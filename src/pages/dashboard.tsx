@@ -10,17 +10,12 @@ const Dashboard = () => {
             <div className="flex flex-wrap">
             <div className="w-1/2 flex flex-col items-center">
             {/*My site*/}
-            <MySite/>
+                <MySite/>
 
             <Add/>
             </div>
                 <div className="w-1/2">
-                {/*My site*/}
-                    <h3 className="text-gray-300 text-sm font-medium mb-4">My Site</h3>
 
-
-                    {/*Add more sections*/}
-                    <Add/>
                 </div>
             </div>
         </>

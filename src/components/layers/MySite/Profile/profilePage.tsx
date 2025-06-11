@@ -1,11 +1,10 @@
 import { ChevronLeft, Image, Upload, X } from "lucide-react";
 import { useState, useRef } from "react";
+import {useNavigate} from "react-router-dom";
 
-interface ProfilePageProps {
-    onBack: () => void;
-}
 
-const ProfilePage = ({ onBack }: ProfilePageProps) => {
+
+const ProfilePage = () => {
     const [name, setName] = useState("Anthonyr");
     const [description, setDescription] = useState("");
     const [url, setUrl] = useState("bio.site/anthonyrmch");
@@ -62,13 +61,20 @@ const ProfilePage = ({ onBack }: ProfilePageProps) => {
             coverInputRef.current.value = '';
         }
     };
+    const navigate = useNavigate();
+
+    const handleBackClick = () => {
+        navigate(-1); // Regresa a la página anterior
+        // si quieres ir específicamente al dashboard: navigate('/sections');
+    };
+
 
     return (
         <div className="max-w-2xl mx-auto p-4">
             {/* Header */}
             <div className="flex items-center mb-8">
                 <button
-                    onClick={onBack}
+                    onClick={handleBackClick}
                     className="flex items-center text-gray-300 hover:text-white transition-colors"
                 >
                     <ChevronLeft size={16} className="mr-2" />
