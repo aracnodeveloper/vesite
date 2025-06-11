@@ -4,8 +4,9 @@ import Layout from "./components/Main/Layout.tsx";
 import Dashboard from "./pages/dashboard.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import {Login} from "./pages/Login.tsx";
-import ProfilePage from "./components/layers/MySite/Profile/profilePage.tsx"; // Ajusta la ruta según tu estructura
-import SocialPage from "./components/layers/MySite/Social/socialPage.tsx"; // Necesitarás crear este componente
+import ProfilePage from "./components/layers/MySite/Profile/profilePage.tsx";
+import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
+import DigitalDownloadFlow from "./components/layers/AddMoreSections/Download/donwloadPage.tsx";
 
 const App: FC = () => {
     return (
@@ -63,7 +64,7 @@ const App: FC = () => {
                         }
                     />
 
-                    {/* Nuevas rutas para Profile y Social */}
+                    {/* Rutas para Profile y Social */}
                     <Route
                         path="/profile"
                         element={
@@ -79,6 +80,15 @@ const App: FC = () => {
                                 <SocialPage />
                             </Layout>
                         }
+                    />
+
+                    {/* Nueva ruta para Digital Download */}
+                    <Route
+                        path="/digital-download"
+                        element={
+                        <Layout>
+                            <DigitalDownloadFlow />
+                        </Layout>}
                     />
 
                     <Route path="/login" element={<Login />} />
