@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 // Mock SVG icons (replace with your actual imports)
@@ -21,6 +21,7 @@ import twitchIcon from '../../../../assets/icons/twitch.svg';
 import whatsappIcon from '../../../../assets/icons/whatsapp.svg';
 import xIcon from '../../../../assets/icons/X.svg';
 import youtubeIcon from '../../../../assets/icons/youtube.svg';
+import {usePreview} from "../../../../context/PreviewContext.tsx";
 
 // Social media icons data with SVG imports
 const socialMediaPlatforms = [
@@ -54,7 +55,7 @@ interface SocialLink {
 }
 
 const SocialPage = () => {
-    const [selectedSocials, setSelectedSocials] = useState<SocialLink[]>([]);
+    const { socialLinks, setSocialLinks } = usePreview();
     const [editingPlatform, setEditingPlatform] = useState<any>(null);
     const [urlInput, setUrlInput] = useState('');
     const navigate = useNavigate();
@@ -65,10 +66,10 @@ const SocialPage = () => {
 
     const handlePlatformSelect = (platform: any) => {
         // Check if already selected
-        const existingLink = selectedSocials.find(link => link.name === platform.name);
+        const existingLink = socialLinks.find(link => link.name === platform.name);
         if (existingLink) {
             // Remove if already selected
-            setSelectedSocials(prev => prev.filter(link => link.name !== platform.name));
+            setSocialLinks(prev => prev.filter(link => link.name !== platform.name));
         } else {
             // Show input form
             setEditingPlatform(platform);
@@ -86,7 +87,7 @@ const SocialPage = () => {
                 color: editingPlatform.color
             };
 
-            setSelectedSocials(prev => [...prev, newLink]);
+            setSocialLinks(prev => [...prev, newLink]);
             setEditingPlatform(null);
             setUrlInput('');
         }
@@ -109,14 +110,14 @@ const SocialPage = () => {
     return (
         <div className="min-h-screen bg-[#1a1a1a] text-white">
             {/* Header */}
-            <div className="flex items-center p-4 border-b border-gray-800">
+            <div className="flex items-center mb-8 mt-3">
                 <button
                     onClick={handleBackClick}
-                    className="text-gray-400 hover:text-white mr-3"
+                    className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
                 >
-                    <ChevronLeft size={20} />
+                    <ChevronLeft size={16} className="mr-2" />
+                    Social
                 </button>
-                <span className="text-white font-medium">Social</span>
             </div>
 
             <div className="p-4">
@@ -170,14 +171,14 @@ const SocialPage = () => {
                         ADD OR REMOVE SOCIAL LINKS
                     </p>
                     <p className="text-gray-400 text-xs">
-                        {selectedSocials.length} / 8
+                        {socialLinks.length} / 8
                     </p>
                 </div>
 
                 {/* Platform Grid */}
                 <div className="grid grid-cols-4 gap-4">
                     {socialMediaPlatforms.map((platform) => {
-                        const isSelected = selectedSocials.some(link => link.name === platform.name);
+                        const isSelected = socialLinks.some(link => link.name === platform.name);
 
                         return (
 

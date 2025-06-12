@@ -1,16 +1,19 @@
 import type {FC} from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Main/Layout.tsx";
-import Dashboard from "./pages/dashboard.tsx";
+import Sections from "./pages/sections.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import {Login} from "./pages/Login.tsx";
 import ProfilePage from "./components/layers/MySite/Profile/profilePage.tsx";
 import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
 import DigitalDownloadFlow from "./components/layers/AddMoreSections/Download/donwloadPage.tsx";
+import { PreviewProvider } from "./context/PreviewContext";
+import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 
 const App: FC = () => {
     return (
         <AuthProvider>
+            <PreviewProvider>
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Navigate to="/sections" />}   />
@@ -18,7 +21,7 @@ const App: FC = () => {
                         path="/sections"
                         element={
                             <Layout>
-                                <Dashboard />
+                                <Sections />
                             </Layout>
                         }
                     />
@@ -27,7 +30,7 @@ const App: FC = () => {
                         path="/droplet"
                         element={
                             <Layout>
-                                <Dashboard />
+                                <Sections />
                             </Layout>
                         }
                     />
@@ -35,7 +38,7 @@ const App: FC = () => {
                         path="/analytics"
                         element={
                             <Layout>
-                                <Dashboard />
+                                <Sections />
                             </Layout>
                         }
                     />
@@ -43,7 +46,7 @@ const App: FC = () => {
                         path="/sales"
                         element={
                             <Layout>
-                                <Dashboard />
+                                <Sections />
                             </Layout>
                         }
                     />
@@ -51,7 +54,7 @@ const App: FC = () => {
                         path="/audience"
                         element={
                             <Layout>
-                                <Dashboard />
+                                <Sections />
                             </Layout>
                         }
                     />
@@ -59,7 +62,7 @@ const App: FC = () => {
                         path="/mail"
                         element={
                             <Layout>
-                                <Dashboard />
+                                <Sections />
                             </Layout>
                         }
                     />
@@ -91,10 +94,18 @@ const App: FC = () => {
                         </Layout>}
                     />
 
+                    <Route path="/links" element={
+                        <Layout>
+                        <LinksPage onBack={() => {}}/>
+                        </Layout>
+                    }
+                    />
+
                     <Route path="/login" element={<Login />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
+            </PreviewProvider>
         </AuthProvider>
     )
 }

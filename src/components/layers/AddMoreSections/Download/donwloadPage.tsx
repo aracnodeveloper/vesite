@@ -1,21 +1,28 @@
 import React, { useState } from 'react';
-import {Upload, Link, X, ArrowLeft, Plus} from 'lucide-react';
+import {Upload, Link, X, Plus, ChevronLeft} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
-// import {useNavigate} from "react-router-dom"; // Removed for artifact compatibility
+import {usePreview} from "../../../../context/PreviewContext.tsx";
+
 type DigitalDownloadModalProps = {
     isOpen: boolean;
     onClose: () => void;
     onSelectMethod: (method: string) => void;
 };
-// Modal de selección inicial
-const DigitalDownloadModal: React.FC<DigitalDownloadModalProps>  = ({ isOpen, onClose, onSelectMethod }) => {
+
+const DigitalDownloadModal: React.FC<DigitalDownloadModalProps>  = ({ isOpen,  onSelectMethod }) => {
+    const navigate = useNavigate();
     if (!isOpen) return null;
+
+    const handleBackClick = () => {
+        navigate(-1); // Regresa a la página anterior
+        // si quieres ir específicamente al dashboard: navigate('/sections');
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#1a1a1a] rounded-lg p-6 w-96 relative">
                 <button
-                    onClick={onClose}
+                    onClick={handleBackClick}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white"
                 >
                     <X size={20} />
@@ -63,7 +70,7 @@ type UploadFilePageProps = {
 };
 
 
-// Página de Upload File
+
 const UploadFilePage: React.FC<UploadFilePageProps>  = ({ onFinish, uploadedFile, setUploadedFile }) => {
 
 
@@ -151,7 +158,7 @@ type AddUrlPageProps = {
     setUploadedUrl: React.Dispatch<React.SetStateAction<string>>;
 };
 
-// Página de Add URL
+
 const AddUrlPage: React.FC<AddUrlPageProps> = ({ onFinish, uploadedUrl, setUploadedUrl }) => {
 
 
@@ -165,7 +172,7 @@ const AddUrlPage: React.FC<AddUrlPageProps> = ({ onFinish, uploadedUrl, setUploa
     return (
         <div className="min-h-screen bg-[#0a0a0a] flex">
             <div className="flex-1 relative">
-                <div className="absolute top-6 right-6 ">
+                <div className="absolute top-6 right-0 z-50">
                     <button
                         onClick={handleFinish}
                         disabled={!uploadedUrl}
@@ -215,18 +222,41 @@ const AddUrlPage: React.FC<AddUrlPageProps> = ({ onFinish, uploadedUrl, setUploa
     );
 };
 type AdminPanelProps = {
-    onBack: () => void;
     uploadedFile: File | null;
     uploadedUrl: string;
     uploadMethod: 'upload' | 'url' | null;
 };
 
-// Panel de administración
-const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, uploadedFile, uploadedUrl, uploadMethod }) => {
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ uploadedFile, uploadedUrl, uploadMethod }) => {
     const [title, setTitle] = useState('Digital Download');
     const [buttonText, setButtonText] = useState('Buy');
     const [price, setPrice] = useState('1');
     const [urlSlug, setUrlSlug] = useState('asadfs');
+
+
+    const { downloads, setDownloads } = usePreview();
+
+    const handleSaveProduct = () => {
+        const fileUrl = uploadMethod === 'upload'
+            ? uploadedFile?.name || ""
+            : uploadedUrl;
+
+        setDownloads(prev => [
+            ...prev,
+            {
+                title,
+                url: fileUrl,
+                price,
+            },
+        ]);
+    };
+
+    const navigate = useNavigate();
+    const handleBackClick = () => {
+        navigate(-1); // Regresa a la página anterior
+        // si quieres ir específicamente al dashboard: navigate('/sections');
+    };
 
     const renderFileSection = () => {
         if (uploadMethod === 'upload' && uploadedFile) {
@@ -283,21 +313,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, uploadedFile, uploadedU
     };
     if ((uploadMethod === 'upload' || uploadMethod === 'url') && (uploadedUrl || uploadedFile)) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] p-6">
+            <div className="min-h-screen  p-6">
                 <div className="max-w-md mx-auto">
-                    <div className="flex items-center mb-6">
+
+                    <div className="flex items-center mb-8 mt-3">
                         <button
-                            onClick={onBack}
-                            className="text-white mr-3 hover:text-gray-300 transition-colors"
+                            onClick={handleBackClick}
+                            className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
                         >
-                            <ArrowLeft size={20}/>
+                            <ChevronLeft size={16} className="mr-2" />
+                            Download
                         </button>
-                        <h1 className="text-white text-xl font-semibold">Digital Download</h1>
                     </div>
 
-                    <p className="text-gray-300 mb-6">
-                        This section enables you to sell any type of file, directly on your Bio Site.
-                    </p>
 
                     <div className="space-y-4">
                         <div className="mb-6">
@@ -369,11 +397,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, uploadedFile, uploadedU
 
                         {/* Mostrar archivo o URL subida */}
                         {renderFileSection()}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                        <button
+                            onClick={handleSaveProduct}
+                            className="w-full bg-green-600 hover:bg-green-700 rounded-lg p-3 text-white transition-colors"
+                        >
+                            SAVE PRODUCT TO PREVIEW
+                        </button>
 
                         <button
                             className="w-full bg-red-600 hover:bg-red-700 rounded-lg p-3 text-white transition-colors">
                             DELETE THIS PRODUCT
                         </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -381,48 +417,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, uploadedFile, uploadedU
     }
 };
 
-// Componente principal que maneja el flujo
+
 const DigitalDownloadFlow = () => {
     const [currentView, setCurrentView] = useState('modal');
     const [modalOpen, setModalOpen] = useState(true);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [uploadedUrl, setUploadedUrl] = useState('');
     const [uploadMethod, setUploadMethod] = useState<'upload' | 'url' | null>(null);
-    const navigate = useNavigate();
 
-    // Función para volver a /sections
-    const handleBackToSections = () => {
-        navigate('/sections');
-    };
 
-    // Función para cerrar el modal inicial
     const handleCloseModal = () => {
         setModalOpen(false);
         console.log('Navigating back');
     };
 
-    // Función para seleccionar método (upload o url)
     const handleSelectMethod = (method: 'upload' | 'url') => {
         setModalOpen(false);
         setCurrentView(method);
         setUploadMethod(method);
     };
 
-
-
-    // Función para ir al panel de administración
     const handleFinish = () => {
         setCurrentView('admin');
-        console.log("currentView is now:", currentView); // Este puede no reflejar el cambio inmediato debido a la naturaleza asincrónica de `setState`
+        console.log("currentView is now:", currentView);
         setModalOpen(false);
     };
 
 
 
-    // Agregar el console.log aquí
     console.log("Rendering view:", currentView);
 
-    // Renderizado condicional basado en la vista actual
     if (currentView === 'upload') {
         return (
             <UploadFilePage
@@ -446,7 +470,6 @@ const DigitalDownloadFlow = () => {
     if (currentView === 'admin') {
         return (
             <AdminPanel
-                onBack={handleBackToSections}
                 uploadedFile={uploadedFile}
                 uploadedUrl={uploadedUrl}
                 uploadMethod={uploadMethod}
@@ -454,7 +477,6 @@ const DigitalDownloadFlow = () => {
         );
     }
 
-    // Vista del modal inicial
     return (
        <div>
 

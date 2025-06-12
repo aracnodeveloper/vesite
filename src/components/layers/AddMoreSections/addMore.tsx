@@ -7,12 +7,12 @@ import Post from "./Socialpost/social_post.tsx";
 import Downloads from "./Download/download.tsx";
 
 
-const Add =() =>{
+const Add = () => {
     return (
         <>
 
-            <div className="mb-6">
-                <h3 className="text-gray-300 text-sm font-medium mb-4">Add more sections</h3>
+            <div className="mb-6 mt-10">
+                <h3 className="text-gray-300 text-lg font-medium mb-8">Add more sections</h3>
 
                 {/* SELL Section */}
                 <div className="mb-6">
