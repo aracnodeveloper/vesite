@@ -9,6 +9,7 @@ import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
 import DigitalDownloadFlow from "./components/layers/AddMoreSections/Download/donwloadPage.tsx";
 import { PreviewProvider } from "./context/PreviewContext";
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
+import Styles from "./pages/styles.tsx";
 
 const App: FC = () => {
     return (
@@ -30,7 +31,7 @@ const App: FC = () => {
                         path="/droplet"
                         element={
                             <Layout>
-                                <Sections />
+                                <Styles />
                             </Layout>
                         }
                     />
@@ -96,7 +97,7 @@ const App: FC = () => {
 
                     <Route path="/links" element={
                         <Layout>
-                        <LinksPage onBack={() => {}}/>
+                        <LinksPage />
                         </Layout>
                     }
                     />

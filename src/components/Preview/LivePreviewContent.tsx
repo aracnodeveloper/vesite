@@ -1,5 +1,4 @@
-import {usePreview} from "../../context/PreviewContext.tsx";
-
+import { usePreview } from "../../context/PreviewContext.tsx";
 
 const LivePreviewContent = () => {
     const {
@@ -11,20 +10,20 @@ const LivePreviewContent = () => {
         downloads,
         links,
         selectedTemplate,
+        themeColor,
+        fontFamily,
     } = usePreview();
 
     return (
-        <div className="bg-white rounded-2xl w-[320px] h-[640px] shadow-xl overflow-y-auto px-4 py-6 mx-auto">
-            {/* URL Display */}
-            <div className="text-xs text-gray-600 mb-4 text-center">
-                URL: bio.site/anthonyrmch
-            </div>
-
+        <div
+            className="rounded-2xl w-[320px] h-[640px] shadow-xl overflow-y-auto px-4 py-6 mx-auto"
+            style={{ backgroundColor: themeColor }}
+        >
             {/* Plantilla 0: Portada arriba + avatar circular */}
             {selectedTemplate === 0 && (
                 <>
                     {coverImage && (
-                        <div className="h-24 w-full bg-gray-200 rounded-md overflow-hidden mb-4">
+                        <div className="h-32 relative -top-9 w-full bg-gray-200 rounded-md overflow-hidden mb-4">
                             <img
                                 src={coverImage}
                                 alt="cover"
@@ -34,7 +33,7 @@ const LivePreviewContent = () => {
                     )}
 
                     {profileImage && (
-                        <div className="w-20 h-20 rounded-full overflow-hidden mx-auto -mt-10 border-4 border-white shadow-md">
+                        <div className="w-28 h-28 relative rounded-full overflow-hidden mx-auto -mt-30 border-4 z-50 border-white shadow-md">
                             <img
                                 src={profileImage}
                                 alt="profile"
@@ -43,30 +42,43 @@ const LivePreviewContent = () => {
                         </div>
                     )}
 
-                    <h2 className="text-center font-semibold mt-2">{name}</h2>
+                    <h2
+                        className="text-center font-semibold mt-2"
+                        style={{ fontFamily }}
+                    >
+                        {name}
+                    </h2>
                     <p className="text-center text-sm text-gray-500">{description}</p>
+                    <div className="text-xs text-gray-600 mb-4 text-center">
+                        URL: bio.site/anthonyrmch
+                    </div>
                 </>
             )}
 
             {/* Plantilla 1: Dos imágenes superpuestas */}
             {selectedTemplate === 1 && (
                 <>
-                    <h2 className="text-center font-semibold mb-2">{name}</h2>
+                    <h2
+                        className="text-center font-semibold mb-5"
+                        style={{ fontFamily }}
+                    >
+                        {name}
+                    </h2>
 
-                    <div className="flex justify-center relative mb-2">
-                        <div className="w-16 h-16 bg-gray-300 rotate-[-8deg] absolute left-12 z-0 rounded-md overflow-hidden">
-                            {coverImage && (
+                    <div className="flex justify-center relative mb-20">
+                        <div className="w-36 h-36 bg-gray-300 rotate-[-8deg] absolute left-5 z-10 rounded-md overflow-hidden">
+                            {profileImage && (
                                 <img
-                                    src={coverImage}
+                                    src={profileImage}
                                     alt="cover"
                                     className="w-full h-full object-cover"
                                 />
                             )}
                         </div>
-                        <div className="w-16 h-16 bg-gray-300 rotate-[8deg] absolute left-20 z-10 rounded-md overflow-hidden">
-                            {profileImage && (
+                        <div className="w-36 h-36 bg-gray-300 rotate-[15deg] absolute right-0 top-5 z-0 rounded-md overflow-hidden">
+                            {coverImage && (
                                 <img
-                                    src={profileImage}
+                                    src={coverImage}
                                     alt="profile"
                                     className="w-full h-full object-cover"
                                 />
@@ -74,9 +86,12 @@ const LivePreviewContent = () => {
                         </div>
                     </div>
 
-                    <p className="text-center text-sm text-gray-500 mt-14">
+                    <p className="text-center text-sm text-gray-500 mt-52">
                         {description}
                     </p>
+                    <div className="text-xs text-gray-600 mb-4 text-center">
+                        URL: bio.site/anthonyrmch
+                    </div>
                 </>
             )}
 
@@ -108,7 +123,7 @@ const LivePreviewContent = () => {
                             rel="noreferrer"
                             className="block p-3 bg-gray-100 rounded-lg text-center text-sm font-medium hover:bg-gray-200 transition"
                         >
-                            {link.name || link.url}
+                            {link.title || link.url}
                         </a>
                     ))}
                 </div>

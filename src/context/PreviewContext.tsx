@@ -27,9 +27,9 @@ interface PreviewContextType {
     downloads: DownloadItem[];
     links: LinkItem[];
     selectedTemplate: number;
+    themeColor: string;
+    fontFamily: string;
 
-
-    setSelectedTemplate: React.Dispatch<React.SetStateAction<number>>;
     setName: React.Dispatch<React.SetStateAction<string>>;
     setDescription: React.Dispatch<React.SetStateAction<string>>;
     setProfileImage: React.Dispatch<React.SetStateAction<string | null>>;
@@ -37,6 +37,9 @@ interface PreviewContextType {
     setSocialLinks: React.Dispatch<React.SetStateAction<SocialLink[]>>;
     setDownloads: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
     setLinks: React.Dispatch<React.SetStateAction<LinkItem[]>>;
+    setSelectedTemplate: React.Dispatch<React.SetStateAction<number>>;
+    setThemeColor: React.Dispatch<React.SetStateAction<string>>;
+    setFontFamily: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PreviewContext = createContext<PreviewContextType | undefined>(undefined);
@@ -49,7 +52,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
     const [downloads, setDownloads] = useState<DownloadItem[]>([]);
     const [links, setLinks] = useState<LinkItem[]>([]);
-    const [selectedTemplate, setSelectedTemplate] = useState(0);
+    const [selectedTemplate, setSelectedTemplate] = useState<number>(0);
+    const [themeColor, setThemeColor] = useState<string>("#ffffff");
+    const [fontFamily, setFontFamily] = useState<string>("Lato");
 
     return (
         <PreviewContext.Provider
@@ -62,8 +67,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 downloads,
                 links,
                 selectedTemplate,
-
-                setSelectedTemplate,
+                themeColor,
+                fontFamily,
                 setName,
                 setDescription,
                 setProfileImage,
@@ -71,6 +76,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 setSocialLinks,
                 setDownloads,
                 setLinks,
+                setSelectedTemplate,
+                setThemeColor,
+                setFontFamily,
             }}
         >
             {children}
