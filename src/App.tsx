@@ -10,6 +10,11 @@ import DigitalDownloadFlow from "./components/layers/AddMoreSections/Download/do
 import { PreviewProvider } from "./context/PreviewContext";
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import Styles from "./pages/styles.tsx";
+import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage.tsx";
+import VideoPage from "./components/layers/AddMoreSections/Video/videoPage.tsx";
+import MusicPage from "./components/layers/AddMoreSections/Music-Posdcast/musicPage.tsx";
+import PostPage from "./components/layers/AddMoreSections/Socialpost/socialPostPage.tsx";
+import Analytics from "./pages/analytics.tsx";
 
 const App: FC = () => {
     return (
@@ -39,34 +44,11 @@ const App: FC = () => {
                         path="/analytics"
                         element={
                             <Layout>
-                                <Sections />
+                                <Analytics />
                             </Layout>
                         }
                     />
-                    <Route
-                        path="/sales"
-                        element={
-                            <Layout>
-                                <Sections />
-                            </Layout>
-                        }
-                    />
-                    <Route
-                        path="/audience"
-                        element={
-                            <Layout>
-                                <Sections />
-                            </Layout>
-                        }
-                    />
-                    <Route
-                        path="/mail"
-                        element={
-                            <Layout>
-                                <Sections />
-                            </Layout>
-                        }
-                    />
+
 
                     {/* Rutas para Profile y Social */}
                     <Route
@@ -97,7 +79,36 @@ const App: FC = () => {
 
                     <Route path="/links" element={
                         <Layout>
-                        <LinksPage />
+                            <LinksPage />
+                        </Layout>
+                    }
+                    />
+
+                    <Route path="/textBox" element={
+                        <Layout>
+                            <TextBoxPage />
+                        </Layout>
+                    }
+                    />
+
+
+                    <Route path="/videos" element={
+                        <Layout>
+                            <VideoPage />
+                        </Layout>
+                    }
+                    />
+
+                    <Route path="/music" element={
+                        <Layout>
+                            <MusicPage />
+                        </Layout>
+                    }
+                    />
+
+                    <Route path="/post" element={
+                        <Layout>
+                            <PostPage />
                         </Layout>
                     }
                     />

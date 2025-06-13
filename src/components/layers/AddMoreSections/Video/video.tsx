@@ -1,8 +1,17 @@
 import {Video} from 'lucide-react';
+import {useNavigate} from "react-router-dom";
 
 const Videos =() =>{
+    const navigate = useNavigate();
+
+    const handleProfileClick = () => {
+        navigate('/videos');
+    };
+
     return (
-        <div className="bg-[#2a2a2a] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer hover:bg-[#323232] transition-colors">
+        <div
+            onClick={handleProfileClick}
+            className="bg-[#2a2a2a] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer hover:bg-[#323232] transition-colors">
             <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                     <Video size={16} className="text-white" />

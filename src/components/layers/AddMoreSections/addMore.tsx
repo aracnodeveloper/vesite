@@ -1,10 +1,9 @@
 import Links from "./Links/links.tsx";
 import TextBox from "./TextBox/textBox.tsx";
-import Linked from "./LinkedTiktokFeed/linkedTiktok.tsx";
 import Videos from "./Video/video.tsx";
 import Musics from "./Music-Posdcast/music_podcast.tsx";
 import Post from "./Socialpost/social_post.tsx";
-import Downloads from "./Download/download.tsx";
+//import Downloads from "./Download/download.tsx";
 
 
 const Add = () => {
@@ -16,15 +15,15 @@ const Add = () => {
 
                 {/* SELL Section */}
                 <div className="mb-6">
+                    {/*}
                     <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">SELL</h4>
 
-                    {/* Digital Download */}
-                    <Downloads/>
+
+                    <Downloads/>*/}
                     <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENT</h4>
 
                     <Links/>
                     <TextBox/>
-                    <Linked/>
                     <Videos/>
                     <Musics/>
                     <Post/>

@@ -65,32 +65,33 @@ const SocialPage = () => {
     };
 
     const handlePlatformSelect = (platform: any) => {
-        // Check if already selected
         const existingLink = socialLinks.find(link => link.name === platform.name);
+
+        setEditingPlatform(platform);
         if (existingLink) {
-            // Remove if already selected
-            setSocialLinks(prev => prev.filter(link => link.name !== platform.name));
+            setUrlInput(existingLink.url);
         } else {
-            // Show input form
-            setEditingPlatform(platform);
             setUrlInput('');
         }
     };
 
-    const handleSaveLink = () => {
-        if (editingPlatform && urlInput.trim()) {
-            const newLink: SocialLink = {
-                id: editingPlatform.id + '_' + Date.now(),
-                name: editingPlatform.name,
-                url: urlInput.trim(),
-                icon: editingPlatform.icon,
-                color: editingPlatform.color
-            };
 
-            setSocialLinks(prev => [...prev, newLink]);
-            setEditingPlatform(null);
-            setUrlInput('');
-        }
+    const handleSaveLink = () => {
+        if (!editingPlatform || !urlInput.trim()) return;
+
+        const updatedLinks = socialLinks.filter(link => link.name !== editingPlatform.name);
+
+        const newLink: SocialLink = {
+            id: editingPlatform.id + '_' + Date.now(),
+            name: editingPlatform.name,
+            url: urlInput.trim(),
+            icon: editingPlatform.icon,
+            color: editingPlatform.color
+        };
+
+        setSocialLinks([...updatedLinks, newLink]);
+        setEditingPlatform(null);
+        setUrlInput('');
     };
 
     const handleCancelEdit = () => {
@@ -108,7 +109,7 @@ const SocialPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#1a1a1a] text-white">
+        <div className="max-w-xl bg-[#1a1a1a] text-white">
             {/* Header */}
             <div className="flex items-center mb-8 mt-3">
                 <button
@@ -185,7 +186,7 @@ const SocialPage = () => {
                                 <button
                                     key={platform.id}
                                     onClick={() => handlePlatformSelect(platform)}
-                                    className="w-9 h-9 bg-[#2a2a2a] rounded-full flex items-center justify-center p-2.5 hover:bg-[#3a3a3a] transition-colors relative"
+                                    className="w-9 h-9 bg-[#2a2a2a] rounded-full flex items-center justify-center p-2.5 hover:bg-[#3a3a3a] transition-colors relative cursor-pointer"
                                 >
                                     <img
                                         src={platform.icon}

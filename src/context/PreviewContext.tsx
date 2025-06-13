@@ -4,6 +4,7 @@ type SocialLink = {
     name: string;
     url: string;
     icon?: string;
+    color?: string;
 };
 
 type DownloadItem = {
@@ -18,6 +19,11 @@ type LinkItem = {
     image?: string;
 };
 
+type SocialPostData = {
+    url: string;
+    note?: string;
+};
+
 interface PreviewContextType {
     name: string;
     description: string;
@@ -30,6 +36,35 @@ interface PreviewContextType {
     themeColor: string;
     fontFamily: string;
 
+    // Text Box
+    textBox: {
+        title: string;
+        description: string;
+    };
+
+    // Music
+    musicEmbedUrl: string;
+    setMusicEmbedUrl: React.Dispatch<React.SetStateAction<string>>;
+    musicNote: string;
+    setMusicNote: React.Dispatch<React.SetStateAction<string>>;
+
+    // Video
+    videoUrl: string;
+    videoTitle: string;
+    setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
+    setVideoTitle: React.Dispatch<React.SetStateAction<string>>;
+
+    // Social Post
+    socialPost: SocialPostData;
+    setSocialPost: React.Dispatch<React.SetStateAction<SocialPostData>>;
+
+    // Analytics
+    views: number;
+    clicks: number;
+    setViews: React.Dispatch<React.SetStateAction<number>>;
+    setClicks: React.Dispatch<React.SetStateAction<number>>;
+
+    // Setters
     setName: React.Dispatch<React.SetStateAction<string>>;
     setDescription: React.Dispatch<React.SetStateAction<string>>;
     setProfileImage: React.Dispatch<React.SetStateAction<string | null>>;
@@ -40,8 +75,13 @@ interface PreviewContextType {
     setSelectedTemplate: React.Dispatch<React.SetStateAction<number>>;
     setThemeColor: React.Dispatch<React.SetStateAction<string>>;
     setFontFamily: React.Dispatch<React.SetStateAction<string>>;
+    setTextBox: React.Dispatch<
+        React.SetStateAction<{
+            title: string;
+            description: string;
+        }>
+    >;
 }
-
 const PreviewContext = createContext<PreviewContextType | undefined>(undefined);
 
 export const PreviewProvider = ({ children }: { children: React.ReactNode }) => {
@@ -55,6 +95,16 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [selectedTemplate, setSelectedTemplate] = useState<number>(0);
     const [themeColor, setThemeColor] = useState<string>("#ffffff");
     const [fontFamily, setFontFamily] = useState<string>("Lato");
+    const [textBox, setTextBox] = useState<{ title: string; description: string }>({title: "", description: "",});
+    const [videoUrl, setVideoUrl] = useState('');
+    const [videoTitle, setVideoTitle] = useState('');
+    const [musicEmbedUrl, setMusicEmbedUrl] = useState('');
+    const [musicNote, setMusicNote] = useState('');
+    const [socialPost, setSocialPost] = useState<SocialPostData>({ url: "", note: "" });
+    const [views, setViews] = useState(14);
+    const [clicks, setClicks] = useState(0);
+
+
 
     return (
         <PreviewContext.Provider
@@ -69,6 +119,23 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 selectedTemplate,
                 themeColor,
                 fontFamily,
+                textBox,
+                videoUrl,
+                videoTitle,
+                musicEmbedUrl,
+                musicNote,
+                socialPost,
+                views,
+                clicks,
+
+                setClicks,
+                setViews,
+                setSocialPost,
+                setMusicEmbedUrl,
+                setMusicNote,
+                setVideoUrl,
+                setVideoTitle,
+                setTextBox,
                 setName,
                 setDescription,
                 setProfileImage,

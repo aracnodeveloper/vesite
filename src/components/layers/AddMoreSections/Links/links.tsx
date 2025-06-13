@@ -15,7 +15,7 @@ const Links = () => {
                 </div>
                 <span className="text-white font-medium">Links</span>
             </div>
-            <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-green-600 hover:border-green-600 transition-colors">
+            <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600 hover:border-purple-600 transition-colors">
                 <span className="text-white text-sm">+</span>
             </div>
         </div>

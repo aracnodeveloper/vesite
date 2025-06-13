@@ -6,6 +6,7 @@ import img_2 from "../../../../assets/img/img_2.png";
 import img_3 from "../../../../assets/img/img_3.png";
 import img_4 from "../../../../assets/img/img_4.png";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
+import {useNavigate} from "react-router-dom";
 
 const ProfilePage = () => {
     const {
@@ -23,6 +24,11 @@ const ProfilePage = () => {
 
     const [minimalClicked, setMinimalClicked] = useState(false);
     const [creativeClicked, setCreativeClicked] = useState(false);
+    const navigate = useNavigate();
+
+    const handleBackClick = () => {
+        navigate(-1);
+    };
 
     const profileInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +65,9 @@ const ProfilePage = () => {
         <div className="max-w-xl mx-auto p-4 text-white">
             {/* Header */}
             <div className="flex items-center mb-6">
-                <button className="flex items-center text-gray-300 hover:text-white transition-colors">
+                <button
+                    onClick={handleBackClick}
+                    className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer" >
                     <ChevronLeft size={16} className="mr-2" />
                     Profile
                 </button>
