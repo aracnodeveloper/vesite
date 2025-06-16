@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { usePreview } from "../../../../context/PreviewContext";
 import { useUpdateBiosite } from "../../../../hooks/useUpdateProfile.ts";
 import Cookies from "js-cookie";
@@ -32,18 +32,22 @@ const ProfilePage = () => {
         reader.readAsDataURL(file);
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async(biositeId: string) => {
         if (!biositeId) return;
+try {
+  await  updateBiosite({
+        title: name,
+        slug: name.toLowerCase().replace(/\s+/g, "-"),
+        avatarImage: profileImage,
+        fonts: fontFamily,
+        colors: { primary: themeColor, secondary: "#000000" },
+        themeId: null,
+        ...(role === "admin" && { backgroundImage: coverImage }),
+    });
+}catch (error) {
+    console.error("Error actualizando biosite", error);
+}
 
-        updateBiosite({
-            title: name,
-            slug: name.toLowerCase().replace(/\s+/g, "-"),
-            avatarImage: profileImage,
-            fonts: fontFamily,
-            colors: { primary: themeColor, secondary: "#000000" },
-            themeId: null,
-            ...(role === "admin" && { backgroundImage: coverImage }),
-        });
     };
 
     return (

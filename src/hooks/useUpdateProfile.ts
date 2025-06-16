@@ -1,15 +1,17 @@
-import type {Biosite} from "../interfaces/Biosite";
 import apiService from "../service/apiService";
-import {getBiositeApi} from "../constants/EndpointsRoutes.ts";
+import { updateBiositeApi} from "../constants/EndpointsRoutes";
 import Cookies from "js-cookie";
 
 export const useUpdateBiosite = () => {
+    const biositeId = Cookies.get("biositeId");
 
-    const updateBiosite = async (data: Partial<Biosite>) => {
+    const updateBiosite = async (data: any) => {
+        if (!biositeId) return;
         try {
-            await apiService.create(getBiositeApi, data);
+            await apiService.update(`${updateBiositeApi}/${biositeId}`, data);
+            console.log("Biosite actualizado");
         } catch (error) {
-            console.error("Error updating biosite:", error);
+            console.error("Error actualizando biosite", error);
         }
     };
 

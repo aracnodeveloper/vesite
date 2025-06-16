@@ -18,11 +18,11 @@ const apiService = {
         return response.data;
     },
 
-    update: async <T>(endpoint: string, id: string, data: Partial<T>): Promise<T> => {
-        const response = await api.patch<T>(`${endpoint}/${id}`, data);
-        return response.data;
-    }
-,
+        update: async <T>(endpoint: string, data: T): Promise<T> => {
+            const response = await api.put<T>(endpoint, data);
+            return response.data;
+        },
+
 
     delete: async <R>(url: string, id: string): Promise<R> => {
         const response = await api.delete<R>(`${url}/${id}`);
