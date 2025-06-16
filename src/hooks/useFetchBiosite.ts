@@ -1,27 +1,30 @@
-// src/hooks/useGetBiosite.ts
-import apiService from "../service/apiService";
+import { useEffect, useState } from "react";
+import apiService from "../service/apiService.ts";
 import { getBiositeApi } from "../constants/EndpointsRoutes";
-import { useAuthContext } from "./useAuthContext.ts";
+import Cookies from "js-cookie";
+import type  { Biosite } from "../interfaces/Biosite";
 
-interface Biosite {
-    title?: string;
-    slug?: string;
-    avatarImage?: string;
-    themeId?: string;
-}
+export const useFetchBiosite = () => {
+    const [biosite, setBiosite] = useState<Biosite | null>(null);
+    const [loading, setLoading] = useState(true);
+    const biositeId = Cookies.get("biositeId");
 
-export const useGetBiosite = () => {
-    const { userId } = useAuthContext();
-
-    const fetchBiosite = async (): Promise<Biosite | null> => {
-        if (!userId) return null;
+    const fetchBiosite = async () => {
         try {
-            const data = await apiService.getById<Biosite>(getBiositeApi, userId);
-            return data;
-        } catch (e) {
-            return null;
+            if (biositeId) {
+                const data = await apiService.getById<Biosite>(getBiositeApi, biositeId);
+                setBiosite(data);
+            }
+        } catch (error) {
+            console.error("Error fetching biosite:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    return { fetchBiosite };
+    useEffect(() => {
+        fetchBiosite();
+    }, []);
+
+    return { biosite, loading };
 };

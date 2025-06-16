@@ -1,30 +1,26 @@
-import { type FC, type ReactNode, useState } from 'react';
+import type {FC, ReactNode} from 'react';
+import {useState}from 'react'
 import Cookie from 'js-cookie';
-import type { LoginParams } from "../types/authTypes.ts";
-import type { AuthResponse } from "../interfaces/Auth.ts";
+import type {LoginParams} from "../types/authTypes.ts";
+import type {AuthResponse} from "../interfaces/Auth.ts";
+import {AuthContext} from '../hooks/useAuthContext.ts'
 import apiService from "../service/apiService.ts";
-import { loginApi} from "../constants/EndpointsRoutes.ts";
+import {loginApi} from "../constants/EndpointsRoutes.ts";
 import notificationService from "../service/notificationService.ts";
-import {AuthContext} from "../hooks/useAuthContext.ts";
 
-
-
-export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [role, setRole] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-
-
     const login = async (email: string, password: string) => {
         try {
             setLoading(true);
-            const data = { email, password };
-            const responseData = await apiService.createReqRes<LoginParams, AuthResponse>(loginApi, data);
-            const { accessToken, refreshToken, userId, roleName } = responseData;
-
+            const data = {email: email, password: password}
+            const responseData = await apiService.createReqRes<LoginParams, AuthResponse>(loginApi, data)
+            const {accessToken, refreshToken, userId, roleName} = responseData;
             const accessExpirationDate = new Date();
             const refreshExpirationDate = new Date();
             accessExpirationDate.setDate(accessExpirationDate.getDate() + 2);
@@ -32,7 +28,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
             Cookie.set('accessToken', accessToken, { expires: accessExpirationDate });
             Cookie.set('refreshToken', refreshToken, { expires: refreshExpirationDate });
-            Cookie.set('userId', userId, { expires: refreshExpirationDate });
+            Cookie.set('userId', userId, { expires: refreshExpirationDate});
             Cookie.set('roleName', roleName[0].roleName, { expires: refreshExpirationDate });
 
             setIsAuthenticated(true);
@@ -40,14 +36,23 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             setAccessToken(accessToken);
             setRole(roleName[0].roleName);
 
-            if (roleName[0].roleName === 'admin') {
+            if (Cookie.get('roleName') === 'admin') {
                 notificationService.warning('Sudo mode', 'You are logged in as sudo, please be careful');
             }
 
-            return { success: true };
-        } catch (error) {
-            console.error('Login error:', error instanceof Error ? error.message : error);
-            return { success: false };
+            return {success: true};
+
+        } catch (error: any) {
+            console.error('Login error:', error);
+            if (error.response) {
+                console.error('Error in server response:', error.response.data);
+            } else if (error.request) {
+                console.error('No response from server:', error.request);
+            } else {
+                console.error('Error while setting up the request', error.message);
+            }
+
+            return {success: false};
         } finally {
             setLoading(false);
         }
@@ -72,9 +77,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, userId, accessToken, role, loading, login, logout }}>
+        <AuthContext.Provider value={{isAuthenticated, userId, accessToken, role, loading, login, logout}}>
             {children}
         </AuthContext.Provider>
     );
 };
-

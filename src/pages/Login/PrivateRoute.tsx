@@ -10,8 +10,6 @@ const PrivateRoute: FC<RouteProps> = ({children}) => {
         Cookies.remove('refreshToken');
         Cookies.remove('userId');
         Cookies.remove('roleName');
-        Cookies.remove('institutionId');
-        Cookies.remove('careerId');
         return <Navigate to="/login" replace />;
     }
 

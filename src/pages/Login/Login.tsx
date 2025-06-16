@@ -1,4 +1,4 @@
-import {type FC, useEffect, useState} from "react";
+import {type FC, useState} from "react";
 import Cookies from "js-cookie";
 import {
     Alert,
@@ -19,14 +19,10 @@ const { Content } = Layout;
 export const Login: FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { login, isAuthenticated } = useAuthContext();
+    const { login} = useAuthContext();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate("/sections", { replace: true });
-        }
-    }, [isAuthenticated]);
+
 
 
     const onFinish = async (values: {
@@ -48,7 +44,7 @@ export const Login: FC = () => {
             if (response.success) {
                 const token = Cookies.get("accessToken");
                 if (token) {
-                    navigate("/users", { replace: true });
+                    navigate("/sections", { replace: true });
                 } else {
                     setError("Login failed. No token found.");
                 }

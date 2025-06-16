@@ -1,7 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { useAnalytics } from "../hooks/useFetchMetrics.ts";
-import { useUpdateTheme } from "../hooks/useFetchUpdateTheme.ts";
+import  { createContext, useContext, useEffect, useState, ReactNode } from "react";
+
 
 interface SocialLink {
     name: string;
@@ -18,10 +16,9 @@ interface DownloadItem {
 interface LinkItem {
     title: string;
     url: string;
-    image?: string;
 }
 
-interface TextBox {
+interface TextBoxData {
     title: string;
     description: string;
 }
@@ -33,89 +30,79 @@ interface SocialPostData {
 
 interface PreviewContextType {
     name: string;
+    setName: (val: string) => void;
     description: string;
+    setDescription: (val: string) => void;
     profileImage: string | null;
+    setProfileImage: (val: string | null) => void;
     coverImage: string | null;
+    setCoverImage: (val: string | null) => void;
     socialLinks: SocialLink[];
+    setSocialLinks: (val: SocialLink[]) => void;
     downloads: DownloadItem[];
+    setDownloads: (val: DownloadItem[]) => void;
     links: LinkItem[];
-    textBox: TextBox;
+    setLinks: (val: LinkItem[]) => void;
+    textBox: TextBoxData;
+    setTextBox: (val: TextBoxData) => void;
     musicEmbedUrl: string;
-    setMusicEmbedUrl: React.Dispatch<React.SetStateAction<string>>;
-    musicNote: string;
-    setMusicNote: React.Dispatch<React.SetStateAction<string>>;
+    setMusicEmbedUrl: (val: string) => void;
     videoUrl: string;
+    setVideoUrl: (val: string) => void;
     videoTitle: string;
-    setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
-    setVideoTitle: React.Dispatch<React.SetStateAction<string>>;
+    setVideoTitle: (val: string) => void;
     socialPost: SocialPostData;
-    setSocialPost: React.Dispatch<React.SetStateAction<SocialPostData>>;
-    views: number;
-    clicks: number;
-    setViews: React.Dispatch<React.SetStateAction<number>>;
-    setClicks: React.Dispatch<React.SetStateAction<number>>;
-    selectedTemplate: number;
-    setSelectedTemplate: React.Dispatch<React.SetStateAction<number>>;
-    themeColor: string;
-    setThemeColor: React.Dispatch<React.SetStateAction<string>>;
+    setSocialPost: (val: SocialPostData) => void;
     fontFamily: string;
-    setFontFamily: React.Dispatch<React.SetStateAction<string>>;
-    setName: React.Dispatch<React.SetStateAction<string>>;
-    setDescription: React.Dispatch<React.SetStateAction<string>>;
-    setProfileImage: React.Dispatch<React.SetStateAction<string | null>>;
-    setCoverImage: React.Dispatch<React.SetStateAction<string | null>>;
-    setSocialLinks: React.Dispatch<React.SetStateAction<SocialLink[]>>;
-    setDownloads: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
-    setLinks: React.Dispatch<React.SetStateAction<LinkItem[]>>;
-    setTextBox: React.Dispatch<React.SetStateAction<TextBox>>;
+    setFontFamily: (val: string) => void;
+    themeColor: string;
+    setThemeColor: (val: string) => void;
+    selectedTemplate: number;
+    setSelectedTemplate: (val: number) => void;
+    updateTrigger: boolean;
+    setUpdateTrigger: (val: boolean) => void;
+    views: number;
+    setViews: (val: number) => void;
+    clicks: number;
+    setClicks: (val: number) => void;
 }
 
-const PreviewContext = createContext<PreviewContextType>({} as PreviewContextType);
+const PreviewContext = createContext<PreviewContextType | null>(null);
 
-export const usePreview = () => useContext(PreviewContext);
+export const PreviewProvider = ({ children }: { children: ReactNode }) => {
+    const stored = localStorage.getItem("biosite-data");
+    const initial = stored ? JSON.parse(stored) : {};
 
-export const PreviewProvider = ({ children }: { children: React.ReactNode }) => {
-    const [name, setName] = useState("Your Name");
-    const [description, setDescription] = useState("Add a short description");
-    const [profileImage, setProfileImage] = useState<string | null>(null);
-    const [coverImage, setCoverImage] = useState<string | null>(null);
+    const [name, setName] = useState(initial.name || "Your Name");
+    const [description, setDescription] = useState(initial.description || "");
+    const [profileImage, setProfileImage] = useState<string | null>(initial.profileImage || null);
+    const [coverImage, setCoverImage] = useState<string | null>(initial.coverImage || null);
     const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
     const [downloads, setDownloads] = useState<DownloadItem[]>([]);
     const [links, setLinks] = useState<LinkItem[]>([]);
-    const [textBox, setTextBox] = useState<TextBox>({ title: "", description: "" });
+    const [textBox, setTextBox] = useState<TextBoxData>({ title: "", description: "" });
     const [musicEmbedUrl, setMusicEmbedUrl] = useState("");
-    const [musicNote, setMusicNote] = useState("");
     const [videoUrl, setVideoUrl] = useState("");
     const [videoTitle, setVideoTitle] = useState("");
-    const [socialPost, setSocialPost] = useState<SocialPostData>({ url: "", note: "" });
+    const [socialPost, setSocialPost] = useState<SocialPostData>({ url: "" });
+    const [fontFamily, setFontFamily] = useState(initial.fontFamily || "inherit");
+    const [themeColor, setThemeColor] = useState(initial.themeColor || "#ffffff");
+    const [selectedTemplate, setSelectedTemplate] = useState(initial.selectedTemplate || 0);
+    const [updateTrigger, setUpdateTrigger] = useState(false);
     const [views, setViews] = useState(0);
     const [clicks, setClicks] = useState(0);
-    const [selectedTemplate, setSelectedTemplate] = useState(0);
-    const [themeColor, setThemeColor] = useState("#ffffff");
-    const [fontFamily, setFontFamily] = useState("Lato");
 
-    const { data: analyticsData } = useAnalytics();
-    const { updateTheme } = useUpdateTheme();
-    const biositeId = Cookies.get("biositeId");
-
-    // Actualiza views y clicks desde el backend
     useEffect(() => {
-        if (analyticsData) {
-            setViews(analyticsData.views);
-            setClicks(analyticsData.clicks);
-        }
-    }, [analyticsData]);
-
-    // Sincroniza estilo visual con backend
-    useEffect(() => {
-        if (themeColor && fontFamily && biositeId) {
-            updateTheme({
-                backgroundColor: themeColor,
-                fontFamily,
-                templateId: selectedTemplate,
-            });
-        }
-    }, [themeColor, fontFamily, selectedTemplate]);
+        localStorage.setItem("biosite-data", JSON.stringify({
+            name,
+            description,
+            profileImage,
+            coverImage,
+            fontFamily,
+            themeColor,
+            selectedTemplate,
+        }));
+    }, [name, description, profileImage, coverImage, fontFamily, themeColor, selectedTemplate]);
 
     return (
         <PreviewContext.Provider
@@ -138,27 +125,31 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 setTextBox,
                 musicEmbedUrl,
                 setMusicEmbedUrl,
-                musicNote,
-                setMusicNote,
                 videoUrl,
                 setVideoUrl,
                 videoTitle,
                 setVideoTitle,
                 socialPost,
                 setSocialPost,
+                selectedTemplate,
+                setSelectedTemplate,
+                fontFamily,
+                setFontFamily,
+                themeColor,
+                setThemeColor,
                 views,
                 setViews,
                 clicks,
                 setClicks,
-                selectedTemplate,
-                setSelectedTemplate,
-                themeColor,
-                setThemeColor,
-                fontFamily,
-                setFontFamily,
             }}
         >
             {children}
         </PreviewContext.Provider>
     );
+};
+
+export const usePreview = () => {
+    const context = useContext(PreviewContext);
+    if (!context) throw new Error("usePreview must be used within a PreviewProvider");
+    return context;
 };

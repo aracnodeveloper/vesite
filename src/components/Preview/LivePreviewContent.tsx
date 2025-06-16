@@ -18,82 +18,107 @@ const LivePreviewContent = () => {
         selectedTemplate,
         fontFamily,
         themeColor,
-        views,
-        clicks,
     } = usePreview();
 
     return (
         <div
-            className="bg-white rounded-2xl w-[320px] h-[640px] shadow-xl overflow-y-auto px-4 py-6 mx-auto"
-            style={{ backgroundColor: themeColor, fontFamily }}
+            className="rounded-2xl w-[320px] h-[640px] shadow-xl overflow-y-auto px-4 py-6 mx-auto no-scrollbar"
+            style={{ backgroundColor: themeColor }}
         >
-            {/* Template 0: Cover + Circular Profile */}
             {selectedTemplate === 0 && (
                 <>
-                    <div className="relative">
-                        <div className="w-full h-36 rounded-t-2xl overflow-hidden shadow-sm">
+                    <div className="h-32 relative -top-9 w-full rounded-md overflow-hidden mb-4">
+                        <img
+                            src={coverImage || defaultCover}
+                            alt="cover"
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+
+                    {profileImage && (
+                        <div className="w-28 h-28 relative rounded-full overflow-hidden mx-auto -mt-14 border-4 z-50 border-white shadow-md">
+                            <img
+                                src={profileImage}
+                                alt="profile"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    )}
+
+                    <h2
+                        className="text-center font-semibold mt-2 text-lg"
+                        style={{ fontFamily }}
+                    >
+                        {name}
+                    </h2>
+                    <p className="text-center text-sm text-gray-600">{description}</p>
+                </>
+            )}
+
+            {selectedTemplate === 1 && (
+                <>
+                    <h2
+                        className="text-center font-semibold mb-4 text-lg"
+                        style={{ fontFamily }}
+                    >
+                        {name}
+                    </h2>
+
+                    <div className="flex justify-center relative mb-20">
+                        <div className="w-36 h-36 rotate-[-8deg] absolute left-5 z-10 rounded-md overflow-hidden">
+                            {profileImage && (
+                                <img
+                                    src={profileImage}
+                                    alt="profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            )}
+                        </div>
+                        <div className="w-36 h-36 rotate-[15deg] absolute right-5 top-5 z-0 rounded-md overflow-hidden">
                             <img
                                 src={coverImage || defaultCover}
                                 alt="cover"
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                        {profileImage && (
-                            <div className="absolute left-1/2 top-24 transform -translate-x-1/2 w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden z-20 bg-white">
-                                <img
-                                    src={profileImage}
-                                    alt="profile"
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        )}
                     </div>
 
-                    <div className="pt-16 text-center">
-                        <h2 className="font-semibold">{name}</h2>
-                        <p className="text-sm text-gray-600">{description}</p>
-                        <div className="text-xs text-gray-500">URL: bio.site/anthonyrmch</div>
-                    </div>
+                    <p className="text-center text-sm text-gray-600 mt-52">
+                        {description}
+                    </p>
                 </>
             )}
 
-            {/* Template 1: Side-rotated images */}
-            {selectedTemplate === 1 && (
-                <>
-                    <h2 className="text-center font-semibold mb-5">{name}</h2>
-                    <div className="flex justify-center relative mb-20">
-                        <div className="w-36 h-36 bg-gray-300 rotate-[-8deg] absolute left-5 z-10 rounded-md overflow-hidden">
-                            {profileImage && <img src={profileImage} className="w-full h-full object-cover" />}
-                        </div>
-                        <div className="w-36 h-36 bg-gray-300 rotate-[15deg] absolute right-0 top-5 z-0 rounded-md overflow-hidden">
-                            <img src={coverImage || defaultCover} className="w-full h-full object-cover" />
-                        </div>
-                    </div>
-                    <p className="text-center text-sm text-gray-600 mt-52">{description}</p>
-                </>
-            )}
-
-            {/* Social icons */}
-            {socialLinks.length > 0 && (
-                <div className="flex justify-center gap-3 mt-4 flex-wrap">
-                    {socialLinks.map((link, i) => (
-                        <a key={i} href={link.url} target="_blank" rel="noreferrer">
-                            <img src={link.icon} alt={link.name} className="w-5 h-5 object-contain" />
-                        </a>
-                    ))}
+            {socialLinks?.length > 0 && (
+                <div className="flex justify-center gap-3 mt-4">
+                    {socialLinks.map(
+                        (
+                            link: { name: string; url: string; icon?: string },
+                            idx: number
+                        ) => (
+                            <a
+                                key={idx}
+                                href={link.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-black text-xl"
+                            >
+                                <i className={`fa-brands fa-${link.icon}`} />
+                            </a>
+                        )
+                    )}
                 </div>
             )}
 
-            {/* Links */}
-            {links.length > 0 && (
+            {links?.length > 0 && (
                 <div className="mt-6 space-y-3">
-                    {links.map((link, index) => (
+                    {links.map((link, idx) => (
                         <a
-                            key={index}
+                            key={idx}
                             href={link.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="block p-3 bg-gray-100 rounded-lg text-center text-sm font-medium hover:bg-gray-200 transition"
+                            className="block p-3 bg-white rounded-lg text-center text-sm font-medium hover:bg-gray-100 transition"
                         >
                             {link.title || link.url}
                         </a>
@@ -101,9 +126,8 @@ const LivePreviewContent = () => {
                 </div>
             )}
 
-            {/* Downloads */}
-            {downloads.length > 0 && (
-                <div className="mt-6">
+            {downloads?.length > 0 && (
+                <div className="mt-6 space-y-3">
                     {downloads.map((item, idx) => (
                         <div
                             key={idx}
@@ -118,57 +142,51 @@ const LivePreviewContent = () => {
                 </div>
             )}
 
-            {/* Text box */}
-            {textBox.title && (
-                <div className="mt-6 p-4 rounded-md bg-white shadow border border-gray-200 text-center">
-                    <h3 className="font-semibold">{textBox.title}</h3>
-                    <p className="text-sm text-gray-600">{textBox.description}</p>
+            {textBox?.title && (
+                <div className="mt-6 bg-white rounded-lg p-4 shadow-sm text-sm">
+                    <h3 className="font-semibold text-base mb-1">{textBox.title}</h3>
+                    <p className="text-gray-600">{textBox.description}</p>
                 </div>
             )}
 
-            {/* Music embed */}
             {musicEmbedUrl && (
                 <div className="mt-6">
                     <iframe
                         src={musicEmbedUrl}
-                        className="w-full h-20 rounded-md"
-                        allow="autoplay *; encrypted-media *;"
-                        loading="lazy"
+                        width="100%"
+                        height="80"
+                        allow="autoplay"
+                        className="rounded"
                     ></iframe>
                 </div>
             )}
 
-            {/* Video embed */}
             {videoUrl && (
-                <div className="mt-6">
+                <div className="mt-6 space-y-1">
+                    {videoTitle && <p className="font-semibold text-sm">{videoTitle}</p>}
                     <iframe
+                        width="100%"
+                        height="200"
                         src={videoUrl}
-                        className="w-full h-44 rounded-md"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        frameBorder="0"
                         allowFullScreen
+                        className="rounded"
                     ></iframe>
                 </div>
             )}
 
-            {/* Social post */}
-            {socialPost.url && (
+            {socialPost?.url && (
                 <div className="mt-6">
                     <iframe
                         src={socialPost.url}
-                        className="w-full h-64 rounded-md"
-                        loading="lazy"
+                        className="w-full h-64 rounded"
+                        allow="autoplay; encrypted-media"
                     ></iframe>
                     {socialPost.note && (
-                        <p className="text-sm text-center text-gray-600 mt-2">{socialPost.note}</p>
+                        <p className="text-sm text-gray-700 mt-2">{socialPost.note}</p>
                     )}
                 </div>
             )}
-
-            {/* Views + Clicks */}
-            <div className="mt-6 flex justify-center gap-6 text-xs text-gray-500">
-                <div>👁 Views: {views}</div>
-                <div>🖱 Clicks: {clicks}</div>
-            </div>
         </div>
     );
 };

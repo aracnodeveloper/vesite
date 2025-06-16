@@ -1,19 +1,17 @@
-import { useAuthContext } from "./useAuthContext.ts"; // ajusta la ruta si es necesario
+import type {Biosite} from "../interfaces/Biosite";
 import apiService from "../service/apiService";
-import { updateBiositeApi } from "../constants/EndpointsRoutes";
+import {getBiositeApi} from "../constants/EndpointsRoutes.ts";
+import Cookies from "js-cookie";
 
-export const useUpdateProfile = () => {
-    const { userId } = useAuthContext();
+export const useUpdateBiosite = () => {
 
-    const updateProfile = async (data: {
-        title?: string;
-        slug?: string;
-        avatarImage?: string;
-        themeId?: string;
-    }) => {
-        if (!userId) return;
-        return await apiService.update(updateBiositeApi, userId, data);
+    const updateBiosite = async (data: Partial<Biosite>) => {
+        try {
+            await apiService.create(getBiositeApi, data);
+        } catch (error) {
+            console.error("Error updating biosite:", error);
+        }
     };
 
-    return { updateProfile };
+    return { updateBiosite };
 };

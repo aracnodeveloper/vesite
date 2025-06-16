@@ -7,14 +7,12 @@ import Layout  from "./components/Main/Layout.tsx";
 
 // Páginas públicas
 import { Login } from "./pages/Login/Login.tsx";
-
 // Páginas privadas
 import Sections  from "./pages/sections.tsx";
 import ProfilePage from "./components/layers/MySite/Profile/profilePage.tsx";
 import Analytics from "./pages/analytics.tsx";
 import Styles from "./pages/styles.tsx";
 import PrivateRoute from "./pages/Login/PrivateRoute.tsx";
-import {AuthProvider} from "./context/AuthContext.tsx";
 import {PreviewProvider} from "./context/PreviewContext.tsx";
 import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
 import VideoPage from "./components/layers/AddMoreSections/Video/videoPage.tsx";
@@ -22,6 +20,7 @@ import MusicPage from "./components/layers/AddMoreSections/Music-Posdcast/musicP
 import PostPage from "./components/layers/AddMoreSections/Socialpost/socialPostPage.tsx";
 import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage.tsx";
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
+import {AuthProvider} from "./context/AuthContext.tsx";
 
 // Rutas protegidas
 
