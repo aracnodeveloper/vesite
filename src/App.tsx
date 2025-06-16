@@ -14,7 +14,6 @@ import ProfilePage from "./components/layers/MySite/Profile/profilePage.tsx";
 import Analytics from "./pages/analytics.tsx";
 import Styles from "./pages/styles.tsx";
 import PrivateRoute from "./pages/Login/PrivateRoute.tsx";
-import AdminRoute from "./pages/Login/AdminRoute.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import {PreviewProvider} from "./context/PreviewContext.tsx";
 import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
@@ -141,11 +140,9 @@ const App = () => {
                 path="/analytics"
                 element={
                     <PrivateRoute>
-                        <AdminRoute>
                             <Layout>
                                 <Analytics />
                             </Layout>
-                        </AdminRoute>
                     </PrivateRoute>
                 }
             />
@@ -154,11 +151,9 @@ const App = () => {
                 path="/styles"
                 element={
                     <PrivateRoute>
-                        <AdminRoute>
                             <Layout>
                                 <Styles />
                             </Layout>
-                        </AdminRoute>
                     </PrivateRoute>
                 }
             />

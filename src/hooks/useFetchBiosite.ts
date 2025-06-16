@@ -1,7 +1,7 @@
 // src/hooks/useGetBiosite.ts
 import apiService from "../service/apiService";
 import { getBiositeApi } from "../constants/EndpointsRoutes";
-import { useAuthContext } from "./useAuthContext";
+import { useAuthContext } from "./useAuthContext.ts";
 
 interface Biosite {
     title?: string;

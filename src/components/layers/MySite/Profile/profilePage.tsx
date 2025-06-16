@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { usePreview } from "../../../../context/PreviewContext";
-import { useAuth } from "../../../../hooks/useAuthContext";
 import defaultCover from "../../../../assets/defaultCover.jpg";
 import clsx from "clsx";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUpdateProfile } from "../../../../hooks/useUpdateProfile";
 import {useGetBiosite} from "../../../../hooks/useFetchBiosite.ts";
+import Cookies from "js-cookie";
 
 const ProfilePage = () => {
     const {
@@ -22,8 +22,7 @@ const ProfilePage = () => {
         setSelectedTemplate,
     } = usePreview();
 
-    const auth = useAuth();
-    const role = auth?.role;
+    const role = Cookies.get('roleName');
     const isAdmin = role === "admin";
     const navigate = useNavigate();
     const { updateProfile } = useUpdateProfile();
@@ -38,7 +37,7 @@ const ProfilePage = () => {
             setSelectedTemplate(Number(data.themeId ?? 0));
 
         });
-    }, []);
+    }, [ ]);
 
     const handleImageUpload = (
         e: React.ChangeEvent<HTMLInputElement>,

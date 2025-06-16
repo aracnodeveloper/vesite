@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
     Layers,
     Droplet,
     BarChart3,
     Menu,
-    X,Smartphone
+    X,
+    Smartphone,
+    LogOut,
 } from "lucide-react";
 
 import imgP from "../../assets/img/img.png";
 import { usePreview } from "../../context/PreviewContext";
+import { AuthContext } from "../../hooks/useAuthContext.ts";
 
 import LivePreviewContent from "../Preview/LivePreviewContent";
 import PhonePreview from "../Preview/phonePreview.tsx";
@@ -21,6 +24,10 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const auth = useContext(AuthContext);
+    if (!auth) throw new Error("AuthContext is null");
+    const { logout } = auth;
+
     const [activeItem, setActiveItem] = useState<string>("layers");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
@@ -41,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         videoTitle,
         musicEmbedUrl,
         musicNote,
-        socialPost
+        socialPost,
     } = usePreview();
 
     const sidebarItems = [
@@ -68,8 +75,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         };
 
         handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     const handleItemClick = (item: any) => {
@@ -95,7 +102,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     return (
-        <div className="flex flex-col lg:flex-row h-screen  bg-[#1b1b1b] p-2 sm:p-4">
+        <div className="flex flex-col lg:flex-row h-screen bg-[#1b1b1b] p-2 sm:p-4">
             {/* Mobile Header */}
             <div className="lg:hidden flex items-center justify-between p-4 bg-[#2a2a2a] rounded-lg mb-2">
                 <div className="flex items-center space-x-3">
@@ -108,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         className="p-2 text-gray-400 hover:text-white transition-colors md:hidden cursor-pointer"
                         title="Toggle Preview"
                     >
-                        <Smartphone size={20}/>
+                        <Smartphone size={20} />
                     </button>
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -155,12 +162,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </button>
                     ))}
                 </div>
+
+                {/* Logout Button */}
+                <div className="mt-auto mb-4">
+                    <button
+                        onClick={logout}
+                        className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                        title="Logout"
+                    >
+                        <LogOut size={20} />
+                    </button>
+                </div>
             </div>
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col lg:flex-row min-h-0">
                 {/* Main Content */}
-                <main className={`${showPreview && window.innerWidth >= 768 ? 'lg:flex-1' : 'flex-1'} flex justify-center items-center rounded-2xl shadow-sm overflow-y-auto p-3 sm:p-6 min-h-0`}>
+                <main
+                    className={`${
+                        showPreview && window.innerWidth >= 768 ? "lg:flex-1" : "flex-1"
+                    } flex justify-center items-center rounded-2xl shadow-sm overflow-y-auto p-3 sm:p-6 min-h-0`}
+                >
                     {children}
                 </main>
 
@@ -172,7 +194,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 URL: bio.site/anthonyrmch
                             </div>
                             <PhonePreview>
-
                                 <LivePreviewContent
                                     name={name}
                                     description={description}
@@ -190,9 +211,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     musicEmbedUrl={musicEmbedUrl}
                                     musicNote={musicNote}
                                     socialPost={socialPost}
-
-
                                 />
+
                             </PhonePreview>
                         </div>
                     </div>

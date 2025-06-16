@@ -1,7 +1,6 @@
-// src/hooks/useUpdateProfile.ts
+import { useAuthContext } from "./useAuthContext.ts"; // ajusta la ruta si es necesario
 import apiService from "../service/apiService";
 import { updateBiositeApi } from "../constants/EndpointsRoutes";
-import { useAuthContext } from "./useAuthContext";
 
 export const useUpdateProfile = () => {
     const { userId } = useAuthContext();
@@ -10,10 +9,9 @@ export const useUpdateProfile = () => {
         title?: string;
         slug?: string;
         avatarImage?: string;
-        themeId?: string; // debe ser un ID válido
+        themeId?: string;
     }) => {
         if (!userId) return;
-
         return await apiService.update(updateBiositeApi, userId, data);
     };
 

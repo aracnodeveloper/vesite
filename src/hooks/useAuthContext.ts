@@ -18,5 +18,4 @@ export const useAuthContext = () => {
     return context;
 };
 
-
 export const useAuth = () => useContext(AuthContext);

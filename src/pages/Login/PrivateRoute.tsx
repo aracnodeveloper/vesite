@@ -1,21 +1,21 @@
-// src/components/PrivateRoute.tsx
+import type {FC} from 'react';
+import {Navigate, type RouteProps} from 'react-router-dom';
+import Cookies from 'js-cookie';
 
-import { Navigate } from "react-router-dom";
-import { useAuthContext } from "../../hooks/useAuthContext.ts";
-import type { JSX } from "react";
+const PrivateRoute: FC<RouteProps> = ({children}) => {
+    const accessToken = Cookies.get('accessToken');
 
-interface Props {
-    children: JSX.Element;
-}
-
-const PrivateRoute = ({ children }: Props) => {
-    const { isAuthenticated } = useAuthContext();
-
-    if (!isAuthenticated) {
+    if (!accessToken || accessToken === 'undefined' || accessToken === 'null' || accessToken === '') {
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        Cookies.remove('userId');
+        Cookies.remove('roleName');
+        Cookies.remove('institutionId');
+        Cookies.remove('careerId');
         return <Navigate to="/login" replace />;
     }
 
-    return children;
+    return <>{children}</>;
 };
 
 export default PrivateRoute;

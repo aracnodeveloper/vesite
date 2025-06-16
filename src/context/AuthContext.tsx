@@ -1,13 +1,13 @@
-// Auth Fixes + Rutas y guardado de perfil actualizado
-
-import { type FC, type ReactNode, useState, useEffect } from 'react';
+import { type FC, type ReactNode, useState } from 'react';
 import Cookie from 'js-cookie';
 import type { LoginParams } from "../types/authTypes.ts";
 import type { AuthResponse } from "../interfaces/Auth.ts";
-import { AuthContext } from '../hooks/useAuthContext.ts';
 import apiService from "../service/apiService.ts";
-import { loginApi, updateBiositeApi } from "../constants/EndpointsRoutes.ts";
+import { loginApi} from "../constants/EndpointsRoutes.ts";
 import notificationService from "../service/notificationService.ts";
+import {AuthContext} from "../hooks/useAuthContext.ts";
+
+
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,18 +16,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [role, setRole] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    useEffect(() => {
-        const token = Cookie.get('accessToken');
-        const uid = Cookie.get('userId');
-        const roleName = Cookie.get('roleName');
 
-        if (token && uid && roleName) {
-            setIsAuthenticated(true);
-            setAccessToken(token);
-            setUserId(uid);
-            setRole(roleName);
-        }
-    }, []);
 
     const login = async (email: string, password: string) => {
         try {
@@ -56,8 +45,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
             }
 
             return { success: true };
-        } catch (error: any) {
-            console.error('Login error:', error);
+        } catch (error) {
+            console.error('Login error:', error instanceof Error ? error.message : error);
             return { success: false };
         } finally {
             setLoading(false);
@@ -89,19 +78,3 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
 };
 
-// Hook para actualizar perfil
-export const useUpdateProfile = () => {
-    const { userId } = React.useContext(AuthContext);
-
-    const updateProfile = async (data: {
-        title?: string;
-        slug?: string;
-        avatarImage?: string;
-        themeId?: string;
-    }) => {
-        if (!userId) return;
-        return await apiService.update(updateBiositeApi, userId, data);
-    };
-
-    return { updateProfile };
-};
