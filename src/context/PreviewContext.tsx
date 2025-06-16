@@ -1,28 +1,35 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useAnalytics } from "../hooks/useFetchMetrics.ts";
+import { useUpdateTheme } from "../hooks/useFetchUpdateTheme.ts";
 
-type SocialLink = {
+interface SocialLink {
     name: string;
     url: string;
     icon?: string;
-    color?: string;
-};
+}
 
-type DownloadItem = {
+interface DownloadItem {
     title: string;
     url: string;
     price: string;
-};
+}
 
-type LinkItem = {
+interface LinkItem {
     title: string;
     url: string;
     image?: string;
-};
+}
 
-type SocialPostData = {
+interface TextBox {
+    title: string;
+    description: string;
+}
+
+interface SocialPostData {
     url: string;
     note?: string;
-};
+}
 
 interface PreviewContextType {
     name: string;
@@ -32,39 +39,27 @@ interface PreviewContextType {
     socialLinks: SocialLink[];
     downloads: DownloadItem[];
     links: LinkItem[];
-    selectedTemplate: number;
-    themeColor: string;
-    fontFamily: string;
-
-    // Text Box
-    textBox: {
-        title: string;
-        description: string;
-    };
-
-    // Music
+    textBox: TextBox;
     musicEmbedUrl: string;
     setMusicEmbedUrl: React.Dispatch<React.SetStateAction<string>>;
     musicNote: string;
     setMusicNote: React.Dispatch<React.SetStateAction<string>>;
-
-    // Video
     videoUrl: string;
     videoTitle: string;
     setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
     setVideoTitle: React.Dispatch<React.SetStateAction<string>>;
-
-    // Social Post
     socialPost: SocialPostData;
     setSocialPost: React.Dispatch<React.SetStateAction<SocialPostData>>;
-
-    // Analytics
     views: number;
     clicks: number;
     setViews: React.Dispatch<React.SetStateAction<number>>;
     setClicks: React.Dispatch<React.SetStateAction<number>>;
-
-    // Setters
+    selectedTemplate: number;
+    setSelectedTemplate: React.Dispatch<React.SetStateAction<number>>;
+    themeColor: string;
+    setThemeColor: React.Dispatch<React.SetStateAction<string>>;
+    fontFamily: string;
+    setFontFamily: React.Dispatch<React.SetStateAction<string>>;
     setName: React.Dispatch<React.SetStateAction<string>>;
     setDescription: React.Dispatch<React.SetStateAction<string>>;
     setProfileImage: React.Dispatch<React.SetStateAction<string | null>>;
@@ -72,91 +67,98 @@ interface PreviewContextType {
     setSocialLinks: React.Dispatch<React.SetStateAction<SocialLink[]>>;
     setDownloads: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
     setLinks: React.Dispatch<React.SetStateAction<LinkItem[]>>;
-    setSelectedTemplate: React.Dispatch<React.SetStateAction<number>>;
-    setThemeColor: React.Dispatch<React.SetStateAction<string>>;
-    setFontFamily: React.Dispatch<React.SetStateAction<string>>;
-    setTextBox: React.Dispatch<
-        React.SetStateAction<{
-            title: string;
-            description: string;
-        }>
-    >;
+    setTextBox: React.Dispatch<React.SetStateAction<TextBox>>;
 }
-const PreviewContext = createContext<PreviewContextType | undefined>(undefined);
+
+const PreviewContext = createContext<PreviewContextType>({} as PreviewContextType);
+
+export const usePreview = () => useContext(PreviewContext);
 
 export const PreviewProvider = ({ children }: { children: React.ReactNode }) => {
-    const [name, setName] = useState("Anthonyr");
-    const [description, setDescription] = useState("Bienvenidos a mi sitio");
+    const [name, setName] = useState("Your Name");
+    const [description, setDescription] = useState("Add a short description");
     const [profileImage, setProfileImage] = useState<string | null>(null);
     const [coverImage, setCoverImage] = useState<string | null>(null);
     const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
     const [downloads, setDownloads] = useState<DownloadItem[]>([]);
     const [links, setLinks] = useState<LinkItem[]>([]);
-    const [selectedTemplate, setSelectedTemplate] = useState<number>(0);
-    const [themeColor, setThemeColor] = useState<string>("#ffffff");
-    const [fontFamily, setFontFamily] = useState<string>("Lato");
-    const [textBox, setTextBox] = useState<{ title: string; description: string }>({title: "", description: "",});
-    const [videoUrl, setVideoUrl] = useState('');
-    const [videoTitle, setVideoTitle] = useState('');
-    const [musicEmbedUrl, setMusicEmbedUrl] = useState('');
-    const [musicNote, setMusicNote] = useState('');
+    const [textBox, setTextBox] = useState<TextBox>({ title: "", description: "" });
+    const [musicEmbedUrl, setMusicEmbedUrl] = useState("");
+    const [musicNote, setMusicNote] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
+    const [videoTitle, setVideoTitle] = useState("");
     const [socialPost, setSocialPost] = useState<SocialPostData>({ url: "", note: "" });
-    const [views, setViews] = useState(14);
+    const [views, setViews] = useState(0);
     const [clicks, setClicks] = useState(0);
+    const [selectedTemplate, setSelectedTemplate] = useState(0);
+    const [themeColor, setThemeColor] = useState("#ffffff");
+    const [fontFamily, setFontFamily] = useState("Lato");
 
+    const { data: analyticsData } = useAnalytics();
+    const { updateTheme } = useUpdateTheme();
+    const biositeId = Cookies.get("biositeId");
 
+    // Actualiza views y clicks desde el backend
+    useEffect(() => {
+        if (analyticsData) {
+            setViews(analyticsData.views);
+            setClicks(analyticsData.clicks);
+        }
+    }, [analyticsData]);
+
+    // Sincroniza estilo visual con backend
+    useEffect(() => {
+        if (themeColor && fontFamily && biositeId) {
+            updateTheme({
+                backgroundColor: themeColor,
+                fontFamily,
+                templateId: selectedTemplate,
+            });
+        }
+    }, [themeColor, fontFamily, selectedTemplate]);
 
     return (
         <PreviewContext.Provider
             value={{
                 name,
-                description,
-                profileImage,
-                coverImage,
-                socialLinks,
-                downloads,
-                links,
-                selectedTemplate,
-                themeColor,
-                fontFamily,
-                textBox,
-                videoUrl,
-                videoTitle,
-                musicEmbedUrl,
-                musicNote,
-                socialPost,
-                views,
-                clicks,
-
-                setClicks,
-                setViews,
-                setSocialPost,
-                setMusicEmbedUrl,
-                setMusicNote,
-                setVideoUrl,
-                setVideoTitle,
-                setTextBox,
                 setName,
+                description,
                 setDescription,
+                profileImage,
                 setProfileImage,
+                coverImage,
                 setCoverImage,
+                socialLinks,
                 setSocialLinks,
+                downloads,
                 setDownloads,
+                links,
                 setLinks,
+                textBox,
+                setTextBox,
+                musicEmbedUrl,
+                setMusicEmbedUrl,
+                musicNote,
+                setMusicNote,
+                videoUrl,
+                setVideoUrl,
+                videoTitle,
+                setVideoTitle,
+                socialPost,
+                setSocialPost,
+                views,
+                setViews,
+                clicks,
+                setClicks,
+                selectedTemplate,
                 setSelectedTemplate,
+                themeColor,
                 setThemeColor,
+                fontFamily,
                 setFontFamily,
             }}
         >
             {children}
         </PreviewContext.Provider>
     );
-};
-
-export const usePreview = (): PreviewContextType => {
-    const context = useContext(PreviewContext);
-    if (!context) {
-        throw new Error("usePreview must be used within a PreviewProvider");
-    }
-    return context;
 };

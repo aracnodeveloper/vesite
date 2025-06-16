@@ -1,81 +1,76 @@
-import {usePreview} from "../context/PreviewContext.tsx";
+import { usePreview } from "../context/PreviewContext";
 
+const fontOptions = ["Lato", "Inter", "Roboto"];
+const colorOptions = ["#ffffff", "#fef3c7", "#f0fdfa", "#ecfdf5", "#f3f4f6"];
 
-const COLORS = [
-    { name: "London", value: "#ffffff" },
-    { name: "Stockholm", value: "#ede9fe" },
-    { name: "Brussels", value: "#fef08a" },
-    { name: "Dublin", value: "#d9f99d" },
-    { name: "San Diego", value: "#dbeafe" },
-    { name: "Phoenix", value: "#fca5a5" },
-    { name: "Paris", value: "#fce7f3" },
-    { name: "Seoul", value: "#f5d0fe" },
-    { name: "Berlin", value: "#f0abfc" },
-];
-
-const FONTS = [
-    "Lato",
-    "Roboto",
-    "Playfair",
-    "Playfair Black",
-    "Bebas",
-    "Open Sans",
-    "Cinzel",
-    "Cinzel Pack",
-    "Bebas Pack",
-    "Slab",
-    "Alegreya",
-    "Oswald",
-];
-
-const Styles = () => {
-    const { themeColor, fontFamily, setThemeColor, setFontFamily } = usePreview();
+const StylesPage = () => {
+    const {
+        themeColor,
+        setThemeColor,
+        fontFamily,
+        setFontFamily,
+        selectedTemplate,
+        setSelectedTemplate,
+    } = usePreview();
 
     return (
-        <div className="flex h-screen overflow-hidden">
-            {/* Panel izquierdo */}
-            <div className="w-[60%] p-6 text-white overflow-y-auto">
-                <h2 className="text-2xl font-semibold mb-4">Style</h2>
-
-                <div className="mb-6">
-                    <h3 className="text-sm font-semibold mb-2">THEMES</h3>
-                    <div className="grid grid-cols-3 gap-4">
-                        {COLORS.map((theme) => (
-                            <button
-                                key={theme.name}
-                                onClick={() => setThemeColor(theme.value)}
-                                className={`h-16 rounded-lg shadow-inner border-2 transition-all ${
-                                    themeColor === theme.value
-                                        ? "ring-4 ring-white border-white"
-                                        : "border-transparent"
-                                }`}
-                                style={{ backgroundColor: theme.value }}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className="text-sm font-semibold mb-2">FONTS</h3>
-                    <div className="grid grid-cols-3 gap-4">
-                        {FONTS.map((font) => (
-                            <button
-                                key={font}
-                                onClick={() => setFontFamily(font)}
-                                className={`bg-neutral-800 rounded-md p-3 w-full text-white text-center ${
-                                    fontFamily === font ? "ring-2 ring-purple-400" : ""
-                                }`}
-                                style={{ fontFamily: font }}
-                            >
-                                {font}
-                            </button>
-                        ))}
-                    </div>
+        <div className="p-6 space-y-8">
+            <div>
+                <h2 className="font-semibold mb-2">Font</h2>
+                <div className="flex gap-3">
+                    {fontOptions.map((font) => (
+                        <button
+                            key={font}
+                            onClick={() => setFontFamily(font)}
+                            className={`px-4 py-2 rounded-full border ${
+                                fontFamily === font
+                                    ? "bg-black text-white"
+                                    : "border-gray-300 text-gray-700"
+                            }`}
+                            style={{ fontFamily: font }}
+                        >
+                            {font}
+                        </button>
+                    ))}
                 </div>
             </div>
 
+            <div>
+                <h2 className="font-semibold mb-2">Background Color</h2>
+                <div className="flex gap-3">
+                    {colorOptions.map((color) => (
+                        <button
+                            key={color}
+                            onClick={() => setThemeColor(color)}
+                            className={`w-8 h-8 rounded-full border ${
+                                themeColor === color ? "border-black" : "border-gray-300"
+                            }`}
+                            style={{ backgroundColor: color }}
+                        ></button>
+                    ))}
+                </div>
+            </div>
+
+            <div>
+                <h2 className="font-semibold mb-2">Template</h2>
+                <div className="flex gap-4">
+                    {[0, 1].map((tpl) => (
+                        <button
+                            key={tpl}
+                            onClick={() => setSelectedTemplate(tpl)}
+                            className={`w-24 h-32 border rounded-xl ${
+                                selectedTemplate === tpl
+                                    ? "border-black"
+                                    : "border-gray-300 opacity-50"
+                            }`}
+                        >
+                            <div className="w-full h-full bg-white">Tpl {tpl}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };
 
-export default Styles;
+export default StylesPage;

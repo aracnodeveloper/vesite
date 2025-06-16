@@ -1,12 +1,12 @@
-import { ChevronLeft, ImagePlus } from "lucide-react";
-import { useRef, useState } from "react";
-
-import img_1 from "../../../../assets/img/img_1.png";
-import img_2 from "../../../../assets/img/img_2.png";
-import img_3 from "../../../../assets/img/img_3.png";
-import img_4 from "../../../../assets/img/img_4.png";
-import { usePreview } from "../../../../context/PreviewContext.tsx";
-import {useNavigate} from "react-router-dom";
+import React, { useEffect } from "react";
+import { usePreview } from "../../../../context/PreviewContext";
+import { useAuth } from "../../../../hooks/useAuthContext";
+import defaultCover from "../../../../assets/defaultCover.jpg";
+import clsx from "clsx";
+import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUpdateProfile } from "../../../../hooks/useUpdateProfile";
+import {useGetBiosite} from "../../../../hooks/useFetchBiosite.ts";
 
 const ProfilePage = () => {
     const {
@@ -22,174 +22,165 @@ const ProfilePage = () => {
         setSelectedTemplate,
     } = usePreview();
 
-    const [minimalClicked, setMinimalClicked] = useState(false);
-    const [creativeClicked, setCreativeClicked] = useState(false);
+    const auth = useAuth();
+    const role = auth?.role;
+    const isAdmin = role === "admin";
     const navigate = useNavigate();
+    const { updateProfile } = useUpdateProfile();
+    const { fetchBiosite } = useGetBiosite();
 
-    const handleBackClick = () => {
-        navigate(-1);
+    useEffect(() => {
+        fetchBiosite().then(data => {
+            if (!data) return;
+            setName(data.title || "");
+            setDescription(data.slug || "");
+            setProfileImage(data.avatarImage || "");
+            setSelectedTemplate(Number(data.themeId ?? 0));
+
+        });
+    }, []);
+
+    const handleImageUpload = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        callback: (url: string) => void
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onloadend = () => callback(reader.result as string);
+        reader.readAsDataURL(file);
     };
 
-    const profileInputRef = useRef<HTMLInputElement>(null);
-    const coverInputRef = useRef<HTMLInputElement>(null);
+    const handleBackClick = () => navigate(-1);
 
-    const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result;
-                if (typeof result === "string") {
-                    setProfileImage(result);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result;
-                if (typeof result === "string") {
-                    setCoverImage(result);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+    const handleSave = () => {
+        updateProfile({
+            title: name,
+            slug: description,
+            avatarImage: profileImage,
+            themeId: String(selectedTemplate),
+        });
     };
 
     return (
-        <div className="max-w-xl mx-auto p-4 text-white">
-            {/* Header */}
-            <div className="flex items-center mb-6">
+        <div className="space-y-8 text-white px-4 pb-10">
+            <div className="flex items-center mb-4 mt-3">
                 <button
                     onClick={handleBackClick}
-                    className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer" >
+                    className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
+                >
                     <ChevronLeft size={16} className="mr-2" />
                     Profile
                 </button>
             </div>
 
-            {/* IMAGES */}
-            <div className="mb-6">
-                <p className="text-xs text-gray-400 mb-2">IMAGES</p>
-                <div className="flex gap-4">
-                    {/* Profile Image */}
-                    <div
-                        className="w-24 h-24 bg-[#1a1a1a] rounded-md flex items-center justify-center cursor-pointer"
-                        onClick={() => profileInputRef.current?.click()}
-                    >
+            {/* Images */}
+            <div className="space-y-2">
+                <h3 className="text-xs text-gray-400">IMAGES</h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-xl bg-[#2a2a2a] h-28 flex items-center justify-center cursor-pointer relative">
                         {profileImage ? (
-                            <img src={profileImage} alt="Profile" className="w-full h-full object-cover rounded-md" />
+                            <img src={profileImage} className="object-cover h-full w-full rounded-xl" alt="profile" />
                         ) : (
-                            <ImagePlus size={20} className="text-gray-400" />
+                            <i className="fa-regular fa-image text-xl text-gray-500" />
                         )}
                         <input
-                            ref={profileInputRef}
                             type="file"
                             accept="image/*"
-                            onChange={handleProfileImageChange}
-                            hidden
+                            className="absolute opacity-0 w-full h-full cursor-pointer"
+                            onChange={(e) => handleImageUpload(e, setProfileImage)}
                         />
                     </div>
 
-                    {/* Cover Image */}
-                    <div
-                        className="flex-1 h-24 bg-[#1a1a1a] rounded-md flex items-center justify-center cursor-pointer"
-                        onClick={() => coverInputRef.current?.click()}
-                    >
-                        {coverImage ? (
-                            <img src={coverImage} alt="Cover" className="w-full h-full object-cover rounded-md" />
-                        ) : (
-                            <ImagePlus size={20} className="text-gray-400" />
-                        )}
-                        <input
-                            ref={coverInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleCoverImageChange}
-                            hidden
+                    <div className="rounded-xl bg-[#2a2a2a] h-28 flex items-center justify-center relative">
+                        <img
+                            src={coverImage || defaultCover}
+                            className="object-cover h-full w-full rounded-xl"
+                            alt="cover"
                         />
+                        {isAdmin && (
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute opacity-0 w-full h-full cursor-pointer"
+                                onChange={(e) => handleImageUpload(e, setCoverImage)}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* ABOUT */}
-            <div className="space-y-4 mb-6">
-                <p className="text-xs text-gray-400">ABOUT</p>
-                <input
-                    className="bg-[#1a1a1a] w-full p-3 rounded-md text-white placeholder-gray-400"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
+            {/* About */}
+            <div className="space-y-2">
+                <h3 className="text-xs text-gray-400">ABOUT</h3>
+                <div className="bg-[#2a2a2a] rounded-xl px-4 py-3">
+                    <label className="text-xs text-gray-500 block mb-1">NAME</label>
+                    <input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        className="w-full bg-transparent text-white text-sm outline-none"
+                    />
+                </div>
+
                 <textarea
-                    className="bg-[#1a1a1a] w-full p-3 rounded-md text-white placeholder-gray-400"
-                    placeholder="Add a description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Add Description"
+                    className="w-full bg-[#2a2a2a] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 outline-none"
                 />
             </div>
 
-            {/* SITE */}
-            <div className="mb-6">
-                <p className="text-xs text-gray-400 mb-2">SITE</p>
-                <div className="bg-[#1a1a1a] flex items-center justify-between p-3 rounded-md text-sm">
-                    <span>bio.site/anthonyrmch</span>
-                    <span className="text-gray-400 text-xs">Public</span>
+            {/* Site */}
+            <div className="space-y-2">
+                <h3 className="text-xs text-gray-400">SITE</h3>
+                <div className="flex items-center justify-between bg-[#2a2a2a] rounded-xl px-4 py-3">
+          <span className="text-white text-sm font-medium">
+            bio.site/{name.toLowerCase()}
+          </span>
+                    <span className="text-xs text-gray-400">Public</span>
                 </div>
             </div>
 
-            {/* DESIGN */}
-            <div className="mb-2">
-                <p className="text-xs text-gray-400 mb-2">DESIGN</p>
-
-                {/* Buttons row */}
-                <div className="flex gap-2 mb-4">
-                    <button className="bg-white text-black text-xs font-medium px-4 py-1 rounded-full">Minimal</button>
-                    <button className="bg-[#1a1a1a] text-white text-xs font-medium px-4 py-1 rounded-full">Creative</button>
-                    <button className="bg-[#1a1a1a] text-white text-xs font-medium px-4 py-1 rounded-full">Bold</button>
+            {/* Design */}
+            <div className="space-y-2">
+                <h3 className="text-xs text-gray-400">DESIGN</h3>
+                <div className="bg-white text-black rounded-xl px-4 py-2 text-center font-medium text-sm">
+                    Minimal
                 </div>
-
-                {/* Template selector */}
-                <div className="flex gap-4">
-                    {/* Minimal Template */}
-                    <div
-                        onClick={() => {
-                            setMinimalClicked(!minimalClicked);
-                            setSelectedTemplate(0);
-                        }}
-                        className={`w-24 h-48 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-[#252525] transition-colors ${
-                            selectedTemplate === 0 ? "border-2 border-white" : "border-2 border-transparent"
-                        }`}
-                    >
-                        <img
-                            src={minimalClicked ? img_2 : img_1}
-                            alt="Minimal Template"
-                            className="w-full h-full object-cover rounded-md"
-                        />
-                    </div>
-
-                    {/* Creative Template */}
-                    <div
-                        onClick={() => {
-                            setCreativeClicked(!creativeClicked);
-                            setSelectedTemplate(1);
-                        }}
-                        className={`w-24 h-48 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-[#252525] transition-colors ${
-                            selectedTemplate === 1 ? "border-2 border-white" : "border-2 border-transparent"
-                        }`}
-                    >
-                        <img
-                            src={creativeClicked ? img_4 : img_3}
-                            alt="Creative Template"
-                            className="w-full h-full object-cover rounded-md"
-                        />
-                    </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                    {[0, 1].map((template) => (
+                        <button
+                            key={template}
+                            onClick={() => setSelectedTemplate(template)}
+                            className={clsx(
+                                "rounded-xl overflow-hidden border",
+                                selectedTemplate === template
+                                    ? "border-white ring-2 ring-white"
+                                    : "border-transparent"
+                            )}
+                        >
+                            <img
+                                src={
+                                    template === 0
+                                        ? "/assets/img/69489b9c-a460-4c68-8001-f6ce35f1c3cb.png"
+                                        : "/assets/img/02fd1de7-cb7f-403e-b538-abc10d6774c1.png"
+                                }
+                                alt={`template-${template}`}
+                                className="h-48 w-full object-cover"
+                            />
+                        </button>
+                    ))}
                 </div>
+            </div>
+
+            <div className="pt-4">
+                <button
+                    onClick={handleSave}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-xl font-medium w-full"
+                >
+                    Save Changes
+                </button>
             </div>
         </div>
     );

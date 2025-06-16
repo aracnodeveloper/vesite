@@ -4,9 +4,6 @@ import {
     Layers,
     Droplet,
     BarChart3,
-    CreditCard,
-    Users,
-    Mail,
     Menu,
     X,Smartphone
 } from "lucide-react";
@@ -35,16 +32,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         coverImage,
         socialLinks,
         downloads,
-        links
+        links,
+        selectedTemplate,
+        themeColor,
+        textBox,
+        fontFamily,
+        videoUrl,
+        videoTitle,
+        musicEmbedUrl,
+        musicNote,
+        socialPost
     } = usePreview();
 
     const sidebarItems = [
         { icon: Layers, label: "Layers", id: "layers", to: "/sections", color: "green" },
         { icon: Droplet, label: "Droplet", id: "droplet", to: "/droplet", color: "orange" },
         { icon: BarChart3, label: "Analytics", id: "analytics", to: "/analytics", color: "blue" },
-        { icon: CreditCard, label: "Sales", id: "sales", to: "/sales", color: "purple" },
-        { icon: Users, label: "Audience", id: "users", to: "/audience", color: "pink" },
-        { icon: Mail, label: "Mail", id: "mail", to: "/mail", color: "yellow" },
     ];
 
     useEffect(() => {
@@ -81,9 +84,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 green: "text-green-600 border-l-4 border-green-300 lg:border-l-4 md:border-b-2 md:border-l-0",
                 orange: "text-orange-600 border-l-4 border-orange-300 lg:border-l-4 md:border-b-2 md:border-l-0",
                 blue: "text-blue-600 border-l-4 border-blue-300 lg:border-l-4 md:border-b-2 md:border-l-0",
-                purple: "text-purple-600 border-l-4 border-purple-300 lg:border-l-4 md:border-b-2 md:border-l-0",
-                pink: "text-pink-600 border-l-4 border-pink-300 lg:border-l-4 md:border-b-2 md:border-l-0",
-                yellow: "text-yellow-600 border-l-4 border-yellow-300 lg:border-l-4 md:border-b-2 md:border-l-0",
             };
             return colorClasses[item.color as keyof typeof colorClasses] + " shadow-sm bg-gray-700/50";
         }
@@ -168,7 +168,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {showPreview && (
                     <div className="w-full md:w-[400px] lg:w-[500px] xl:w-[600px] 2xl:w-[700px] mt-4 lg:mt-0 lg:ml-4 p-2 sm:p-4 rounded-2xl shadow-inner flex justify-center items-center bg-[#2a2a2a]/20">
                         <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center">
+                            <div className="absolute text-xs  top-10 left-2/3 text-white mb-4 text-center">
+                                URL: bio.site/anthonyrmch
+                            </div>
                             <PhonePreview>
+
                                 <LivePreviewContent
                                     name={name}
                                     description={description}
@@ -177,6 +181,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     socialLinks={socialLinks}
                                     downloads={downloads}
                                     links={links}
+                                    selectedTemplate={selectedTemplate}
+                                    themeColor={themeColor}
+                                    fontFamily={fontFamily}
+                                    textBox={textBox}
+                                    videoUrl={videoUrl}
+                                    videoTitle={videoTitle}
+                                    musicEmbedUrl={musicEmbedUrl}
+                                    musicNote={musicNote}
+                                    socialPost={socialPost}
+
+
                                 />
                             </PhonePreview>
                         </div>

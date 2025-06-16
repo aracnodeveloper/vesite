@@ -1,125 +1,174 @@
-import type {FC} from "react";
+// src/App.tsx
+
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Layout from "./components/Main/Layout.tsx";
-import Sections from "./pages/sections.tsx";
-import {AuthProvider} from "./context/AuthContext.tsx";
-import {Login} from "./pages/Login.tsx";
+
+// Layout principal
+import Layout  from "./components/Main/Layout.tsx";
+
+// Páginas públicas
+import { Login } from "./pages/Login/Login.tsx";
+
+// Páginas privadas
+import Sections  from "./pages/sections.tsx";
 import ProfilePage from "./components/layers/MySite/Profile/profilePage.tsx";
-import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
-import DigitalDownloadFlow from "./components/layers/AddMoreSections/Download/donwloadPage.tsx";
-import { PreviewProvider } from "./context/PreviewContext";
-import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
+import Analytics from "./pages/analytics.tsx";
 import Styles from "./pages/styles.tsx";
-import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage.tsx";
+import PrivateRoute from "./pages/Login/PrivateRoute.tsx";
+import AdminRoute from "./pages/Login/AdminRoute.tsx";
+import {AuthProvider} from "./context/AuthContext.tsx";
+import {PreviewProvider} from "./context/PreviewContext.tsx";
+import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
 import VideoPage from "./components/layers/AddMoreSections/Video/videoPage.tsx";
 import MusicPage from "./components/layers/AddMoreSections/Music-Posdcast/musicPage.tsx";
 import PostPage from "./components/layers/AddMoreSections/Socialpost/socialPostPage.tsx";
-import Analytics from "./pages/analytics.tsx";
+import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage.tsx";
+import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 
-const App: FC = () => {
+// Rutas protegidas
+
+const App = () => {
+
+
     return (
         <AuthProvider>
             <PreviewProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<Navigate to="/sections" />}   />
-                    <Route
-                        path="/sections"
-                        element={
-                            <Layout>
-                                <Sections />
-                            </Layout>
-                        }
-                    />
+                <BrowserRouter>
+        <Routes>
+            {/* Rutas públicas */}
+            <Route path="/" element={<Navigate to="/sections" />} />
+            <Route path="/login" element={<Login />} />
 
-                    <Route
-                        path="/droplet"
-                        element={
-                            <Layout>
-                                <Styles />
-                            </Layout>
-                        }
-                    />
-                    <Route
-                        path="/analytics"
-                        element={
+            {/* Rutas privadas (autenticado) */}
+            <Route
+                path="/sections"
+                element={
+                    <PrivateRoute>
+                        <Layout>
+                            <Sections />
+                        </Layout>
+                    </PrivateRoute>
+                }
+            />
+
+            <Route
+                path="/profile"
+                element={
+                    <PrivateRoute>
+                        <Layout>
+                            <ProfilePage />
+                        </Layout>
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/social"
+                element={
+                    <PrivateRoute>
+                        <Layout>
+                            <SocialPage />
+                        </Layout>
+                    </PrivateRoute>
+                }
+            />
+            <Route path="/links" element={
+                <PrivateRoute>
+                    <Layout>
+                        <LinksPage />
+                    </Layout>
+                </PrivateRoute>
+            }
+            />
+
+            <Route path="/textBox" element={
+                <PrivateRoute>
+                    <Layout>
+                        <TextBoxPage />
+                    </Layout>
+                </PrivateRoute>
+            }
+            />
+
+
+            <Route path="/videos" element={
+                <PrivateRoute>
+                    <Layout>
+                        <VideoPage />
+                    </Layout>
+                </PrivateRoute>
+            }
+            />
+
+            <Route path="/music" element={
+                <PrivateRoute>
+                    <Layout>
+                        <MusicPage />
+                    </Layout>
+                </PrivateRoute>
+            }
+            />
+
+            <Route path="/post" element={
+                <PrivateRoute>
+                    <Layout>
+                        <PostPage />
+                    </Layout>
+                </PrivateRoute>
+            }
+            />
+            <Route
+                path="/droplet"
+                element={
+                    <PrivateRoute>
+                        <Layout>
+                            <Styles />
+                        </Layout>
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/analytics"
+                element={
+                    <PrivateRoute>
+                        <Layout>
+                            <Analytics />
+                        </Layout>
+                    </PrivateRoute>
+                }
+            />
+
+            {/* Rutas solo para admins */}
+            <Route
+                path="/analytics"
+                element={
+                    <PrivateRoute>
+                        <AdminRoute>
                             <Layout>
                                 <Analytics />
                             </Layout>
-                        }
-                    />
+                        </AdminRoute>
+                    </PrivateRoute>
+                }
+            />
 
-
-                    {/* Rutas para Profile y Social */}
-                    <Route
-                        path="/profile"
-                        element={
+            <Route
+                path="/styles"
+                element={
+                    <PrivateRoute>
+                        <AdminRoute>
                             <Layout>
-                                <ProfilePage />
+                                <Styles />
                             </Layout>
-                        }
-                    />
-                    <Route
-                        path="/social"
-                        element={
-                            <Layout>
-                                <SocialPage />
-                            </Layout>
-                        }
-                    />
+                        </AdminRoute>
+                    </PrivateRoute>
+                }
+            />
 
-                    {/* Nueva ruta para Digital Download */}
-                    <Route
-                        path="/digital-download"
-                        element={
-                        <Layout>
-                            <DigitalDownloadFlow />
-                        </Layout>}
-                    />
-
-                    <Route path="/links" element={
-                        <Layout>
-                            <LinksPage />
-                        </Layout>
-                    }
-                    />
-
-                    <Route path="/textBox" element={
-                        <Layout>
-                            <TextBoxPage />
-                        </Layout>
-                    }
-                    />
-
-
-                    <Route path="/videos" element={
-                        <Layout>
-                            <VideoPage />
-                        </Layout>
-                    }
-                    />
-
-                    <Route path="/music" element={
-                        <Layout>
-                            <MusicPage />
-                        </Layout>
-                    }
-                    />
-
-                    <Route path="/post" element={
-                        <Layout>
-                            <PostPage />
-                        </Layout>
-                    }
-                    />
-
-                    <Route path="/login" element={<Login />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </BrowserRouter>
+            {/* Catch-all: redirección a inicio */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+                </BrowserRouter>
             </PreviewProvider>
         </AuthProvider>
-    )
-}
-
+    );
+};
 export default App
