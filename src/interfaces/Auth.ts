@@ -12,8 +12,6 @@ export interface AuthContextType {
 }
 
 export interface AuthResponse {
-    email: string;
-    password: string;
     userId: UUID;
     roleName: RoleName[]
     accessToken: string;

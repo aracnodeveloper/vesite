@@ -1,6 +1,16 @@
 // src/service/apiService.ts
 import api from "./api";
-import type { AxiosRequestConfig } from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
+import Cookies from "js-cookie";
+const getAuthHeaders = () => {
+    const token = Cookies.get("accessToken");
+    return {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+    };
+};
+
+
 
 const apiService = {
     getAll: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
@@ -17,15 +27,20 @@ const apiService = {
         const response = await api.post<R>(url, data);
         return response.data;
     },
-
-        update: async <T>(endpoint: string, data: T): Promise<T> => {
-            const response = await api.put<T>(endpoint, data);
+    patch: async <T>(url: string, data: T): Promise<T> => {
+        const response = await axios.patch(url, data, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    },
+    update: async <T>(endpoint: string, id: string): Promise<T> => {
+            const response = await api.patch<T>(`${endpoint}/${id}`);
             return response.data;
         },
 
 
-    delete: async <R>(url: string, id: string): Promise<R> => {
-        const response = await api.delete<R>(`${url}/${id}`);
+    delete: async <R>(endpoint: string, id: string): Promise<R> => {
+        const response = await api.delete<R>(`${endpoint}/${id}`);
         return response.data;
     },
 

@@ -1,155 +1,120 @@
-import  { createContext, useContext, useEffect, useState, ReactNode } from "react";
-
-
-interface SocialLink {
-    name: string;
-    url: string;
-    icon?: string;
-}
-
-interface DownloadItem {
-    title: string;
-    url: string;
-    price: string;
-}
-
-interface LinkItem {
-    title: string;
-    url: string;
-}
-
-interface TextBoxData {
-    title: string;
-    description: string;
-}
-
-interface SocialPostData {
-    url: string;
-    note?: string;
-}
+import  {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+} from "react";
+import type { ReactNode } from "react";
+import { debounce, isEqual } from "lodash";
+import Cookies from "js-cookie";
+import { useFetchBiosite } from "../hooks/useFetchBiosite";
+import type { BiositeFull } from "../interfaces/Biosite";
+import type { BiositeUpdateDto } from "../interfaces/Biosite";
 
 interface PreviewContextType {
-    name: string;
-    setName: (val: string) => void;
-    description: string;
-    setDescription: (val: string) => void;
-    profileImage: string | null;
-    setProfileImage: (val: string | null) => void;
-    coverImage: string | null;
-    setCoverImage: (val: string | null) => void;
-    socialLinks: SocialLink[];
-    setSocialLinks: (val: SocialLink[]) => void;
-    downloads: DownloadItem[];
-    setDownloads: (val: DownloadItem[]) => void;
-    links: LinkItem[];
-    setLinks: (val: LinkItem[]) => void;
-    textBox: TextBoxData;
-    setTextBox: (val: TextBoxData) => void;
-    musicEmbedUrl: string;
-    setMusicEmbedUrl: (val: string) => void;
-    videoUrl: string;
-    setVideoUrl: (val: string) => void;
-    videoTitle: string;
-    setVideoTitle: (val: string) => void;
-    socialPost: SocialPostData;
-    setSocialPost: (val: SocialPostData) => void;
-    fontFamily: string;
-    setFontFamily: (val: string) => void;
-    themeColor: string;
-    setThemeColor: (val: string) => void;
-    selectedTemplate: number;
-    setSelectedTemplate: (val: number) => void;
-    updateTrigger: boolean;
-    setUpdateTrigger: (val: boolean) => void;
-    views: number;
-    setViews: (val: number) => void;
-    clicks: number;
-    setClicks: (val: number) => void;
+    data: BiositeFull;
+    setData: <K extends keyof BiositeFull>(key: K, value: BiositeFull[K]) => void;
 }
 
 const PreviewContext = createContext<PreviewContextType | null>(null);
 
-export const PreviewProvider = ({ children }: { children: ReactNode }) => {
-    const stored = localStorage.getItem("biosite-data");
-    const initial = stored ? JSON.parse(stored) : {};
+export const usePreview = () => {
+    const context = useContext(PreviewContext);
+    if (!context) {
+        throw new Error("usePreview debe usarse dentro de PreviewProvider");
+    }
+    return context;
+};
 
-    const [name, setName] = useState(initial.name || "Your Name");
-    const [description, setDescription] = useState(initial.description || "");
-    const [profileImage, setProfileImage] = useState<string | null>(initial.profileImage || null);
-    const [coverImage, setCoverImage] = useState<string | null>(initial.coverImage || null);
-    const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-    const [downloads, setDownloads] = useState<DownloadItem[]>([]);
-    const [links, setLinks] = useState<LinkItem[]>([]);
-    const [textBox, setTextBox] = useState<TextBoxData>({ title: "", description: "" });
-    const [musicEmbedUrl, setMusicEmbedUrl] = useState("");
-    const [videoUrl, setVideoUrl] = useState("");
-    const [videoTitle, setVideoTitle] = useState("");
-    const [socialPost, setSocialPost] = useState<SocialPostData>({ url: "" });
-    const [fontFamily, setFontFamily] = useState(initial.fontFamily || "inherit");
-    const [themeColor, setThemeColor] = useState(initial.themeColor || "#ffffff");
-    const [selectedTemplate, setSelectedTemplate] = useState(initial.selectedTemplate || 0);
-    const [updateTrigger, setUpdateTrigger] = useState(false);
-    const [views, setViews] = useState(0);
-    const [clicks, setClicks] = useState(0);
+const defaultBiosite: BiositeFull = {
+    id: "",
+    ownerId: "",
+    title: "",
+    slug: "",
+    themeId: "0",
+    colors: JSON.stringify({ primary: "#000000", secondary: "#000000" }),
+    fonts: "Inter",
+    avatarImage: "",
+    backgroundImage: "",
+    videoUrl: "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isActive: true,
+    links: [],
+    owner: {
+        id: "",
+        email: "",
+        password: "",
+        role: "USER",
+        name: null,
+        description: null,
+        site: null,
+        avatarUrl: null,
+        parentId: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isActive: true,
+    },
+};
+
+export const PreviewProvider = ({ children }: { children: ReactNode }) => {
+    const { refetch, updateBiosite } = useFetchBiosite();
+    const [data, setDataState] = useState<BiositeFull>(defaultBiosite);
+    const [prevData, setPrevData] = useState<BiositeFull>(defaultBiosite);
+
+    const biositeId = Cookies.get("biositeId");
+    const role = Cookies.get("role");
+
+    const setData = useCallback(<K extends keyof BiositeFull>(key: K, value: BiositeFull[K]) => {
+        setDataState((prev) => ({ ...prev, [key]: value }));
+    }, []);
 
     useEffect(() => {
-        localStorage.setItem("biosite-data", JSON.stringify({
-            name,
-            description,
-            profileImage,
-            coverImage,
-            fontFamily,
-            themeColor,
-            selectedTemplate,
-        }));
-    }, [name, description, profileImage, coverImage, fontFamily, themeColor, selectedTemplate]);
+        const load = async () => {
+            const res = await refetch();
+            if (res) {
+                setDataState(res);
+                setPrevData(res);
+            }
+        };
+        load();
+    }, []);
+
+    const sync = useCallback(
+        debounce(async (current: BiositeFull) => {
+            if (!biositeId || isEqual(current, prevData)) return;
+
+            try {
+                const biositePayload: BiositeUpdateDto = {
+                    title: current.title,
+                    slug: current.slug,
+                    fonts: current.fonts,
+                    avatarImage: current.avatarImage,
+                    themeId: current.themeId,
+                    colors: current.colors,
+                    ...(role === "ADMIN" || role === "SUPER_ADMIN"
+                        ? { backgroundImage: current.backgroundImage }
+                        : {}),
+                };
+
+                await updateBiosite(biositePayload);
+                setPrevData(current);
+            } catch (err) {
+                console.error("Error al guardar automáticamente:", err);
+            }
+        }, 800),
+        [biositeId, prevData]
+    );
+
+    useEffect(() => {
+        sync(data);
+        return () => sync.cancel();
+    }, [data]);
 
     return (
-        <PreviewContext.Provider
-            value={{
-                name,
-                setName,
-                description,
-                setDescription,
-                profileImage,
-                setProfileImage,
-                coverImage,
-                setCoverImage,
-                socialLinks,
-                setSocialLinks,
-                downloads,
-                setDownloads,
-                links,
-                setLinks,
-                textBox,
-                setTextBox,
-                musicEmbedUrl,
-                setMusicEmbedUrl,
-                videoUrl,
-                setVideoUrl,
-                videoTitle,
-                setVideoTitle,
-                socialPost,
-                setSocialPost,
-                selectedTemplate,
-                setSelectedTemplate,
-                fontFamily,
-                setFontFamily,
-                themeColor,
-                setThemeColor,
-                views,
-                setViews,
-                clicks,
-                setClicks,
-            }}
-        >
+        <PreviewContext.Provider value={{ data, setData }}>
             {children}
         </PreviewContext.Provider>
     );
-};
-
-export const usePreview = () => {
-    const context = useContext(PreviewContext);
-    if (!context) throw new Error("usePreview must be used within a PreviewProvider");
-    return context;
 };

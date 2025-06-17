@@ -51,24 +51,7 @@ const StylesPage = () => {
                 </div>
             </div>
 
-            <div>
-                <h2 className="font-semibold mb-2">Template</h2>
-                <div className="flex gap-4">
-                    {[0, 1].map((tpl) => (
-                        <button
-                            key={tpl}
-                            onClick={() => setSelectedTemplate(tpl)}
-                            className={`w-24 h-32 border rounded-xl ${
-                                selectedTemplate === tpl
-                                    ? "border-black"
-                                    : "border-gray-300 opacity-50"
-                            }`}
-                        >
-                            <div className="w-full h-full bg-white">Tpl {tpl}</div>
-                        </button>
-                    ))}
-                </div>
-            </div>
+
         </div>
     );
 };

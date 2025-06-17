@@ -16,6 +16,8 @@ import { useAuthContext } from "../../hooks/useAuthContext.ts";
 
 import LivePreviewContent from "../Preview/LivePreviewContent";
 import PhonePreview from "../Preview/phonePreview.tsx";
+import {useFetchBiosite} from "../../hooks/useFetchBiosite.ts";
+
 
 interface LayoutProps {
     children?: React.ReactNode;
@@ -25,7 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuthContext();
-
+    const {biosite} = useFetchBiosite()
     const [activeItem, setActiveItem] = useState<string>("layers");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
@@ -184,7 +186,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     URL: bio.site/anthonyrmch
                                 </div>
                                 <PhonePreview>
-                                    <LivePreviewContent />
+                                    <LivePreviewContent biosite={biosite} />
                                 </PhonePreview>
                             </div>
                         </div>

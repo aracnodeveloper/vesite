@@ -13,5 +13,6 @@ export const themesApi ="/themes"
 
 //Profile
 export const updateBiositeApi = "/biosites";
+export const updateStaticApi = "/biosites/static";
 export const getBiositeApi = "/biosites/user";
 

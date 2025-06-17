@@ -36,7 +36,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
             setAccessToken(accessToken);
             setRole(roleName[0].roleName);
 
-            if (Cookie.get('roleName') === 'admin') {
+            if (Cookie.get('roleName') === "SUPER_ADMIN" && "ADMIN") {
                 notificationService.warning('Sudo mode', 'You are logged in as sudo, please be careful');
             }
 
