@@ -4,6 +4,7 @@ import type {RoleName} from "./RoleName.ts";
 export interface AuthContextType {
     isAuthenticated: boolean;
     userId: string | null;
+    biositeId: string | null;
     accessToken: string | null;
     loading: boolean;
     role: string | null;
@@ -16,4 +17,5 @@ export interface AuthResponse {
     roleName: RoleName[]
     accessToken: string;
     refreshToken: string;
+    biositeId: UUID;
 }

@@ -10,6 +10,21 @@ export interface BiositeUpdateDto {
         secondary: string;
     };
 }
+interface ProfileColors {
+    primary: string;
+    secundary: string;
+}
+export interface BiositeUp {
+    id: string,
+    ownerId: string;
+    title: string;
+    slug: string;
+    themeId: string | null;
+    colors: ProfileColors;
+    fonts: string;
+    avatarImage: string;
+
+}
 export interface Link {
     id: string;
     biositeId: string;

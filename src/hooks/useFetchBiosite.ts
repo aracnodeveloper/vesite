@@ -1,20 +1,20 @@
-import apiService from "../service/apiService";
-import Cookies from "js-cookie";
-import { updateBiositeApi, updateStaticApi,getBiositeApi } from "../constants/EndpointsRoutes";
-import type { BiositeUpdateDto, BiositeFull } from "../interfaces/Biosite";
-import type { StaticUpdateDto } from "../interfaces/Static";
-import {useState} from "react";
 
-export const useFetchBiosite = () => {
-    const [biosite, setBiosite] = useState<BiositeFull[]>([]);
-    const biositeId = Cookies.get("userId");
+
+import { getBiositeApi } from "../constants/EndpointsRoutes";
+import type { BiositeFull } from "../interfaces/Biosite";
+import { useState } from "react";
+import apiService from "../service/apiService.ts";
+
+export const useFetchBiosite = (biositeId: string) => {
+    const [biositeData, setBiositeData] = useState<BiositeFull | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
-    const fetchBiosite = async () => {
+    const fetchBiosite = async (): Promise<BiositeFull | null> => {
         if (!biositeId) return null;
         try {
-            const res :BiositeFull[] = await apiService.getById(getBiositeApi,biositeId);
-            setBiosite(res);
+            const res = await apiService.getById<BiositeFull>(getBiositeApi, biositeId);
+            setBiositeData(res);
+            return res;
         } catch (error) {
             console.error("fetchBiosite error", error);
             return null;
@@ -23,26 +23,5 @@ export const useFetchBiosite = () => {
         }
     };
 
-    const fetchStatic = async (): Promise<StaticUpdateDto | null> => {
-        if (!biositeId) return null;
-        try {
-            const res = await apiService.getAll(`${updateStaticApi}/${biositeId}`);
-            return res;
-        } catch (err) {
-            console.error("fetchStatic error", err);
-            return null;
-        }
-    };
-
-    const updateBiosite = async (data: BiositeUpdateDto) => {
-        if (!biositeId) return;
-        return await apiService.patch(`${updateBiositeApi}/${biositeId}`, data);
-    };
-
-    const updateStatic = async (data: StaticUpdateDto) => {
-        if (!biositeId) return;
-        return await apiService.patch(`${updateStaticApi}/${biositeId}`, data);
-    };
-
-    return { biosite,loading,refetch:fetchBiosite, fetchStatic, updateBiosite, updateStatic };
+    return { biositeData, loading, fetchBiosite };
 };
