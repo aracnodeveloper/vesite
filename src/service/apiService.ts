@@ -51,6 +51,29 @@ const apiService = {
         const response = await api.post<D>(endpoint, data);
         return response.data;
     },
+
+};
+
+export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | 'last30' | 'lastYear' = 'last7') => {
+  try {
+    const response = await axios.get(`/analytics/${userId}`, {
+      params: { timeRange },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching biosite analytics:', error);
+    throw error;
+  }
+};
+
+export const getClicksGroupedByLabel = async (biositeId: string) => {
+  try {
+    const response = await axios.get(`/biosite/${biositeId}/links-clicks`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching clicks grouped by label:', error);
+    throw error;
+  }
 };
 
 export default apiService;
