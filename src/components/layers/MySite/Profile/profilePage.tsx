@@ -1,12 +1,10 @@
 import {usePreview} from "../../../../context/PreviewContext.tsx";
-import {useAuthContext} from "../../../../hooks/useAuthContext.ts";
+import Cookies from "js-cookie";
 
 
 const ProfilePage = () => {
     const { data, setData } = usePreview();
-    const { role } = useAuthContext();
-    const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
-
+    const  role  = Cookies.get('roleName');
     const handleImageChange = (
         e: React.ChangeEvent<HTMLInputElement>,
         key: "avatarImage" | "backgroundImage"
@@ -15,7 +13,8 @@ const ProfilePage = () => {
         if (!file) return;
         const reader = new FileReader();
         reader.onloadend = () => {
-            if (key === "backgroundImage" && !isAdmin) return;
+            if (key === "backgroundImage" && !(role === "ADMIN" || role === "SUPER_ADMIN" || role === "user")) return;
+
             setData(key, reader.result as string);
         };
         reader.readAsDataURL(file);
@@ -29,27 +28,42 @@ const ProfilePage = () => {
                 <label className="w-24 h-24 bg-gray-800 flex items-center justify-center rounded cursor-pointer">
                     <input type="file" accept="image/*" hidden onChange={(e) => handleImageChange(e, "avatarImage")} />
                     {data.avatarImage ? (
-                        <img src={data.avatarImage} className="w-full h-full object-cover rounded" />
+                        <img
+                            src={data.avatarImage}
+                            alt="profile"
+                            className="w-full h-full object-cover"
+                        />
                     ) : (
-                        <span className="text-sm text-gray-400">Avatar</span>
+                        <div className="w-full h-full bg-gray-700 flex items-center justify-center text-sm text-white">
+                            No avatar
+                        </div>
                     )}
+
                 </label>
 
                 <label
-                    className={`flex-1 h-24 bg-gray-800 rounded cursor-pointer ${!isAdmin ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`flex-1 h-24 bg-gray-800 rounded cursor-pointer `}
                 >
                     <input
                         type="file"
                         accept="image/*"
                         hidden
-                        disabled={!isAdmin}
+                        disabled={!(role === "ADMIN" || role === "SUPER_ADMIN" || role === "user")}
                         onChange={(e) => handleImageChange(e, "backgroundImage")}
                     />
+
                     {data.backgroundImage ? (
-                        <img src={data.backgroundImage} className="w-full h-full object-cover rounded" />
+                        <img
+                            src={data.backgroundImage}
+                            alt="cover"
+                            className="w-full h-full object-cover"
+                        />
                     ) : (
-                        <span className="text-sm text-gray-400 flex justify-center items-center h-full">Cover</span>
+                        <div className="w-full h-full bg-gray-800 flex items-center justify-center text-sm text-white">
+                            No cover
+                        </div>
                     )}
+
                 </label>
             </div>
 

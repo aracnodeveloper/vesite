@@ -32,11 +32,13 @@ const LivePreviewContent = () => {
 
             {/* Avatar */}
             <div className="w-28 h-28 relative rounded-full overflow-hidden mx-auto -mt-28 border-4 z-50 border-white shadow-md">
+                {data.avatarImage ? (
                 <img
                     src={data.avatarImage}
                     alt="profile"
                     className="w-full h-full object-cover"
                 />
+                    ):null}
             </div>
 
             {/* Title and Slug */}
