@@ -5,10 +5,8 @@ export interface BiositeUpdateDto {
     avatarImage?: string;
     backgroundImage?: string;
     themeId?: string;
-    colors?: string | {
-        primary: string;
-        secondary: string;
-    };
+    colors?: string | BiositeColors;
+    isActive?: boolean;
 }
 interface ProfileColors {
     primary: string;
@@ -56,7 +54,7 @@ export interface BiositeFull {
     title: string;
     slug: string;
     themeId: string | null;
-    colors: string; // stored as stringified JSON: { primary: string; secundary: string }
+    colors: string | BiositeColors; // stored as stringified JSON: { primary: string; secundary: string }
     fonts: string;
     avatarImage: string;
     backgroundImage: string;
@@ -67,7 +65,11 @@ export interface BiositeFull {
     links: Link[];
     owner: Owner;
 }
-
+export interface BiositeColors {
+    primary: string;
+    secondary: string;
+    [key: string]: string; // Allow additional color properties
+}
 export interface LinkItem {
     id?: string;
     label: string;
