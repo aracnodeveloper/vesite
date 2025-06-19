@@ -33,10 +33,10 @@ const apiService = {
         });
         return response.data;
     },
-    update: async <T>(endpoint: string, id: string): Promise<T> => {
-            const response = await api.patch<T>(`${endpoint}/${id}`);
-            return response.data;
-        },
+    update: async <T>(endpoint: string, id: string, data: T): Promise<T> => {
+        const response = await api.patch<T>(`${endpoint}/${id}`, data);
+        return response.data;
+    },
 
 
     delete: async <R>(endpoint: string, id: string): Promise<R> => {
