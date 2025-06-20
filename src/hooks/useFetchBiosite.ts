@@ -1,5 +1,5 @@
 import { getBiositeApi, updateBiositeApi } from "../constants/EndpointsRoutes";
-import type { BiositeFull, BiositeUpdateDto} from "../interfaces/Biosite";
+import type { BiositeFull, BiositeUpdateDto } from "../interfaces/Biosite";
 import { useState, useCallback, useRef } from "react";
 import apiService from "../service/apiService.ts";
 
@@ -17,24 +17,36 @@ export const useFetchBiosite = (userId?: string) => {
         }
 
         if (loading || (isInitializedRef.current && currentUserIdRef.current === userId)) {
-            console.log("Skipping duplicate fetch for userId:", userId);
+
             return biositeData;
         }
 
         try {
             setLoading(true);
             setError(null);
-            console.log("Fetching biosite for userId:", userId);
 
-            const res = await apiService.getById<BiositeFull>(getBiositeApi, userId);
-            console.log("Biosite data received:", res);
 
-            setBiositeData(res);
+            const res = await apiService.getById<BiositeFull | BiositeFull[]>(getBiositeApi, userId);
+
+
+            // Handle both array and single object responses
+            let biositeResult: BiositeFull;
+            if (Array.isArray(res)) {
+                if (res.length === 0) {
+                    throw new Error("No biosite found for this user");
+                }
+                biositeResult = res[0]; // Take the first biosite if array
+
+            } else {
+                biositeResult = res;
+            }
+
+            setBiositeData(biositeResult);
             isInitializedRef.current = true;
             currentUserIdRef.current = userId;
-            return res;
+            return biositeResult;
         } catch (error: any) {
-            console.error("fetchBiosite error:", error);
+
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
             setError(errorMessage);
             setBiositeData(null);
@@ -45,9 +57,21 @@ export const useFetchBiosite = (userId?: string) => {
     }, [userId, loading, biositeData]);
 
     const updateBiosite = async (updateData: BiositeUpdateDto): Promise<BiositeFull | null> => {
+
         if (!biositeData?.id) {
             const errorMsg = "No biosite ID available for update";
-            console.error(errorMsg);
+            setError(errorMsg);
+            return null;
+        }
+
+        const criticalFields = [ 'title', 'slug'];
+        const missingCriticalFields = criticalFields.filter(field => {
+            const value = updateData[field as keyof BiositeUpdateDto];
+            return !value || (typeof value === 'string' && value.trim() === '');
+        });
+
+        if (missingCriticalFields.length > 0) {
+            const errorMsg = `Missing critical fields: ${missingCriticalFields.join(', ')}`;
             setError(errorMsg);
             return null;
         }
@@ -55,7 +79,6 @@ export const useFetchBiosite = (userId?: string) => {
         try {
             setLoading(true);
             setError(null);
-            console.log("Updating biosite with data:", updateData);
 
             const updatedBiosite = await apiService.update<BiositeUpdateDto>(
                 updateBiositeApi,
@@ -63,18 +86,56 @@ export const useFetchBiosite = (userId?: string) => {
                 updateData
             );
 
-            console.log("Biosite updated:", updatedBiosite);
+            if (updatedBiosite == null) {
+                const errorMsg = "API returned null/undefined response";
+
+                setError(errorMsg);
+                return null;
+            }
+
+            let biositeResult: BiositeFull;
+
+            if (Array.isArray(updatedBiosite)) {
+
+                if (updatedBiosite.length === 0) {
+                    const errorMsg = "API returned empty array";
+                    setError(errorMsg);
+                    return null;
+                }
+                biositeResult = updatedBiosite[0] as BiositeFull;
+            } else {
+                biositeResult = updatedBiosite as unknown as BiositeFull;
+            }
+
+            if (!biositeResult || typeof biositeResult !== 'object') {
+                const errorMsg = "Invalid biosite data received from API - not an object";
+                setError(errorMsg);
+                return null;
+            }
+
+            if (!biositeResult.id) {
+                const errorMsg = "Invalid biosite data received from API - missing ID";
+                setError(errorMsg);
+                return null;
+            }
 
             const newBiositeData: BiositeFull = {
                 ...biositeData,
-                ...updatedBiosite,
-                colors: updatedBiosite.colors ?? biositeData.colors
+                ...biositeResult,
+                id: biositeResult.id || biositeData.id,
+                title: biositeResult.title || updateData.title || biositeData.title,
+                slug: biositeResult.slug || updateData.slug || biositeData.slug,
+                links: biositeData.links || [],
+                owner: biositeData.owner,
+                colors: biositeResult.colors || updateData.colors || biositeData.colors
             };
-            setBiositeData(newBiositeData);
 
+
+            setBiositeData(newBiositeData);
             return newBiositeData;
         } catch (error: any) {
-            console.error("updateBiosite error:", error);
+
+
             const errorMessage = error?.response?.data?.message || error?.message || "Error al actualizar el biosite";
             setError(errorMessage);
             return null;

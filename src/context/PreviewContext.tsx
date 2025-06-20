@@ -1,31 +1,9 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type { BiositeFull, BiositeUpdateDto } from "../interfaces/Biosite";
+import type { PreviewContextType, SocialLink } from "../interfaces/PreviewContext.ts";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import Cookies from "js-cookie";
-
-interface SocialLink {
-    id: string;
-    name: string;
-    url: string;
-    icon: string;
-    color: string;
-}
-
-interface PreviewContextType {
-    biosite: BiositeFull | null;
-    socialLinks: SocialLink[];
-    loading: boolean;
-    error: string | null;
-    updatePreview: (data: Partial<BiositeFull>) => void;
-    updateBiosite: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
-    refreshBiosite: () => Promise<void>;
-    setSocialLinks: (links: SocialLink[]) => void;
-    addSocialLink: (link: SocialLink) => Promise<void>;
-    removeSocialLink: (linkId: string) => Promise<void>;
-    updateSocialLink: (linkId: string, updateData: Partial<SocialLink>) => Promise<void>;
-    clearError: () => void;
-}
 
 const PreviewContext = createContext<PreviewContextType | undefined>(undefined);
 
@@ -56,11 +34,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [socialLinks, setSocialLinksState] = useState<SocialLink[]>([]);
     const initializationRef = useRef<{ [key: string]: boolean }>({});
 
-    // Combined loading and error states
     const loading = biositeLoading || linksLoading;
     const error = biositeError || linksError;
 
-    // Reset state when userId changes
     useEffect(() => {
         if (!userId) {
             setBiosite(null);
@@ -70,165 +46,141 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             return;
         }
 
-        // Initialize biosite if not already done for this user
         if (userId && !initializationRef.current[userId]) {
-            console.log("Initializing biosite for user:", userId);
+
             initializationRef.current[userId] = true;
             fetchBiosite();
         }
     }, [userId, fetchBiosite, resetState]);
 
-    // Sync with biosite hook data
     useEffect(() => {
         if (biositeData) {
-            console.log("Updating biosite state with new data:", biositeData);
             setBiosite(biositeData);
         }
     }, [biositeData]);
 
-    // Fetch links when biosite is loaded
     useEffect(() => {
         if (biositeData?.id) {
-            console.log("Fetching links for biosite:", biositeData.id);
             fetchLinks();
         }
     }, [biositeData?.id, fetchLinks]);
 
-    // Convert backend links to social links format
     useEffect(() => {
-        if (links && links.length > 0) {
-            const socialLinksFormatted = links
-                .filter(link => link.isActive)
-                .map(link => ({
-                    id: link.id,
-                    name: link.label,
-                    url: link.url,
-                    icon: link.icon,
-                    color: getSocialMediaColor(link.label) // Helper function to get color
-                }));
-
-            console.log("Converting links to social format:", socialLinksFormatted);
-            setSocialLinksState(socialLinksFormatted);
-        } else {
-            setSocialLinksState([]);
+        if (links && Array.isArray(links)) {
+            const transformedLinks: SocialLink[] = links.map(link => ({
+                id: link.id,
+                name: link.label || link.title || 'Unnamed Link',
+                url: link.url,
+                icon: link.icon || '🔗',
+                color: link.color || '#3B82F6'
+            }));
+            setSocialLinksState(transformedLinks);
         }
     }, [links]);
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
-        console.log("Updating preview with:", data);
-        setBiosite((prev) => {
-            if (prev) {
-                const updated: BiositeFull = {
-                    ...prev,
-                    ...data,
-                    colors: data.colors ?? prev.colors
-                };
-                console.log("Preview updated:", updated);
-                return updated;
-            }
-            return null;
+
+        setBiosite(prevBiosite => {
+            if (!prevBiosite) return null;
+            const updated = { ...prevBiosite, ...data };
+            console.log("Preview updated:", updated);
+            return updated;
         });
     }, []);
 
     const updateBiosite = useCallback(async (data: BiositeUpdateDto): Promise<BiositeFull | null> => {
-        console.log("Updating biosite through context:", data);
-        const updated = await updateBiositeHook(data);
-        if (updated) {
-            setBiosite(updated);
-            console.log("Biosite updated successfully:", updated);
+        console.log("PreviewContext: updateBiosite called with:", data);
+        try {
+            const result = await updateBiositeHook(data);
+            console.log("PreviewContext: updateBiosite result:", result);
+
+            if (result) {
+                setBiosite(result);
+                console.log("PreviewContext: biosite state updated");
+            }
+
+            return result;
+        } catch (error) {
+            console.error("PreviewContext: updateBiosite error:", error);
+            throw error;
         }
-        return updated;
     }, [updateBiositeHook]);
 
-    const refreshBiosite = useCallback(async (): Promise<void> => {
-        if (userId) {
-            console.log("Refreshing biosite data");
-            if (initializationRef.current[userId]) {
-                initializationRef.current[userId] = false;
+    // Refresh biosite function
+    const refreshBiosite = useCallback(async () => {
+        console.log("Refreshing biosite...");
+        try {
+            const refreshedBiosite = await fetchBiosite();
+            if (refreshedBiosite) {
+                setBiosite(refreshedBiosite);
+                console.log("Biosite refreshed successfully");
             }
-            await fetchBiosite();
-            if (biositeData?.id) {
-                await fetchLinks();
-            }
+        } catch (error) {
+            console.error("Error refreshing biosite:", error);
         }
-    }, [userId, fetchBiosite, fetchLinks, biositeData?.id]);
+    }, [fetchBiosite]);
 
-    const setSocialLinks = useCallback((newLinks: SocialLink[]) => {
-        console.log("Setting social links:", newLinks);
-        setSocialLinksState(newLinks);
+    // Social links management functions
+    const setSocialLinks = useCallback((links: SocialLink[]) => {
+        console.log("Setting social links:", links);
+        setSocialLinksState(links);
     }, []);
 
-    const addSocialLink = useCallback(async (link: SocialLink): Promise<void> => {
+    const addSocialLink = useCallback(async (link: SocialLink) => {
         if (!biositeData?.id) {
-            console.error("No biosite ID available for adding link");
-            return;
+            throw new Error("No biosite available");
         }
 
         try {
-            const linkData = {
+            console.log("Adding social link:", link);
+            const newLink = await createLink({
                 biositeId: biositeData.id,
                 label: link.name,
                 url: link.url,
                 icon: link.icon,
-                orderIndex: socialLinks.length,
-                isActive: true
-            };
+                color: link.color,
+                isActive: true,
+                orderIndex: socialLinks.length
+            });
 
-            console.log("Adding social link:", linkData);
-            const newLink = await createLink(linkData);
-
-            if (newLink) {
-                const socialLinkFormatted = {
-                    id: newLink.id,
-                    name: newLink.label,
-                    url: newLink.url,
-                    icon: newLink.icon,
-                    color: link.color
-                };
-
-                setSocialLinksState(prev => [...prev, socialLinkFormatted]);
-            }
+            console.log("Social link added:", newLink);
+            // The useEffect will handle updating the state when links change
         } catch (error) {
             console.error("Error adding social link:", error);
+            throw error;
         }
-    }, [biositeData?.id, socialLinks.length, createLink]);
+    }, [biositeData?.id, createLink, socialLinks.length]);
 
-    const removeSocialLink = useCallback(async (linkId: string): Promise<void> => {
+    const removeSocialLink = useCallback(async (linkId: string) => {
         try {
             console.log("Removing social link:", linkId);
             await deleteLink(linkId);
-            setSocialLinksState(prev => prev.filter(link => link.id !== linkId));
+            console.log("Social link removed successfully");
+            // The useEffect will handle updating the state when links change
         } catch (error) {
             console.error("Error removing social link:", error);
+            throw error;
         }
     }, [deleteLink]);
 
-    const updateSocialLink = useCallback(async (linkId: string, updateData: Partial<SocialLink>): Promise<void> => {
+    const updateSocialLink = useCallback(async (linkId: string, updateData: Partial<SocialLink>) => {
         try {
             console.log("Updating social link:", linkId, updateData);
-
-            const linkUpdateData = {
+            const updatedLink = await updateLink(linkId, {
                 label: updateData.name,
                 url: updateData.url,
-                icon: updateData.icon
-            };
-
-            const updatedLink = await updateLink(linkId, linkUpdateData);
-
-            if (updatedLink) {
-                setSocialLinksState(prev =>
-                    prev.map(link =>
-                        link.id === linkId
-                            ? { ...link, ...updateData }
-                            : link
-                    )
-                );
-            }
+                icon: updateData.icon,
+                color: updateData.color
+            });
+            console.log("Social link updated:", updatedLink);
+            // The useEffect will handle updating the state when links change
         } catch (error) {
             console.error("Error updating social link:", error);
+            throw error;
         }
     }, [updateLink]);
 
+    // Clear error function
     const clearError = useCallback(() => {
         clearBiositeError();
         clearLinksError();
@@ -256,37 +208,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     );
 };
 
-export const usePreview = () => {
+export const usePreview = (): PreviewContextType => {
     const context = useContext(PreviewContext);
-    if (!context) {
-        throw new Error("usePreview debe usarse dentro de PreviewProvider");
+    if (context === undefined) {
+        throw new Error('usePreview must be used within a PreviewProvider');
     }
     return context;
-};
-
-// Helper function to get social media colors
-const getSocialMediaColor = (platform: string): string => {
-    const colorMap: { [key: string]: string } = {
-        'Instagram': 'bg-gradient-to-r from-purple-500 to-pink-500',
-        'TikTok': 'bg-black',
-        'Twitter/X': 'bg-black',
-        'YouTube': 'bg-red-600',
-        'Facebook': 'bg-blue-600',
-        'Twitch': 'bg-purple-600',
-        'LinkedIn': 'bg-blue-700',
-        'Snapchat': 'bg-yellow-400',
-        'Threads': 'bg-black',
-        'Email': 'bg-gray-600',
-        'Pinterest': 'bg-red-500',
-        'Spotify': 'bg-green-500',
-        'Apple Music': 'bg-gray-800',
-        'Discord': 'bg-indigo-600',
-        'Tumblr': 'bg-blue-800',
-        'WhatsApp': 'bg-green-600',
-        'Telegram': 'bg-blue-500',
-        'Amazon': 'bg-orange-400',
-        'OnlyFans': 'bg-blue-500'
-    };
-
-    return colorMap[platform] || 'bg-gray-500';
 };

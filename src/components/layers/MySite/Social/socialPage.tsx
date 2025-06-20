@@ -182,7 +182,7 @@ const SocialPage = () => {
     }
 
     return (
-        <div className="min-h-screen ">
+        <div className="max-w-xl mx-auto">
             {/* Header */}
             <div className=" shadow-sm border-b">
                 <div className="max-w-md mx-auto px-4 py-4">
@@ -193,10 +193,10 @@ const SocialPage = () => {
                             disabled={isSubmitting}
                         >
                             <ChevronLeft className="w-5 h-5 mr-1" />
-                            Volver
+                            <h1 className="text-lg font-semibold text-white">Redes Sociales</h1>
                         </button>
-                        <h1 className="text-lg font-semibold text-white">Redes Sociales</h1>
-                       {/* Spacer for centering */}
+
+
                     </div>
                 </div>
             </div>

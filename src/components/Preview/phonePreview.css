@@ -1,3 +1,8 @@
+.phone-frame {
+    display: flex;
+    justify-content: center;
+}
+
 .phone-screen {
     /* ya existente */
     width: 100%;

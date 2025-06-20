@@ -5,7 +5,7 @@ import type { BiositeColors } from "../../interfaces/Biosite";
 const LivePreviewContent = () => {
     const { biosite, loading, error } = usePreview();
     const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
-
+    const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
 
     const parseColors = (colors: string | BiositeColors | null | undefined): BiositeColors => {
         const defaultColors: BiositeColors = { primary: '#3B82F6', secondary: '#1F2937' };
@@ -27,16 +27,12 @@ const LivePreviewContent = () => {
         return defaultColors;
     };
 
-
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
 
-
         if (url.startsWith('data:')) {
-
             const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
             const isValid = dataUrlRegex.test(url);
-
 
             if (isValid) {
                 const base64Part = url.split(',')[1];
@@ -45,24 +41,43 @@ const LivePreviewContent = () => {
             return false;
         }
 
-
         try {
             const urlObj = new URL(url);
-            return ['http:', 'https:'].includes(urlObj.protocol);
+            const isHttps = ['http:', 'https:'].includes(urlObj.protocol);
+
+            const blockedDomains = ['visitaecuador.com'];
+            const isDomainBlocked = blockedDomains.some(domain => urlObj.hostname.includes(domain));
+
+            return isHttps && !isDomainBlocked;
         } catch {
             return false;
         }
     };
 
-
     useEffect(() => {
         setImageErrors({});
+        setImageLoadStates({});
     }, [biosite?.id]);
 
+    const handleImageLoad = (imageType: string) => {
+
+        setImageLoadStates(prev => ({ ...prev, [imageType]: 'loaded' }));
+        setImageErrors(prev => ({ ...prev, [imageType]: false }));
+    };
+
+    const handleImageError = (imageType: string, imageUrl?: string) => {
+
+        setImageLoadStates(prev => ({ ...prev, [imageType]: 'error' }));
+        setImageErrors(prev => ({ ...prev, [imageType]: true }));
+    };
+
+    const handleImageLoadStart = (imageType: string) => {
+        setImageLoadStates(prev => ({ ...prev, [imageType]: 'loading' }));
+    };
 
     if (loading) {
         return (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <div className="w-full h-full flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
                     <p className="text-gray-500 text-sm">Cargando biosite...</p>
@@ -70,7 +85,6 @@ const LivePreviewContent = () => {
             </div>
         );
     }
-
 
     if (error) {
         return (
@@ -86,7 +100,6 @@ const LivePreviewContent = () => {
             </div>
         );
     }
-
 
     if (!biosite) {
         return (
@@ -104,34 +117,54 @@ const LivePreviewContent = () => {
     }
 
     const { title, avatarImage, backgroundImage, links, colors } = biosite;
-
-
     const parsedColors = parseColors(colors);
 
-    const handleImageError = (imageType: string) => {
-        console.warn(`Image error for ${imageType}:`, imageType === 'avatar' ? avatarImage : backgroundImage);
-        setImageErrors(prev => ({ ...prev, [imageType]: true }));
-    };
-
-
+    // Enhanced default avatar with better styling
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-
+    // Validate images with enhanced logic
     const validBackgroundImage = isValidImageUrl(backgroundImage) && !imageErrors.background ? backgroundImage : null;
     const validAvatarImage = isValidImageUrl(avatarImage) && !imageErrors.avatar ? avatarImage : null;
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-white">
+            {/* Background Header */}
 
-            <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500">
                 {validBackgroundImage ? (
-                    <img
-                        src={validBackgroundImage}
-                        alt="Background"
-                        className="w-full h-full object-cover"
-                        onError={() => handleImageError('background')}
-                        onLoad={() => console.log('Background image loaded successfully')}
-                    />
+                    <div className="relative w-full h-full">
+                        {imageLoadStates.background === 'loading' && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                            </div>
+                        )}
+                        <img
+                            src={validBackgroundImage}
+                            alt="Background"
+                            className="w-full h-full object-cover"
+                            onLoadStart={() => handleImageLoadStart('background')}
+                            onLoad={() => handleImageLoad('background')}
+                            onError={() => handleImageError('background', backgroundImage)}
+                            style={{
+                                display: imageLoadStates.background === 'error' ? 'none' : 'block'
+                            }}
+                        />
+                        {imageLoadStates.background === 'error' && (
+                            <div
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ backgroundColor: parsedColors.primary || '#3B82F6' }}
+                            >
+                                <div className="text-white text-center">
+                                    <div className="mb-2">
+                                        <svg className="w-8 h-8 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <h2 className="text-lg font-bold">{title || "Tu Biosite"}</h2>
+                                    <p className="text-sm opacity-80">Imagen no disponible</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div
                         className="w-full h-full flex items-center justify-center"
@@ -143,18 +176,36 @@ const LivePreviewContent = () => {
                         </div>
                     </div>
                 )}
-            </div>
+
 
             {/* Profile Avatar */}
             <div className="flex justify-center -mt-12 relative z-10">
                 {validAvatarImage ? (
-                    <img
-                        src={validAvatarImage}
-                        alt="Avatar"
-                        className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg"
-                        onError={() => handleImageError('avatar')}
-                        onLoad={() => console.log('Avatar image loaded successfully')}
-                    />
+                    <div className="relative">
+                        {imageLoadStates.avatar === 'loading' && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-full border-4 border-white w-24 h-24">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                            </div>
+                        )}
+                        <img
+                            src={validAvatarImage}
+                            alt="Avatar"
+                            className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg"
+                            onLoadStart={() => handleImageLoadStart('avatar')}
+                            onLoad={() => handleImageLoad('avatar')}
+                            onError={() => handleImageError('avatar', avatarImage)}
+                            style={{
+                                display: imageLoadStates.avatar === 'error' ? 'none' : 'block'
+                            }}
+                        />
+                        {imageLoadStates.avatar === 'error' && (
+                            <img
+                                src={defaultAvatar}
+                                alt="Avatar placeholder"
+                                className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg"
+                            />
+                        )}
+                    </div>
                 ) : (
                     <img
                         src={defaultAvatar}
@@ -180,10 +231,11 @@ const LivePreviewContent = () => {
                     links
                         .filter(link => link.isActive)
                         .sort((a, b) => a.orderIndex - b.orderIndex)
-                        .slice(0, 5) // Mostrar máximo 5 links en preview
+                        .slice(0, 5) // Show maximum 5 links in preview
                         .map((link) => (
                             <div
                                 key={link.id}
+
                                 className="w-full p-3 rounded-lg border-2 text-center transition-all hover:shadow-md cursor-pointer"
                                 style={{
                                     borderColor: parsedColors.primary || '#3B82F6',

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { Link } from "../interfaces/Biosite";
+import type { SocialLink } from "../interfaces/PreviewContext.ts";
 import apiService from "../service/apiService";
 
 interface CreateLinkDto {
@@ -20,11 +20,11 @@ interface UpdateLinkDto {
 }
 
 export const useFetchLinks = (biositeId?: string) => {
-    const [links, setLinks] = useState<Link[]>([]);
+    const [links, setLinks] = useState<SocialLink[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchLinks = useCallback(async (): Promise<Link[]> => {
+    const fetchLinks = useCallback(async (): Promise<SocialLink[]> => {
         if (!biositeId) {
             setError("Biosite ID is required");
             return [];
@@ -36,7 +36,7 @@ export const useFetchLinks = (biositeId?: string) => {
             console.log("Fetching links for biositeId:", biositeId);
 
             // Assuming you have an endpoint to get links by biosite ID
-            const res = await apiService.getAll<Link[]>(`/links/biosite/${biositeId}`);
+            const res = await apiService.getAll<SocialLink[]>(`/links/biosite/${biositeId}`);
             console.log("Links data received:", res);
 
             setLinks(Array.isArray(res) ? res : []);
@@ -52,14 +52,14 @@ export const useFetchLinks = (biositeId?: string) => {
         }
     }, [biositeId]);
 
-    const createLink = useCallback(async (linkData: CreateLinkDto): Promise<Link | null> => {
+    const createLink = useCallback(async (linkData: CreateLinkDto): Promise<SocialLink | null> => {
         try {
             setLoading(true);
             setError(null);
             console.log("Creating link with data:", linkData);
 
-            const newLink = await apiService.create<CreateLinkDto, Link>("/links", linkData);
-            console.log("Link created:", newLink);
+            const newLink = await apiService.create<CreateLinkDto, SocialLink>("/links", linkData);
+            console.log("SocialLink created:", newLink);
 
             // Update local state
             setLinks(prev => [...prev, newLink]);
@@ -74,14 +74,14 @@ export const useFetchLinks = (biositeId?: string) => {
         }
     }, []);
 
-    const updateLink = useCallback(async (linkId: string, updateData: UpdateLinkDto): Promise<Link | null> => {
+    const updateLink = useCallback(async (linkId: string, updateData: UpdateLinkDto): Promise<SocialLink | null> => {
         try {
             setLoading(true);
             setError(null);
             console.log("Updating link:", linkId, updateData);
 
             const updatedLink = await apiService.update<UpdateLinkDto>("/links", linkId, updateData);
-            console.log("Link updated:", updatedLink);
+            console.log("SocialLink updated:", updatedLink);
 
             // Update local state
             setLinks(prev =>
@@ -92,7 +92,7 @@ export const useFetchLinks = (biositeId?: string) => {
                 )
             );
 
-            return updatedLink as Link;
+            return updatedLink as SocialLink;
         } catch (error: any) {
             console.error("updateLink error:", error);
             const errorMessage = error?.response?.data?.message || error?.message || "Error al actualizar el enlace";
@@ -110,7 +110,7 @@ export const useFetchLinks = (biositeId?: string) => {
             console.log("Deleting link:", linkId);
 
             await apiService.delete("/links", linkId);
-            console.log("Link deleted:", linkId);
+            console.log("SocialLink deleted:", linkId);
 
             // Update local state
             setLinks(prev => prev.filter(link => link.id !== linkId));
@@ -125,7 +125,7 @@ export const useFetchLinks = (biositeId?: string) => {
         }
     }, []);
 
-    const reorderLinks = useCallback(async (reorderedLinks: Link[]): Promise<boolean> => {
+    const reorderLinks = useCallback(async (reorderedLinks: SocialLink []): Promise<boolean> => {
         try {
             setLoading(true);
             setError(null);
@@ -159,7 +159,7 @@ export const useFetchLinks = (biositeId?: string) => {
             console.log("Toggling link status:", linkId, isActive);
 
             const updatedLink = await apiService.update<UpdateLinkDto>("/links", linkId, { isActive });
-            console.log("Link status updated:", updatedLink);
+            console.log("SocialLink status updated:", updatedLink);
 
             // Update local state
             setLinks(prev =>
