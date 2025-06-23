@@ -1,5 +1,4 @@
 import type {UUID} from "../types/authTypes.ts";
-import type {RoleName} from "./RoleName.ts";
 
 export interface AuthContextType {
     isAuthenticated: boolean;
@@ -7,15 +6,17 @@ export interface AuthContextType {
     biositeId: string | null;
     accessToken: string | null;
     loading: boolean;
-    role: string | null;
+    roleName: string | null;
     login: (email: string, password: string) => Promise<{ success: boolean }>;
     logout: () => void;
 }
 
 export interface AuthResponse {
+
     userId: UUID;
-    roleName: RoleName[]
+    roleName: string;
+    biositeId: UUID;
     accessToken: string;
     refreshToken: string;
-    biositeId: UUID;
+
 }

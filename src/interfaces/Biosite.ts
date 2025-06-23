@@ -1,53 +1,28 @@
-export interface BiositeUpdateDto {
-    title?: string;
-    slug?: string;
-    fonts?: string;
-    avatarImage?: string;
-    backgroundImage?: string;
-    themeId?: string;
-    colors?: string | {
-        primary: string;
-        secondary: string;
-    };
-}
-interface ProfileColors {
-    primary: string;
-    secundary: string;
-}
-export interface BiositeUp {
-    id: string,
-    ownerId: string;
-    title: string;
-    slug: string;
-    themeId: string | null;
-    colors: ProfileColors;
-    fonts: string;
-    avatarImage: string;
+// interfaces/Biosite.ts
 
+export interface BiositeColors {
+    primary: string;
+    secondary: string;
 }
-export interface Link {
+
+export interface BiositeOwner {
+    id: string;
+    email: string;
+    name?: string;
+    avatar?: string;
+}
+
+export interface BiositeLink {
     id: string;
     biositeId: string;
     label: string;
     url: string;
-    icon: string;
-    orderIndex: number;
+    icon?: string;
+    color?: string;
     isActive: boolean;
-}
-
-export interface Owner {
-    id: string;
-    email: string;
-    password: string;
-    role: "USER" | "ADMIN" | "SUPER_ADMIN";
-    name: string | null;
-    description: string | null;
-    site: string | null;
-    avatarUrl: string | null;
-    parentId: string | null;
+    orderIndex: number;
     createdAt: string;
     updatedAt: string;
-    isActive: boolean;
 }
 
 export interface BiositeFull {
@@ -55,8 +30,26 @@ export interface BiositeFull {
     ownerId: string;
     title: string;
     slug: string;
-    themeId: string | null;
-    colors: string; // stored as stringified JSON: { primary: string; secundary: string }
+    themeId: string;
+    colors: string | BiositeColors;
+    fonts?: string;
+    avatarImage?: string;
+    backgroundImage?: string;
+    videoUrl?: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    owner?: BiositeOwner;
+    links?: BiositeLink[];
+}
+
+export interface BiositeUpdateDto {
+    id: string;
+    ownerId: string;
+    title: string;
+    slug: string;
+    themeId: string;
+    colors: string;
     fonts: string;
     avatarImage: string;
     backgroundImage: string;
@@ -64,24 +57,36 @@ export interface BiositeFull {
     createdAt: string;
     updatedAt: string;
     isActive: boolean;
-    links: Link[];
-    owner: Owner;
 }
 
-export interface LinkItem {
-    id?: string;
+export interface BiositeCreateDto {
+    ownerId: string;
+    title: string;
+    slug: string;
+    themeId: string;
+    colors?: string;
+    fonts?: string;
+    avatarImage?: string;
+    backgroundImage?: string;
+    videoUrl?: string;
+    isActive?: boolean;
+}
+
+export interface LinkCreateDto {
+    biositeId: string;
     label: string;
     url: string;
+    icon?: string;
+    color?: string;
+    isActive?: boolean;
+    orderIndex?: number;
 }
 
-export interface SocialLink {
-    id?: string;
-    platform: string;
-    url: string;
-}
-
-export interface DownloadItem {
-    id?: string;
-    label: string;
-    url: string;
+export interface LinkUpdateDto {
+    label?: string;
+    url?: string;
+    icon?: string;
+    color?: string;
+    isActive?: boolean;
+    orderIndex?: number;
 }
