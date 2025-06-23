@@ -56,7 +56,7 @@ const apiService = {
 
 export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | 'last30' | 'lastYear' = 'last7') => {
   try {
-    const response = await axios.get(`/analytics/${userId}`, {
+    const response = await axios.get(`/biosites/analytics/${userId}`, {
       params: { timeRange },
     });
     return response.data;
