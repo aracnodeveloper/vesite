@@ -136,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
 
                 {/* Desktop Sidebar */}
-                <div className="hidden lg:flex w-14 xl:w-16 bg-[#2a2a2a] shadow-lg mt-5 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
+                <div className="hidden lg:flex w-14 xl:w-14 bg-[#2a2a2a] shadow-lg mt-5 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
                     <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
                         <img src={imgP} className="rounded-xl w-8 h-8 xl:w-10 xl:h-10" alt="perfil" />
                     </button>

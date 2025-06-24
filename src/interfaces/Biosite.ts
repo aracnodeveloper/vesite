@@ -44,18 +44,15 @@ export interface BiositeFull {
 }
 
 export interface BiositeUpdateDto {
-    id: string;
+
     ownerId: string;
     title: string;
     slug: string;
     themeId: string;
-    colors: string;
+    colors: string | BiositeColors;
     fonts: string;
     avatarImage: string;
     backgroundImage: string;
-    videoUrl: string;
-    createdAt: string;
-    updatedAt: string;
     isActive: boolean;
 }
 

@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import type { BiositeUpdateDto } from "../../../../interfaces/Biosite";
+import type {BiositeColors, BiositeUpdateDto} from "../../../../interfaces/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
 
 const ProfilePage = () => {
@@ -47,12 +47,34 @@ const ProfilePage = () => {
             return;
         }
         try {
+            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
+                if (!colors) {
+                    return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                }
+
+                if (typeof colors === 'string') {
+                    // Validate if it's already a valid JSON string
+                    try {
+                        JSON.parse(colors);
+                        return colors;
+                    } catch {
+                        // If it's not valid JSON, return default
+                        return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                    }
+                } else if (colors && typeof colors === 'object') {
+                    // Convert object to JSON string
+                    return JSON.stringify(colors);
+                }
+
+                return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+            };
+
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || biosite.title,
                 slug: values.slug || biosite.slug,
                 themeId: biosite.themeId,
-                colors: biosite.colors || '{"primary":"#3B82F6","secondary":"#1F2937"}',
+                colors: ensureColorsAsString(biosite.colors),
                 fonts: biosite.fonts || '',
                 avatarImage: biosite.avatarImage || '',
                 backgroundImage: biosite.backgroundImage || '',
@@ -180,17 +202,15 @@ const ProfilePage = () => {
     return (
         <div className="p-6 max-w-xl mx-auto">
             {/* Header */}
-            <div className="shadow-sm border-b mb-6">
-                <div className="max-w-md mx-auto px-4 py-4">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleBackClick}
-                            className="flex items-center cursor-pointer text-gray-600 hover:text-gray-800 transition-colors"
-                        >
-                            <ChevronLeft className="w-5 h-5 mr-1" />
-                            <h1 className="text-lg font-semibold text-white">Perfil</h1>
-                        </button>
-                    </div>
+            <div className="p-4 border-b border-gray-700">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleBackClick}
+                        className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
+                    >
+                        <ChevronLeft className="w-5 h-5 mr-1" />
+                        <h1 className="text-lg font-semibold">Perfil</h1>
+                    </button>
                 </div>
             </div>
 
@@ -245,31 +265,7 @@ const ProfilePage = () => {
                     />
                 </Form.Item>
 
-                {/* URL Preview */}
-                <div className="p-4 rounded-lg bg-gray-800 mb-4">
-                    <h3 className="font-semibold mb-2 text-white">URL de tu biosite</h3>
-                    <div className="flex items-center space-x-2">
-                        <code className="bg-gray-700 px-3 py-2 rounded text-green-400 flex-1 text-sm">
-                            bio.site/{biosite.slug || 'tu-slug'}
-                        </code>
-                        <Button
-                            onClick={() => {
-                                const url = `https://bio.site/${biosite.slug}`;
-                                navigator.clipboard.writeText(url).then(() => {
-                                    message.success('URL copiada al portapapeles');
-                                }).catch(() => {
-                                    message.error('Error al copiar URL');
-                                });
-                            }}
-                            size="small"
-                            disabled={!biosite.slug}
-                        >
-                            Copiar
-                        </Button>
-                    </div>
-                </div>
 
-                {/* Submit Button */}
                 <Form.Item>
                     <Button
                         type="primary"
@@ -283,7 +279,7 @@ const ProfilePage = () => {
                 </Form.Item>
             </Form>
 
-            {/* Enhanced Debug Information */}
+
             {isDevelopment && (
                 <div className="mt-8 p-4 bg-gray-900 rounded-lg">
                     <h4 className="text-white font-semibold mb-2">Debug Info</h4>

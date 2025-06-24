@@ -10,7 +10,8 @@ interface ImageUploadSectionProps {
     updatePreview: (data: Partial<BiositeFull>) => void;
     role: string | undefined;
 }
-
+//http://pacoelmorlaco.com/assets/final-DVKF3YLC.png
+    //https://media.bio.site/sites/c4f9c218-9fd0-4c21-9c9b-29c7a3e8a680/9Wiay7YtnvgUGWnNgAhTCk.jpg
 const ImageUploadSection = ({
                                 biosite,
                                 loading,

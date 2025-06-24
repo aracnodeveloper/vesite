@@ -1,57 +1,23 @@
-import { useState } from 'react';
-import { ChevronLeft, X } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { ChevronLeft, X, ExternalLink, Edit2, Check, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
-
-// Import your SVG icons
-import instagramIcon from '../../../../assets/icons/instagram.svg';
-import discordIcon from '../../../../assets/icons/discord.svg';
-import amazonIcon from '../../../../assets/icons/amazon.svg';
-import gmailIcon from '../../../../assets/icons/gmail.svg';
-import facebookIcon from '../../../../assets/icons/facebook.svg';
-import linkdlIcon from '../../../../assets/icons/linkdl.svg';
-import musicIcon from '../../../../assets/icons/music.svg';
-import onlyfansIcon from '../../../../assets/icons/onlyfans.svg';
-import pinterestIcon from '../../../../assets/icons/pinterest.svg';
-import spotifyIcon from '../../../../assets/icons/spottufy.svg';
-import snapchatIcon from '../../../../assets/icons/snapchat.svg';
-import telegramIcon from '../../../../assets/icons/telegram.svg';
-import threadsIcon from '../../../../assets/icons/threads.svg';
-import tiktokIcon from '../../../../assets/icons/tiktok.svg';
-import tumblrIcon from '../../../../assets/icons/tumblr.svg';
-import twitchIcon from '../../../../assets/icons/twitch.svg';
-import whatsappIcon from '../../../../assets/icons/whatsapp.svg';
-import xIcon from '../../../../assets/icons/X.svg';
-import youtubeIcon from '../../../../assets/icons/youtube.svg';
-
-// Social media platforms configuration
-const socialMediaPlatforms = [
-    { id: 'instagram', name: 'Instagram', icon: instagramIcon, color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
-    { id: 'tiktok', name: 'TikTok', icon: tiktokIcon, color: 'bg-black' },
-    { id: 'twitter', name: 'Twitter/X', icon: xIcon, color: 'bg-black' },
-    { id: 'youtube', name: 'YouTube', icon: youtubeIcon, color: 'bg-red-600' },
-    { id: 'facebook', name: 'Facebook', icon: facebookIcon, color: 'bg-blue-600' },
-    { id: 'twitch', name: 'Twitch', icon: twitchIcon, color: 'bg-purple-600' },
-    { id: 'linkedin', name: 'LinkedIn', icon: linkdlIcon, color: 'bg-blue-700' },
-    { id: 'snapchat', name: 'Snapchat', icon: snapchatIcon, color: 'bg-yellow-400' },
-    { id: 'threads', name: 'Threads', icon: threadsIcon, color: 'bg-black' },
-    { id: 'email', name: 'Email', icon: gmailIcon, color: 'bg-gray-600' },
-    { id: 'pinterest', name: 'Pinterest', icon: pinterestIcon, color: 'bg-red-500' },
-    { id: 'spotify', name: 'Spotify', icon: spotifyIcon, color: 'bg-green-500' },
-    { id: 'apple-music', name: 'Apple Music', icon: musicIcon, color: 'bg-gray-800' },
-    { id: 'discord', name: 'Discord', icon: discordIcon, color: 'bg-indigo-600' },
-    { id: 'tumblr', name: 'Tumblr', icon: tumblrIcon, color: 'bg-blue-800' },
-    { id: 'whatsapp', name: 'WhatsApp', icon: whatsappIcon, color: 'bg-green-600' },
-    { id: 'telegram', name: 'Telegram', icon: telegramIcon, color: 'bg-blue-500' },
-    { id: 'amazon', name: 'Amazon', icon: amazonIcon, color: 'bg-orange-400' },
-    { id: 'onlyfans', name: 'OnlyFans', icon: onlyfansIcon, color: 'bg-blue-500' }
-];
+import { socialMediaPlatforms } from "../../../../media/socialPlataforms.ts";
 
 interface SocialPlatform {
     id: string;
     name: string;
-    icon: string;
+    icon: string
     color: string;
+    isActive: boolean;
+}
+
+interface DeleteConfirmation {
+    isOpen: boolean;
+    linkId: string | null;
+    linkLabel: string;
+    onConfirm: () => void;
+    onCancel: () => void;
 }
 
 const SocialPage = () => {
@@ -61,36 +27,117 @@ const SocialPage = () => {
         removeSocialLink,
         updateSocialLink,
         loading,
-        error
+        error,
+        clearError
     } = usePreview();
 
     const [editingPlatform, setEditingPlatform] = useState<SocialPlatform | null>(null);
     const [urlInput, setUrlInput] = useState('');
+    const [labelInput, setLabelInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingLink, setEditingLink] = useState<string | null>(null);
+    const [showUrlForm, setShowUrlForm] = useState(false);
+    const [deleteConfirmation, setDeleteConfirmation] = useState<DeleteConfirmation>({
+        isOpen: false,
+        linkId: null,
+        linkLabel: '',
+        onConfirm: () => {},
+        onCancel: () => {}
+    });
+
     const navigate = useNavigate();
+
+    // Filtrar solo los enlaces sociales activos
+    const activeSocialLinks = socialLinks.filter(link => link.isActive);
+
+    useEffect(() => {
+        // Clear error when component mounts
+        if (error) {
+            clearError();
+        }
+    }, []);
 
     const handleBackClick = () => {
         navigate(-1);
     };
 
+    const showDeleteConfirmation = (linkId: string, linkLabel: string, onConfirm: () => void) => {
+        setDeleteConfirmation({
+            isOpen: true,
+            linkId,
+            linkLabel,
+            onConfirm,
+            onCancel: () => setDeleteConfirmation({
+                isOpen: false,
+                linkId: null,
+                linkLabel: '',
+                onConfirm: () => {},
+                onCancel: () => {}
+            })
+        });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (deleteConfirmation.onConfirm) {
+            await deleteConfirmation.onConfirm();
+        }
+        setDeleteConfirmation({
+            isOpen: false,
+            linkId: null,
+            linkLabel: '',
+            onConfirm: () => {},
+            onCancel: () => {}
+        });
+    };
+
     const handlePlatformSelect = async (platform: SocialPlatform) => {
-        const existingLink = socialLinks.find(link => link.name === platform.name);
+        const existingLink = activeSocialLinks.find(link => {
+            const linkLabelLower = link.label.toLowerCase();
+            const platformNameLower = platform.name.toLowerCase();
+            const platformIdLower = platform.id.toLowerCase();
+
+            return (
+                linkLabelLower === platformNameLower ||
+                linkLabelLower === platformIdLower ||
+                (platformIdLower.length > 2 && linkLabelLower.includes(platformIdLower)) ||
+                link.icon === platform.icon ||
+                linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '') ||
+                (platformNameLower.includes('/') && platformNameLower.split('/').some(name =>
+                    name.trim().toLowerCase() === linkLabelLower
+                )) ||
+                (linkLabelLower.includes('/') && linkLabelLower.split('/').some(name =>
+                    name.trim().toLowerCase() === platformNameLower
+                ))
+            );
+        });
 
         if (existingLink) {
-            // If link exists, remove it
-            try {
-                setIsSubmitting(true);
-                await removeSocialLink(existingLink.id);
-                console.log(`Removed ${platform.name} link`);
-            } catch (error) {
-                console.error(`Error removing ${platform.name} link:`, error);
-            } finally {
-                setIsSubmitting(false);
-            }
+            showDeleteConfirmation(
+                existingLink.id,
+                platform.name,
+                async () => {
+                    try {
+                        setIsSubmitting(true);
+                        console.log("Attempting to remove link with ID:", existingLink.id);
+                        await removeSocialLink(existingLink.id);
+                        console.log(`Successfully removed ${platform.name} link`);
+                    } catch (error) {
+                        console.error(`Error removing ${platform.name} link:`, error);
+                        const errorMessage = error instanceof Error
+                            ? error.message
+                            : `Error al eliminar el enlace de ${platform.name}`;
+                        alert(errorMessage);
+                    } finally {
+                        setIsSubmitting(false);
+                    }
+                }
+            );
         } else {
             // If link doesn't exist, show form to add it
             setEditingPlatform(platform);
+            setLabelInput(platform.name);
             setUrlInput('');
+            setShowUrlForm(true);
         }
     };
 
@@ -101,25 +148,27 @@ const SocialPage = () => {
             setIsSubmitting(true);
 
             // Check if this is an update or a new link
-            const existingLink = socialLinks.find(link => link.name === editingPlatform.name);
+            const existingLink = activeSocialLinks.find(link => link.id === editingLink);
 
             if (existingLink) {
                 // Update existing link
                 await updateSocialLink(existingLink.id, {
-                    name: editingPlatform.name,
+                    label: labelInput.trim() || editingPlatform.name,
                     url: urlInput.trim(),
                     icon: editingPlatform.icon,
-                    color: editingPlatform.color
+                    color: editingPlatform.color,
+                    isActive: editingPlatform.isActive,
                 });
                 console.log(`Updated ${editingPlatform.name} link`);
             } else {
                 // Create new link
                 const newSocialLink = {
-                    id: `temp-${Date.now()}`, // Temporary ID, will be replaced by backend
-                    name: editingPlatform.name,
+                    id: `temp-${Date.now()}`,
+                    label: labelInput.trim() || editingPlatform.name,
                     url: urlInput.trim(),
                     icon: editingPlatform.icon,
-                    color: editingPlatform.color
+                    color: editingPlatform.color,
+                    isActive: editingPlatform.isActive,
                 };
 
                 await addSocialLink(newSocialLink);
@@ -127,8 +176,7 @@ const SocialPage = () => {
             }
 
             // Reset form
-            setEditingPlatform(null);
-            setUrlInput('');
+            handleCancelEdit();
         } catch (error) {
             console.error(`Error saving ${editingPlatform.name} link:`, error);
         } finally {
@@ -136,9 +184,28 @@ const SocialPage = () => {
         }
     };
 
+    const handleEditLink = (link: any) => {
+        const platform = socialMediaPlatforms.find(p =>
+            p.name.toLowerCase() === link.label.toLowerCase() ||
+            link.label.toLowerCase().includes(p.id.toLowerCase()) ||
+            p.id.toLowerCase() === link.label.toLowerCase()
+        );
+
+        if (platform) {
+            setEditingPlatform(platform);
+            setEditingLink(link.id);
+            setLabelInput(link.label);
+            setUrlInput(link.url);
+            setShowUrlForm(true);
+        }
+    };
+
     const handleCancelEdit = () => {
         setEditingPlatform(null);
+        setEditingLink(null);
         setUrlInput('');
+        setLabelInput('');
+        setShowUrlForm(false);
     };
 
     const getPlaceholderText = (platformName: string): string => {
@@ -152,7 +219,7 @@ const SocialPage = () => {
             'LinkedIn': 'https://linkedin.com/in/username',
             'Snapchat': 'https://snapchat.com/add/username',
             'Threads': 'https://threads.net/@username',
-            'Email': 'mailto:your@email.com',
+            'Email': 'your@email.com',
             'Pinterest': 'https://pinterest.com/username',
             'Spotify': 'https://open.spotify.com/user/username',
             'Apple Music': 'https://music.apple.com/profile/username',
@@ -166,170 +233,335 @@ const SocialPage = () => {
         return placeholders[platformName] || 'https://example.com';
     };
 
-    const isPlatformActive = (platformName: string) => {
-        return socialLinks.some(link => link.name === platformName);
+    const isPlatformActive = (platform: SocialPlatform) => {
+        return activeSocialLinks.some(link => {
+            const linkLabelLower = link.label.toLowerCase();
+            const platformNameLower = platform.name.toLowerCase();
+            const platformIdLower = platform.id.toLowerCase();
+
+            return (
+                // Coincidencia exacta por nombre
+                linkLabelLower === platformNameLower ||
+                // Coincidencia por ID
+                linkLabelLower === platformIdLower ||
+                // El label contiene el ID (pero debe ser más específico para evitar falsos positivos)
+                (platformIdLower.length > 2 && linkLabelLower.includes(platformIdLower)) ||
+                // Coincidencia de iconos
+                link.icon === platform.icon ||
+                // Comparación sin caracteres especiales
+                linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '') ||
+                // Para casos como "Twitter/X"
+                (platformNameLower.includes('/') && platformNameLower.split('/').some(name =>
+                    name.trim().toLowerCase() === linkLabelLower
+                )) ||
+                (linkLabelLower.includes('/') && linkLabelLower.split('/').some(name =>
+                    name.trim().toLowerCase() === platformNameLower
+                ))
+            );
+        });
     };
 
-    if (loading) {
+    const validateUrl = (url: string) => {
+        if (!url.trim()) return false;
+
+        // If it's an email, validate email format
+        if (editingPlatform?.id === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(url) || url.startsWith('mailto:');
+        }
+
+        // For other platforms, ensure it's a valid URL
+        try {
+            new URL(url.startsWith('http') ? url : `https://${url}`);
+            return true;
+        } catch {
+            return false;
+        }
+    };
+
+    if (loading && activeSocialLinks.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="max-w-xl mx-auto p-4 text-white flex items-center justify-center min-h-screen">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Cargando...</p>
+                    <p className="mt-4 text-gray-400">Cargando redes sociales...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-xl mx-auto">
+        <div className="max-h-screen mx-auto text-white mt-14">
             {/* Header */}
-            <div className=" shadow-sm border-b">
-                <div className="max-w-md mx-auto px-4 py-4">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleBackClick}
-                            className="flex items-center cursor-pointer text-gray-600 hover:text-gray-800 transition-colors"
-                            disabled={isSubmitting}
-                        >
-                            <ChevronLeft className="w-5 h-5 mr-1" />
-                            <h1 className="text-lg font-semibold text-white">Redes Sociales</h1>
-                        </button>
-
-
-                    </div>
+            <div className="p-4 border-b border-gray-700">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleBackClick}
+                        className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
+                        disabled={isSubmitting}
+                    >
+                        <ChevronLeft className="w-5 h-5 mr-1" />
+                        <h1 className="text-lg font-semibold">Redes Sociales</h1>
+                    </button>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="max-w-md mx-auto px-4 py-6">
+            <div className="p-4">
                 {error && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-600 text-sm">{error}</p>
+                    <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
+                        <p className="text-red-400 text-sm">{error}</p>
                     </div>
                 )}
 
-                {/* Social Media Platforms Grid */}
-                <div className="grid grid-cols-4 gap-4">
-                    {socialMediaPlatforms.map((platform) => {
-                        const isActive = isPlatformActive(platform.name);
+                {/* Delete Confirmation Modal */}
+                {deleteConfirmation.isOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md border border-gray-600">
+                            <div className="flex items-center mb-4">
+                                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-white">
+                                    Confirmar eliminación
+                                </h3>
+                            </div>
 
-                        return (
-                            <button
-                                key={platform.id}
-                                onClick={() => handlePlatformSelect(platform)}
-                                disabled={isSubmitting}
-                                className={`
-                                    relative p-2 rounded-xl  transition-all duration-200 cursor-pointer
-                                    ${isActive
-                                    ? ''
-                                    : ''
-                                }
-                                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-                                `}
-                            >
-                                {/* Platform Icon */}
-                                <div className="flex flex-col items-center space-y-2">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${platform.color}`}>
+                            <p className="text-gray-300 mb-6">
+                                ¿Estás seguro de que quieres eliminar el enlace de <span className="font-medium text-white">{deleteConfirmation.linkLabel}</span>?
+                            </p>
+
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={handleConfirmDelete}
+                                    disabled={isSubmitting}
+                                    className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isSubmitting ? 'Eliminando...' : 'Sí, eliminar'}
+                                </button>
+                                <button
+                                    onClick={deleteConfirmation.onCancel}
+                                    className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+                                    disabled={isSubmitting}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* URL Form Modal */}
+                {showUrlForm && editingPlatform && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-white flex items-center">
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
+                                        style={{ backgroundColor: editingPlatform.color }}
+                                    >
                                         <img
-                                            src={platform.icon}
-                                            alt={platform.name}
-                                            className="w-6 h-6 filter invert brightness-0 contrast-100"
+                                            src={editingPlatform.icon}
+                                            alt={editingPlatform.name}
+                                            className="w-4 h-4 filter invert brightness-0 contrast-100"
                                         />
                                     </div>
-
-                                </div>
-
-                                {/* Active Indicator */}
-                                {isActive && (
-                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                        <X className="w-3 h-3 text-white" />
-                                    </div>
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* URL Input Modal */}
-                {editingPlatform && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-xl p-6 w-full max-w-sm">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                    Agregar {editingPlatform.name}
+                                    {editingLink ? 'Editar' : 'Agregar'} {editingPlatform.name}
                                 </h3>
                                 <button
                                     onClick={handleCancelEdit}
-                                    className="text-gray-400 hover:text-gray-600"
+                                    className="text-gray-400 hover:text-white"
                                     disabled={isSubmitting}
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    URL del perfil
-                                </label>
-                                <input
-                                    type="url"
-                                    value={urlInput}
-                                    onChange={(e) => setUrlInput(e.target.value)}
-                                    placeholder={getPlaceholderText(editingPlatform.name)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    disabled={isSubmitting}
-                                    autoFocus
-                                />
-                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Etiqueta
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={labelInput}
+                                        onChange={(e) => setLabelInput(e.target.value)}
+                                        className="w-full bg-[#2a2a2a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                                        placeholder={editingPlatform.name}
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
 
-                            <div className="flex space-x-3">
-                                <button
-                                    onClick={handleCancelEdit}
-                                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                    disabled={isSubmitting}
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={handleSaveLink}
-                                    disabled={!urlInput.trim() || isSubmitting}
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    {isSubmitting ? 'Guardando...' : 'Guardar'}
-                                </button>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        URL
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={urlInput}
+                                        onChange={(e) => setUrlInput(e.target.value)}
+                                        className="w-full bg-[#2a2a2a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                                        placeholder={getPlaceholderText(editingPlatform.name)}
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+
+                                <div className="flex space-x-3 pt-4">
+                                    <button
+                                        onClick={handleSaveLink}
+                                        disabled={!validateUrl(urlInput) || isSubmitting}
+                                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                    >
+                                        <Check className="w-4 h-4 mr-2" />
+                                        {isSubmitting ? 'Guardando...' : 'Guardar'}
+                                    </button>
+                                    <button
+                                        onClick={handleCancelEdit}
+                                        className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+                                        disabled={isSubmitting}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Active Links Summary */}
-                {socialLinks.length > 0 && (
-                    <div className="mt-8 p-4 bg-white rounded-xl border border-gray-200">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                            Enlaces activos ({socialLinks.length})
+                {/* Active Social Links */}
+                {activeSocialLinks.length > 0 && (
+                    <div className="mb-6">
+                        <h3 className="text-sm font-semibold text-gray-300 mb-3">
+                            Enlaces activos ({activeSocialLinks.length})
                         </h3>
                         <div className="space-y-2">
-                            {socialLinks.map((link) => (
-                                <div key={link.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center space-x-3">
-                                        <img
-                                            src={link.icon}
-                                            alt={link.name}
-                                            className="w-4 h-4"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">
-                                            {link.name}
-                                        </span>
+                            {activeSocialLinks.map((link) => {
+                                const platform = socialMediaPlatforms.find(p =>
+                                    p.name.toLowerCase() === link.label.toLowerCase() ||
+                                    link.label.toLowerCase().includes(p.id.toLowerCase()) ||
+                                    p.id.toLowerCase() === link.label.toLowerCase()
+                                );
+
+                                return (
+                                    <div key={link.id} className="flex items-center justify-between p-3 bg-[#2a2a2a] rounded-lg">
+                                        <div className="flex items-center space-x-3">
+                                            <div
+                                                className="w-8 h-8 rounded-full flex items-center justify-center"
+                                                style={{ backgroundColor: platform?.color || '#6B7280' }}
+                                            >
+                                                <img
+                                                    src={platform?.icon || '🔗'}
+                                                    alt={link.label}
+                                                    className="w-4 h-4 filter invert brightness-0 contrast-100"
+                                                />
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-medium text-white">
+                                                    {link.label}
+                                                </span>
+                                                <p className="text-xs text-gray-400 truncate max-w-48">
+                                                    {link.url}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={() => handleEditLink(link)}
+                                                className="text-gray-400 hover:text-blue-400 transition-colors p-1"
+                                                disabled={isSubmitting}
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => window.open(link.url, '_blank')}
+                                                className="text-gray-400 hover:text-green-400 transition-colors p-1"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+
+                                                    showDeleteConfirmation(
+                                                        link.id,
+                                                        link.label,
+                                                        async () => {
+                                                            try {
+                                                                setIsSubmitting(true);
+                                                                await removeSocialLink(link.id);
+                                                            } catch (error) {
+                                                                const errorMessage = error instanceof Error
+                                                                    ? error.message
+                                                                    : "Error al eliminar el enlace";
+                                                                alert(errorMessage);
+                                                            } finally {
+                                                                setIsSubmitting(false);
+                                                            }
+                                                        }
+                                                    );
+                                                }}
+                                                className="text-gray-400 hover:text-red-400 transition-colors p-1"
+                                                disabled={isSubmitting}
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <span className="text-xs text-gray-500 truncate ml-2 max-w-32">
-                                        {link.url}
-                                    </span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
+
+                {/* Social Media Platforms Grid */}
+                <div>
+                    <h3 className="text-sm font-semibold text-gray-300 mb-3">
+                        Agregar plataforma
+                    </h3>
+                    <div className="grid grid-cols-4 gap-4 mb-6">
+                        {socialMediaPlatforms.map((platform) => {
+                            const isActive = isPlatformActive(platform);
+                            return (
+                                <button
+                                    key={platform.id}
+                                    onClick={() => handlePlatformSelect(platform)}
+                                    disabled={isSubmitting}
+                                    className={`
+                                        relative p-4 rounded-lg transition-all duration-200 
+                                        ${isActive
+                                        ? 'bg-green-900/20 border border-green-500'
+                                        : 'bg-[#2a2a2a] border border-gray-600 hover:border-gray-500'
+                                    }
+                                        ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                    `}
+                                >
+                                    {isActive && (
+                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                            <X className="w-3 h-3 text-white" />
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col items-center space-y-2">
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                                            style={{ backgroundColor: platform.color }}
+                                        >
+                                            <img
+                                                src={platform.icon}
+                                                alt={platform.name}
+                                                className="w-4 h-4 filter invert brightness-0 contrast-100"
+                                            />
+                                        </div>
+                                        <span className="text-xs text-center text-gray-300 leading-tight">
+                                            {platform.name}
+                                        </span>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
         </div>
     );
