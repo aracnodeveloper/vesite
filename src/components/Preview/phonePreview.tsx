@@ -15,15 +15,9 @@ const PhonePreview: FC<PhonePreviewProps> = ({
     return (
         <div className={`phone-frame ${className}`} role="region" aria-label={title}>
             <div className="phone-container">
-
                 <div className="phone-screen">
                     <div className="phone-content">
-                        <div className="biosite-wrapper" style={{
-                            width: '100%',
-                            height: '100%',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
+                        <div className="biosite-wrapper">
                             {children}
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 import { Upload, Image, message } from "antd";
-import { uploadImage } from "./lib/uploadImage";
+import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto } from "../../../../interfaces/Biosite";
 
 interface ImageUploadSectionProps {
@@ -10,8 +10,7 @@ interface ImageUploadSectionProps {
     updatePreview: (data: Partial<BiositeFull>) => void;
     role: string | undefined;
 }
-//http://pacoelmorlaco.com/assets/final-DVKF3YLC.png
-    //https://media.bio.site/sites/c4f9c218-9fd0-4c21-9c9b-29c7a3e8a680/9Wiay7YtnvgUGWnNgAhTCk.jpg
+
 const ImageUploadSection = ({
                                 biosite,
                                 loading,
@@ -126,32 +125,25 @@ const ImageUploadSection = ({
         }
 
         try {
-            // Validate file type
-            if (!fileToUpload.type.startsWith('image/')) {
-                console.error("File is not an image");
-                message.error("Error: El archivo debe ser una imagen");
-                return;
-            }
-
-            // Validate file size (optional - e.g., max 10MB)
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            if (fileToUpload.size > maxSize) {
-                console.error("File too large");
-                message.error("Error: El archivo es demasiado grande (máximo 10MB)");
-                return;
-            }
-
             console.log(`Uploading ${key}...`);
             const loadingMessage = message.loading(
                 `Subiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
                 0
             );
 
-            const imageUrl = await uploadImage(fileToUpload);
+            let imageUrl: string;
+
+            // Use the specific backend endpoints
+            if (key === 'avatarImage') {
+                imageUrl = await uploadBiositeAvatar(fileToUpload,biosite.id );
+            } else {
+                imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
+            }
+
             console.log("Upload completed, received URL:", imageUrl);
+            loadingMessage();
 
             if (!imageUrl) {
-                loadingMessage();
                 console.error("Upload failed - no URL returned");
                 message.error("Error: No se pudo obtener la URL de la imagen");
                 return;
@@ -161,46 +153,27 @@ const ImageUploadSection = ({
 
             // Validate the uploaded image URL
             if (!isValidImageUrl(imageUrl)) {
-                loadingMessage();
                 console.error("Uploaded image URL is invalid:", imageUrl);
                 message.error("Error: La URL de la imagen subida no es válida");
                 return;
             }
 
-            // Create proper update data object
-            const updateData: BiositeUpdateDto = {
-                ownerId: biosite.ownerId || userId,
-                title: biosite.title,
-                slug: biosite.slug,
-                themeId: biosite.themeId,
-                colors: biosite.colors || '{"primary":"#3B82F6","secondary":"#1F2937"}',
-                fonts: biosite.fonts || '',
-                avatarImage: key === 'avatarImage' ? imageUrl : (biosite.avatarImage || ''),
-                backgroundImage: key === 'backgroundImage' ? imageUrl : (biosite.backgroundImage || ''),
-                isActive: biosite.isActive ?? true
+            // Update preview immediately
+            const previewUpdate = {
+                [key]: imageUrl
             };
+            updatePreview(previewUpdate);
 
-            console.log(`=== UPDATING ${key.toUpperCase()} ===`);
-            console.log('Update data:', updateData);
+            message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
+            console.log(`${key} updated successfully`);
 
-            const updated = await updateBiosite(updateData);
-            loadingMessage();
-
-            console.log(`=== ${key.toUpperCase()} UPDATE RESULT ===`);
-            console.log('Updated result:', updated);
-
-            if (updated) {
-                updatePreview(updated);
-                message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
-                console.log(`${key} updated successfully`);
-            } else {
-                console.error(`${key} update failed - returned null/undefined`);
-                message.error("Error al actualizar la imagen");
-            }
-        } catch (error) {
+        } catch (error: any) {
             console.error(`=== ${key.toUpperCase()} UPLOAD ERROR ===`);
             console.error("Error updating image:", error);
-            message.error("Error al subir la imagen. Verifica el archivo e inténtalo de nuevo.");
+
+            // More specific error messages
+            const errorMessage = error.message || "Error al subir la imagen";
+            message.error(errorMessage);
         }
     };
 

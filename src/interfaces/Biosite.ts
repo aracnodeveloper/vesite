@@ -1,4 +1,3 @@
-// interfaces/Biosite.ts
 
 export interface BiositeColors {
     primary: string;
@@ -56,34 +55,3 @@ export interface BiositeUpdateDto {
     isActive: boolean;
 }
 
-export interface BiositeCreateDto {
-    ownerId: string;
-    title: string;
-    slug: string;
-    themeId: string;
-    colors?: string;
-    fonts?: string;
-    avatarImage?: string;
-    backgroundImage?: string;
-    videoUrl?: string;
-    isActive?: boolean;
-}
-
-export interface LinkCreateDto {
-    biositeId: string;
-    label: string;
-    url: string;
-    icon?: string;
-    color?: string;
-    isActive?: boolean;
-    orderIndex?: number;
-}
-
-export interface LinkUpdateDto {
-    label?: string;
-    url?: string;
-    icon?: string;
-    color?: string;
-    isActive?: boolean;
-    orderIndex?: number;
-}
