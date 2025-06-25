@@ -64,14 +64,30 @@ const ImageUploadSection = ({
         }
     };
 
+    // File validation function
+    const validateFile = (file: File): boolean => {
+        // Check file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            message.error('Formato de archivo no válido. Solo se permiten: JPG, PNG, WebP, GIF');
+            return false;
+        }
+
+        // Check file size (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            message.error('El archivo es demasiado grande. Tamaño máximo: 5MB');
+            return false;
+        }
+
+        return true;
+    };
+
     const handleUpload = async (info: any, key: "avatarImage" | "backgroundImage") => {
         console.log(`=== HANDLE UPLOAD DEBUG (${key}) ===`);
         console.log('Upload info:', info);
         console.log('File object:', info.file);
         console.log('File status:', info.file?.status);
-        console.log('File name:', info.file?.name);
-        console.log('File type:', info.file?.type);
-        console.log('Has originFileObj:', !!info.file?.originFileObj);
 
         // Check if the upload was cancelled or no file was selected
         if (!info.file) {
@@ -79,53 +95,53 @@ const ImageUploadSection = ({
             return;
         }
 
-        // Check if the file status indicates removal or cancellation
+        // Check if the file status indicates removal, cancellation, or error
         if (info.file.status === 'removed' || info.file.status === 'error') {
             console.log(`Upload ${info.file.status} for ${key}`);
             return;
         }
 
-        // Fix: Check for both originFileObj and direct file object
+        // Get the actual file object - prioritize originFileObj over file
         const fileToUpload = info.file.originFileObj || info.file;
 
-        if (!fileToUpload) {
-            console.log("No valid file object found");
+        console.log("File to upload:", fileToUpload);
+        console.log("File instanceof File:", fileToUpload instanceof File);
+        console.log("File type:", typeof fileToUpload);
+
+        // Ensure we have a valid File object
+        if (!fileToUpload || !(fileToUpload instanceof File)) {
+            console.error("Invalid file object:", fileToUpload);
+            message.error("Error: Archivo no válido");
             return;
         }
 
-        // Additional check to ensure it's a File object
-        if (!(fileToUpload instanceof File)) {
-            console.log("File object is not an instance of File:", typeof fileToUpload);
-            return;
+        // Validate file
+        if (!validateFile(fileToUpload)) {
+            return; // Error message already shown in validateFile
         }
 
-        console.log("Using file object:", fileToUpload);
-        console.log("File details:", {
+        console.log("Valid file details:", {
             name: fileToUpload.name,
             type: fileToUpload.type,
-            size: fileToUpload.size
+            size: fileToUpload.size,
+            lastModified: fileToUpload.lastModified
         });
 
-        if (!biosite) {
-            console.error("No biosite data available for upload");
-            message.error("Error: No hay datos del biosite disponibles");
-            return;
-        }
-
-        if (!biosite.id) {
-            console.error("Biosite ID is missing for upload");
+        // Validate required data
+        if (!biosite?.id) {
+            console.error("Biosite ID is missing");
             message.error("Error: ID del biosite no disponible");
             return;
         }
 
         if (!userId) {
-            console.error("User ID is missing for upload");
+            console.error("User ID is missing");
             message.error("Error: ID de usuario no disponible");
             return;
         }
 
         try {
-            console.log(`Uploading ${key}...`);
+            console.log(`Starting upload for ${key}...`);
             const loadingMessage = message.loading(
                 `Subiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
                 0
@@ -135,27 +151,22 @@ const ImageUploadSection = ({
 
             // Use the specific backend endpoints
             if (key === 'avatarImage') {
-                imageUrl = await uploadBiositeAvatar(fileToUpload,biosite.id );
+                imageUrl = await uploadBiositeAvatar(fileToUpload, biosite.id);
             } else {
                 imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
             }
 
-            console.log("Upload completed, received URL:", imageUrl);
+            console.log("Upload completed successfully. URL:", imageUrl);
             loadingMessage();
 
             if (!imageUrl) {
-                console.error("Upload failed - no URL returned");
-                message.error("Error: No se pudo obtener la URL de la imagen");
-                return;
+                throw new Error("No se pudo obtener la URL de la imagen");
             }
-
-            console.log(`Upload successful. New URL: ${imageUrl}`);
 
             // Validate the uploaded image URL
             if (!isValidImageUrl(imageUrl)) {
                 console.error("Uploaded image URL is invalid:", imageUrl);
-                message.error("Error: La URL de la imagen subida no es válida");
-                return;
+                throw new Error("La URL de la imagen subida no es válida");
             }
 
             // Update preview immediately
@@ -165,16 +176,57 @@ const ImageUploadSection = ({
             updatePreview(previewUpdate);
 
             message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
-            console.log(`${key} updated successfully`);
+            console.log(`${key} updated successfully with URL: ${imageUrl}`);
 
         } catch (error: any) {
             console.error(`=== ${key.toUpperCase()} UPLOAD ERROR ===`);
-            console.error("Error updating image:", error);
+            console.error("Upload error:", error);
+            console.error("Error message:", error?.message);
+            console.error("Error response:", error?.response?.data);
 
-            // More specific error messages
-            const errorMessage = error.message || "Error al subir la imagen";
+            // More specific error handling
+            let errorMessage = "Error al subir la imagen";
+
+            if (error?.message) {
+                errorMessage = error.message;
+            } else if (error?.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+
             message.error(errorMessage);
         }
+    };
+
+    // Custom upload function that handles the file properly
+    const customUpload = (options: any, key: "avatarImage" | "backgroundImage") => {
+        const { file, onSuccess, onError } = options;
+
+        console.log(`=== CUSTOM UPLOAD (${key}) ===`);
+        console.log('File in customUpload:', file);
+        console.log('File type:', file.type);
+        console.log('File size:', file.size);
+
+        // Validate file
+        if (!validateFile(file)) {
+            onError(new Error('Invalid file'));
+            return;
+        }
+
+        // Create the upload info object that matches Antd's structure
+        const uploadInfo = {
+            file: file,
+            fileList: [file]
+        };
+
+        // Call our handleUpload function
+        handleUpload(uploadInfo, key)
+            .then(() => {
+                onSuccess({}, file);
+            })
+            .catch((error) => {
+                console.error('Custom upload error:', error);
+                onError(error);
+            });
     };
 
     const canEditCover = role === "ADMIN" || role === "SUPER_ADMIN";
@@ -191,10 +243,11 @@ const ImageUploadSection = ({
                 <div className="flex items-center space-x-4">
                     <Upload
                         showUploadList={false}
-                        beforeUpload={() => false}
-                        onChange={(info) => handleUpload(info, "avatarImage")}
-                        accept="image/*"
+                        customRequest={(options) => customUpload(options, "avatarImage")}
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                         disabled={loading}
+                        multiple={false}
+                        maxCount={1}
                     >
                         <div className="relative">
                             <Image
@@ -221,6 +274,8 @@ const ImageUploadSection = ({
                     </Upload>
                     <div className="text-sm text-gray-400">
                         <p>Tamaño recomendado: 400x400px</p>
+                        <p>Formatos: JPG, PNG, WebP, GIF</p>
+                        <p>Tamaño máximo: 5MB</p>
                     </div>
                 </div>
             </div>
@@ -232,10 +287,11 @@ const ImageUploadSection = ({
                     <div className="space-y-3">
                         <Upload
                             showUploadList={false}
-                            beforeUpload={() => false}
-                            onChange={(info) => handleUpload(info, "backgroundImage")}
-                            accept="image/*"
+                            customRequest={(options) => customUpload(options, "backgroundImage")}
+                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                             disabled={loading}
+                            multiple={false}
+                            maxCount={1}
                         >
                             <div className="relative">
                                 <Image
@@ -262,6 +318,8 @@ const ImageUploadSection = ({
                         </Upload>
                         <div className="text-sm text-gray-400">
                             <p>Tamaño recomendado: 1200x400px</p>
+                            <p>Formatos: JPG, PNG, WebP, GIF</p>
+                            <p>Tamaño máximo: 5MB</p>
                         </div>
                     </div>
                 </div>

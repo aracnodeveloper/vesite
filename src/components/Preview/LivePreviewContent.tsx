@@ -1,5 +1,6 @@
 import { useLivePreview } from "../../hooks/useLivePreview.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
+import type {SocialLink} from "../../interfaces/PreviewContext.ts";
 
 const LivePreviewContent = () => {
     const {
@@ -28,6 +29,39 @@ const LivePreviewContent = () => {
     const socialPost = getSocialPost();
     const videoEmbed = getVideoEmbed();
 
+    const filterRealSocialLinks = (links: SocialLink[]) => {
+        return links.filter(link => {
+            if (!link.isActive) return false;
+
+            // Excluir enlaces de música, video y posts sociales
+            const excludedKeywords = [
+                'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+                'youtube', 'video', 'vimeo', 'tiktok video',
+                'post', 'publicacion', 'contenido',
+                'music embed', 'video embed', 'social post',
+                'embed', 'player'
+            ];
+
+            const labelLower = link.label.toLowerCase();
+            const urlLower = link.url.toLowerCase();
+
+            // Si el label o URL contiene palabras excluidas, no es un enlace social regular
+            const isExcluded = excludedKeywords.some(keyword =>
+                labelLower.includes(keyword) || urlLower.includes(keyword)
+            );
+
+            if (isExcluded) return false;
+
+            // Verificar si es un enlace social válido usando findPlatformForLink
+            const platform = findPlatformForLink(link);
+
+            // Solo mostrar si encontramos una plataforma social válida
+            return platform !== undefined && platform !== null;
+        });
+    };
+
+// Luego reemplaza la línea donde usas socialLinksData con:
+    const realSocialLinks = filterRealSocialLinks(socialLinksData);
     // Helper function to extract Spotify track ID
     const getSpotifyEmbedUrl = (url: string) => {
         const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
@@ -196,10 +230,10 @@ const LivePreviewContent = () => {
                 </div>
 
                 {/* Social Media Icons */}
-                {socialLinksData.length > 0 && (
+                {realSocialLinks.length > 0 && (
                     <div className="px-4 mb-4">
                         <div className="flex justify-center items-center gap-3 flex-wrap">
-                            {socialLinksData.map((link) => {
+                            {realSocialLinks.map((link) => {
                                 const platform = findPlatformForLink(link);
 
                                 return (

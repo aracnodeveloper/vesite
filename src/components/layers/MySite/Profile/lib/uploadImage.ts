@@ -19,26 +19,78 @@ export interface UploadResponse {
  */
 export const uploadBiositeAvatar = async (file: File, biositeId: string): Promise<string> => {
     try {
-        console.log("Uploading biosite avatar:", { file: file.name, biositeId });
+        console.log("=== UPLOADING BIOSITE AVATAR ===");
+        console.log("File details:", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified
+        });
+        console.log("Biosite ID:", biositeId);
 
+        // Validate inputs
+        if (!file || !(file instanceof File)) {
+            throw new Error('Archivo no válido');
+        }
+
+        if (!biositeId || typeof biositeId !== 'string') {
+            throw new Error('ID de biosite no válido');
+        }
+
+        // Create FormData and append the file
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', file, file.name);
+
+        // Log FormData contents (for debugging)
+        console.log("FormData entries:");
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+            if (value instanceof File) {
+                console.log(`  File details: ${value.name}, ${value.type}, ${value.size} bytes`);
+            }
+        }
+
+        const endpoint = `${uploadBiositeAvatarApi}/${biositeId}`;
+        console.log("API endpoint:", endpoint);
 
         const response = await apiService.create<FormData, UploadResponse>(
-            `${uploadBiositeAvatarApi}/${biositeId}`,
+            endpoint,
             formData
         );
 
         console.log("Avatar upload response:", response);
 
-        if (!response.success || !response.data?.url) {
-            throw new Error(response.message || 'Error uploading avatar');
+        if (!response) {
+            throw new Error('No se recibió respuesta del servidor');
         }
 
+        if (!response.success) {
+            throw new Error(response.message || 'Error al subir el avatar');
+        }
+
+        if (!response.data?.url) {
+            throw new Error('URL de imagen no recibida del servidor');
+        }
+
+        console.log("Avatar upload successful. URL:", response.data.url);
         return response.data.url;
+
     } catch (error: any) {
-        console.error("Error uploading biosite avatar:", error);
-        const errorMessage = error?.response?.data?.message || error?.message || 'Error uploading avatar';
+        console.error("=== AVATAR UPLOAD ERROR ===");
+        console.error("Error object:", error);
+        console.error("Error message:", error?.message);
+        console.error("Error response:", error?.response);
+        console.error("Error response data:", error?.response?.data);
+
+        // Extract the most appropriate error message
+        let errorMessage = 'Error al subir el avatar';
+
+        if (error?.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        } else if (error?.message) {
+            errorMessage = error.message;
+        }
+
         throw new Error(errorMessage);
     }
 };
@@ -48,26 +100,78 @@ export const uploadBiositeAvatar = async (file: File, biositeId: string): Promis
  */
 export const uploadBiositeBackground = async (file: File, biositeId: string): Promise<string> => {
     try {
-        console.log("Uploading biosite background:", { file: file.name, biositeId });
+        console.log("=== UPLOADING BIOSITE BACKGROUND ===");
+        console.log("File details:", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified
+        });
+        console.log("Biosite ID:", biositeId);
 
+        // Validate inputs
+        if (!file || !(file instanceof File)) {
+            throw new Error('Archivo no válido');
+        }
+
+        if (!biositeId || typeof biositeId !== 'string') {
+            throw new Error('ID de biosite no válido');
+        }
+
+        // Create FormData and append the file
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', file, file.name);
+
+        // Log FormData contents (for debugging)
+        console.log("FormData entries:");
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+            if (value instanceof File) {
+                console.log(`  File details: ${value.name}, ${value.type}, ${value.size} bytes`);
+            }
+        }
+
+        const endpoint = `${uploadBiositeBackgroundApi}/${biositeId}`;
+        console.log("API endpoint:", endpoint);
 
         const response = await apiService.create<FormData, UploadResponse>(
-            `${uploadBiositeBackgroundApi}/${biositeId}`,
+            endpoint,
             formData
         );
 
         console.log("Background upload response:", response);
 
-        if (!response.success || !response.data?.url) {
-            throw new Error(response.message || 'Error uploading background');
+        if (!response) {
+            throw new Error('No se recibió respuesta del servidor');
         }
 
+        if (!response.success) {
+            throw new Error(response.message || 'Error al subir la imagen de fondo');
+        }
+
+        if (!response.data?.url) {
+            throw new Error('URL de imagen no recibida del servidor');
+        }
+
+        console.log("Background upload successful. URL:", response.data.url);
         return response.data.url;
+
     } catch (error: any) {
-        console.error("Error uploading biosite background:", error);
-        const errorMessage = error?.response?.data?.message || error?.message || 'Error uploading background';
+        console.error("=== BACKGROUND UPLOAD ERROR ===");
+        console.error("Error object:", error);
+        console.error("Error message:", error?.message);
+        console.error("Error response:", error?.response);
+        console.error("Error response data:", error?.response?.data);
+
+        // Extract the most appropriate error message
+        let errorMessage = 'Error al subir la imagen de fondo';
+
+        if (error?.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        } else if (error?.message) {
+            errorMessage = error.message;
+        }
+
         throw new Error(errorMessage);
     }
 };
@@ -77,10 +181,19 @@ export const uploadBiositeBackground = async (file: File, biositeId: string): Pr
  */
 export const uploadImage = async (file: File): Promise<string> => {
     try {
-        console.log("Uploading generic image:", file.name);
+        console.log("=== UPLOADING GENERIC IMAGE ===");
+        console.log("File details:", {
+            name: file.name,
+            type: file.type,
+            size: file.size
+        });
+
+        if (!file || !(file instanceof File)) {
+            throw new Error('Archivo no válido');
+        }
 
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', file, file.name);
 
         const response = await apiService.create<FormData, UploadResponse>(
             '/upload/image',
@@ -89,14 +202,14 @@ export const uploadImage = async (file: File): Promise<string> => {
 
         console.log("Generic upload response:", response);
 
-        if (!response.success || !response.data?.url) {
-            throw new Error(response.message || 'Error uploading image');
+        if (!response?.success || !response.data?.url) {
+            throw new Error(response?.message || 'Error al subir la imagen');
         }
 
         return response.data.url;
     } catch (error: any) {
         console.error("Error uploading generic image:", error);
-        const errorMessage = error?.response?.data?.message || error?.message || 'Error uploading image';
+        const errorMessage = error?.response?.data?.message || error?.message || 'Error al subir la imagen';
         throw new Error(errorMessage);
     }
 };

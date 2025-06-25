@@ -48,7 +48,50 @@ const SocialPage = () => {
     const navigate = useNavigate();
 
     // Filtrar solo los enlaces sociales activos
-    const activeSocialLinks = socialLinks.filter(link => link.isActive);
+    const activeSocialLinks = socialLinks.filter(link => {
+        if (!link.isActive) return false;
+
+        // Excluir enlaces de música, video y posts sociales
+        const excludedKeywords = [
+            'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+            'youtube', 'video', 'vimeo', 'tiktok video',
+            'post', 'publicacion', 'contenido',
+            'music embed', 'video embed', 'social post'
+        ];
+
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        // Si el label o URL contiene palabras excluidas, no es un enlace social regular
+        const isExcluded = excludedKeywords.some(keyword =>
+            labelLower.includes(keyword) || urlLower.includes(keyword)
+        );
+
+        if (isExcluded) return false;
+
+        // Verificar si es un enlace social válido comparando con las plataformas disponibles
+        const platform = socialMediaPlatforms.find(p => {
+            const platformNameLower = p.name.toLowerCase();
+            const platformIdLower = p.id.toLowerCase();
+
+            return (
+                labelLower === platformNameLower ||
+                labelLower === platformIdLower ||
+                (platformIdLower.length > 2 && labelLower.includes(platformIdLower)) ||
+                link.icon === p.icon ||
+                labelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '') ||
+                (platformNameLower.includes('/') && platformNameLower.split('/').some(name =>
+                    name.trim().toLowerCase() === labelLower
+                )) ||
+                (labelLower.includes('/') && labelLower.split('/').some(name =>
+                    name.trim().toLowerCase() === platformNameLower
+                ))
+            );
+        });
+
+        // Solo mostrar si encontramos una plataforma social válida
+        return platform !== undefined;
+    });
 
     useEffect(() => {
         // Clear error when component mounts
@@ -240,17 +283,16 @@ const SocialPage = () => {
             const platformIdLower = platform.id.toLowerCase();
 
             return (
-                // Coincidencia exacta por nombre
                 linkLabelLower === platformNameLower ||
-                // Coincidencia por ID
+
                 linkLabelLower === platformIdLower ||
-                // El label contiene el ID (pero debe ser más específico para evitar falsos positivos)
+
                 (platformIdLower.length > 2 && linkLabelLower.includes(platformIdLower)) ||
-                // Coincidencia de iconos
+
                 link.icon === platform.icon ||
-                // Comparación sin caracteres especiales
+
                 linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '') ||
-                // Para casos como "Twitter/X"
+
                 (platformNameLower.includes('/') && platformNameLower.split('/').some(name =>
                     name.trim().toLowerCase() === linkLabelLower
                 )) ||
@@ -264,13 +306,11 @@ const SocialPage = () => {
     const validateUrl = (url: string) => {
         if (!url.trim()) return false;
 
-        // If it's an email, validate email format
         if (editingPlatform?.id === 'email') {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(url) || url.startsWith('mailto:');
         }
 
-        // For other platforms, ensure it's a valid URL
         try {
             new URL(url.startsWith('http') ? url : `https://${url}`);
             return true;
@@ -520,7 +560,7 @@ const SocialPage = () => {
                     <h3 className="text-sm font-semibold text-gray-300 mb-3">
                         Agregar plataforma
                     </h3>
-                    <div className="grid grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-4 gap-2 mb-6">
                         {socialMediaPlatforms.map((platform) => {
                             const isActive = isPlatformActive(platform);
                             return (
@@ -531,14 +571,14 @@ const SocialPage = () => {
                                     className={`
                                         relative p-4 rounded-lg transition-all duration-200 
                                         ${isActive
-                                        ? 'bg-green-900/20 border border-green-500'
-                                        : 'bg-[#2a2a2a] border border-gray-600 hover:border-gray-500'
+                                        ? ''
+                                        : '  hover:border-gray-500'
                                     }
                                         ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                                     `}
                                 >
                                     {isActive && (
-                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
                                             <X className="w-3 h-3 text-white" />
                                         </div>
                                     )}

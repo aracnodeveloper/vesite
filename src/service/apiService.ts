@@ -14,8 +14,8 @@ const apiService = {
         return response.data;
     },
 
-    create: async <T, R>(url: string, data: T): Promise<R> => {
-        const response = await api.post<R>(url, data);
+    create: async <T extends object, R>(endpoint: string, data: T): Promise<R> => {
+        const response = await api.post<R>(endpoint, data);
         return response.data;
     },
     patch: async <T>(url: string, data: T): Promise<T> => {
