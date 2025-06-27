@@ -13,10 +13,10 @@ import { Dialog } from "@headlessui/react";
 
 import imgP from "../../assets/img/img.png";
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
+import { usePreview } from "../../context/PreviewContext.tsx";
 
 import LivePreviewContent from "../Preview/LivePreviewContent";
 import PhonePreview from "../Preview/phonePreview.tsx";
-
 
 interface LayoutProps {
     children?: React.ReactNode;
@@ -26,18 +26,50 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuthContext();
+    const { biosite } = usePreview();
     const [activeItem, setActiveItem] = useState<string>("layers");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
 
-
+    // Enhanced default avatar with better styling
+    const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
     const sidebarItems = [
         { icon: Layers, label: "Layers", id: "layers", to: "/sections", color: "green" },
         { icon: Droplet, label: "Droplet", id: "droplet", to: "/droplet", color: "orange" },
         { icon: BarChart3, label: "Analytics", id: "analytics", to: "/analytics", color: "blue" },
     ];
+
+    // Function to validate and get avatar image
+    const getAvatarImage = () => {
+        if (avatarError || !biosite?.avatarImage) {
+            return imgP; // Fallback to default static image
+        }
+
+        // Check if it's a valid image URL
+        if (typeof biosite.avatarImage === 'string' && biosite.avatarImage.trim()) {
+            if (biosite.avatarImage.startsWith('data:')) {
+                // Validate base64 data URL
+                const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
+                return dataUrlRegex.test(biosite.avatarImage) ? biosite.avatarImage : imgP;
+            }
+
+            try {
+                new URL(biosite.avatarImage);
+                return biosite.avatarImage;
+            } catch {
+                return imgP;
+            }
+        }
+
+        return imgP;
+    };
+
+    const handleAvatarError = () => {
+        setAvatarError(true);
+    };
 
     const showLogoutModal = () => setIsLogoutDialogOpen(true);
     const handleCancelLogout = () => setIsLogoutDialogOpen(false);
@@ -69,6 +101,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    // Reset avatar error when biosite avatar changes
+    useEffect(() => {
+        setAvatarError(false);
+    }, [biosite?.avatarImage]);
+
     const handleItemClick = (item: any) => {
         setActiveItem(item.id);
         navigate(item.to);
@@ -97,7 +134,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {/* Mobile Header */}
                 <div className="lg:hidden flex items-center justify-between p-4 bg-[#2a2a2a] rounded-lg mb-2">
                     <div className="flex items-center space-x-3">
-                        <img src={imgP} className="w-8 h-8 rounded-lg" alt="perfil" />
+                        <img
+                            src={getAvatarImage()}
+                            className="w-8 h-8 rounded-lg object-cover"
+                            alt="perfil"
+                            onError={handleAvatarError}
+                        />
                         <span className="text-white font-medium">Dashboard</span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -136,9 +178,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
 
                 {/* Desktop Sidebar */}
-                <div className="hidden lg:flex w-14 xl:w-16 bg-[#2a2a2a] shadow-lg mt-5 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
+                <div className="hidden lg:flex w-14 xl:w-14 bg-[#2a2a2a] shadow-lg mt-5 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
                     <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
-                        <img src={imgP} className="rounded-xl w-8 h-8 xl:w-10 xl:h-10" alt="perfil" />
+                        <img
+                            src={getAvatarImage()}
+                            className="rounded-xl w-8 h-8 xl:w-10 xl:h-10 object-cover"
+                            alt="perfil"
+                            onError={handleAvatarError}
+                        />
                     </button>
 
                     <div className="flex flex-col space-y-4 mt-7">
@@ -181,7 +228,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <div className="w-full md:w-[400px] lg:w-[500px] xl:w-[600px] 2xl:w-[700px] mt-4 lg:mt-0 lg:ml-4 p-2 sm:p-4 rounded-2xl shadow-inner flex justify-center items-center bg-[#2a2a2a]/20">
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center">
                                 <div className="absolute text-xs top-10 left-2/3 text-white mb-4 text-center">
-                                    URL: bio.site/anthonyrmch
+                                    URL: bio.site/{biosite?.slug || 'tu-slug'}
                                 </div>
                                 <PhonePreview>
                                     <LivePreviewContent />

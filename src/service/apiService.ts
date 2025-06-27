@@ -1,14 +1,5 @@
-// src/service/apiService.ts
 import api from "./api";
-import axios, { type AxiosRequestConfig } from "axios";
-import Cookies from "js-cookie";
-const getAuthHeaders = () => {
-    const token = Cookies.get("accessToken");
-    return {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-    };
-};
+import type {  AxiosRequestConfig } from "axios";
 
 
 
@@ -23,14 +14,12 @@ const apiService = {
         return response.data;
     },
 
-    create: async <T, R>(url: string, data: T): Promise<R> => {
-        const response = await api.post<R>(url, data);
+    create: async <T extends object, R>(endpoint: string, data: T): Promise<R> => {
+        const response = await api.post<R>(endpoint, data);
         return response.data;
     },
     patch: async <T>(url: string, data: T): Promise<T> => {
-        const response = await axios.patch(url, data, {
-            headers: getAuthHeaders(),
-        });
+        const response = await api.patch(url, data)
         return response.data;
     },
     update: async <T>(endpoint: string, id: string, data: T): Promise<T> => {
@@ -39,11 +28,9 @@ const apiService = {
     },
 
 
-    delete: async <R>(endpoint: string, id: string): Promise<R> => {
-        const response = await api.delete<R>(`${endpoint}/${id}`);
-        return response.data;
+    delete: async (endpoint: string, id: string): Promise<void> => {
+        await api.delete(`${endpoint}/${id}`);
     },
-
     createReqRes: async <T extends object, D>(
         endpoint: string,
         data: T
