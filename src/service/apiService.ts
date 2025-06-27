@@ -1,5 +1,6 @@
 import api from "./api";
 import type {  AxiosRequestConfig } from "axios";
+import axios from "axios";
 
 
 
