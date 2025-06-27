@@ -22,6 +22,7 @@ import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
+import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
 
 // Rutas protegidas
 
@@ -110,6 +111,15 @@ const App = () => {
                 <PrivateRoute>
                     <Layout>
                         <PostPage />
+                    </Layout>
+                </PrivateRoute>
+            }
+            />
+
+            <Route path="/app" element={
+                <PrivateRoute>
+                    <Layout>
+                        <AppPage/>
                     </Layout>
                 </PrivateRoute>
             }

@@ -1,6 +1,7 @@
 import { useLivePreview } from "../../hooks/useLivePreview.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import type {SocialLink} from "../../interfaces/PreviewContext.ts";
+import {AppDownloadButtons} from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 const LivePreviewContent = () => {
     const {
@@ -80,7 +81,6 @@ const LivePreviewContent = () => {
         return null;
     };
 
-    // Helper function to check if URL is Instagram
     const isInstagramUrl = (url: string) => {
         return url.includes('instagram.com');
     };
@@ -422,7 +422,9 @@ const LivePreviewContent = () => {
                         ))}
                     </div>
                 )}
-
+                <div className="mt-12">
+                    <AppDownloadButtons />
+                </div>
                 <div className="h-12"></div>
             </div>
         </div>
