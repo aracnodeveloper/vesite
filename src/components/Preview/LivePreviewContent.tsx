@@ -130,7 +130,7 @@ const LivePreviewContent = () => {
 
     return (
         <div className="w-full bg-white" style={{ minHeight: '100vh' }}>
-            {/* Background Header - Altura fija para móvil */}
+
             <div className="relative w-full h-48 flex-shrink-0">
                 {validBackgroundImage ? (
                     <>
@@ -423,7 +423,6 @@ const LivePreviewContent = () => {
                     </div>
                 )}
 
-                {/* Spacer para asegurar scroll completo */}
                 <div className="h-12"></div>
             </div>
         </div>

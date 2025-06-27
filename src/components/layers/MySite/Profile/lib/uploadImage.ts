@@ -1,5 +1,5 @@
 // lib/uploadImage.ts
-import apiService from "../../../../../service/apiService.ts";
+import api from "../../../../../service/api"; // Import api directly instead of apiService
 import { uploadBiositeAvatarApi, uploadBiositeBackgroundApi } from "../../../../../constants/EndpointsRoutes";
 
 export interface UploadResponse {
@@ -53,27 +53,29 @@ export const uploadBiositeAvatar = async (file: File, biositeId: string): Promis
         const endpoint = `${uploadBiositeAvatarApi}/${biositeId}`;
         console.log("API endpoint:", endpoint);
 
-        const response = await apiService.create<FormData, UploadResponse>(
-            endpoint,
-            formData
-        );
+        // Use api directly instead of apiService to ensure proper headers
+        const response = await api.post<UploadResponse>(endpoint, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
-        console.log("Avatar upload response:", response);
+        console.log("Avatar upload response:", response.data);
 
-        if (!response) {
+        if (!response.data) {
             throw new Error('No se recibió respuesta del servidor');
         }
 
-        if (!response.success) {
-            throw new Error(response.message || 'Error al subir el avatar');
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Error al subir el avatar');
         }
 
-        if (!response.data?.url) {
+        if (!response.data.data?.url) {
             throw new Error('URL de imagen no recibida del servidor');
         }
 
-        console.log("Avatar upload successful. URL:", response.data.url);
-        return response.data.url;
+        console.log("Avatar upload successful. URL:", response.data.data.url);
+        return response.data.data.url;
 
     } catch (error: any) {
         console.error("=== AVATAR UPLOAD ERROR ===");
@@ -134,27 +136,29 @@ export const uploadBiositeBackground = async (file: File, biositeId: string): Pr
         const endpoint = `${uploadBiositeBackgroundApi}/${biositeId}`;
         console.log("API endpoint:", endpoint);
 
-        const response = await apiService.create<FormData, UploadResponse>(
-            endpoint,
-            formData
-        );
+        // Use api directly instead of apiService to ensure proper headers
+        const response = await api.post<UploadResponse>(endpoint, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
-        console.log("Background upload response:", response);
+        console.log("Background upload response:", response.data);
 
-        if (!response) {
+        if (!response.data) {
             throw new Error('No se recibió respuesta del servidor');
         }
 
-        if (!response.success) {
-            throw new Error(response.message || 'Error al subir la imagen de fondo');
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Error al subir la imagen de fondo');
         }
 
-        if (!response.data?.url) {
+        if (!response.data.data?.url) {
             throw new Error('URL de imagen no recibida del servidor');
         }
 
-        console.log("Background upload successful. URL:", response.data.url);
-        return response.data.url;
+        console.log("Background upload successful. URL:", response.data.data.url);
+        return response.data.data.url;
 
     } catch (error: any) {
         console.error("=== BACKGROUND UPLOAD ERROR ===");
@@ -195,18 +199,20 @@ export const uploadImage = async (file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('image', file, file.name);
 
-        const response = await apiService.create<FormData, UploadResponse>(
-            '/upload/image',
-            formData
-        );
+        // Use api directly instead of apiService
+        const response = await api.post<UploadResponse>('/upload/image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
-        console.log("Generic upload response:", response);
+        console.log("Generic upload response:", response.data);
 
-        if (!response?.success || !response.data?.url) {
-            throw new Error(response?.message || 'Error al subir la imagen');
+        if (!response.data?.success || !response.data.data?.url) {
+            throw new Error(response.data?.message || 'Error al subir la imagen');
         }
 
-        return response.data.url;
+        return response.data.data.url;
     } catch (error: any) {
         console.error("Error uploading generic image:", error);
         const errorMessage = error?.response?.data?.message || error?.message || 'Error al subir la imagen';

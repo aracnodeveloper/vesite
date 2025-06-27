@@ -21,6 +21,7 @@ import PostPage from "./components/layers/AddMoreSections/Socialpost/socialPostP
 import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage.tsx";
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
+import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
 
 // Rutas protegidas
 
@@ -157,6 +158,16 @@ const App = () => {
                 }
             />
 
+            <Route
+                path="/expoced"
+                element={
+                    <PrivateRoute>
+                        <div className="min-h-screen bg-gray-100">
+                        <LivePreviewContent/>
+                        </div>
+                    </PrivateRoute>
+                }
+            />
             {/* Catch-all: redirección a inicio */}
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

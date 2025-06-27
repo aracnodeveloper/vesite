@@ -33,7 +33,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
 
-    // Enhanced default avatar with better styling
+    const handleExpoced = () => {
+        if (biosite?.slug) {
+            navigate("/expoced");
+        } else {
+            console.warn("No hay slug disponible para la navegación");
+            // Opcional: mostrar una notificación al usuario o manejar el caso
+        }
+    };
+
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
     const sidebarItems = [
@@ -227,7 +235,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {showPreview && (
                         <div className="w-full md:w-[400px] lg:w-[500px] xl:w-[600px] 2xl:w-[700px] mt-4 lg:mt-0 lg:ml-4 p-2 sm:p-4 rounded-2xl shadow-inner flex justify-center items-center bg-[#2a2a2a]/20">
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center">
-                                <div className="absolute text-xs top-10 left-2/3 text-white mb-4 text-center">
+                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 left-2/3 text-white mb-4 text-center">
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}
                                 </div>
                                 <PhonePreview>
@@ -248,7 +256,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </button>
             </div>
 
-            {/* Logout Confirmation Dialog */}
             <Dialog
                 open={isLogoutDialogOpen}
                 onClose={handleCancelLogout}

@@ -45,6 +45,7 @@ export const Login: FC = () => {
                 const token = Cookies.get("accessToken");
                 if (token) {
                     navigate("/sections", { replace: true });
+
                 } else {
                     setError("Login failed. No token found.");
                 }
