@@ -65,22 +65,22 @@ const MusicPage = () => {
     }
 
     return (
-        <div className="max-w-xl bg-[#1a1a1a] text-white px-4 py-6">
+        <div className="max-w-full  text-white px-4 py-6">
             {/* Header */}
             <div className="flex items-center mb-8 mt-3">
                 <button
                     onClick={handleBackClick}
-                    className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
+                    className="flex items-center text-black hover:text-gray-400 transition-colors cursor-pointer"
                     disabled={isSubmitting}
                 >
-                    <ChevronLeft size={16} className="mr-2" />
+                    <ChevronLeft size={16} className="mr-2 hover:text-gray-400" />
                     Music / Podcast
                 </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 w-96">
                 <div>
-                    <label className="text-xs text-gray-400 block mb-2">
+                    <label className="text-xs text-gray-600 block mb-2">
                         URL *
                     </label>
                     <input
@@ -88,7 +88,7 @@ const MusicPage = () => {
                         placeholder="https://open.spotify.com/track/... or https://soundcloud.com/..."
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="w-full bg-[#2a2a2a] text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 border border-gray-600"
+                        className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500  "
                         disabled={isSubmitting}
                     />
                     {url && !isValidUrl(url) && (
@@ -99,7 +99,7 @@ const MusicPage = () => {
                 </div>
 
                 <div>
-                    <label className="text-xs text-gray-400 block mb-2">
+                    <label className="text-xs text-gray-600 block mb-2">
                         Note (optional)
                     </label>
                     <input
@@ -107,16 +107,16 @@ const MusicPage = () => {
                         placeholder="Add a description or note about this music/podcast"
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        className="w-full bg-[#2a2a2a] text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 border border-gray-600"
+                        className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "
                         disabled={isSubmitting}
                     />
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                     <button
                         onClick={handleSave}
                         disabled={!url.trim() || !isValidUrl(url) || isSubmitting}
-                        className="w-full bg-purple-600 px-4 py-2 rounded-md hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="w-full text-black bg-[#FAFFF6] px-4 py-2 rounded-full hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
                     >
                         {isSubmitting ? (
                             <>
@@ -135,7 +135,7 @@ const MusicPage = () => {
                                 setNote('');
                             }}
                             disabled={isSubmitting}
-                            className="w-full mt-2 bg-gray-600 px-4 py-2 rounded-md hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full mt-2 bg-gray-600 h-14 px-4 py-2 rounded-full hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             Clear
                         </button>

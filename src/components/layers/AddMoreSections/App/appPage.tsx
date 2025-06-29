@@ -9,29 +9,29 @@ const AppPage = () => {
     const googlePlayUrl = "https://play.google.com/store/apps/details?id=com.visitaEcuador&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1&pli=1";
 
     return(
-        <div className="min-h-screen pt-8 text-white">
+        <div className="min-h-screen max-w-full pt-8 text-white">
             {/* Header */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-4 ">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleBackClick}
                         className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                     >
-                        <ChevronLeft className="w-5 h-5 mr-1" />
-                        <h1 className="text-lg font-semibold">Descarga VisitaEcuador</h1>
+                        <ChevronLeft className="w-5 h-5 mr-1 text-black" />
+                        <h1 className="text-lg text-black font-semibold">Descarga VisitaEcuador</h1>
                     </button>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8">
+            <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8 " style={{width:'450px'}}>
                 {/* App Info */}
                 <div className="text-center space-y-4">
                     <div className="w-24 h-24 mx-auto bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                         <span className="text-3xl font-bold text-white">VE</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-white">VisitaEcuador</h2>
-                    <p className="text-gray-300 max-w-md mx-auto leading-relaxed">
+                    <h2 className="text-2xl font-bold text-black">VisitaEcuador</h2>
+                    <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
                         Descarga nuestra app móvil para una mejor experiencia y acceso completo a todas las funcionalidades.
                     </p>
                 </div>
@@ -106,8 +106,8 @@ const AppPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-white font-semibold">Explora Ecuador</h3>
-                            <p className="text-gray-400 text-sm">Descubre destinos increíbles en todo el país</p>
+                            <h3 className="text-black font-semibold">Explora Ecuador</h3>
+                            <p className="text-gray-600 text-sm">Descubre destinos increíbles en todo el país</p>
                         </div>
 
                         <div className="text-center space-y-3">
@@ -116,8 +116,8 @@ const AppPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-white font-semibold">Fácil de Usar</h3>
-                            <p className="text-gray-400 text-sm">Interfaz intuitiva y navegación sencilla</p>
+                            <h3 className="text-black font-semibold">Fácil de Usar</h3>
+                            <p className="text-gray-600 text-sm">Interfaz intuitiva y navegación sencilla</p>
                         </div>
 
                         <div className="text-center space-y-3">
@@ -126,8 +126,8 @@ const AppPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
-                            <h3 className="text-white font-semibold">Experiencia Completa</h3>
-                            <p className="text-gray-400 text-sm">Todas las funcionalidades en tu móvil</p>
+                            <h3 className="text-black font-semibold">Experiencia Completa</h3>
+                            <p className="text-gray-600 text-sm">Todas las funcionalidades en tu móvil</p>
                         </div>
                     </div>
                 </div>

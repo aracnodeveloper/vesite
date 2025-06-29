@@ -200,88 +200,111 @@ const ProfilePage = () => {
             window.location.hostname.includes('dev'));
 
     return (
-        <div className="p-6 max-w-xl mx-auto">
+        <div className="w-full max-w-md mx-auto rounded-lg  overflow-hidden">
             {/* Header */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleBackClick}
-                        className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
+                        className="flex items-center cursor-pointer text-gray-600 hover:text-gray-800 transition-colors"
                     >
                         <ChevronLeft className="w-5 h-5 mr-1" />
-                        <h1 className="text-lg font-semibold">Perfil</h1>
+                        <h1 className="text-lg font-semibold text-gray-800">Perfil</h1>
                     </button>
                 </div>
             </div>
 
-            {/* Image Upload Section */}
-            <ImageUploadSection
-                biosite={biosite}
-                loading={loading}
-                userId={userId}
-                updateBiosite={updateBiosite}
-                updatePreview={updatePreview}
-                role={role}
-            />
-
-            {/* Form Section */}
-            <Form
-                form={form}
-                layout="vertical"
-                onFinish={handleFinish}
-                className="mb-6"
-            >
-                <Form.Item
-                    label={<span className="text-white">Título</span>}
-                    name="title"
-                    rules={[
-                        { required: true, message: 'El título es requerido' },
-                        { min: 2, message: 'El título debe tener al menos 2 caracteres' },
-                        { max: 50, message: 'El título no puede tener más de 50 caracteres' }
-                    ]}
-                >
-                    <Input
-                        placeholder="Nombre de tu biosite"
-                        disabled={loading}
-                        maxLength={50}
-                    />
-                </Form.Item>
-
-                <Form.Item
-                    label={<span className="text-white">Slug (URL personalizada)</span>}
-                    name="slug"
-                    rules={[
-                        { required: true, message: 'El slug es requerido' },
-                        { min: 3, message: 'El slug debe tener al menos 3 caracteres' },
-                        { max: 30, message: 'El slug no puede tener más de 30 caracteres' },
-                        { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }
-                    ]}
-                >
-                    <Input
-                        placeholder="tu-nombre-personalizado"
-                        addonBefore="bio.site/"
-                        disabled={loading}
-                        maxLength={30}
-                    />
-                </Form.Item>
-
-
-                <Form.Item>
-                    <Button
-                        type="primary"
-                        htmlType="submit"
-                        className="w-full"
+            {/* Content Container */}
+            <div className="p-6">
+                {/* Images Section */}
+                <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide">IMÁGENES</h3>
+                    <ImageUploadSection
+                        biosite={biosite}
                         loading={loading}
-                        disabled={!biosite.id}
-                    >
-                        {loading ? 'Actualizando...' : 'Actualizar Perfil'}
-                    </Button>
-                </Form.Item>
-            </Form>
+                        userId={userId}
+                        updateBiosite={updateBiosite}
+                        updatePreview={updatePreview}
+                        role={role}
+                    />
+                </div>
+
+                {/* About Section */}
+                <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide">ACERCA DE</h3>
+
+                    {/* Title Field */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">NOMBRE</label>
+                        <Form form={form} layout="vertical" onFinish={handleFinish}>
+                            <Form.Item
+                                name="title"
+                                rules={[
+                                    { required: true, message: 'El título es requerido' },
+                                    { min: 2, message: 'El título debe tener al menos 2 caracteres' },
+                                    { max: 50, message: 'El título no puede tener más de 50 caracteres' }
+                                ]}
+                                className="mb-0"
+                            >
+                                <Input
+                                    placeholder="diseño"
+                                    disabled={loading}
+                                    maxLength={50}
+                                    className="rounded-lg border-gray-300"
+                                />
+                            </Form.Item>
 
 
+
+                            {/* Site Section */}
+                            <div className="mb-6">
+                                <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide">SITIO</h3>
+
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">URL</label>
+                                    <div className="flex">
+                                        <Form.Item
+                                            name="slug"
+                                            rules={[
+                                                { required: true, message: 'El slug es requerido' },
+                                                { min: 3, message: 'El slug debe tener al menos 3 caracteres' },
+                                                { max: 30, message: 'El slug no puede tener más de 30 caracteres' },
+                                                { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }
+                                            ]}
+                                            className="flex-1 mb-0"
+                                        >
+                                            <Input
+                                                placeholder="sitioReynaldomartinez31"
+                                                addonBefore="bio.site/"
+                                                disabled={loading}
+                                                maxLength={30}
+                                                className="rounded-l-lg border-r-0"
+                                            />
+                                        </Form.Item>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Update Button */}
+                            <Form.Item className="mb-0">
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 rounded-lg py-2 h-auto"
+                                    loading={loading}
+                                    disabled={!biosite.id}
+                                >
+                                    {loading ? 'Actualizando...' : 'Actualizar Perfil'}
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </div>
+                </div>
+            </div>
+
+            {/* Debug Info */}
             {isDevelopment && (
-                <div className="mt-8 p-4 bg-gray-900 rounded-lg">
+                <div className="mx-6 mb-6 p-4 bg-gray-900 rounded-lg">
                     <h4 className="text-white font-semibold mb-2">Debug Info</h4>
                     <div className="text-xs text-gray-400 space-y-1">
                         <p>Biosite ID: {biosite.id || 'N/A'}</p>

@@ -12,6 +12,7 @@ import {
 import { Dialog } from "@headlessui/react";
 
 import imgP from "../../assets/img/img.png";
+import imgP6 from "../../assets/img/img_6.png"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 
@@ -123,13 +124,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const getItemStyles = (item: any) => {
         if (activeItem === item.id) {
             const colorClasses = {
-                green: "text-green-600 border-l-4 border-green-300 lg:border-l-4 md:border-b-2 md:border-l-0",
-                orange: "text-orange-600 border-l-4 border-orange-300 lg:border-l-4 md:border-b-2 md:border-l-0",
-                blue: "text-blue-600 border-l-4 border-blue-300 lg:border-l-4 md:border-b-2 md:border-l-0",
+                green: "text-green-600 border-l-4 border-green-300 lg:border-l-4 ",
+                orange: "text-orange-600 border-l-4 border-orange-300 lg:border-l-4 ",
+                blue: "text-blue-600 border-l-4 border-blue-300 lg:border-l-4 ",
             };
-            return colorClasses[item.color as keyof typeof colorClasses] + " shadow-sm bg-gray-700/50";
+            return colorClasses[item.color as keyof typeof colorClasses] + " ";
         }
-        return "text-gray-600 hover:text-white hover:bg-gray-700/30";
+        return "text-gray-600 hover:text-gray-300 ";
     };
 
     const togglePreview = () => {
@@ -138,13 +139,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row h-screen bg-[#1b1b1b] p-2 sm:p-4">
-                {/* Mobile Header */}
-                <div className="lg:hidden flex items-center justify-between p-4 bg-[#2a2a2a] rounded-lg mb-2">
+            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4" >
+
+                <div  className="lg:hidden flex items-center justify-between p-4 bg-[#FAFFF6] rounded-lg mb-2">
                     <div className="flex items-center space-x-3">
                         <img
                             src={getAvatarImage()}
-                            className="w-8 h-8 rounded-lg object-cover"
+                            className="w-8 h-8 rounded-xl object-cover"
                             alt="perfil"
                             onError={handleAvatarError}
                         />
@@ -153,14 +154,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="flex items-center space-x-2">
                         <button
                             onClick={togglePreview}
-                            className="p-2 text-gray-400 hover:text-white transition-colors md:hidden cursor-pointer"
+                            className="p-2 text-gray-400 hover:text-black transition-colors md:hidden cursor-pointer"
                             title="Toggle Preview"
                         >
                             <Smartphone size={20} />
                         </button>
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="p-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                            className="p-2 text-gray-400 hover:text-black transition-colors cursor-pointer"
                         >
                             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
@@ -186,11 +187,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
 
                 {/* Desktop Sidebar */}
-                <div className="hidden lg:flex w-14 xl:w-14 bg-[#2a2a2a] shadow-lg mt-5 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
+                <div className="hidden lg:flex w-14 xl:w-14 bg-[#FAFFF6] shadow-lg mt-5 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
                     <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
                         <img
                             src={getAvatarImage()}
-                            className="rounded-xl w-8 h-8 xl:w-10 xl:h-10 object-cover"
+                            className="rounded-full w-8 h-8 xl:w-10 xl:h-10 object-cover"
                             alt="perfil"
                             onError={handleAvatarError}
                         />
@@ -222,18 +223,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+                <div className="flex-1 flex flex-col  p-0 lg:flex-row min-h-screen ">
                     <main
                         className={`${
                             showPreview && window.innerWidth >= 768 ? "lg:flex-1" : "flex-1"
-                        } flex justify-center items-center rounded-2xl shadow-sm overflow-y-auto p-3 sm:p-6 min-h-0`}
+                        } flex justify-center items-center  overflow-y-auto p-3 sm:p-6 min-h-screen`}
+                        style={{
+                            background: `url(${imgP6}) no-repeat center center`,
+                            backgroundSize: 'cover',
+                            backgroundColor: 'white',
+                        }}
                     >
                         {children}
                     </main>
 
                     {/* Preview Panel */}
                     {showPreview && (
-                        <div className="w-full md:w-[400px] lg:w-[500px] xl:w-[600px] 2xl:w-[700px] mt-4 lg:mt-0 lg:ml-4 p-2 sm:p-4 rounded-2xl shadow-inner flex justify-center items-center bg-[#2a2a2a]/20">
+                        <div className="w-full md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[800px] mt-0 lg:mt-0  p-0 md:p-0  flex justify-center items-center bg-[#C7E1AB]">
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center">
                                 <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 left-2/3 text-white mb-4 text-center">
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}

@@ -236,25 +236,24 @@ const ImageUploadSection = ({
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
     return (
-        <div className="space-y-6 flex gap-3 justify-between mb-6">
+        <div className="flex gap-1">
             {/* Avatar Section */}
-            <div className="p-4 rounded-lg">
-                <h3 className="font-semibold mb-3 text-white">Avatar</h3>
-                <div className="flex items-center space-x-4">
-                    <Upload
-                        showUploadList={false}
-                        customRequest={(options) => customUpload(options, "avatarImage")}
-                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                        disabled={loading}
-                        multiple={false}
-                        maxCount={1}
-                    >
-                        <div className="relative">
+            <div className="flex-1">
+                <Upload
+                    showUploadList={false}
+                    customRequest={(options) => customUpload(options, "avatarImage")}
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                    disabled={loading}
+                    multiple={false}
+                    maxCount={1}
+                >
+                    <div className="relative group cursor-pointer">
+                        <div className="w-28 h-28 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
                             <Image
-                                width={100}
+                                width={120}
                                 height={120}
                                 src={safeAvatarImage}
-                                className="object-cover cursor-pointer rounded-lg"
+                                className="object-cover rounded-lg"
                                 fallback={placeholderAvatar}
                                 preview={false}
                                 onError={(e) => {
@@ -265,40 +264,40 @@ const ImageUploadSection = ({
                                     }
                                 }}
                             />
-                            {loading && (
-                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                                </div>
-                            )}
                         </div>
-                    </Upload>
-                    <div className="text-sm text-gray-400">
-                        <p>Tamaño recomendado: 400x400px</p>
-                        <p>Formatos: JPG, PNG, WebP, GIF</p>
-                        <p>Tamaño máximo: 5MB</p>
+                        {/* Upload overlay */}
+                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        {loading && (
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            </div>
+                        )}
                     </div>
-                </div>
+                </Upload>
             </div>
 
             {/* Background Image Section */}
             {canEditCover && (
-                <div className="p-4 rounded-lg">
-                    <h3 className="font-semibold mb-3 text-white">Imagen de portada</h3>
-                    <div className="space-y-3">
-                        <Upload
-                            showUploadList={false}
-                            customRequest={(options) => customUpload(options, "backgroundImage")}
-                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                            disabled={loading}
-                            multiple={false}
-                            maxCount={1}
-                        >
-                            <div className="relative">
+                <div className="flex-1">
+                    <Upload
+                        showUploadList={false}
+                        customRequest={(options) => customUpload(options, "backgroundImage")}
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        disabled={loading}
+                        multiple={false}
+                        maxCount={1}
+                    >
+                        <div className="relative group cursor-pointer">
+                            <div className="w-72 h-28 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                                 <Image
-                                    width={200}
+                                    width={340}
                                     height={120}
                                     src={safeBackgroundImage}
-                                    className="rounded-lg object-cover cursor-pointer"
+                                    className="rounded-lg object-cover"
                                     fallback={placeholderBackground}
                                     preview={false}
                                     onError={(e) => {
@@ -309,19 +308,20 @@ const ImageUploadSection = ({
                                         }
                                     }}
                                 />
-                                {loading && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                                    </div>
-                                )}
                             </div>
-                        </Upload>
-                        <div className="text-sm text-gray-400">
-                            <p>Tamaño recomendado: 1200x400px</p>
-                            <p>Formatos: JPG, PNG, WebP, GIF</p>
-                            <p>Tamaño máximo: 5MB</p>
+                            {/* Upload overlay */}
+                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                            {loading && (
+                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    </Upload>
                 </div>
             )}
         </div>

@@ -62,14 +62,12 @@ const SocialPage = () => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
 
-        // Si el label o URL contiene palabras excluidas, no es un enlace social regular
         const isExcluded = excludedKeywords.some(keyword =>
             labelLower.includes(keyword) || urlLower.includes(keyword)
         );
 
         if (isExcluded) return false;
 
-        // Verificar si es un enlace social válido comparando con las plataformas disponibles
         const platform = socialMediaPlatforms.find(p => {
             const platformNameLower = p.name.toLowerCase();
             const platformIdLower = p.id.toLowerCase();
@@ -331,17 +329,17 @@ const SocialPage = () => {
     }
 
     return (
-        <div className="max-h-screen mx-auto text-white mt-14">
+        <div className="w-full max-w-md mx-auto rounded-lg  overflow-hidden">
             {/* Header */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-4 ">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleBackClick}
                         className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                         disabled={isSubmitting}
                     >
-                        <ChevronLeft className="w-5 h-5 mr-1" />
-                        <h1 className="text-lg font-semibold">Redes Sociales</h1>
+                        <ChevronLeft className="w-5 h-5 mr-1 text-black"/>
+                        <h1 className="text-lg font-semibold text-black">Redes Sociales</h1>
                     </button>
                 </div>
             </div>
@@ -359,8 +357,9 @@ const SocialPage = () => {
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md border border-gray-600">
                             <div className="flex items-center mb-4">
-                                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
-                                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                                <div
+                                    className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
+                                    <AlertTriangle className="w-5 h-5 text-red-400"/>
                                 </div>
                                 <h3 className="text-lg font-semibold text-white">
                                     Confirmar eliminación
@@ -368,7 +367,8 @@ const SocialPage = () => {
                             </div>
 
                             <p className="text-gray-300 mb-6">
-                                ¿Estás seguro de que quieres eliminar el enlace de <span className="font-medium text-white">{deleteConfirmation.linkLabel}</span>?
+                                ¿Estás seguro de que quieres eliminar el enlace de <span
+                                className="font-medium text-white">{deleteConfirmation.linkLabel}</span>?
                             </p>
 
                             <div className="flex space-x-3">
@@ -399,7 +399,7 @@ const SocialPage = () => {
                                 <h3 className="text-lg font-semibold text-white flex items-center">
                                     <div
                                         className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
-                                        style={{ backgroundColor: editingPlatform.color }}
+                                        style={{backgroundColor: editingPlatform.color}}
                                     >
                                         <img
                                             src={editingPlatform.icon}
@@ -414,7 +414,7 @@ const SocialPage = () => {
                                     className="text-gray-400 hover:text-white"
                                     disabled={isSubmitting}
                                 >
-                                    <X className="w-5 h-5" />
+                                    <X className="w-5 h-5"/>
                                 </button>
                             </div>
 
@@ -453,7 +453,7 @@ const SocialPage = () => {
                                         disabled={!validateUrl(urlInput) || isSubmitting}
                                         className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                     >
-                                        <Check className="w-4 h-4 mr-2" />
+                                        <Check className="w-4 h-4 mr-2"/>
                                         {isSubmitting ? 'Guardando...' : 'Guardar'}
                                     </button>
                                     <button
@@ -472,7 +472,7 @@ const SocialPage = () => {
                 {/* Active Social Links */}
                 {activeSocialLinks.length > 0 && (
                     <div className="mb-6">
-                        <h3 className="text-sm font-semibold text-gray-300 mb-3">
+                        <h3 className="text-sm text-black font-semibold  mb-3">
                             Enlaces activos ({activeSocialLinks.length})
                         </h3>
                         <div className="space-y-2">
@@ -484,20 +484,21 @@ const SocialPage = () => {
                                 );
 
                                 return (
-                                    <div key={link.id} className="flex items-center justify-between p-3 bg-[#2a2a2a] rounded-lg">
+                                    <div key={link.id}
+                                         className="flex items-center justify-between p-3 bg-[#FAFFF6] rounded-lg">
                                         <div className="flex items-center space-x-3">
                                             <div
                                                 className="w-8 h-8 rounded-full flex items-center justify-center"
-                                                style={{ backgroundColor: platform?.color || '#6B7280' }}
+                                                style={{backgroundColor: platform?.color || '#6B7280'}}
                                             >
                                                 <img
                                                     src={platform?.icon || '🔗'}
                                                     alt={link.label}
-                                                    className="w-4 h-4 filter invert brightness-0 contrast-100"
+                                                    className="w-4 h-4  filter invert brightness-0 contrast-100"
                                                 />
                                             </div>
                                             <div>
-                                                <span className="text-sm font-medium text-white">
+                                                <span className="text-sm font-medium text-black">
                                                     {link.label}
                                                 </span>
                                                 <p className="text-xs text-gray-400 truncate max-w-48">
@@ -511,13 +512,13 @@ const SocialPage = () => {
                                                 className="text-gray-400 hover:text-blue-400 transition-colors p-1"
                                                 disabled={isSubmitting}
                                             >
-                                                <Edit2 className="w-4 h-4" />
+                                                <Edit2 className="w-4 h-4"/>
                                             </button>
                                             <button
                                                 onClick={() => window.open(link.url, '_blank')}
                                                 className="text-gray-400 hover:text-green-400 transition-colors p-1"
                                             >
-                                                <ExternalLink className="w-4 h-4" />
+                                                <ExternalLink className="w-4 h-4"/>
                                             </button>
                                             <button
                                                 onClick={(e) => {
@@ -545,7 +546,7 @@ const SocialPage = () => {
                                                 className="text-gray-400 hover:text-red-400 transition-colors p-1"
                                                 disabled={isSubmitting}
                                             >
-                                                <X className="w-4 h-4" />
+                                                <X className="w-4 h-4"/>
                                             </button>
                                         </div>
                                     </div>
@@ -557,10 +558,10 @@ const SocialPage = () => {
 
                 {/* Social Media Platforms Grid */}
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-300 mb-3">
+                    <h3 className="text-sm font-semibold text-black mb-3">
                         Agregar plataforma
                     </h3>
-                    <div className="grid grid-cols-4 gap-2 mb-6">
+                    <div className="grid grid-cols-4  mb-6">
                         {socialMediaPlatforms.map((platform) => {
                             const isActive = isPlatformActive(platform);
                             return (
@@ -578,14 +579,15 @@ const SocialPage = () => {
                                     `}
                                 >
                                     {isActive && (
-                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                                            <X className="w-3 h-3 text-white" />
+                                        <div
+                                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                            <X className="w-3 h-3 text-white"/>
                                         </div>
                                     )}
-                                    <div className="flex flex-col items-center space-y-2">
+                                    <div className="flex flex-col items-center space-y-1">
                                         <div
                                             className="w-8 h-8 rounded-full flex items-center justify-center"
-                                            style={{ backgroundColor: platform.color }}
+                                            style={{backgroundColor: platform.color}}
                                         >
                                             <img
                                                 src={platform.icon}
