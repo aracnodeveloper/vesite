@@ -28,6 +28,11 @@ export interface PreviewContextType {
     updateBiosite: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
     refreshBiosite: () => Promise<void>;
 
+    themeColor: string;
+    setThemeColor: (color: string) => Promise<void>;
+    fontFamily: string;
+    setFontFamily: (font: string) => Promise<void>;
+
     // Social links methods
     setSocialLinks: (links: SocialLink[]) => void;
     addSocialLink: (link: SocialLink) => Promise<void>;
@@ -40,7 +45,6 @@ export interface PreviewContextType {
     removeRegularLink: (linkId: string) => Promise<void>;
     updateRegularLink: (linkId: string, updateData: Partial<RegularLink>) => Promise<void>;
     reorderRegularLinks: (links: RegularLink[]) => Promise<void>;
-
     // Special content methods
     getMusicEmbed: () => any;
     setMusicEmbed: (url: string, note?: string) => Promise<void>;

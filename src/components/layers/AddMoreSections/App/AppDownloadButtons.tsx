@@ -4,12 +4,12 @@ export const AppDownloadButtons = () => {
     const googlePlayUrl = "https://play.google.com/store/apps/details?id=com.visitaEcuador&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1&pli=1";
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md mx-auto">
             <a
                 href={appStoreUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-black hover:bg-gray-800 transition-colors rounded-lg p-3 flex items-center space-x-3 border border-gray-600"
+                className="flex-1 bg-black hover:bg-gray-800 transition-colors  rounded-lg p-1 flex items-center space-x-1 border border-gray-600"
             >
                 {/* SVG App Store */}
                 <div className="flex-shrink-0">
@@ -27,7 +27,7 @@ export const AppDownloadButtons = () => {
                 href={googlePlayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-black hover:bg-gray-800 transition-colors rounded-lg p-3 flex items-center space-x-3 border border-gray-600"
+                className="flex-1 bg-black hover:bg-gray-800 transition-colors rounded-lg p-1 flex items-center space-x-1 border border-gray-600"
             >
                 {/* SVG Google Play */}
                 <div className="flex-shrink-0">

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
-import type { BiositeFull, BiositeUpdateDto } from "../interfaces/Biosite";
+import type {BiositeColors, BiositeFull, BiositeUpdateDto} from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
@@ -36,6 +36,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [biosite, setBiosite] = useState<BiositeFull | null>(null);
     const [socialLinks, setSocialLinksState] = useState<SocialLink[]>([]);
     const [regularLinks, setRegularLinksState] = useState<RegularLink[]>([]);
+    const [themeColor, setThemeColorState] = useState<string>('#ffffff');
+    const [fontFamily, setFontFamilyState] = useState<string>('Inter');
     const initializationRef = useRef<{ [key: string]: boolean }>({});
 
     const loading = biositeLoading || linksLoading;
@@ -76,6 +78,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setBiosite(null);
             setSocialLinksState([]);
             setRegularLinksState([]);
+            setThemeColorState('#ffffff');
+            setFontFamilyState('Inter');
             resetState();
             initializationRef.current = {};
             return;
@@ -90,6 +94,19 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     useEffect(() => {
         if (biositeData) {
             setBiosite(biositeData);
+
+            // Set theme color and font family from biosite data
+            if (biositeData.colors) {
+                if (typeof biositeData.colors === 'string') {
+                    setThemeColorState(biositeData.colors);
+                } else if (biositeData.colors.background) {
+                    setThemeColorState(biositeData.colors.background);
+                }
+            }
+
+            if (biositeData.fonts) {
+                setFontFamilyState(biositeData.fonts);
+            }
         }
     }, [biositeData]);
 
@@ -165,6 +182,95 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             console.error("Error refreshing biosite:", error);
         }
     }, [fetchBiosite]);
+
+    // Theme color management
+    const setThemeColor = useCallback(async (color: string) => {
+        if (!biositeData?.id) {
+            throw new Error("No biosite available");
+        }
+
+        try {
+            console.log("Setting theme color:", color);
+            setThemeColorState(color);
+
+            const colorsObject: BiositeColors = {
+                primary: color,
+                secondary: color,
+                background: color,
+                text: '#000000', // Default text color
+                accent: color,
+                profileBackground: color
+            };
+
+            // Update biosite with new theme color
+            const updateData: BiositeUpdateDto = {
+                ownerId: biositeData.ownerId,
+                title: biositeData.title,
+                slug: biositeData.slug,
+                themeId: biositeData.themeId,
+                colors:JSON.stringify(colorsObject),
+                fonts: biositeData.fonts || fontFamily,
+                avatarImage: biositeData.avatarImage || '',
+                backgroundImage: biositeData.backgroundImage || '',
+                isActive: biositeData.isActive
+            };
+
+            await updateBiosite(updateData);
+            console.log("Theme color updated successfully");
+        } catch (error) {
+            console.error("Error updating theme color:", error);
+            // Revert local state on error
+            if (biositeData.colors) {
+                const previousColor = typeof biositeData.colors === 'string'
+                    ? biositeData.colors
+                    : biositeData.colors.background || '#ffffff';
+                setThemeColorState(previousColor);
+            }
+            throw error;
+        }
+    }, [biositeData, fontFamily, updateBiosite]);
+
+    // Font family management
+    const setFontFamily = useCallback(async (font: string) => {
+        if (!biositeData?.id) {
+            throw new Error("No biosite available");
+        }
+
+        try {
+            console.log("Setting font family:", font);
+            setFontFamilyState(font);
+
+            let colorsString: string;
+            if (typeof biositeData.colors === 'string') {
+                // If it's already a string, use it as is (assuming it's already JSON)
+                colorsString = biositeData.colors;
+            } else {
+                // If it's an object, stringify it
+                colorsString = JSON.stringify(biositeData.colors);
+            }
+
+            // Update biosite with new font family
+            const updateData: BiositeUpdateDto = {
+                ownerId: biositeData.ownerId,
+                title: biositeData.title,
+                slug: biositeData.slug,
+                themeId: biositeData.themeId,
+                colors: colorsString,
+                fonts: font,
+                avatarImage: biositeData.avatarImage || '',
+                backgroundImage: biositeData.backgroundImage || '',
+                isActive: biositeData.isActive
+            };
+
+            await updateBiosite(updateData);
+            console.log("Font family updated successfully");
+        } catch (error) {
+            console.error("Error updating font family:", error);
+            // Revert local state on error
+            setFontFamilyState(biositeData.fonts || 'Inter');
+            throw error;
+        }
+    }, [biositeData, updateBiosite]);
 
     // Social links management functions
     const setSocialLinks = useCallback((links: SocialLink[]) => {
@@ -487,6 +593,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         regularLinks,
         loading,
         error,
+        themeColor,
+        setThemeColor,
+        fontFamily,
+        setFontFamily,
         updatePreview,
         updateBiosite,
         refreshBiosite,

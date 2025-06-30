@@ -185,15 +185,15 @@ const Analytics = () => {
   }
 
   return (
-    <div className="min-h-screen text-white px-6 py-16">
+    <div className="min-h-screen text-white px-6 py-16 ">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-semibold mb-2 text-center">Analytics</h1>
-        <p className="text-center text-gray-500 text-sm mb-10">
+        <h1 className="text-3xl text-black font-semibold mb-2 text-center">Analytics</h1>
+        <p className="text-center text-gray-400 text-sm mb-10">
           Visualize engagement with your Bio Site
         </p>
 
         <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">Daily Activity</h2>
+          <h2 className="text-xl text-gray-600 font-semibold mb-4">Daily Activity</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {analyticsData.dailyActivity.map((activity, index) => (
               <div key={index} className="bg-[#1e1e1e] p-6 rounded-xl border border-[#2a2a2a]">
@@ -206,7 +206,7 @@ const Analytics = () => {
         </div>
 
         <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">Clicks by Link</h2>
+          <h2 className="text-xl text-gray-600 font-semibold mb-4">Clicks by Link</h2>
           {clicksData.length > 0 ? (
             <table className="w-full text-left border-collapse">
               <thead>

@@ -27,8 +27,8 @@ const AppPage = () => {
             <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8 " style={{width:'450px'}}>
                 {/* App Info */}
                 <div className="text-center space-y-4">
-                    <div className="w-24 h-24 mx-auto bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <span className="text-3xl font-bold text-white">VE</span>
+                    <div className="w-24 h-24 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                        <img src="/src/assets/img/img_7.png" className="text-3xl font-bold text-white"/>
                     </div>
                     <h2 className="text-2xl font-bold text-black">VisitaEcuador</h2>
                     <p className="text-gray-600 max-w-md mx-auto leading-relaxed">

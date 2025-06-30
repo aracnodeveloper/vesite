@@ -12,6 +12,11 @@ export interface BiositeThemeConfig {
     fonts: {
         primary: string;
         secondary?: string;
+        third?: string;fourth?: string;
+        fifth?: string;
+        sixth?: string;
+
+
     };
     isDark: boolean;
     isAnimated: boolean;

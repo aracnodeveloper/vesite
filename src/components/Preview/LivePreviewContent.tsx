@@ -22,19 +22,16 @@ const LivePreviewContent = () => {
 
     const { getMusicEmbed, getSocialPost, getVideoEmbed, themeColor, fontFamily } = usePreview();
 
-    // Función para obtener la configuración del tema aplicado
     const getThemeConfig = () => {
-        // Si hay un tema seleccionado en el biosite, usar esa configuración
         if (biosite?.theme?.config) {
             return {
                 colors: biosite.theme.config.colors || parsedColors,
-                fonts: biosite.theme.config.fonts || { primary: fontFamily || 'Inter' },
+                fonts: biosite.theme.config.fonts || { primary: fontFamily || 'Inter', secondary: fontFamily || 'Lato', third: fontFamily || 'Roboto', fourth: fontFamily || 'Poppins', fifth: fontFamily || 'Monstserrat', Sixth: fontFamily || 'OpenSans'},
                 isDark: biosite.theme.config.isDark || false,
                 isAnimated: biosite.theme.config.isAnimated || false
             };
         }
 
-        // Si no hay tema del biosite, usar la configuración del preview context
         return {
             colors: {
                 primary: parsedColors.primary,
@@ -46,7 +43,12 @@ const LivePreviewContent = () => {
             },
             fonts: {
                 primary: fontFamily || 'Inter',
-                secondary: fontFamily || 'Inter'
+                secondary: fontFamily || 'Lato',
+                thrid: fontFamily || 'Roboto',
+                fourth: fontFamily || 'Poppins',
+                fifth: fontFamily || 'Monstserrat',
+                Sixth: fontFamily || 'OpenSans',
+
             },
             isDark: false,
             isAnimated: false
@@ -55,10 +57,8 @@ const LivePreviewContent = () => {
 
     const themeConfig = getThemeConfig();
 
-    // Enhanced default avatar with better styling
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-    // Get special content
     const musicEmbed = getMusicEmbed();
     const socialPost = getSocialPost();
     const videoEmbed = getVideoEmbed();
@@ -91,7 +91,6 @@ const LivePreviewContent = () => {
 
     const realSocialLinks = filterRealSocialLinks(socialLinksData);
 
-    // Helper functions
     const getSpotifyEmbedUrl = (url: string) => {
         const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
         if (trackMatch) {
@@ -108,13 +107,21 @@ const LivePreviewContent = () => {
         return null;
     };
 
+    const getInstagramEmbedUrl = (url: string) => {
+        const postMatch = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+        if (postMatch) {
+            return `https://www.instagram.com/p/${postMatch[1]}/embed/`;
+        }
+        return null;
+    };
+
     const isInstagramUrl = (url: string) => {
-        return url.includes('instagram.com');
+        return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
     };
 
     if (loading) {
         return (
-            <div className="w-full h-full flex items-center justify-center"
+            <div className="w-full h-full p-5 flex items-center justify-center"
                  style={{
                      backgroundColor: themeConfig.colors.background,
                      fontFamily: themeConfig.fonts.primary
@@ -175,7 +182,6 @@ const LivePreviewContent = () => {
                  color: themeConfig.colors.text
              }}>
 
-            {/* Background Header */}
             <div className="relative w-full h-48 flex-shrink-0">
                 {validBackgroundImage ? (
                     <>
@@ -231,10 +237,8 @@ const LivePreviewContent = () => {
                 )}
             </div>
 
-            {/* Scrollable Content */}
             <div className="relative pb-8">
-                {/* Profile Avatar */}
-                <div className="flex justify-center -mt-8 relative z-10 mb-4">
+                <div className="flex justify-center -mt-12 relative z-10 mb-4">
                     {validAvatarImage ? (
                         <div className="relative">
                             {imageLoadStates.avatar === 'loading' && (
@@ -247,7 +251,7 @@ const LivePreviewContent = () => {
                             <img
                                 src={validAvatarImage}
                                 alt="Avatar"
-                                className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                                className="w-24 h-24 rounded-full border-3 border-white object-cover shadow-lg"
                                 onLoadStart={() => handleImageLoadStart('avatar')}
                                 onLoad={() => handleImageLoad('avatar')}
                                 onError={() => handleImageError('avatar', biosite.avatarImage)}
@@ -272,12 +276,11 @@ const LivePreviewContent = () => {
                     )}
                 </div>
 
-                {/* Profile Info */}
                 <div className="text-center px-4 mb-4">
                     <h1 className="text-lg font-bold leading-tight"
                         style={{
                             color: themeConfig.colors.text,
-                            fontFamily: themeConfig.fonts.primary
+                            fontFamily: themeConfig.fonts.primary || themeConfig.fonts.secondary
                         }}>
                         {title || "Tu nombre aquí"}
                     </h1>
@@ -291,7 +294,6 @@ const LivePreviewContent = () => {
                     </p>
                 </div>
 
-                {/* Social Media Icons */}
                 {realSocialLinks.length > 0 && (
                     <div className="px-4 mb-4">
                         <div className="flex justify-center items-center gap-3 flex-wrap">
@@ -326,52 +328,43 @@ const LivePreviewContent = () => {
                     </div>
                 )}
 
-                {/* Video Embed */}
-                {videoEmbed && (
-                    <div className="px-4 mb-4">
-                        <div className="rounded-lg shadow-md overflow-hidden"
-                             style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
-                            {getYouTubeEmbedUrl(videoEmbed.url) ? (
-                                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                                    <iframe
-                                        src={getYouTubeEmbedUrl(videoEmbed.url)!}
-                                        title={videoEmbed.label}
-                                        className="absolute top-0 left-0 w-full h-full"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    ></iframe>
+                {regularLinksData.length > 0 && (
+                    <div className="px-4 pb-8 space-y-2">
+                        {regularLinksData.map(link => (
+                            <a
+                                key={link.id}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full p-3 rounded-lg border-2 text-center transition-all duration-200 hover:shadow-md"
+                                style={{
+                                    borderColor: themeConfig.colors.primary,
+                                    backgroundColor: themeConfig.colors.profileBackground || 'transparent',
+                                    transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
+                                }}
+                            >
+                                <div className="flex items-center justify-center space-x-2">
+                                    <span className="text-xs">🔗</span>
+                                    <span className="font-medium text-xs truncate"
+                                          style={{
+                                              color: themeConfig.colors.text,
+                                              fontFamily: themeConfig.fonts.primary
+                                          }}>
+                                        {link.title}
+                                    </span>
                                 </div>
-                            ) : (
-                                <div className="p-4 text-center">
-                                    <div className="mb-2" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>
-                                        <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM6 8a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm6 4a1 1 0 100-2 1 1 0 000 2z" />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-medium"
-                                       style={{
-                                           color: themeConfig.colors.text,
-                                           fontFamily: themeConfig.fonts.primary
-                                       }}>
-                                        {videoEmbed.label}
-                                    </p>
-                                    <a
-                                        href={videoEmbed.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs hover:underline mt-1 block"
-                                        style={{ color: themeConfig.colors.primary }}
-                                    >
-                                        Ver video
-                                    </a>
-                                </div>
-                            )}
-                        </div>
+                                <p className="text-xs opacity-60 truncate mt-1"
+                                   style={{
+                                       color: themeConfig.colors.text,
+                                       fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
+                                   }}>
+                                    {link.url}
+                                </p>
+                            </a>
+                        ))}
                     </div>
                 )}
 
-                {/* Music Embed */}
                 {musicEmbed && (
                     <div className="px-4 mb-4">
                         <div className="rounded-lg shadow-md overflow-hidden"
@@ -420,50 +413,22 @@ const LivePreviewContent = () => {
                     </div>
                 )}
 
-                {/* Social Post */}
                 {socialPost && (
                     <div className="px-4 mb-4">
                         <div className="rounded-lg shadow-md overflow-hidden"
                              style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
-                            {isInstagramUrl(socialPost.url) ? (
-                                <div className="p-4">
-                                    <div className="flex items-center space-x-3 mb-3">
-                                        <div className="w-10 h-10 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 rounded-full flex items-center justify-center">
-                                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium"
-                                               style={{
-                                                   color: themeConfig.colors.text,
-                                                   fontFamily: themeConfig.fonts.primary
-                                               }}>
-                                                {socialPost.label}
-                                            </p>
-                                            <p className="text-xs" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>
-                                                Instagram Post
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="rounded-lg p-3 text-center"
-                                         style={{ backgroundColor: themeConfig.colors.background }}>
-                                        <div className="mb-2" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>
-                                            <svg className="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        <a
-                                            href={socialPost.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm hover:underline font-medium"
-                                            style={{ color: themeConfig.colors.primary }}
-                                        >
-                                            Ver en Instagram
-                                        </a>
-                                    </div>
-                                </div>
+                            {isInstagramUrl(socialPost.url) && getInstagramEmbedUrl(socialPost.url) ? (
+                                <iframe
+                                    src={getInstagramEmbedUrl(socialPost.url)!}
+                                    width="100%"
+                                    height="500"
+                                    frameBorder="0"
+                                    scrolling="no"
+                                    allowTransparency={true}
+                                    allow="encrypted-media"
+                                    title={socialPost.label}
+                                    style={{ border: 'none', overflow: 'hidden' }}
+                                ></iframe>
                             ) : (
                                 <div className="p-4">
                                     <div className="flex items-center space-x-3">
@@ -498,44 +463,50 @@ const LivePreviewContent = () => {
                     </div>
                 )}
 
-                {/* Regular Links Section */}
-                {regularLinksData.length > 0 && (
-                    <div className="px-4 pb-8 space-y-2">
-                        {regularLinksData.map(link => (
-                            <a
-                                key={link.id}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block w-full p-3 rounded-lg border-2 text-center transition-all duration-200 hover:shadow-md"
-                                style={{
-                                    borderColor: themeConfig.colors.primary,
-                                    backgroundColor: themeConfig.colors.profileBackground || 'transparent',
-                                    transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
-                                }}
-                            >
-                                <div className="flex items-center justify-center space-x-2">
-                                    <span className="text-xs">🔗</span>
-                                    <span className="font-medium text-xs truncate"
-                                          style={{
-                                              color: themeConfig.colors.text,
-                                              fontFamily: themeConfig.fonts.primary
-                                          }}>
-                                        {link.title}
-                                    </span>
+
+                {videoEmbed && (
+                    <div className="px-4 mb-4">
+                        <div className="rounded-lg shadow-md overflow-hidden"
+                             style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
+                            {getYouTubeEmbedUrl(videoEmbed.url) ? (
+                                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                                    <iframe
+                                        src={getYouTubeEmbedUrl(videoEmbed.url)!}
+                                        title={videoEmbed.label}
+                                        className="absolute top-0 left-0 w-full h-full"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    ></iframe>
                                 </div>
-                                <p className="text-xs opacity-60 truncate mt-1"
-                                   style={{
-                                       color: themeConfig.colors.text,
-                                       fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
-                                   }}>
-                                    {link.url}
-                                </p>
-                            </a>
-                        ))}
+                            ) : (
+                                <div className="p-4 text-center">
+                                    <div className="mb-2" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>
+                                        <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM6 8a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H8a2 2 0 01-2-2V8zm6 4a1 1 0 100-2 1 1 0 000 2z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-medium"
+                                       style={{
+                                           color: themeConfig.colors.text,
+                                           fontFamily: themeConfig.fonts.primary
+                                       }}>
+                                        {videoEmbed.label}
+                                    </p>
+                                    <a
+                                        href={videoEmbed.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs hover:underline mt-1 block"
+                                        style={{ color: themeConfig.colors.primary }}
+                                    >
+                                        Ver video
+                                    </a>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
-
                 <div className="mt-12">
                     <AppDownloadButtons />
                 </div>

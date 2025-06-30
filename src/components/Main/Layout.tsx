@@ -43,8 +43,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }
     };
 
-    const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
-
     const sidebarItems = [
         { icon: Layers, label: "Layers", id: "layers", to: "/sections", color: "green" },
         { icon: Droplet, label: "Droplet", id: "droplet", to: "/droplet", color: "orange" },
@@ -75,29 +73,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         return imgP;
     };
-    const getBackImage = () => {
-        if (avatarError || !biosite?.backgroundImage) {
-            return imgP6; // Fallback to default static image
-        }
 
-        // Check if it's a valid image URL
-        if (typeof biosite.backgroundImage === 'string' && biosite.backgroundImage.trim()) {
-            if (biosite.backgroundImage.startsWith('data:')) {
-                // Validate base64 data URL
-                const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
-                return dataUrlRegex.test(biosite.backgroundImage) ? biosite.backgroundImage : imgP6;
-            }
-
-            try {
-                new URL(biosite.backgroundImage);
-                return biosite.backgroundImage;
-            } catch {
-                return imgP6;
-            }
-        }
-
-        return imgP6;
-    };
     const handleAvatarError = () => {
         setAvatarError(true);
     };
@@ -161,7 +137,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4  overflow-x-hidden overflow-y-hidden" >
+            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4  overflow-x-hidden md:overflow-y-hidden" >
 
                 <div  className="lg:hidden flex items-center justify-between p-4 bg-[#FAFFF6] rounded-lg mb-2">
                     <div className="flex items-center space-x-3">
@@ -245,7 +221,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col  p-0 lg:flex-row min-h-screen ">
+                <div className="flex-1 flex flex-col pt-0 p-0 lg:flex-row min-h-screen ">
                     <main
                         className={`${
                             showPreview && window.innerWidth >= 768 ? "lg:flex-1" : "flex-1"
@@ -266,7 +242,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div
                                 className="absolute inset-0 opacity-20"
                                 style={{
-                                    background: `url(${getBackImage()}) no-repeat center center`,
+
                                     backgroundSize: 'cover',
                                     filter: 'blur(40px)',
                                     transform: 'scale(1.1)', // Evita bordes difuminados
@@ -277,7 +253,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div
                                 className="absolute inset-0"
                                 style={{
-                                    background: `url(${getBackImage()}) no-repeat center center`,
+                                    background: 'white',
                                     backgroundSize: 'cover',
                                     height:'100%',
                                     opacity: 0.6,
@@ -286,7 +262,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                             {/* Contenido del preview (celular) */}
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center z-50 relative">
-                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 left-2/3 text-white mb-4 text-center z-60">
+                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2  left-20 text-white mb-4 text-center z-60">
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}
                                 </div>
                                 <PhonePreview>

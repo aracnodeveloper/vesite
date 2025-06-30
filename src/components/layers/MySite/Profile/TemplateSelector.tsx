@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Loader2 } from 'lucide-react';
-import { useTemplates } from '../../../../hooks/useTemplates'; // Ajusta la ruta según tu estructura
-
-// Interfaces para las plantillas
+import { useTemplates } from '../../../../hooks/useTemplates';
 export interface Platilla {
     id: string;
     name?: string;
     description?: string;
     previewUrl?: string;
     index?: number;
-    config: any; // JSON configuration
+    config: any;
     isActive?: boolean;
 }
 
@@ -27,12 +25,12 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     const { templates, loading: loadingTemplates, error, refetch } = useTemplates();
     const [selectedTemplate, setSelectedTemplate] = useState<string>(currentThemeId);
 
-    // Update selected template when currentThemeId changes
+
     useEffect(() => {
         setSelectedTemplate(currentThemeId);
     }, [currentThemeId]);
 
-    // Retry loading templates if there's an error
+
     const handleRetry = () => {
         refetch();
     };

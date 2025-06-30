@@ -9,7 +9,7 @@ const Links = () => {
             className="bg-[#FAFFF6] rounded-lg p-4 mb-4 flex items-center justify-between cursor-pointer  transition-colors"
         >
             <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#6F4FC1] rounded-lg flex items-center justify-center">
                     <svg width="50" height="51" viewBox="0 0 50 51" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M6 12.5C6 9.73858 8.23858 7.5 11 7.5H38C40.7614 7.5 43 9.73858 43 12.5V39.5C43 42.2614 40.7614 44.5 38 44.5H11C8.23858 44.5 6 42.2614 6 39.5V12.5Z"
@@ -26,7 +26,7 @@ const Links = () => {
                 </div>
             </div>
             <div
-                className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600 hover:border-purple-600 transition-colors">
+                className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-[#6F4FC1] hover:border-[#6F4FC1] transition-colors">
             <span className="text-black text-sm hover:text-white">+</span>
             </div>
         </div>
