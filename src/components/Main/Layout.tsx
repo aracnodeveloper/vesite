@@ -161,7 +161,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4  overflow-x-hidden" >
+            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4  overflow-x-hidden overflow-y-hidden" >
 
                 <div  className="lg:hidden flex items-center justify-between p-4 bg-[#FAFFF6] rounded-lg mb-2">
                     <div className="flex items-center space-x-3">
@@ -249,7 +249,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <main
                         className={`${
                             showPreview && window.innerWidth >= 768 ? "lg:flex-1" : "flex-1"
-                        } flex justify-center items-center  overflow-y-hidden p-3 sm:p-6 min-h-screen`}
+                        } flex justify-center items-center  overflow-y-auto p-3 sm:p-6 min-h-screen`}
                         style={{
                             background: `url(${imgP6}) no-repeat center center`,
                             backgroundSize: 'cover',

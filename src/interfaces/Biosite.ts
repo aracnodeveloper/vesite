@@ -1,7 +1,26 @@
-
 export interface BiositeColors {
     primary: string;
     secondary: string;
+    accent?: string;
+    background?: string;
+    text?: string;
+    profileBackground?: string;
+}
+
+export interface BiositeThemeConfig {
+    colors: BiositeColors;
+    fonts: {
+        primary: string;
+        secondary?: string;
+    };
+    isDark: boolean;
+    isAnimated: boolean;
+}
+
+export interface BiositeTheme {
+    id: string;
+    name: string;
+    config: BiositeThemeConfig;
 }
 
 export interface BiositeOwner {
@@ -30,6 +49,7 @@ export interface BiositeFull {
     title: string;
     slug: string;
     themeId: string;
+    theme?: BiositeTheme; // Optional theme object with full config
     colors: string | BiositeColors;
     fonts?: string;
     avatarImage?: string;
@@ -40,10 +60,10 @@ export interface BiositeFull {
     updatedAt: string;
     owner?: BiositeOwner;
     links?: BiositeLink[];
+
 }
 
 export interface BiositeUpdateDto {
-
     ownerId: string;
     title: string;
     slug: string;
@@ -54,4 +74,3 @@ export interface BiositeUpdateDto {
     backgroundImage: string;
     isActive: boolean;
 }
-

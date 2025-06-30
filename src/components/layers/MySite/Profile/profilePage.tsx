@@ -200,7 +200,7 @@ const ProfilePage = () => {
             window.location.hostname.includes('dev'));
 
     return (
-        <div className="w-full  max-h-screen  max-w-md mx-auto rounded-lg  overflow-hidden">
+        <div className="w-full  max-h-screen mb-10 max-w-md mx-auto rounded-lg  ">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
