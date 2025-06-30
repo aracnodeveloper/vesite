@@ -18,7 +18,7 @@ export const getBiositeApi = "/biosites/user";
 
 //Links
 export const LinksApi = "/links"
-
+export const LinksImageApi = "/upload/image-link";
 //upload
 
 export const uploadImageApi: string = "/upload/image";

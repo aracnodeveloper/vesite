@@ -307,12 +307,21 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const updateRegularLink = useCallback(async (linkId: string, updateData: Partial<RegularLink>) => {
         try {
             console.log("Updating regular link:", linkId, updateData);
-            const updatedLink = await updateLink(linkId, {
+
+            // Preparar los datos para enviar al backend
+            const updatePayload: any = {
                 label: updateData.title,
                 url: updateData.url,
                 isActive: updateData.isActive,
                 orderIndex: updateData.orderIndex
-            });
+            };
+
+            // Agregar la imagen si está presente
+            if (updateData.image !== undefined) {
+                updatePayload.image = updateData.image;
+            }
+
+            const updatedLink = await updateLink(linkId, updatePayload);
             console.log("Regular link updated:", updatedLink);
             await fetchLinks();
         } catch (error) {

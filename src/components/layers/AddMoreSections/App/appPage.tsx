@@ -17,8 +17,8 @@ const AppPage = () => {
                         onClick={handleBackClick}
                         className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                     >
-                        <ChevronLeft className="w-5 h-5 mr-1 text-black" />
-                        <h1 className="text-lg text-black font-semibold">Descarga VisitaEcuador</h1>
+                        <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400" />
+                        <h1 className="text-lg text-black font-semibold hover:text-gray-400">Descarga VisitaEcuador</h1>
                     </button>
                 </div>
             </div>

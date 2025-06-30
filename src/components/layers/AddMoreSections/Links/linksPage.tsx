@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { useNavigate } from "react-router-dom";
+import { uploadLinkImage } from "../../MySite/Profile/lib/uploadImage.ts";
 
 const LinksPage = () => {
     const {
@@ -31,6 +32,7 @@ const LinksPage = () => {
     const [editImage, setEditImage] = useState<string | undefined>(undefined);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     // Drag and drop state
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -67,6 +69,7 @@ const LinksPage = () => {
                 console.log("Link added successfully");
             } catch (error) {
                 console.error("Error adding link:", error);
+                alert('Error al agregar el enlace');
             } finally {
                 setIsSubmitting(false);
             }
@@ -81,6 +84,7 @@ const LinksPage = () => {
             console.log("Link deleted successfully");
         } catch (error) {
             console.error("Error deleting link:", error);
+            alert('Error al eliminar el enlace');
         } finally {
             setIsSubmitting(false);
         }
@@ -101,31 +105,105 @@ const LinksPage = () => {
             setIsSubmitting(true);
             const linkToUpdate = activeLinks[editingIndex];
 
-            await updateRegularLink(linkToUpdate.id, {
+            const updateData = {
                 title: editTitle,
                 url: editUrl,
-            });
+                image: editImage,
+            };
+
+            console.log("Datos que se van a enviar:", updateData);
+
+            await updateRegularLink(linkToUpdate.id, updateData);
 
             setEditingIndex(null);
+            // Limpiar los estados de edición
+            setEditTitle("");
+            setEditUrl("");
+            setEditImage(undefined);
+
             console.log("Link updated successfully");
         } catch (error) {
             console.error("Error updating link:", error);
+            alert('Error al actualizar el enlace');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            if (typeof reader.result === "string") {
-                setEditImage(reader.result);
+        if (!file.type.startsWith('image/')) {
+            console.error('Please select an image file');
+            alert('Por favor selecciona un archivo de imagen válido');
+            return;
+        }
+
+        // Validar tamaño (opcional - máximo 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            console.error('Image size should be less than 5MB');
+            alert('El tamaño de la imagen debe ser menor a 5MB');
+            return;
+        }
+
+        // Si estamos editando un enlace existente
+        if (editingIndex !== null) {
+            const linkToUpdate = activeLinks[editingIndex];
+
+            if (linkToUpdate.id) {
+                try {
+                    setUploadingImage(true);
+                    console.log("Uploading image for link ID:", linkToUpdate.id);
+
+                    // Subir imagen usando el endpoint específico
+                    const imageUrl = await uploadLinkImage(file, linkToUpdate.id);
+                    console.log("Image uploaded successfully:", imageUrl);
+
+                    // Actualizar el estado local para mostrar la imagen inmediatamente
+                    setEditImage(imageUrl);
+
+                    console.log("Image URL set in edit state:", imageUrl);
+
+                } catch (error) {
+                    console.error("Error uploading link image:", error);
+                    alert('Error al subir la imagen al servidor');
+
+                    // Fallback a base64 si falla la subida
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        if (typeof reader.result === "string") {
+                            setEditImage(reader.result);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } finally {
+                    setUploadingImage(false);
+                }
+            } else {
+                // Si no hay ID del enlace, usar base64 como fallback
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (typeof reader.result === "string") {
+                        setEditImage(reader.result);
+                    }
+                };
+                reader.readAsDataURL(file);
             }
-        };
-        reader.readAsDataURL(file);
+        } else {
+            // Para nuevos enlaces, usar base64
+            const reader = new FileReader();
+            reader.onload = () => {
+                if (typeof reader.result === "string") {
+                    setEditImage(reader.result);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+        e.target.value = '';
     };
 
     // HTML5 Drag and Drop handlers
@@ -193,11 +271,28 @@ const LinksPage = () => {
             console.log("Links reordered successfully");
         } catch (error) {
             console.error("Error reordering links:", error);
+            alert('Error al reordenar los enlaces');
         } finally {
             setDraggedIndex(null);
             setDragOverIndex(null);
         }
     };
+
+    const handleCancelEdit = () => {
+        setEditingIndex(null);
+        setEditTitle("");
+        setEditUrl("");
+        setEditImage(undefined);
+    };
+
+    const handleCancelAdd = () => {
+        setAdding(false);
+        setNewUrl("");
+    };
+
+    // Debug logs
+    console.log("Active links:", activeLinks);
+    console.log("Current edit image:", editImage);
 
     if (loading && activeLinks.length === 0) {
         return (
@@ -220,15 +315,15 @@ const LinksPage = () => {
                             onClick={handleBackClick}
                             className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                         >
-                            <ChevronLeft className="w-5 h-5 mr-1 text-black"/>
-                            <h1 className="text-lg text-black font-semibold">Links</h1>
+                            <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
+                            <h1 className="text-lg text-black font-semibold hover:text-gray-400">Links</h1>
                         </button>
                     </div>
                 </div>
             ) : (
                 <div className="p-4">
                     <button
-                        onClick={() => setEditingIndex(null)}
+                        onClick={handleCancelEdit}
                         className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
                         disabled={isSubmitting}
                     >
@@ -251,29 +346,29 @@ const LinksPage = () => {
                 {editingIndex !== null ? (
                     <div className="space-y-4">
                         <div>
-                            <p className="text-sm mb-1 text-gray-300">NOMBRE</p>
+                            <p className="text-sm mb-1 text-gray-600">NOMBRE</p>
                             <input
                                 value={editTitle}
                                 onChange={(e) => setEditTitle(e.target.value)}
-                                className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-gray-600 text-white focus:outline-none focus:border-blue-500"
+                                className="w-full p-3 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
                                 placeholder="Nombre del enlace"
                                 disabled={isSubmitting}
                             />
                         </div>
 
                         <div>
-                            <p className="text-sm mb-1 text-gray-300">URL</p>
+                            <p className="text-sm mb-1 text-gray-600">URL</p>
                             <input
                                 value={editUrl}
                                 onChange={(e) => setEditUrl(e.target.value)}
-                                className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-gray-600 text-white focus:outline-none focus:border-blue-500"
+                                className="w-full p-3 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
                                 placeholder="https://ejemplo.com"
                                 disabled={isSubmitting}
                             />
                         </div>
 
                         <div>
-                            <p className="text-sm mb-1 text-gray-300">IMAGEN (opcional)</p>
+                            <p className="text-sm mb-1 text-gray-600">IMAGEN (opcional)</p>
                             <div className="flex items-center space-x-2">
                                 {editImage ? (
                                     <div className="relative">
@@ -281,22 +376,36 @@ const LinksPage = () => {
                                             src={editImage}
                                             alt="Preview"
                                             className="w-16 h-16 rounded-lg object-cover"
+                                            onError={(e) => {
+                                                console.error('Image failed to load:', editImage);
+                                                const img = e.target as HTMLImageElement;
+                                                img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHA+dGggZD0iTTI4IDI4TDM2IDM2TDQwIDMyTDQ0IDM2VjQ0SDIwVjM2TDI4IDI4WiIgc3Ryb2tlPSIjOUNBM0FGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K';
+                                            }}
                                         />
                                         <button
                                             onClick={() => setEditImage(undefined)}
                                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                                            disabled={isSubmitting}
+                                            disabled={isSubmitting || uploadingImage}
                                         >
                                             <X size={12} />
                                         </button>
+                                        {uploadingImage && (
+                                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center hover:border-gray-500 transition-colors"
-                                        disabled={isSubmitting}
+                                        className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center hover:border-gray-500 transition-colors relative"
+                                        disabled={isSubmitting || uploadingImage}
                                     >
-                                        <ImagePlus size={24} className="text-gray-400" />
+                                        {uploadingImage ? (
+                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+                                        ) : (
+                                            <ImagePlus size={24} className="text-gray-400" />
+                                        )}
                                     </button>
                                 )}
                                 <input
@@ -305,21 +414,25 @@ const LinksPage = () => {
                                     accept="image/*"
                                     onChange={handleImageUpload}
                                     className="hidden"
+                                    disabled={uploadingImage}
                                 />
                             </div>
+                            {uploadingImage && (
+                                <p className="text-sm text-blue-600 mt-1">Subiendo imagen...</p>
+                            )}
                         </div>
 
                         <div className="flex space-x-3 pt-4">
                             <button
                                 onClick={handleSaveEdit}
-                                disabled={isSubmitting || !editTitle.trim() || !editUrl.trim()}
+                                disabled={isSubmitting || !editTitle.trim() || !editUrl.trim() || uploadingImage}
                                 className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 {isSubmitting ? "Guardando..." : "Guardar cambios"}
                             </button>
                             <button
-                                onClick={() => setEditingIndex(null)}
-                                disabled={isSubmitting}
+                                onClick={handleCancelEdit}
+                                disabled={isSubmitting || uploadingImage}
                                 className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
                             >
                                 Cancelar
@@ -332,7 +445,7 @@ const LinksPage = () => {
                         {/* Active Links Section */}
                         {activeLinks.length > 0 && (
                             <div>
-                                <h3 className="text-sm text-black font-semibold mb-3">
+                                <h3 className="text-sm text-gray-600 font-semibold mb-3">
                                     Enlaces activos ({activeLinks.length})
                                 </h3>
                                 <div className="space-y-2">
@@ -361,6 +474,19 @@ const LinksPage = () => {
                                                         src={link.image}
                                                         alt=""
                                                         className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
+                                                        onError={(e) => {
+                                                            console.warn('Link image failed to load:', link.image);
+                                                            const img = e.target as HTMLImageElement;
+                                                            // Fallback to default icon if image fails
+                                                            img.style.display = 'none';
+                                                            const parent = img.parentElement;
+                                                            if (parent && !parent.querySelector('.fallback-icon')) {
+                                                                const fallback = document.createElement('div');
+                                                                fallback.className = 'w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0 fallback-icon';
+                                                                fallback.innerHTML = '<span class="text-xs text-gray-500">🔗</span>';
+                                                                parent.appendChild(fallback);
+                                                            }
+                                                        }}
                                                     />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
@@ -411,7 +537,7 @@ const LinksPage = () => {
 
                         {/* Add New Link Section */}
                         <div>
-                            <h3 className="text-sm font-semibold text-black mb-3">
+                            <h3 className="text-sm font-semibold text-gray-600 mb-3">
                                 Agregar enlace
                             </h3>
 
@@ -438,10 +564,7 @@ const LinksPage = () => {
                                         <Check size={20} />
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            setAdding(false);
-                                            setNewUrl("");
-                                        }}
+                                        onClick={handleCancelAdd}
                                         disabled={isSubmitting}
                                         className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50"
                                     >

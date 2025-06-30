@@ -75,7 +75,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         return imgP;
     };
+    const getBackImage = () => {
+        if (avatarError || !biosite?.backgroundImage) {
+            return imgP6; // Fallback to default static image
+        }
 
+        // Check if it's a valid image URL
+        if (typeof biosite.backgroundImage === 'string' && biosite.backgroundImage.trim()) {
+            if (biosite.backgroundImage.startsWith('data:')) {
+                // Validate base64 data URL
+                const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
+                return dataUrlRegex.test(biosite.backgroundImage) ? biosite.backgroundImage : imgP6;
+            }
+
+            try {
+                new URL(biosite.backgroundImage);
+                return biosite.backgroundImage;
+            } catch {
+                return imgP6;
+            }
+        }
+
+        return imgP6;
+    };
     const handleAvatarError = () => {
         setAvatarError(true);
     };
@@ -139,7 +161,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4" >
+            <div className="flex flex-col lg:flex-row h-screen bg-[#E0EED5]  p-2 sm:p-4  overflow-x-hidden" >
 
                 <div  className="lg:hidden flex items-center justify-between p-4 bg-[#FAFFF6] rounded-lg mb-2">
                     <div className="flex items-center space-x-3">
@@ -170,7 +192,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                 {/* Mobile Navigation Menu */}
                 {isMobileMenuOpen && (
-                    <div className="lg:hidden bg-[#2a2a2a] rounded-lg mb-2 p-4">
+                    <div className="lg:hidden bg-[#FAFFF6] rounded-lg mb-2 p-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {sidebarItems.map((item) => (
                                 <button
@@ -227,7 +249,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <main
                         className={`${
                             showPreview && window.innerWidth >= 768 ? "lg:flex-1" : "flex-1"
-                        } flex justify-center items-center  overflow-y-auto p-3 sm:p-6 min-h-screen`}
+                        } flex justify-center items-center  overflow-y-hidden p-3 sm:p-6 min-h-screen`}
                         style={{
                             background: `url(${imgP6}) no-repeat center center`,
                             backgroundSize: 'cover',
@@ -239,9 +261,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                     {/* Preview Panel */}
                     {showPreview && (
-                        <div className="w-full md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[800px] mt-0 lg:mt-0  p-0 md:p-0  flex justify-center items-center bg-[#C7E1AB]">
-                            <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center">
-                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 left-2/3 text-white mb-4 text-center">
+                        <div className="w-full md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[800px] mt-0 lg:mt-0 p-0 md:p-0 flex justify-center items-center relative">
+                            {/* Background difuminado con avatar */}
+                            <div
+                                className="absolute inset-0 opacity-20"
+                                style={{
+                                    background: `url(${getBackImage()}) no-repeat center center`,
+                                    backgroundSize: 'cover',
+                                    filter: 'blur(40px)',
+                                    transform: 'scale(1.1)', // Evita bordes difuminados
+                                }}
+                            />
+
+                            {/* Background overlay con imgP6 */}
+                            <div
+                                className="absolute inset-0"
+                                style={{
+                                    background: `url(${getBackImage()}) no-repeat center center`,
+                                    backgroundSize: 'cover',
+                                    height:'100%',
+                                    opacity: 0.6,
+                                }}
+                            />
+
+                            {/* Contenido del preview (celular) */}
+                            <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center z-50 relative">
+                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 left-2/3 text-white mb-4 text-center z-60">
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}
                                 </div>
                                 <PhonePreview>

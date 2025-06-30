@@ -9,8 +9,9 @@ interface Link {
     label: string;
     url: string;
     icon: string;
-    color?: string;
+    image?: string;
     isActive: boolean;
+    color?: string;
     orderIndex: number;
     createdAt: string;
     updatedAt: string;
@@ -21,6 +22,7 @@ interface CreateLinkDto {
     label: string;
     url: string;
     icon: string;
+    image?:string;
     orderIndex: number;
     isActive?: boolean;
 }
@@ -28,6 +30,7 @@ interface CreateLinkDto {
 interface UpdateLinkDto {
     label?: string;
     url?: string;
+    image?:string;
     icon?: string;
     orderIndex?: number;
     isActive?: boolean;
