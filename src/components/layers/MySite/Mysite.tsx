@@ -1,5 +1,6 @@
 import Profile from "./Profile/profile.tsx";
 import Social from "./Social/social.tsx";
+import V_Card from "./V-Card/V-Card.tsx";
 
 const MySite = () => {
     return (
@@ -8,6 +9,7 @@ const MySite = () => {
             <div className="space-y-3">
                 <Profile />
                 <Social />
+                <V_Card/>
             </div>
         </div>
     );

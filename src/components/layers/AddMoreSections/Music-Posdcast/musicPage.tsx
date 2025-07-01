@@ -65,17 +65,18 @@ const MusicPage = () => {
     }
 
     return (
-        <div className="max-w-full  text-white px-4 py-6">
+        <div className="max-w-full  min-h-screen text-white px-4 py-6">
             {/* Header */}
-            <div className="flex items-center mb-8 mt-3">
-                <button
-                    onClick={handleBackClick}
-                    className="flex items-center text-black hover:text-gray-400 transition-colors cursor-pointer"
-                    disabled={isSubmitting}
-                >
-                    <ChevronLeft size={16} className="mr-2 hover:text-gray-400" />
-                    Music / Podcast
-                </button>
+            <div className="py-4 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleBackClick}
+                        className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors"
+                    >
+                        <ChevronLeft className="w-5 h-5 mr-1 hover:text-gray-400" />
+                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400">Music/Podcast</h1>
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-4 w-96">
@@ -135,7 +136,7 @@ const MusicPage = () => {
                                 setNote('');
                             }}
                             disabled={isSubmitting}
-                            className="w-full mt-2 bg-gray-600 h-14 px-4 py-2 rounded-full hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            className="w-full  h-4 bg-gray-600 h-10 px-4 py-2 rounded-full hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             Clear
                         </button>

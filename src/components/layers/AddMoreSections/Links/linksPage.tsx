@@ -306,7 +306,7 @@ const LinksPage = () => {
     }
 
     return (
-        <div className="w-full max-w-md mx-auto rounded-lg overflow-hidden">
+        <div className="w-full max-w-md min-h-sreen mx-auto rounded-lg overflow-hidden">
             {/* Header */}
             {editingIndex === null ? (
                 <div className="p-4">

@@ -329,7 +329,7 @@ const SocialPage = () => {
     }
 
     return (
-        <div className="w-full max-w-md mx-auto rounded-lg  overflow-hidden">
+        <div className="w-full max-w-md min-h-sreen mx-auto rounded-lg  overflow-hidden">
             {/* Header */}
             <div className="p-4 ">
                 <div className="flex items-center gap-3">

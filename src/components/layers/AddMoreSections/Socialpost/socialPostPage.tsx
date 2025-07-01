@@ -73,12 +73,12 @@ const PostPage = () => {
     }
 
     return (
-        <div className="max-w-full  text-white px-4 py-6">
+        <div className="max-w-full min-h-screen text-white px-4 py-6">
             {/* Header */}
             <div className="flex items-center mb-8 mt-3">
                 <button
                     onClick={handleBackClick}
-                    className="flex items-center text-black hover:text-gray-400 transition-colors cursor-pointer"
+                    className="flex items-center text-lg font-semibold text-black hover:text-gray-400 transition-colors cursor-pointer"
                     disabled={isSubmitting}
                 >
                     <ChevronLeft size={16} className="mr-2 hover:text-gray-400" />

@@ -70,17 +70,18 @@ const VideoPage = () => {
     }
 
     return (
-        <div className="max-w-xl  text-white px-4 py-6">
+        <div className="max-w-xl min-h-screen text-white px-4 py-6">
             {/* Header */}
-            <div className="flex items-center mb-8 mt-3">
-                <button
-                    onClick={handleBackClick}
-                    className="flex items-center text-black hover:text-gray-600 transition-colors cursor-pointer"
-                    disabled={isSubmitting}
-                >
-                    <ChevronLeft size={16} className="mr-2 text-black hover:text-gray-600 " />
-                    Video
-                </button>
+            <div className=" py-4 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleBackClick}
+                        className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors"
+                    >
+                        <ChevronLeft className="w-5 h-5 mr-1 hover:text-gray-400" />
+                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400">Videos</h1>
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-4">

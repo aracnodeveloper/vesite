@@ -23,6 +23,7 @@ import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
 import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
+import VCardPage from "./components/layers/MySite/V-Card/V-CardPage.tsx";
 
 // Rutas protegidas
 
@@ -164,6 +165,16 @@ const App = () => {
                             <Layout>
                                 <Styles />
                             </Layout>
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/VCard"
+                element={
+                    <PrivateRoute>
+                        <Layout>
+                            <VCardPage />
+                        </Layout>
                     </PrivateRoute>
                 }
             />

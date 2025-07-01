@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type {BiositeColors, BiositeFull, BiositeUpdateDto} from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
-import { useFetchBiosite } from "../hooks/useFetchBiosite";
+import { useFetchBiosite, CreateBiositeDto } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import Cookies from "js-cookie";
 
@@ -14,7 +14,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         loading: biositeLoading,
         error: biositeError,
         fetchBiosite,
+        fetchUserBiosites,
+        createBiosite,
         updateBiosite: updateBiositeHook,
+        switchBiosite,
         clearError: clearBiositeError,
         resetState
     } = useFetchBiosite(userId);
@@ -271,6 +274,46 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [biositeData, updateBiosite]);
+
+    // Biosite management functions
+    const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
+        try {
+            console.log("Creating new biosite:", data);
+            const result = await createBiosite(data);
+            console.log("New biosite created:", result);
+            return result;
+        } catch (error) {
+            console.error("Error creating biosite:", error);
+            throw error;
+        }
+    }, [createBiosite]);
+
+    const getUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+        try {
+            console.log("Fetching user biosites");
+            const result = await fetchUserBiosites();
+            console.log("User biosites fetched:", result);
+            return result;
+        } catch (error) {
+            console.error("Error fetching user biosites:", error);
+            throw error;
+        }
+    }, [fetchUserBiosites]);
+
+    const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
+        try {
+            console.log("Switching to biosite:", biositeId);
+            const result = await switchBiosite(biositeId);
+            if (result) {
+                setBiosite(result);
+                console.log("Biosite switched successfully");
+            }
+            return result;
+        } catch (error) {
+            console.error("Error switching biosite:", error);
+            throw error;
+        }
+    }, [switchBiosite]);
 
     // Social links management functions
     const setSocialLinks = useCallback((links: SocialLink[]) => {
@@ -555,14 +598,12 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             const label = title || 'Video';
 
             if (existingVideo) {
-                // Update existing video embed
                 await updateLink(existingVideo.id, {
                     label,
                     url,
                     isActive: !!url
                 });
             } else {
-                // Create new video embed
                 const maxOrderIndex = Math.max(...links.map(l => l.orderIndex), -1);
                 await createLink({
                     biositeId: biositeData.id,
@@ -600,10 +641,16 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         updatePreview,
         updateBiosite,
         refreshBiosite,
+        // Biosite management
+        createNewBiosite,
+        getUserBiosites,
+        switchToAnotherBiosite,
+        // Social links management
         setSocialLinks,
         addSocialLink,
         removeSocialLink,
         updateSocialLink,
+        // Regular links management
         setRegularLinks,
         addRegularLink,
         removeRegularLink,
