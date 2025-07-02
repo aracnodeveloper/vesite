@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type {BiositeColors, BiositeFull, BiositeUpdateDto} from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
-import { useFetchBiosite, CreateBiositeDto } from "../hooks/useFetchBiosite";
+import { useFetchBiosite,type CreateBiositeDto } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import Cookies from "js-cookie";
 

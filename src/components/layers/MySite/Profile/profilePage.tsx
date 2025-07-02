@@ -16,6 +16,12 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
+    // Check if user is admin
+    const isAdmin = role === 'admin' || role === 'ADMIN';
+
+    // Default background URL for non-admin users
+    const DEFAULT_BACKGROUND = 'https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
+
     const loading = previewLoading || updateLoading;
     useEffect(() => {
         if (biosite && !loading) {
@@ -69,6 +75,17 @@ const ProfilePage = () => {
                 return '{"primary":"#3B82F6","secondary":"#1F2937"}';
             };
 
+            // Determine background image based on user role
+            const getBackgroundImage = (): string => {
+                if (isAdmin) {
+                    // Admin users can keep their custom background or empty
+                    return biosite.backgroundImage || '';
+                } else {
+                    // Non-admin users get default background if they don't have one
+                    return biosite.backgroundImage || DEFAULT_BACKGROUND;
+                }
+            };
+
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || biosite.title,
@@ -77,18 +94,19 @@ const ProfilePage = () => {
                 colors: ensureColorsAsString(biosite.colors),
                 fonts: biosite.fonts || '',
                 avatarImage: biosite.avatarImage || '',
-                backgroundImage: biosite.backgroundImage || '',
+                backgroundImage: getBackgroundImage(),
                 isActive: biosite.isActive ?? true
             };
 
             console.log("=== UPDATE DATA ===");
             console.log("Update data being sent:", updateData);
-
+            console.log("User role:", role);
+            console.log("Is admin:", isAdmin);
+            console.log("Background image:", updateData.backgroundImage);
 
             const loadingMessage = message.loading('Actualizando perfil...', 0);
 
             console.log("=== CALLING UPDATE FUNCTION ===");
-
 
             console.log("=== ENSURING HOOK HAS BIOSITE DATA ===");
             await fetchBiosite();
@@ -229,6 +247,28 @@ const ProfilePage = () => {
                     />
                 </div>
 
+                {/* Non-admin background info */}
+                {!isAdmin && (
+                    <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-medium text-blue-800 mb-1">Imagen de fondo</h4>
+                                <p className="text-sm text-blue-700">
+                                    {biosite.backgroundImage
+                                        ? 'Tienes una imagen de fondo personalizada configurada.'
+                                        : 'Se aplicará una imagen de fondo por defecto a tu perfil.'
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* About Section */}
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide">ACERCA DE</h3>
@@ -309,6 +349,9 @@ const ProfilePage = () => {
                         <p>Biosite ID: {biosite.id || 'N/A'}</p>
                         <p>User ID: {userId || 'N/A'}</p>
                         <p>Role: {role || 'N/A'}</p>
+                        <p>Is Admin: {isAdmin ? 'Yes' : 'No'}</p>
+                        <p>Current Background: {biosite.backgroundImage || 'None'}</p>
+                        <p>Default Background: {DEFAULT_BACKGROUND}</p>
                         <p>Loading: {loading ? 'Yes' : 'No'}</p>
                         <p>Preview Loading: {previewLoading ? 'Yes' : 'No'}</p>
                         <p>Update Loading: {updateLoading ? 'Yes' : 'No'}</p>

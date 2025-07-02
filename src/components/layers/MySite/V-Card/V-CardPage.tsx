@@ -79,7 +79,7 @@ const VCardPage = () => {
 
     const handleRegenerateQR = async () => {
         try {
-            await regenerateQRCode(currentUserId);
+            await regenerateQRCode(currentUserId) ;
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
@@ -232,7 +232,7 @@ const VCardPage = () => {
                             </>
                         ) : (
                             <>
-                                <div className="text-center">
+                                <div className="text-center flex flex-col justify-center">
                                     <h2 className="text-2xl font-bold text-gray-800">
                                         {cardData.name || 'Sin nombre'}
                                     </h2>
@@ -242,6 +242,14 @@ const VCardPage = () => {
                                     <p className="text-gray-500">
                                         {cardData.company || 'Sin empresa'}
                                     </p>
+                                    <button
+                                        onClick={handleRegenerateQR}
+                                        className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer"
+                                        title="Generar código QR"
+                                    >         Mostrar mi QR
+                                        <QrCode size={20} className="ml-2" />
+
+                                    </button>
                                 </div>
 
                                 <div className="border-t pt-4 space-y-3">
