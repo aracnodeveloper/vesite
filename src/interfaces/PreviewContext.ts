@@ -18,6 +18,17 @@ export interface RegularLink {
     isActive: boolean;
 }
 
+export interface CreateBiositeDto {
+    ownerId: string;
+    title: string;
+    slug: string;
+    themeId?: string;
+    colors?: string;
+    fonts?: string;
+    avatarImage?: string;
+    backgroundImage?: string;
+    isActive?: boolean;
+}
 export interface PreviewContextType {
     biosite: BiositeFull | null;
     socialLinks: SocialLink[];
@@ -33,6 +44,11 @@ export interface PreviewContextType {
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
 
+    // Biosite management methods
+    createNewBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
+    getUserBiosites: () => Promise<BiositeFull[]>;
+    switchToAnotherBiosite: (biositeId: string) => Promise<BiositeFull | null>;
+
     // Social links methods
     setSocialLinks: (links: SocialLink[]) => void;
     addSocialLink: (link: SocialLink) => Promise<void>;
@@ -45,6 +61,7 @@ export interface PreviewContextType {
     removeRegularLink: (linkId: string) => Promise<void>;
     updateRegularLink: (linkId: string, updateData: Partial<RegularLink>) => Promise<void>;
     reorderRegularLinks: (links: RegularLink[]) => Promise<void>;
+
     // Special content methods
     getMusicEmbed: () => any;
     setMusicEmbed: (url: string, note?: string) => Promise<void>;
@@ -55,3 +72,5 @@ export interface PreviewContextType {
 
     clearError: () => void;
 }
+
+// Export the CreateBiositeDto interface for consistency

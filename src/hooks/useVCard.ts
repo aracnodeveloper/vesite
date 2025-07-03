@@ -71,6 +71,22 @@ export const useBusinessCard = (userId?: string) => {
         }
     };
 
+    const generarBusinessQR = async (userId: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const getCard = await businessCardService.getBussinesCard(userId);
+            setBusinessCard(getCard);
+            return getCard;
+        }catch (err) {
+            setError('Error de capa 8');
+            throw err;
+        }finally {
+            setLoading(false);
+        }
+    }
+
+
     // Regenerar código QR
     const regenerateQRCode = async (userId: string) => {
         setLoading(true);
@@ -118,6 +134,7 @@ export const useBusinessCard = (userId?: string) => {
         fetchBusinessCardBySlug,
         updateBusinessCard,
         regenerateQRCode,
+        generarBusinessQR,
         deleteBusinessCard,
         setError
     };

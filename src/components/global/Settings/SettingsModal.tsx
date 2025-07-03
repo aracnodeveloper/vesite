@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import {
-    // Globe,
     HelpCircle,
     FileText,
     Shield,
     Plus,
     Check,
     Loader2,
-    AlertCircle, LogOut
+    AlertCircle,
+    LogOut
 } from "lucide-react";
 import imgP from "../../../assets/img/img.png";
 import { usePreview } from "../../../context/PreviewContext.tsx";
-import apiService from "../../../service/apiService";
-import {getBiositeApi, updateBiositeApi} from "../../../constants/EndpointsRoutes";
-import type { BiositeFull, BiositeColors } from "../../../interfaces/Biosite";
-import Cookies from "js-cookie";
+import type { BiositeFull } from "../../../interfaces/Biosite";
 
 interface Profile {
     id: string;
@@ -47,7 +44,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                          onProfileSelect,
                                                          onCreateNewSite
                                                      }) => {
-    const { biosite } = usePreview();
+    const {
+        biosite,
+        loading: contextLoading,
+        error: contextError,
+        createNewBiosite,
+        getUserBiosites,
+        switchToAnotherBiosite,
+        clearError
+    } = usePreview();
+
     const [avatarError, setAvatarError] = useState(false);
     const [biosites, setBiosites] = useState<BiositeFull[]>([]);
     const [loading, setLoading] = useState(false);
@@ -59,35 +65,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         slug: ''
     });
 
-    const userId = Cookies.get('userId');
-
-
+    // Fetch user biosites using the context method
     const fetchUserBiosites = async () => {
-        if (!userId) return;
-
         try {
             setLoading(true);
             setError(null);
+            clearError(); // Clear any previous context errors
 
-            // Using the findAllByAdminId endpoint
-            const response = await apiService.getById<BiositeFull[]>(`${getBiositeApi}`, userId);
-            setBiosites(Array.isArray(response) ? response : [response]);
+            const userBiosites = await getUserBiosites();
+            setBiosites(userBiosites);
         } catch (err: any) {
             console.error('Error fetching biosites:', err);
-            setError(err?.response?.data?.message || 'Error al cargar los biosites');
+            setError(err?.message || 'Error al cargar los biosites');
         } finally {
             setLoading(false);
         }
     };
 
-    const isValidUUID = (uuid: string): boolean => {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-        return uuidRegex.test(uuid);
-    };
-
-// Updated createNewBiosite function with UUID validation and debugging
-    const createNewBiosite = async () => {
-        if (!userId || !createForm.title.trim() || !createForm.slug.trim()) {
+    // Create new biosite using context method
+    const handleCreateNewBiosite = async () => {
+        if (!createForm.title.trim() || !createForm.slug.trim()) {
             setError('Todos los campos son obligatorios');
             return;
         }
@@ -95,119 +92,110 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         try {
             setIsCreating(true);
             setError(null);
+            clearError();
 
-            // ✅ Debug: Log the userId and validate it
-            console.log("=== UUID DEBUGGING ===");
-            console.log("Raw userId from cookie:", userId);
-            console.log("UserId type:", typeof userId);
-            console.log("UserId length:", userId?.length);
-            console.log("Is valid UUID:", isValidUUID(userId));
+            // Get userId from cookies
+            const userId = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('userId='))
+                ?.split('=')[1];
 
-            // ✅ Validate UUID format before proceeding
-            if (!isValidUUID(userId)) {
-                console.error("Invalid UUID format detected:", userId);
-                setError('ID de usuario no válido. Por favor, inicie sesión nuevamente.');
+            if (!userId) {
+                setError('Usuario no autenticado. Por favor, inicie sesión nuevamente.');
                 return;
             }
-
-            const defaultColors: BiositeColors = {
-                primary: '#3B82F6',
-                secondary: '#1E40AF',
-                background: '#FFFFFF',
-                text: '#000000',
-                accent: '#3B82F6',
-                profileBackground: '#F3F4F6'
-            };
 
             const createData = {
                 ownerId: userId,
                 title: createForm.title.trim(),
                 slug: createForm.slug.trim(),
-                themeId: null,
-                colors: JSON.stringify(defaultColors),
+                themeId: 'default',
+                colors: JSON.stringify({
+                    primary: '#3B82F6',
+                    secondary: '#1E40AF',
+                    background: '#FFFFFF',
+                    text: '#000000',
+                    accent: '#3B82F6',
+                    profileBackground: '#F3F4F6'
+                }),
                 fonts: 'Inter',
                 isActive: true
             };
 
-            console.log("=== CREATE DATA ===");
-            console.log("Full create data:", createData);
-            console.log("OwnerId specifically:", createData.ownerId);
+            const newBiosite = await createNewBiosite(createData);
 
-            const newBiosite = await apiService.create<typeof createData, BiositeFull>(
-                updateBiositeApi,
-                createData
-            );
+            if (newBiosite) {
+                // Add to local state
+                setBiosites(prev => [...prev, newBiosite]);
 
-            // Add to local state
-            setBiosites(prev => [...prev, newBiosite]);
+                // Reset form
+                setCreateForm({ title: '', slug: '' });
+                setShowCreateForm(false);
 
-            // Reset form
-            setCreateForm({ title: '', slug: '' });
-            setShowCreateForm(false);
+                // Call external callback if provided
+                if (onCreateNewSite) {
+                    onCreateNewSite();
+                }
 
-            // Call the external callback if provided
-            if (onCreateNewSite) {
-                onCreateNewSite();
-            }
-
-            // Auto-select the new biosite if callback provided
-            if (onProfileSelect) {
-                const profile: Profile = {
-                    id: newBiosite.id,
-                    name: newBiosite.title,
-                    slug: `bio.site/${newBiosite.slug}`,
-                    isActive: true
-                };
-                onProfileSelect(profile);
+                // Auto-select the new biosite
+                await handleProfileSwitch(newBiosite);
             }
 
         } catch (err: any) {
-            console.error('=== CREATE BIOSITE ERROR ===');
-            console.error('Full error object:', err);
-            console.error('Error response:', err?.response?.data);
-
-            let errorMessage = 'Error al crear el biosite';
-
-            // Handle specific UUID errors
-            if (err?.response?.data?.details?.code === 'P2023') {
-                errorMessage = 'Error de formato de ID. Por favor, inicie sesión nuevamente.';
-            } else if (err?.response?.data?.details) {
-                errorMessage = `Error de validación: ${err.response.data.details.join(', ')}`;
-            } else if (err?.response?.data?.message) {
-                errorMessage = err.response.data.message;
-            }
-
-            setError(errorMessage);
+            console.error('Error creating biosite:', err);
+            setError(err?.message || 'Error al crear el biosite');
         } finally {
             setIsCreating(false);
         }
     };
 
+    // Handle profile switching using context method
+    const handleProfileSwitch = async (biositeData: BiositeFull) => {
+        try {
+            setLoading(true);
+            setError(null);
+            clearError();
+
+            const switchedBiosite = await switchToAnotherBiosite(biositeData.id);
+
+            if (switchedBiosite && onProfileSelect) {
+                const profile: Profile = {
+                    id: switchedBiosite.id,
+                    name: switchedBiosite.title,
+                    slug: `bio.site/${switchedBiosite.slug}`,
+                    isActive: true
+                };
+                onProfileSelect(profile);
+            }
+
+            onClose();
+        } catch (err: any) {
+            console.error('Error switching biosite:', err);
+            setError(err?.message || 'Error al cambiar de biosite');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Load biosites when modal opens
     useEffect(() => {
-        if (isOpen && userId) {
+        if (isOpen) {
             fetchUserBiosites();
         }
-    }, [isOpen, userId]);
+    }, [isOpen]);
 
-    // Handle profile selection
-    const handleProfileClick = (biositeData: BiositeFull) => {
-        if (onProfileSelect) {
-            const profile: Profile = {
-                id: biositeData.id,
-                name: biositeData.title,
-                slug: `bio.site/${biositeData.slug}`,
-                isActive: biositeData.id === biosite?.id
-            };
-            onProfileSelect(profile);
+    // Update error state from context
+    useEffect(() => {
+        if (contextError) {
+            setError(contextError);
         }
-        onClose();
-    };
+    }, [contextError]);
 
     // Handle create new site button
     const handleCreateNewSite = () => {
         setShowCreateForm(true);
         setError(null);
+        clearError();
     };
 
     // Generate slug from title
@@ -222,20 +210,23 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }));
     };
 
-    const getAvatarImage = () => {
-        if (avatarError || !biosite?.avatarImage) {
+    const getAvatarImage = (biositeData?: BiositeFull) => {
+
+        const targetBiosite = biositeData || biosite;
+
+        if (avatarError || !targetBiosite?.avatarImage) {
             return imgP;
         }
 
-        if (typeof biosite.avatarImage === 'string' && biosite.avatarImage.trim()) {
-            if (biosite.avatarImage.startsWith('data:')) {
+        if (typeof targetBiosite.avatarImage === 'string' && targetBiosite.avatarImage.trim()) {
+            if (targetBiosite.avatarImage.startsWith('data:')) {
                 const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
-                return dataUrlRegex.test(biosite.avatarImage) ? biosite.avatarImage : imgP;
+                return dataUrlRegex.test(targetBiosite.avatarImage) ? targetBiosite.avatarImage : imgP;
             }
 
             try {
-                new URL(biosite.avatarImage);
-                return biosite.avatarImage;
+                new URL(targetBiosite.avatarImage);
+                return targetBiosite.avatarImage;
             } catch {
                 return imgP;
             }
@@ -243,6 +234,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
         return imgP;
     };
+
+    const isLoadingState = loading || contextLoading || isCreating;
 
     return (
         <Dialog
@@ -288,6 +281,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                     onChange={(e) => handleTitleChange(e.target.value)}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Mi Biosite"
+                                    disabled={isLoadingState}
                                 />
                             </div>
                             <div>
@@ -298,13 +292,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, slug: e.target.value }))}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="mi-biosite"
+                                    disabled={isLoadingState}
                                 />
                                 <p className="text-xs text-gray-400 mt-1">bio.site/{createForm.slug}</p>
                             </div>
                             <div className="flex space-x-2">
                                 <button
-                                    onClick={createNewBiosite}
-                                    disabled={isCreating || !createForm.title.trim() || !createForm.slug.trim()}
+                                    onClick={handleCreateNewBiosite}
+                                    disabled={isLoadingState || !createForm.title.trim() || !createForm.slug.trim()}
                                     className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 >
                                     {isCreating ? (
@@ -318,8 +313,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                         setShowCreateForm(false);
                                         setCreateForm({ title: '', slug: '' });
                                         setError(null);
+                                        clearError();
                                     }}
-                                    className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50"
+                                    disabled={isLoadingState}
+                                    className="px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 disabled:opacity-50"
                                 >
                                     Cancelar
                                 </button>
@@ -340,12 +337,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             {biosites.map((biositeData) => (
                                 <div
                                     key={biositeData.id}
-                                    onClick={() => handleProfileClick(biositeData)}
-                                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer group"
+                                    onClick={() => !isLoadingState && handleProfileSwitch(biositeData)}
+                                    className={`flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer group ${
+                                        isLoadingState ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                                 >
                                     <div className="relative">
                                         <img
-                                            src={getAvatarImage()}
+                                            src={getAvatarImage(biositeData)}
                                             alt={biositeData.title}
                                             className="w-10 h-10 rounded-full object-cover"
                                             onError={() => setAvatarError(true)}
@@ -367,8 +366,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
                             {/* Create New Site Button */}
                             <div
-                                onClick={handleCreateNewSite}
-                                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 hover:text-white cursor-pointer group"
+                                onClick={() => !isLoadingState && handleCreateNewSite()}
+                                className={`flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 hover:text-white cursor-pointer group ${
+                                    isLoadingState ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                             >
                                 <div className="w-10 h-10 border border-gray-600 rounded-full flex items-center justify-center group-hover:border-white">
                                     <Plus size={16} className="text-black group-hover:text-white" />
@@ -386,8 +387,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Settings Options */}
                 <div className="border-t border-[#E0EED5]">
                     <div className="p-4 space-y-4">
-
-
                         {/* Support */}
                         <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
                             <HelpCircle size={20} className="text-gray-400" />

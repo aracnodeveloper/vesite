@@ -325,7 +325,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <SettingsModal
                 isOpen={isSettingsModalOpen}
-                onClose={handleCloseSettings}
+                onClose={() => setIsSettingsModalOpen(false)}
                 onLogout={handleLogoutFromSettings}
                 onProfileSelect={handleProfileSelect}
                 onCreateNewSite={handleCreateNewSite}

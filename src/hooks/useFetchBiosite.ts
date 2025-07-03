@@ -74,7 +74,7 @@ export const useFetchBiosite = (userId?: string) => {
             setError(null);
 
             // Using the findAllByAdminId endpoint
-            const res = await apiService.getById<BiositeFull[]>(`${getBiositeApi}/admin`, userId);
+            const res = await apiService.getById<BiositeFull[]>(`${getBiositeApi}`, userId);
             return Array.isArray(res) ? res : [res];
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar los biosites";

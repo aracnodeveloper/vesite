@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useBusinessCard } from '../../../../hooks/useVCard.ts';
 import { ChevronLeft, QrCode, Edit, Save, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -24,7 +24,8 @@ const VCardPage = () => {
         fetchBusinessCardBySlug,
         fetchBusinessCardByUserId,
         updateBusinessCard,
-        regenerateQRCode
+        regenerateQRCode,
+        generarBusinessQR
     } = useBusinessCard();
 
     const currentUserId = Cookies.get('userId');
@@ -74,6 +75,14 @@ const VCardPage = () => {
             setIsEditing(false);
         } catch (error) {
             console.error('Error updating business card:', error);
+        }
+    };
+
+    const handleGenerate = async () => {
+        try {
+            await generarBusinessQR(currentUserId) ;
+        }catch (error) {
+            console.error('Error de capa 8', error);
         }
     };
 
@@ -142,7 +151,7 @@ const VCardPage = () => {
                         {isEditing ? (
                             <>
                                 <button
-                                    onClick={handleSave}
+                                    onClick={handleSave && handleGenerate}
                                     className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
                                 >
                                     <Save size={20} />
