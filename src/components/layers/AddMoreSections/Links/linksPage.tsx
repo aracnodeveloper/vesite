@@ -8,6 +8,7 @@ import {
     ImagePlus,
     Edit2,
     ExternalLink,
+    Link as LinkIcon,
 } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { useNavigate } from "react-router-dom";
@@ -42,6 +43,85 @@ const LinksPage = () => {
 
     // Filtrar solo los enlaces activos
     const activeLinks = regularLinks.filter(link => link.isActive);
+
+    // Función para validar si una URL de imagen es válida
+    const isValidImageUrl = (url: string | null | undefined): boolean => {
+        if (!url || typeof url !== 'string') return false;
+
+        // Verificar data URLs (base64)
+        if (url.startsWith('data:')) {
+            const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
+            return dataUrlRegex.test(url);
+        }
+
+        // Verificar URLs HTTP/HTTPS
+        try {
+            const urlObj = new URL(url);
+            return ['http:', 'https:'].includes(urlObj.protocol);
+        } catch {
+            return false;
+        }
+    };
+
+    // Componente para renderizar la imagen del enlace
+    const LinkImage = ({ image, title, size = "small" }: {
+        image?: string | null;
+        title: string;
+        size?: "small" | "medium" | "large"
+    }) => {
+        const sizeClasses = {
+            small: "w-8 h-8",
+            medium: "w-12 h-12",
+            large: "w-16 h-16"
+        };
+
+        const iconSizes = {
+            small: 16,
+            medium: 20,
+            large: 24
+        };
+
+        const [imageError, setImageError] = useState(false);
+        const [isLoading, setIsLoading] = useState(true);
+
+        const handleImageLoad = () => {
+            setIsLoading(false);
+            setImageError(false);
+        };
+
+        const handleImageError = () => {
+            setIsLoading(false);
+            setImageError(true);
+        };
+
+        if (!image || !isValidImageUrl(image) || imageError) {
+            return (
+                <div className={`${sizeClasses[size]} rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 border border-blue-200`}>
+                    <LinkIcon
+                        size={iconSizes[size]}
+                        className="text-blue-600"
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div className={`${sizeClasses[size]} rounded-lg overflow-hidden flex-shrink-0 relative`}>
+                {isLoading && (
+                    <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+                        <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+                    </div>
+                )}
+                <img
+                    src={image}
+                    alt={title}
+                    className={`w-full h-full object-cover rounded-lg transition-opacity duration-200 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                    onLoad={handleImageLoad}
+                    onError={handleImageError}
+                />
+            </div>
+        );
+    };
 
     const handleBackClick = () => {
         navigate(-1);
@@ -372,19 +452,14 @@ const LinksPage = () => {
                             <div className="flex items-center space-x-2">
                                 {editImage ? (
                                     <div className="relative">
-                                        <img
-                                            src={editImage}
-                                            alt="Preview"
-                                            className="w-16 h-16 rounded-lg object-cover"
-                                            onError={(e) => {
-                                                console.error('Image failed to load:', editImage);
-                                                const img = e.target as HTMLImageElement;
-                                                img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0NFY0NEgyMFYyMFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHA+dGggZD0iTTI4IDI4TDM2IDM2TDQwIDMyTDQ0IDM2VjQ0SDIwVjM2TDI4IDI4WiIgc3Ryb2tlPSIjOUNBM0FGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K';
-                                            }}
+                                        <LinkImage
+                                            image={editImage}
+                                            title={editTitle || "Link"}
+                                            size="large"
                                         />
                                         <button
                                             onClick={() => setEditImage(undefined)}
-                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                                             disabled={isSubmitting || uploadingImage}
                                         >
                                             <X size={12} />
@@ -398,7 +473,7 @@ const LinksPage = () => {
                                 ) : (
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center hover:border-gray-500 transition-colors relative"
+                                        className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 hover:bg-gray-50 transition-colors relative"
                                         disabled={isSubmitting || uploadingImage}
                                     >
                                         {uploadingImage ? (
@@ -469,30 +544,11 @@ const LinksPage = () => {
                                             <div className="flex items-center space-x-3 flex-1 min-w-0">
                                                 <GripVertical size={16} className="text-gray-400 flex-shrink-0" />
 
-                                                {link.image ? (
-                                                    <img
-                                                        src={link.image}
-                                                        alt=""
-                                                        className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
-                                                        onError={(e) => {
-                                                            console.warn('Link image failed to load:', link.image);
-                                                            const img = e.target as HTMLImageElement;
-                                                            // Fallback to default icon if image fails
-                                                            img.style.display = 'none';
-                                                            const parent = img.parentElement;
-                                                            if (parent && !parent.querySelector('.fallback-icon')) {
-                                                                const fallback = document.createElement('div');
-                                                                fallback.className = 'w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0 fallback-icon';
-                                                                fallback.innerHTML = '<span class="text-xs text-gray-500">🔗</span>';
-                                                                parent.appendChild(fallback);
-                                                            }
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-xs text-gray-500">🔗</span>
-                                                    </div>
-                                                )}
+                                                <LinkImage
+                                                    image={link.image}
+                                                    title={link.title}
+                                                    size="small"
+                                                />
 
                                                 <div className="flex-1 min-w-0">
                                                     <span className="text-sm font-medium text-black block truncate">
@@ -559,14 +615,14 @@ const LinksPage = () => {
                                     <button
                                         onClick={handleConfirmAdd}
                                         disabled={!newUrl.trim() || isSubmitting}
-                                        className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
                                         <Check size={20} />
                                     </button>
                                     <button
                                         onClick={handleCancelAdd}
                                         disabled={isSubmitting}
-                                        className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50"
+                                        className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"
                                     >
                                         <X size={20} />
                                     </button>

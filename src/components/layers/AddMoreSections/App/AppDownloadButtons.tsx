@@ -4,12 +4,12 @@ export const AppDownloadButtons = () => {
     const googlePlayUrl = "https://play.google.com/store/apps/details?id=com.visitaEcuador&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1&pli=1";
 
     return (
-        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md mx-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md  mx-auto">
             <a
                 href={appStoreUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-black hover:bg-gray-800 transition-colors  rounded-lg p-1 flex items-center space-x-1 border border-gray-600"
+                className="flex-1 bg-black hover:bg-gray-800 ml-2 transition-colors flex-col  rounded-lg p-0 flex items-center space-x-1 border border-gray-600"
             >
                 {/* SVG App Store */}
                 <div className="flex-shrink-0">
@@ -18,7 +18,6 @@ export const AppDownloadButtons = () => {
                     </svg>
                 </div>
                 <div className="flex-1 text-left">
-                    <div className="text-xs text-gray-300">Consíguelo en el</div>
                     <div className="text-lg font-semibold text-white">App Store</div>
                 </div>
             </a>
@@ -27,7 +26,7 @@ export const AppDownloadButtons = () => {
                 href={googlePlayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 bg-black hover:bg-gray-800 transition-colors rounded-lg p-1 flex items-center space-x-1 border border-gray-600"
+                className="flex-1 bg-black hover:bg-gray-800 transition-colors mr-2 rounded-lg p-0 flex flex-col items-center space-x-1 border border-gray-600"
             >
                 {/* SVG Google Play */}
                 <div className="flex-shrink-0">
@@ -57,7 +56,6 @@ export const AppDownloadButtons = () => {
                     </svg>
                 </div>
                 <div className="flex-1 text-left">
-                    <div className="text-xs text-gray-300">Disponible en</div>
                     <div className="text-lg font-semibold text-white">Google Play</div>
                 </div>
             </a>

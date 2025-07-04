@@ -369,9 +369,9 @@ const LivePreviewContent = () => {
                                         target={isExposedRoute ? "_blank" : undefined}
                                         rel={isExposedRoute ? "noopener noreferrer" : undefined}
                                         onClick={isExposedRoute ? undefined : handleSocialClick}
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+                                        className={`w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
                                         style={{
-                                            backgroundColor: platform?.color || themeConfig.colors.accent,
+                                            backgroundColor: 'gray' ,
                                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
                                         }}
                                     >
@@ -379,7 +379,7 @@ const LivePreviewContent = () => {
                                             <img
                                                 src={platform.icon}
                                                 alt={link.label}
-                                                className="w-5 h-5 filter brightness-0 invert"
+                                                className="w-4 h-4 filter brightness-0 invert"
                                             />
                                         ) : (
                                             <span className="text-white text-sm">🔗</span>
@@ -400,40 +400,54 @@ const LivePreviewContent = () => {
                                 target={isExposedRoute ? "_blank" : undefined}
                                 rel={isExposedRoute ? "noopener noreferrer" : undefined}
                                 onClick={isExposedRoute ? undefined : handleLinksClick}
-                                className={`block w-full p-3 rounded-lg border-2 text-center transition-all duration-200 hover:shadow-md ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+                                className={`block w-full p-3 rounded-lg border-2 text-center transition-all flex flex-wrap duration-200 hover:shadow-md ${!isExposedRoute ? 'cursor-pointer' : ''}`}
                                 style={{
                                     borderColor: themeConfig.colors.primary,
                                     backgroundColor: themeConfig.colors.profileBackground || 'transparent',
                                     transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
                                 }}
                             >
-                                <div className="flex items-center justify-center space-x-2">
-                                    <span className="text-xs">🔗</span>
-                                    <span className="font-medium text-xs truncate"
-                                          style={{
-                                              color: themeConfig.colors.text,
-                                              fontFamily: themeConfig.fonts.primary
-                                          }}>
-                                        {link.title}
-                                    </span>
+                                {link.image && (
+                                    <div className="w-8 h-8 rounded-lg overflow-hidden mr-2 flex-shrink-0">
+                                        <img
+                                            src={link.image}
+                                            alt={link.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )}
+                                {!link.image && (
+                                    <span className="text-xs mr-2">🔗</span>
+                                )}
+                                <div className="grid grid-cols-1 gap-1">
+                                    <div className="flex items-center">
+      <span className="font-medium text-xs truncate"
+            style={{
+                color: themeConfig.colors.text,
+                fontFamily: themeConfig.fonts.primary
+            }}>
+        {link.title}
+      </span>
+                                    </div>
+                                    <p className="text-xs opacity-60 truncate mt-1"
+                                       style={{
+                                           color: themeConfig.colors.text,
+                                           fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
+                                       }}>
+                                        {link.url}
+                                    </p>
                                 </div>
-                                <p className="text-xs opacity-60 truncate mt-1"
-                                   style={{
-                                       color: themeConfig.colors.text,
-                                       fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
-                                   }}>
-                                    {link.url}
-                                </p>
                             </a>
+
                         ))}
                     </div>
                 )}
 
                 {/* MÚSICA EMBED - SIEMPRE VISIBLE COMO IFRAME */}
                 {musicEmbed && (
-                    <div className="px-4 mb-4">
+                    <div className="px-4 ">
                         <div className="relative rounded-lg shadow-md overflow-hidden"
-                             style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
+                             >
 
                             {/* Iframe siempre visible */}
                             {getSpotifyEmbedUrl(musicEmbed.url) ? (
@@ -441,7 +455,7 @@ const LivePreviewContent = () => {
                                     <iframe
                                         src={getSpotifyEmbedUrl(musicEmbed.url)!}
                                         width="100%"
-                                        height="152"
+                                        height="100"
                                         frameBorder="0"
                                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                         loading="lazy"
@@ -451,7 +465,7 @@ const LivePreviewContent = () => {
                             ) : (
                                 <div className="p-4 flex items-center space-x-3">
                                     <div className="flex-shrink-0">
-                                        <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center"
                                              style={{ backgroundColor: themeConfig.colors.accent || '#10b981' }}>
                                             <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M18 3a1 1 0 00-1.196-.98L6 3.75c-.553.138-.954.63-.954 1.188V8.5a2.5 2.5 0 11-1.5 2.292V4.938A2.5 2.5 0 016.094 2.5L17.5 1a1 1 0 01.5.98v8.52a2.5 2.5 0 11-1.5 2.292V3z" />
@@ -501,7 +515,7 @@ const LivePreviewContent = () => {
                                     <iframe
                                         src={getYouTubeEmbedUrl(videoEmbed.url)!}
                                         width="100%"
-                                        height="200"
+                                        height="150"
                                         frameBorder="0"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowFullScreen
@@ -617,7 +631,7 @@ const LivePreviewContent = () => {
                 <div className="mt-12">
                     <AppDownloadButtons />
                 </div>
-                <div className="h-12"></div>
+                <div className="h-5"></div>
             </div>
         </div>
     );

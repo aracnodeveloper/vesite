@@ -51,7 +51,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             '/assets/icons/instagram.svg': 'instagram',
             '/assets/icons/tiktok.svg': 'tiktok',
             '/assets/icons/X.svg': 'twitter',
-            '/assets/icons/youtube.svg': 'youtube',
             '/assets/icons/facebook.svg': 'facebook',
             '/assets/icons/twitch.svg': 'twitch',
             '/assets/icons/linkdl.svg': 'linkedin',
@@ -144,7 +143,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
         }
-    }, [links, getSocialLinks, getRegularLinks]);
+    }, [links, getSocialLinks, getRegularLinks, biositeData?.id]);
+
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
         setBiosite(prevBiosite => {
