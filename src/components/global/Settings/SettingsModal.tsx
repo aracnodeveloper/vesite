@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import {
@@ -65,6 +66,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         slug: ''
     });
 
+    // Get current user ID from cookies
+    const getCurrentUserId = () => {
+        const userId = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('userId='))
+            ?.split('=')[1];
+        return userId;
+    };
+
     // Fetch user biosites using the context method
     const fetchUserBiosites = async () => {
         try {
@@ -82,10 +92,36 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     };
 
+    // Validate slug format
+    const validateSlug = (slug: string): string | null => {
+        if (!slug.trim()) return 'El slug es obligatorio';
+        if (slug.length < 3) return 'El slug debe tener al menos 3 caracteres';
+        if (slug.length > 50) return 'El slug no debe exceder 50 caracteres';
+        if (!/^[a-z0-9-]+$/.test(slug)) return 'El slug solo puede contener letras minúsculas, números y guiones';
+        if (slug.startsWith('-') || slug.endsWith('-')) return 'El slug no puede comenzar o terminar con guión';
+        if (slug.includes('--')) return 'El slug no puede contener guiones consecutivos';
+        return null;
+    };
+
+    // Check if slug already exists
+    const checkSlugExists = (slug: string): boolean => {
+        return biosites.some(biosite => biosite.slug.toLowerCase() === slug.toLowerCase());
+    };
+
     // Create new biosite using context method
     const handleCreateNewBiosite = async () => {
-        if (!createForm.title.trim() || !createForm.slug.trim()) {
-            setError('Todos los campos son obligatorios');
+        const titleError = !createForm.title.trim() ? 'El título es obligatorio' : null;
+        const slugValidationError = validateSlug(createForm.slug);
+        const slugExistsError = checkSlugExists(createForm.slug) ? 'Este slug ya está en uso' : null;
+
+        if (titleError || slugValidationError || slugExistsError) {
+            setError(titleError || slugValidationError || slugExistsError);
+            return;
+        }
+
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            setError('Usuario no autenticado. Por favor, inicie sesión nuevamente.');
             return;
         }
 
@@ -94,19 +130,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setError(null);
             clearError();
 
-            // Get userId from cookies
-            const userId = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('userId='))
-                ?.split('=')[1];
-
-            if (!userId) {
-                setError('Usuario no autenticado. Por favor, inicie sesión nuevamente.');
-                return;
-            }
-
             const createData = {
-                ownerId: userId,
                 title: createForm.title.trim(),
                 slug: createForm.slug.trim(),
                 themeId: 'default',
@@ -119,12 +143,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     profileBackground: '#F3F4F6'
                 }),
                 fonts: 'Inter',
-                isActive: true
+                isActive: true,
+                ownerId: '' // This will be set by the hook after creating the user
             };
+
+            console.log('Creating new biosite and user...', createData);
 
             const newBiosite = await createNewBiosite(createData);
 
             if (newBiosite) {
+                console.log('Biosite and user created successfully:', newBiosite);
+
                 // Add to local state
                 setBiosites(prev => [...prev, newBiosite]);
 
@@ -142,8 +171,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             }
 
         } catch (err: any) {
-            console.error('Error creating biosite:', err);
-            setError(err?.message || 'Error al crear el biosite');
+            console.error('Error creating biosite and user:', err);
+            setError(err?.message || 'Error al crear el biosite y usuario');
         } finally {
             setIsCreating(false);
         }
@@ -200,18 +229,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     // Generate slug from title
     const handleTitleChange = (title: string) => {
+        const generatedSlug = title.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+            .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+            .trim();
+
         setCreateForm(prev => ({
             ...prev,
             title,
-            slug: title.toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .trim()
+            slug: generatedSlug
+        }));
+    };
+
+    // Handle manual slug change
+    const handleSlugChange = (slug: string) => {
+        const cleanSlug = slug.toLowerCase()
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+
+        setCreateForm(prev => ({
+            ...prev,
+            slug: cleanSlug
         }));
     };
 
     const getAvatarImage = (biositeData?: BiositeFull) => {
-
         const targetBiosite = biositeData || biosite;
 
         if (avatarError || !targetBiosite?.avatarImage) {
@@ -289,21 +334,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <input
                                     type="text"
                                     value={createForm.slug}
-                                    onChange={(e) => setCreateForm(prev => ({ ...prev, slug: e.target.value }))}
+                                    onChange={(e) => handleSlugChange(e.target.value)}
                                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="mi-biosite"
                                     disabled={isLoadingState}
                                 />
                                 <p className="text-xs text-gray-400 mt-1">bio.site/{createForm.slug}</p>
+                                {/* Slug validation feedback */}
+                                {createForm.slug && validateSlug(createForm.slug) && (
+                                    <p className="text-xs text-red-500 mt-1">{validateSlug(createForm.slug)}</p>
+                                )}
+                                {createForm.slug && !validateSlug(createForm.slug) && checkSlugExists(createForm.slug) && (
+                                    <p className="text-xs text-red-500 mt-1">Este slug ya está en uso</p>
+                                )}
                             </div>
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleCreateNewBiosite}
-                                    disabled={isLoadingState || !createForm.title.trim() || !createForm.slug.trim()}
+                                    disabled={isLoadingState || !createForm.title.trim() || !createForm.slug.trim() || !!validateSlug(createForm.slug) || checkSlugExists(createForm.slug)}
                                     className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 >
                                     {isCreating ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                            Creando...
+                                        </>
                                     ) : (
                                         'Crear'
                                     )}

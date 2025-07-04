@@ -168,6 +168,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="flex items-center space-x-3">
                         <img
                             src={getAvatarImage()}
+                            onClick={handleOpenSettings}
                             className="w-8 h-8 rounded-xl object-cover"
                             alt="perfil"
                             onError={handleAvatarError}
@@ -214,6 +215,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
                         <img
                             src={getAvatarImage()}
+                            onClick={handleOpenSettings}
                             className="rounded-full w-8 h-8 xl:w-10 xl:h-10 object-cover"
                             alt="perfil"
                             onError={handleAvatarError}

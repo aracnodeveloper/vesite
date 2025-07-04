@@ -1,4 +1,4 @@
-import { getBiositeApi, updateBiositeApi } from "../constants/EndpointsRoutes";
+import { getBiositeApi, updateBiositeApi, registerStudentApi } from "../constants/EndpointsRoutes";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../interfaces/Biosite";
 import { useState, useCallback, useRef } from "react";
 import apiService from "../service/apiService.ts";
@@ -13,6 +13,24 @@ export interface CreateBiositeDto {
     avatarImage?: string;
     backgroundImage?: string;
     isActive?: boolean;
+}
+
+export interface CreateUserDto {
+    email: string;
+    password: string;
+    name?: string;
+    parentId?: string;
+}
+
+export interface CreatedUser {
+    id: string;
+    email: string;
+    name?: string;
+    parentId?: string;
+    role?: string;
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export const useFetchBiosite = (userId?: string) => {
@@ -86,13 +104,13 @@ export const useFetchBiosite = (userId?: string) => {
     }, [userId]);
 
     const createBiosite = useCallback(async (createData: CreateBiositeDto): Promise<BiositeFull | null> => {
-        if (!createData.ownerId) {
-            setError("Owner ID is required");
+        if (!createData.title?.trim() || !createData.slug?.trim()) {
+            setError("Title and slug are required");
             return null;
         }
 
-        if (!createData.title?.trim() || !createData.slug?.trim()) {
-            setError("Title and slug are required");
+        if (!userId) {
+            setError("Parent user ID is required");
             return null;
         }
 
@@ -100,7 +118,24 @@ export const useFetchBiosite = (userId?: string) => {
             setLoading(true);
             setError(null);
 
-            // Set default values
+            // Step 1: Create a new user for the biosite
+            const newUserData: CreateUserDto = {
+                email: `${createData.slug}@biosite.local`, // Generate email from slug
+                password: `biosite_${createData.slug}_${Date.now()}`, // Generate temporary password
+                name: createData.title,
+                parentId: userId // Set the current user as parent
+            };
+
+            console.log("Creating new user for biosite:", newUserData);
+
+            const createdUser = await apiService.create<CreateUserDto, CreatedUser>(
+                registerStudentApi,
+                newUserData
+            );
+
+            console.log("User created successfully:", createdUser);
+
+            // Step 2: Create the biosite with the new user as owner
             const defaultColors: BiositeColors = {
                 primary: '#3B82F6',
                 secondary: '#1E40AF',
@@ -110,8 +145,8 @@ export const useFetchBiosite = (userId?: string) => {
                 profileBackground: '#F3F4F6'
             };
 
-            const dataToSend = {
-                ownerId: createData.ownerId,
+            const biositeDataToSend = {
+                ownerId: createdUser.id, // Use the newly created user ID
                 title: createData.title.trim(),
                 slug: createData.slug.trim(),
                 themeId: createData.themeId || 'default',
@@ -122,16 +157,16 @@ export const useFetchBiosite = (userId?: string) => {
                 isActive: createData.isActive !== undefined ? createData.isActive : true
             };
 
-            console.log("Creating biosite with data:", dataToSend);
+            console.log("Creating biosite with data:", biositeDataToSend);
 
-            const newBiosite = await apiService.create<typeof dataToSend, BiositeFull>(
+            const newBiosite = await apiService.create<typeof biositeDataToSend, BiositeFull>(
                 getBiositeApi,
-                dataToSend
+                biositeDataToSend
             );
 
             console.log("Biosite created successfully:", newBiosite);
 
-            // If this is the first biosite for the user, set it as the current one
+            // If this is the first biosite for the current user, set it as the current one
             if (!biositeData) {
                 setBiositeData(newBiosite);
                 isInitializedRef.current = true;
@@ -140,8 +175,8 @@ export const useFetchBiosite = (userId?: string) => {
 
             return newBiosite;
         } catch (error: any) {
-            console.error("Error creating biosite:", error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al crear el biosite";
+            console.error("Error creating biosite and user:", error);
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al crear el biosite y usuario";
             setError(errorMessage);
             return null;
         } finally {
