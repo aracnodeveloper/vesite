@@ -1,5 +1,6 @@
 import  { useState, useEffect } from 'react';
 import { useBusinessCard } from '../../../../hooks/useVCard.ts';
+import { useUser } from '../../../../hooks/useUser.ts';
 import { ChevronLeft, QrCode, Edit, Save, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from "js-cookie";
@@ -28,6 +29,14 @@ const VCardPage = () => {
         generarBusinessQR
     } = useBusinessCard();
 
+    const {
+        user,
+        loading: userLoading,
+        error: userError,
+        fetchUser,
+        updateUser
+    } = useUser();
+
     const currentUserId = Cookies.get('userId');
 
     useEffect(() => {
@@ -35,8 +44,12 @@ const VCardPage = () => {
             fetchBusinessCardBySlug(slug);
         } else {
             fetchBusinessCardByUserId(currentUserId);
+            // También cargar datos del usuario si no hay slug (es decir, es el usuario actual)
+            if (currentUserId) {
+                fetchUser(currentUserId);
+            }
         }
-    }, [slug]);
+    }, [slug, currentUserId]);
 
     useEffect(() => {
         if (businessCard?.data) {
@@ -65,16 +78,44 @@ const VCardPage = () => {
     };
 
     const handleSave = async () => {
-        if (!businessCard) return;
+        if (!businessCard || !currentUserId) return;
 
         try {
+            // Actualizar la business card
             await updateBusinessCard(businessCard.id, {
                 data: JSON.stringify(cardData), // Convert to JSON string
                 isActive: true
             });
+
+            // Actualizar el usuario con el teléfono y nombre si están disponibles
+            const userUpdateData: any = {};
+            if (cardData.phone) {
+                userUpdateData.phone = cardData.phone;
+            }
+            if (cardData.name) {
+                userUpdateData.name = cardData.name;
+            }
+            if (cardData.website) {
+                userUpdateData.site = cardData.website;
+            }
+
+            // Solo actualizar el usuario si hay datos para actualizar y no estamos viendo una V-Card externa
+            if (Object.keys(userUpdateData).length > 0 && !slug) {
+                await updateUser(currentUserId, userUpdateData);
+            }
+
             setIsEditing(false);
         } catch (error) {
             console.error('Error updating business card:', error);
+        }
+    };
+
+    const handleSaveAndGenerate = async () => {
+        try {
+            await handleSave();
+            await handleGenerate();
+        } catch (error) {
+            console.error('Error en handleSaveAndGenerate:', error);
         }
     };
 
@@ -98,7 +139,10 @@ const VCardPage = () => {
         setCardData(prev => ({ ...prev, [field]: value }));
     };
 
-    if (loading) {
+    // Combinar loading states
+    const isLoading = loading || userLoading;
+
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-lg">Cargando...</div>
@@ -126,7 +170,7 @@ const VCardPage = () => {
     }
 
     return (
-        <div className="min-h-screen ">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className="  p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3 cursor-pointer">
@@ -136,7 +180,7 @@ const VCardPage = () => {
                     >
                         <ChevronLeft size={20} />
                     </button>
-                    <h1 className="text-xl font-semibold">V-Card</h1>
+                    <h1 className="text-xl font-semibold" style={{fontSize:"17px"}}>V-Card</h1>
                 </div>
 
                 {!slug && businessCard && (
@@ -151,8 +195,9 @@ const VCardPage = () => {
                         {isEditing ? (
                             <>
                                 <button
-                                    onClick={handleSave && handleGenerate}
+                                    onClick={handleSaveAndGenerate}
                                     className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                    disabled={isLoading}
                                 >
                                     <Save size={20} />
                                 </button>
@@ -177,10 +222,10 @@ const VCardPage = () => {
 
             {/* Card Content */}
             <div className="p-4 max-w-md mx-auto">
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-400">
                     {/* QR Code Section */}
                     {businessCard?.qrCodeUrl && (
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-center">
+                        <div className="bg-[#E0EED5] p-6 text-center">
                             <img
                                 src={businessCard.qrCodeUrl}
                                 alt="QR Code"
@@ -242,26 +287,26 @@ const VCardPage = () => {
                         ) : (
                             <>
                                 <div className="text-center flex flex-col justify-center">
-                                    <h2 className="text-2xl font-bold text-gray-800">
-                                        {cardData.name || 'Sin nombre'}
-                                    </h2>
-                                    <p className="text-lg text-gray-600">
-                                        {cardData.title || 'Sin título'}
-                                    </p>
-                                    <p className="text-gray-500">
-                                        {cardData.company || 'Sin empresa'}
-                                    </p>
+
+
                                     <button
                                         onClick={handleRegenerateQR}
-                                        className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer"
+                                        className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer mt-4"
                                         title="Generar código QR"
                                     >         Mostrar mi QR
                                         <QrCode size={20} className="ml-2" />
-
                                     </button>
                                 </div>
 
                                 <div className="border-t pt-4 space-y-3">
+                                    {cardData.name && (
+                                        <div className="flex items-center space-x-3">
+                                            <span className="text-gray-500 text-sm">Name:</span>
+                                            <a href={`mailto:${cardData.name}`} className="text-blue-500">
+                                                {cardData.name}
+                                            </a>
+                                        </div>
+                                    )}
                                     {cardData.email && (
                                         <div className="flex items-center space-x-3">
                                             <span className="text-gray-500 text-sm">Email:</span>
@@ -303,6 +348,15 @@ const VCardPage = () => {
                             <div className="bg-white p-2 rounded border text-sm">
                                 {`${window.location.origin}/vcard/${businessCard.slug}`}
                             </div>
+                        </div>
+                    )}
+
+                    {/* User sync status */}
+                    {userError && !slug && (
+                        <div className="bg-yellow-50 p-4 border-t">
+                            <p className="text-sm text-yellow-800">
+                                Advertencia: No se pudo sincronizar con el perfil de usuario
+                            </p>
                         </div>
                     )}
                 </div>

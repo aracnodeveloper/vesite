@@ -156,14 +156,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     }, []);
 
     const updateBiosite = useCallback(async (data: BiositeUpdateDto): Promise<BiositeFull | null> => {
-        console.log("PreviewContext: updateBiosite called with:", data);
         try {
             const result = await updateBiositeHook(data);
-            console.log("PreviewContext: updateBiosite result:", result);
-
             if (result) {
                 setBiosite(result);
-                console.log("PreviewContext: biosite state updated");
             }
 
             return result;
@@ -174,38 +170,31 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     }, [updateBiositeHook]);
 
     const refreshBiosite = useCallback(async () => {
-        console.log("Refreshing biosite...");
         try {
             const refreshedBiosite = await fetchBiosite();
             if (refreshedBiosite) {
                 setBiosite(refreshedBiosite);
-                console.log("Biosite refreshed successfully");
             }
         } catch (error) {
             console.error("Error refreshing biosite:", error);
         }
     }, [fetchBiosite]);
 
-    // Theme color management
     const setThemeColor = useCallback(async (color: string) => {
         if (!biositeData?.id) {
             throw new Error("No biosite available");
         }
-
         try {
-            console.log("Setting theme color:", color);
             setThemeColorState(color);
 
             const colorsObject: BiositeColors = {
                 primary: color,
                 secondary: color,
                 background: color,
-                text: '#000000', // Default text color
+                text: '#000000',
                 accent: color,
                 profileBackground: color
             };
-
-            // Update biosite with new theme color
             const updateData: BiositeUpdateDto = {
                 ownerId: biositeData.ownerId,
                 title: biositeData.title,
@@ -219,10 +208,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             };
 
             await updateBiosite(updateData);
-            console.log("Theme color updated successfully");
         } catch (error) {
             console.error("Error updating theme color:", error);
-            // Revert local state on error
             if (biositeData.colors) {
                 const previousColor = typeof biositeData.colors === 'string'
                     ? biositeData.colors
@@ -232,8 +219,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [biositeData, fontFamily, updateBiosite]);
-
-    // Font family management
     const setFontFamily = useCallback(async (font: string) => {
         if (!biositeData?.id) {
             throw new Error("No biosite available");
@@ -245,14 +230,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             let colorsString: string;
             if (typeof biositeData.colors === 'string') {
-                // If it's already a string, use it as is (assuming it's already JSON)
                 colorsString = biositeData.colors;
             } else {
-                // If it's an object, stringify it
                 colorsString = JSON.stringify(biositeData.colors);
             }
-
-            // Update biosite with new font family
             const updateData: BiositeUpdateDto = {
                 ownerId: biositeData.ownerId,
                 title: biositeData.title,
@@ -266,33 +247,24 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             };
 
             await updateBiosite(updateData);
-            console.log("Font family updated successfully");
         } catch (error) {
             console.error("Error updating font family:", error);
-            // Revert local state on error
             setFontFamilyState(biositeData.fonts || 'Inter');
             throw error;
         }
     }, [biositeData, updateBiosite]);
-
-    // Biosite management functions
     const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
         try {
-            console.log("Creating new biosite:", data);
             const result = await createBiosite(data);
-            console.log("New biosite created:", result);
             return result;
         } catch (error) {
             console.error("Error creating biosite:", error);
             throw error;
         }
     }, [createBiosite]);
-
     const getUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {
         try {
-            console.log("Fetching user biosites");
             const result = await fetchUserBiosites();
-            console.log("User biosites fetched:", result);
             return result;
         } catch (error) {
             console.error("Error fetching user biosites:", error);
@@ -302,11 +274,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
         try {
-            console.log("Switching to biosite:", biositeId);
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
-                console.log("Biosite switched successfully");
             }
             return result;
         } catch (error) {
@@ -314,13 +284,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [switchBiosite]);
-
-    // Social links management functions
     const setSocialLinks = useCallback((links: SocialLink[]) => {
         console.log("Setting social links:", links);
         setSocialLinksState(links);
     }, []);
-
     const addSocialLink = useCallback(async (link: SocialLink) => {
         if (!biositeData?.id) {
             throw new Error("No biosite available");
@@ -409,7 +376,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, [updateLink, getIconIdentifier, fetchLinks]);
 
-    // Regular links management functions
     const setRegularLinks = useCallback((links: RegularLink[]) => {
         console.log("Setting regular links:", links);
         setRegularLinksState(links);
@@ -455,21 +421,15 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     const updateRegularLink = useCallback(async (linkId: string, updateData: Partial<RegularLink>) => {
         try {
-            console.log("Updating regular link:", linkId, updateData);
-
-            // Preparar los datos para enviar al backend
             const updatePayload: any = {
                 label: updateData.title,
                 url: updateData.url,
                 isActive: updateData.isActive,
                 orderIndex: updateData.orderIndex
             };
-
-            // Agregar la imagen si está presente
             if (updateData.image !== undefined) {
                 updatePayload.image = updateData.image;
             }
-
             const updatedLink = await updateLink(linkId, updatePayload);
             console.log("Regular link updated:", updatedLink);
             await fetchLinks();
@@ -483,18 +443,13 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         if (!biositeData?.id) {
             throw new Error("No biosite available");
         }
-
         try {
-            console.log("Reordering regular links:", reorderedLinks);
             setRegularLinksState(reorderedLinks);
-
             const reorderData = reorderedLinks.map((link, index) => ({
                 id: link.id,
                 orderIndex: index
             }));
-
             await reorderLinks(biositeData.id, reorderData);
-            console.log("Regular links reordered successfully");
             await fetchLinks();
         } catch (error) {
             console.error("Error reordering regular links:", error);
@@ -518,14 +473,12 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             const label = note || 'Music/Podcast';
 
             if (existingMusic) {
-                // Update existing music embed
                 await updateLink(existingMusic.id, {
                     label,
                     url,
                     isActive: !!url
                 });
             } else {
-                // Create new music embed
                 const maxOrderIndex = Math.max(...links.map(l => l.orderIndex), -1);
                 await createLink({
                     biositeId: biositeData.id,
@@ -536,7 +489,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     isActive: !!url
                 });
             }
-
             await fetchLinks();
         } catch (error) {
             console.error("Error setting music embed:", error);
@@ -558,14 +510,12 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             const label = note || 'Social Post';
 
             if (existingPost) {
-                // Update existing social post
                 await updateLink(existingPost.id, {
                     label,
                     url,
                     isActive: !!url
                 });
             } else {
-                // Create new social post
                 const maxOrderIndex = Math.max(...links.map(l => l.orderIndex), -1);
                 await createLink({
                     biositeId: biositeData.id,
@@ -592,7 +542,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         if (!biositeData?.id) {
             throw new Error("No biosite available");
         }
-
         try {
             const existingVideo = getVideoEmbed();
             const label = title || 'Video';
@@ -622,7 +571,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, [biositeData?.id, getVideoEmbed, updateLink, createLink, fetchLinks, links]);
 
-    // Clear error function
     const clearError = useCallback(() => {
         clearBiositeError();
         clearLinksError();

@@ -248,12 +248,12 @@ const ImageUploadSection = ({
                     maxCount={1}
                 >
                     <div className="relative group cursor-pointer">
-                        <div className="w-28 h-28 bg-green-100 rounded-lg flex items-center justify-center overflow-hidden">
+                        <div className="w-28 h-28 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden">
                             <Image
                                 width={120}
                                 height={120}
                                 src={safeAvatarImage}
-                                className="object-cover rounded-lg"
+                                className="object-cover "
                                 fallback={placeholderAvatar}
                                 preview={false}
                                 onError={(e) => {
@@ -292,7 +292,7 @@ const ImageUploadSection = ({
                         maxCount={1}
                     >
                         <div className="relative group cursor-pointer">
-                            <div className="w-72 h-28 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                            <div className="w-72 h-28 bg-gray-100 rounded-lg border-gray-400  border  flex items-center justify-center overflow-hidden">
                                 <Image
                                     width={340}
                                     height={120}

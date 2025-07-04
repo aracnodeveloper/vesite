@@ -9,7 +9,7 @@ const AppPage = () => {
     const googlePlayUrl = "https://play.google.com/store/apps/details?id=com.visitaEcuador&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1&pli=1";
 
     return(
-        <div className="min-h-screen max-w-full pt-8 text-white">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className="p-4 ">
                 <div className="flex items-center gap-3">
@@ -18,7 +18,7 @@ const AppPage = () => {
                         className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                     >
                         <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400" />
-                        <h1 className="text-lg text-black font-semibold hover:text-gray-400">Descarga VisitaEcuador</h1>
+                        <h1 className="text-lg text-black font-semibold hover:text-gray-400" style={{fontSize:"17px"}}>Descarga VisitaEcuador</h1>
                     </button>
                 </div>
             </div>
@@ -30,8 +30,8 @@ const AppPage = () => {
                     <div className="w-24 h-24 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg">
                         <img src="/src/assets/img/img_7.png" className="text-3xl font-bold text-white"/>
                     </div>
-                    <h2 className="text-2xl font-bold text-black">VisitaEcuador</h2>
-                    <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
+                    <h2 className=" font-bold text-black" style={{fontSize:"20px"}}>VisitaEcuador</h2>
+                    <p className="text-gray-600 max-w-md mx-auto leading-relaxed" style={{fontSize:"12px"}}>
                         Descarga nuestra app móvil para una mejor experiencia y acceso completo a todas las funcionalidades.
                     </p>
                 </div>
@@ -51,8 +51,8 @@ const AppPage = () => {
                             </svg>
                         </div>
                         <div className="flex-1 text-left">
-                            <div className="text-xs text-gray-300">Consíguelo en el</div>
-                            <div className="text-lg font-semibold text-white">App Store</div>
+                            <div className="text-xs text-gray-300" style={{fontSize:"11px"}}>Consíguelo en el</div>
+                            <div className="text-lg font-semibold text-white " style={{fontSize:"11px"}}>App Store</div>
                         </div>
                     </a>
 
@@ -90,8 +90,8 @@ const AppPage = () => {
                             </svg>
                         </div>
                         <div className="flex-1 text-left">
-                            <div className="text-xs text-gray-300">Disponible en</div>
-                            <div className="text-lg font-semibold text-white">Google Play</div>
+                            <div className="text-xs text-gray-300" style={{fontSize:"11px"}}>Disponible en</div>
+                            <div className="text-lg font-semibold text-white" style={{fontSize:"11px"}}>Google Play</div>
                         </div>
                     </a>
                 </div>
@@ -107,7 +107,7 @@ const AppPage = () => {
                                 </svg>
                             </div>
                             <h3 className="text-black font-semibold">Explora Ecuador</h3>
-                            <p className="text-gray-600 text-sm">Descubre destinos increíbles en todo el país</p>
+                            <p className="text-gray-600 text-sm"style={{fontSize:"11px"}}>Descubre destinos increíbles en todo el país</p>
                         </div>
 
                         <div className="text-center space-y-3">
@@ -117,7 +117,7 @@ const AppPage = () => {
                                 </svg>
                             </div>
                             <h3 className="text-black font-semibold">Fácil de Usar</h3>
-                            <p className="text-gray-600 text-sm">Interfaz intuitiva y navegación sencilla</p>
+                            <p className="text-gray-600 text-sm"style={{fontSize:"11px"}}>Interfaz intuitiva y navegación sencilla</p>
                         </div>
 
                         <div className="text-center space-y-3">
@@ -127,7 +127,7 @@ const AppPage = () => {
                                 </svg>
                             </div>
                             <h3 className="text-black font-semibold">Experiencia Completa</h3>
-                            <p className="text-gray-600 text-sm">Todas las funcionalidades en tu móvil</p>
+                            <p className="text-gray-600 text-sm"style={{fontSize:"11px"}}>Todas las funcionalidades en tu móvil</p>
                         </div>
                     </div>
                 </div>

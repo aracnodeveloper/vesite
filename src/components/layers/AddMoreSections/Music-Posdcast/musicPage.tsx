@@ -65,7 +65,7 @@ const MusicPage = () => {
     }
 
     return (
-        <div className="max-w-full  min-h-screen text-white px-4 py-6">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className="py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
@@ -81,8 +81,8 @@ const MusicPage = () => {
 
             <div className="space-y-4 w-96">
                 <div>
-                    <label className="text-xs text-gray-600 block mb-2">
-                        URL *
+                    <label className=" text-gray-600 block mb-2" style={{fontSize:"11px"}}>
+                        URL
                     </label>
                     <input
                         type="text"
@@ -101,11 +101,11 @@ const MusicPage = () => {
 
                 <div>
                     <label className="text-xs text-gray-600 block mb-2">
-                        Note (optional)
+                        Note
                     </label>
                     <input
                         type="text"
-                        placeholder="Add a description or note about this music/podcast"
+                        placeholder="Añade una nota o descripcciónb sobre este music/podcast"
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "

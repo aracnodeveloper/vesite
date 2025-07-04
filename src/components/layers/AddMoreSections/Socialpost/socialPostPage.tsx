@@ -73,7 +73,7 @@ const PostPage = () => {
     }
 
     return (
-        <div className="max-w-full min-h-screen text-white px-4 py-6">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className="flex items-center mb-8 mt-3">
                 <button

@@ -1,28 +1,29 @@
 import { Button, Form, Input, message } from "antd";
 import { usePreview } from "../../../../context/PreviewContext";
 import { useFetchBiosite } from "../../../../hooks/useFetchBiosite";
+import { useUser } from "../../../../hooks/useUser";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import type {BiositeColors, BiositeUpdateDto} from "../../../../interfaces/Biosite";
+import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
+
+const { TextArea } = Input;
 
 const ProfilePage = () => {
     const role = Cookies.get('roleName');
     const { biosite, updatePreview, loading: previewLoading } = usePreview();
     const userId = Cookies.get('userId');
     const { updateBiosite, fetchBiosite, loading: updateLoading } = useFetchBiosite(userId);
+    const { user, fetchUser, updateUser, loading: userLoading } = useUser();
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
-    // Check if user is admin
     const isAdmin = role === 'admin' || role === 'ADMIN';
-
-    // Default background URL for non-admin users
     const DEFAULT_BACKGROUND = 'https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
+    const loading = previewLoading || updateLoading || userLoading;
 
-    const loading = previewLoading || updateLoading;
     useEffect(() => {
         if (biosite && !loading) {
             fetchBiosite();
@@ -30,61 +31,36 @@ const ProfilePage = () => {
     }, [biosite, fetchBiosite, loading]);
 
     useEffect(() => {
-        if (biosite) {
+        if (userId) {
+            fetchUser(userId);
+        }
+    }, [userId, fetchUser]);
+
+    useEffect(() => {
+        if (biosite && user) {
             form.setFieldsValue({
                 title: biosite.title,
                 slug: biosite.slug,
+                description: user.description || ''
             });
         }
-    }, [biosite, form]);
+    }, [biosite, user, form]);
 
     const handleFinish = async (values: any) => {
+        if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
 
-        if (!biosite) {
-            return;
-        }
-        if (!biosite.id) {
-            return;
-        }
-        if (!userId) {
-            return;
-        }
-        if (typeof updateBiosite !== 'function') {
-            return;
-        }
         try {
             const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
-                if (!colors) {
-                    return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                }
-
+                if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
                 if (typeof colors === 'string') {
-                    // Validate if it's already a valid JSON string
-                    try {
-                        JSON.parse(colors);
-                        return colors;
-                    } catch {
-                        // If it's not valid JSON, return default
-                        return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                    }
-                } else if (colors && typeof colors === 'object') {
-                    // Convert object to JSON string
-                    return JSON.stringify(colors);
+                    try { JSON.parse(colors); return colors; } catch { return '{"primary":"#3B82F6","secondary":"#1F2937"}'; }
                 }
-
-                return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                return JSON.stringify(colors);
             };
 
-            // Determine background image based on user role
-            const getBackgroundImage = (): string => {
-                if (isAdmin) {
-                    // Admin users can keep their custom background or empty
-                    return biosite.backgroundImage || '';
-                } else {
-                    // Non-admin users get default background if they don't have one
-                    return biosite.backgroundImage || DEFAULT_BACKGROUND;
-                }
-            };
+            const getBackgroundImage = (): string => biosite.backgroundImage || DEFAULT_BACKGROUND;
+
+            const loadingMessage = message.loading('Actualizando perfil...', 0);
 
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
@@ -98,78 +74,27 @@ const ProfilePage = () => {
                 isActive: biosite.isActive ?? true
             };
 
-            console.log("=== UPDATE DATA ===");
-            console.log("Update data being sent:", updateData);
-            console.log("User role:", role);
-            console.log("Is admin:", isAdmin);
-            console.log("Background image:", updateData.backgroundImage);
-
-            const loadingMessage = message.loading('Actualizando perfil...', 0);
-
-            console.log("=== CALLING UPDATE FUNCTION ===");
-
-            console.log("=== ENSURING HOOK HAS BIOSITE DATA ===");
-            await fetchBiosite();
-
-            const updated = await updateBiosite(updateData);
-
-            loadingMessage();
-
-            console.log("=== UPDATE RESULT ===");
-            console.log("Update function returned:", updated);
-            console.log("Type of result:", typeof updated);
-            console.log("Is null:", updated === null);
-            console.log("Is undefined:", updated === undefined);
-
-            if (updated) {
-                console.log("=== SUCCESS PATH ===");
-                console.log("Updated biosite data:", updated);
-
-                // Update the preview context
-                updatePreview(updated);
-                message.success("Perfil actualizado correctamente");
-                console.log("Profile updated successfully, preview updated");
-            } else {
-                console.error("=== ERROR PATH ===");
-                console.error("Update returned null/undefined");
-                console.error("This indicates the API call failed or returned invalid data");
-
-                // Check if it's specifically null or undefined
-                if (updated === null) {
-                    console.error("Result is explicitly null");
-                    message.error("Error: La actualización falló. El servidor retornó un valor nulo.");
-                } else if (updated === undefined) {
-                    console.error("Result is undefined");
-                    message.error("Error: La actualización falló. No se recibió respuesta del servidor.");
-                } else {
-                    console.error("Result is falsy but not null/undefined:", updated);
-                    message.error("Error: La actualización falló. Respuesta inválida del servidor.");
+            if (values.description !== user?.description) {
+                const updatedUser = await updateUser(userId, {
+                    description: values.description || ''
+                });
+                if (updatedUser) {
+                    form.setFieldsValue({ description: updatedUser.description });
                 }
             }
-        } catch (error: unknown) {
-            console.error("=== EXCEPTION CAUGHT ===");
-            console.error("Error updating profile:", error);
-            console.error("Error type:", typeof error);
 
-            // Type-safe error handling
-            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-            const errorStack = error instanceof Error ? error.stack : undefined;
-
-            console.error("Error message:", errorMessage);
-            console.error("Error stack:", errorStack);
-
-            // More specific error messages based on error type
-            if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-                message.error("Error de conexión. Verifica tu internet e inténtalo de nuevo.");
-            } else if (errorMessage.includes('401') || errorMessage.includes('unauthorized')) {
-                message.error("Sesión expirada. Por favor, inicia sesión nuevamente.");
-            } else if (errorMessage.includes('403') || errorMessage.includes('forbidden')) {
-                message.error("No tienes permisos para realizar esta acción.");
-            } else if (errorMessage.includes('400') || errorMessage.includes('bad request')) {
-                message.error("Datos inválidos. Verifica la información e inténtalo de nuevo.");
-            } else {
-                message.error(`Error al actualizar el perfil: ${errorMessage}`);
+            const updated = await updateBiosite(updateData);
+            if (updated) {
+                updatePreview(updated);
+                console.log("Background image after update:", updated.backgroundImage);
             }
+
+            loadingMessage();
+            message.success('Perfil actualizado exitosamente');
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            console.error("Error al actualizar:", errorMessage);
+            message.error(`Error al actualizar el perfil: ${errorMessage}`);
         }
     };
 
@@ -177,7 +102,6 @@ const ProfilePage = () => {
         navigate(-1);
     };
 
-    // Loading state
     if (loading && !biosite) {
         return (
             <div className="p-6 max-w-xl mx-auto">
@@ -189,7 +113,6 @@ const ProfilePage = () => {
         );
     }
 
-    // Error state when no biosite is available
     if (!biosite) {
         return (
             <div className="p-6 max-w-xl mx-auto">
@@ -211,43 +134,23 @@ const ProfilePage = () => {
         );
     }
 
-    // Check if we're in development mode (browser-safe way)
-    const isDevelopment = typeof window !== 'undefined' &&
-        (window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname.includes('dev'));
-
     return (
-        <div className="w-full  max-h-screen mb-10 max-w-md mx-auto rounded-lg  ">
-            {/* Header */}
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleBackClick}
-                        className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors"
-                    >
+                    <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors">
                         <ChevronLeft className="w-5 h-5 mr-1 hover:text-gray-400" />
-                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400">Perfil</h1>
+                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400" style={{ fontSize: "17px" }}>Perfil</h1>
                     </button>
                 </div>
             </div>
 
-            {/* Content Container */}
             <div className="p-6">
-                {/* Images Section */}
                 <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide">IMÁGENES</h3>
-                    <ImageUploadSection
-                        biosite={biosite}
-                        loading={loading}
-                        userId={userId}
-                        updateBiosite={updateBiosite}
-                        updatePreview={updatePreview}
-                        role={role}
-                    />
+                    <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>IMÁGENES</h3>
+                    <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
                 </div>
 
-                {/* Non-admin background info */}
                 {!isAdmin && (
                     <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="flex items-start gap-3">
@@ -256,110 +159,53 @@ const ProfilePage = () => {
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <div>
-                                <h4 className="text-sm font-medium text-blue-800 mb-1">Imagen de fondo</h4>
-                                <p className="text-sm text-blue-700">
-                                    {biosite.backgroundImage
-                                        ? 'Tienes una imagen de fondo personalizada configurada.'
-                                        : 'Se aplicará una imagen de fondo por defecto a tu perfil.'
-                                    }
+                            <div className="h-5">
+                                <h4 className="text-sm font-medium text-blue-800 mb-1" style={{ fontSize: "11px" }}>Imagen de fondo</h4>
+                                <p className="text-sm text-blue-700" style={{ fontSize: "11px" }}>
+                                    {biosite.backgroundImage ? 'Tienes una imagen de fondo personalizada configurada.' : 'Se aplicará una imagen de fondo por defecto a tu perfil.'}
                                 </p>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* About Section */}
                 <div className="mb-6">
-                    <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide">ACERCA DE</h3>
-
-                    {/* Title Field */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-400 mb-2 ml-2">NOMBRE</label>
-                        <Form form={form} layout="vertical" onFinish={handleFinish}>
-                            <Form.Item
-                                name="title"
-                                rules={[
-                                    { required: true, message: 'El título es requerido' },
-                                    { min: 2, message: 'El título debe tener al menos 2 caracteres' },
-                                    { max: 50, message: 'El título no puede tener más de 50 caracteres' }
-                                ]}
-                                className="mb-0"
-                            >
-                                <Input
-                                    placeholder="diseño"
-                                    disabled={loading}
-                                    maxLength={50}
-                                    className="rounded-lg border-gray-300 h-16"
-                                />
+                    <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
+                    <Form form={form} layout="vertical" onFinish={handleFinish}>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>NOMBRE</label>
+                            <Form.Item name="title" rules={[{ required: true, message: 'El título es requerido' }, { min: 2, message: 'El título debe tener al menos 2 caracteres' }, { max: 50, message: 'El título no puede tener más de 50 caracteres' }]} className="mb-0">
+                                <Input placeholder="diseño" disabled={loading} maxLength={50} className="rounded-lg border-gray-300 h-16 " style={{ fontSize: "12px" }} />
                             </Form.Item>
+                        </div>
 
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>DESCRIPCIÓN</label>
+                            <Form.Item name="description" rules={[{ max: 250, message: 'La descripción no puede tener más de 250 caracteres' }]} className="mb-0">
+                                <TextArea placeholder="Cuéntanos acerca de ti..." disabled={loading} maxLength={250} rows={4} className="rounded-lg border-gray-300 resize-none" style={{ fontSize: "12px" }} showCount />
+                            </Form.Item>
+                        </div>
 
-
-                            {/* Site Section */}
-                            <div className="mb-6">
-                                <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide">SITIO</h3>
-
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-400 mb-2 ml-2">Bio.site/</label>
-                                    <div className="flex">
-                                        <Form.Item
-                                            name="slug"
-                                            rules={[
-                                                { required: true, message: 'El slug es requerido' },
-                                                { min: 3, message: 'El slug debe tener al menos 3 caracteres' },
-                                                { max: 30, message: 'El slug no puede tener más de 30 caracteres' },
-                                                { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }
-                                            ]}
-                                            className="flex-1 mb-0"
-                                        >
-                                            <Input
-                                                placeholder="sitioReynaldomartinez31"
-                                                disabled={loading}
-                                                maxLength={30}
-                                                className="rounded-l-lg border-r-0 h-16"
-                                            />
-                                        </Form.Item>
-                                    </div>
+                        <div className="mb-6">
+                            <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>SITIO</h3>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>Bio.site/</label>
+                                <div className="flex">
+                                    <Form.Item name="slug" rules={[{ required: true, message: 'El slug es requerido' }, { min: 3, message: 'El slug debe tener al menos 3 caracteres' }, { max: 30, message: 'El slug no puede tener más de 30 caracteres' }, { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }]} className="flex-1 mb-0">
+                                        <Input placeholder="sitioReynaldomartinez31" disabled={loading} maxLength={30} className="rounded-l-lg border-r-0 h-16 " style={{ fontSize: "11px" }} />
+                                    </Form.Item>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Update Button */}
-                            <Form.Item className="mb-0">
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    className="w-full bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 rounded-lg py-2 h-auto"
-                                    loading={loading}
-                                    disabled={!biosite.id}
-                                >
-                                    {loading ? 'Actualizando...' : 'Actualizar Perfil'}
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </div>
+                        <Form.Item className="mb-0">
+                            <Button type="primary" htmlType="submit" className="w-full bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 rounded-lg py-2 h-auto" loading={loading} disabled={!biosite.id}>
+                                {loading ? 'Actualizando...' : 'Actualizar Perfil'}
+                            </Button>
+                        </Form.Item>
+                    </Form>
                 </div>
             </div>
-
-            {/* Debug Info */}
-            {isDevelopment && (
-                <div className="mx-6 mb-6 p-4 bg-gray-900 rounded-lg">
-                    <h4 className="text-white font-semibold mb-2">Debug Info</h4>
-                    <div className="text-xs text-gray-400 space-y-1">
-                        <p>Biosite ID: {biosite.id || 'N/A'}</p>
-                        <p>User ID: {userId || 'N/A'}</p>
-                        <p>Role: {role || 'N/A'}</p>
-                        <p>Is Admin: {isAdmin ? 'Yes' : 'No'}</p>
-                        <p>Current Background: {biosite.backgroundImage || 'None'}</p>
-                        <p>Default Background: {DEFAULT_BACKGROUND}</p>
-                        <p>Loading: {loading ? 'Yes' : 'No'}</p>
-                        <p>Preview Loading: {previewLoading ? 'Yes' : 'No'}</p>
-                        <p>Update Loading: {updateLoading ? 'Yes' : 'No'}</p>
-                        <p>Update Function Type: {typeof updateBiosite}</p>
-                        <p>Biosite Keys: {biosite ? Object.keys(biosite).join(', ') : 'N/A'}</p>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

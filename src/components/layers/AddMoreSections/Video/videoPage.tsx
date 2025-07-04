@@ -70,7 +70,7 @@ const VideoPage = () => {
     }
 
     return (
-        <div className="max-w-xl min-h-screen text-white px-4 py-6">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className=" py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">

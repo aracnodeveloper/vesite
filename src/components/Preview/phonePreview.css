@@ -63,13 +63,19 @@
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
-    /* CRÍTICO: Establecer altura máxima específica */
     height: 100%;
-    max-height: 100%;
 
-    /* Habilitar scroll suave */
+    /* MEJORADO: Scroll más suave y estable */
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+
+    /* NUEVO: Evitar bugs de scroll rápido */
+    contain: layout style paint;
+    will-change: scroll-position;
+
+    /* NUEVO: Mejorar rendimiento */
+    transform: translateZ(0);
+    backface-visibility: hidden;
 
     /* Scroll personalizado visible */
     scrollbar-width: thin;
@@ -95,19 +101,82 @@
     background-color: rgba(155, 155, 155, 0.8);
 }
 
-/* CRÍTICO: Wrapper del biosite que permite scroll */
+/* CORREGIDO: Wrapper del biosite más estable */
 .biosite-wrapper {
     width: 100%;
-    /* CAMBIO IMPORTANTE: Permitir que el contenido crezca */
     min-height: 100%;
     height: auto;
     position: relative;
     font-size: 14px;
     line-height: 1.4;
-    /* IMPORTANTE: No usar overflow hidden aquí */
-    overflow: visible;
-    /* Asegurar que el contenido interno pueda expandirse */
+
+    /* NUEVO: Mejorar estabilidad del contenido */
+    contain: layout style;
+    transform: translateZ(0);
+
+    /* NUEVO: Evitar saltos durante el scroll */
+    overflow-anchor: auto;
+}
+
+/* NUEVO: Contenedor específico para embeds */
+.embed-container {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    /* CRÍTICO: Asegurar que los embeds se rendericen correctamente */
+    contain: layout;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.embed-container iframe {
+    width: 100%;
+    border: none;
     display: block;
+
+    /* NUEVO: Mejorar rendimiento de iframes */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* NUEVO: Contenedor para embeds de Spotify */
+.spotify-embed {
+    height: 152px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* NUEVO: Contenedor para embeds de YouTube */
+.youtube-embed {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.youtube-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* NUEVO: Contenedor para embeds de Instagram */
+.instagram-embed {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.instagram-embed iframe {
+    min-height: 400px;
+    height: auto;
 }
 
 /* Efectos adicionales para mayor realismo */
@@ -154,6 +223,19 @@
     top: 140px;
     width: 4px;
     height: 50px;
+}
+
+/* NUEVO: Optimizaciones para mejor rendimiento */
+.phone-content * {
+    box-sizing: border-box;
+}
+
+/* NUEVO: Prevenir flickering en elementos animados */
+.phone-content img,
+.phone-content video,
+.phone-content iframe {
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* Responsive design */

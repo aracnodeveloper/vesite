@@ -174,7 +174,7 @@ const SocialPage = () => {
                 }
             );
         } else {
-            // If link doesn't exist, show form to add it
+            // If link doesn't exist, show inline form to add it
             setEditingPlatform(platform);
             setLabelInput(platform.name);
             setUrlInput('');
@@ -282,15 +282,10 @@ const SocialPage = () => {
 
             return (
                 linkLabelLower === platformNameLower ||
-
                 linkLabelLower === platformIdLower ||
-
                 (platformIdLower.length > 2 && linkLabelLower.includes(platformIdLower)) ||
-
                 link.icon === platform.icon ||
-
                 linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '') ||
-
                 (platformNameLower.includes('/') && platformNameLower.split('/').some(name =>
                     name.trim().toLowerCase() === linkLabelLower
                 )) ||
@@ -329,7 +324,7 @@ const SocialPage = () => {
     }
 
     return (
-        <div className="w-full max-w-md min-h-sreen mx-auto rounded-lg  overflow-hidden">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className="p-4 ">
                 <div className="flex items-center gap-3">
@@ -339,7 +334,7 @@ const SocialPage = () => {
                         disabled={isSubmitting}
                     >
                         <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
-                        <h1 className="text-lg font-semibold text-black hover:text-gray-400">Redes Sociales</h1>
+                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400" style={{fontSize:"17px"}}>Redes Sociales</h1>
                     </button>
                 </div>
             </div>
@@ -352,13 +347,56 @@ const SocialPage = () => {
                     </div>
                 )}
 
+                {/* Inline URL Form */}
+                {showUrlForm && editingPlatform && (
+                    <div className="mb-4 p-3 bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                                style={{backgroundColor: editingPlatform.color}}
+                            >
+                                <img
+                                    src={editingPlatform.icon}
+                                    alt={editingPlatform.name}
+                                    className="w-4 h-4 filter invert brightness-0 contrast-100"
+                                />
+                            </div>
+
+                            <input
+                                type="text"
+                                value={urlInput}
+                                onChange={(e) => setUrlInput(e.target.value)}
+                                className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none"
+                                placeholder={getPlaceholderText(editingPlatform.name)}
+                                disabled={isSubmitting}
+                            />
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleSaveLink}
+                                    disabled={!validateUrl(urlInput) || isSubmitting}
+                                    className="w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                >
+                                    <Check className="w-4 h-4"/>
+                                </button>
+                                <button
+                                    onClick={handleCancelEdit}
+                                    className="w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors flex items-center justify-center"
+                                    disabled={isSubmitting}
+                                >
+                                    <X className="w-4 h-4"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Delete Confirmation Modal */}
                 {deleteConfirmation.isOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md border border-gray-600">
                             <div className="flex items-center mb-4">
-                                <div
-                                    className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
+                                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
                                     <AlertTriangle className="w-5 h-5 text-red-400"/>
                                 </div>
                                 <h3 className="text-lg font-semibold text-white">
@@ -391,178 +429,99 @@ const SocialPage = () => {
                     </div>
                 )}
 
-                {/* URL Form Modal */}
-                {showUrlForm && editingPlatform && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center">
-                                    <div
-                                        className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
-                                        style={{backgroundColor: editingPlatform.color}}
-                                    >
-                                        <img
-                                            src={editingPlatform.icon}
-                                            alt={editingPlatform.name}
-                                            className="w-4 h-4 filter invert brightness-0 contrast-100"
-                                        />
-                                    </div>
-                                    {editingLink ? 'Editar' : 'Agregar'} {editingPlatform.name}
-                                </h3>
-                                <button
-                                    onClick={handleCancelEdit}
-                                    className="text-gray-400 hover:text-white"
-                                    disabled={isSubmitting}
-                                >
-                                    <X className="w-5 h-5"/>
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Etiqueta
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={labelInput}
-                                        onChange={(e) => setLabelInput(e.target.value)}
-                                        className="w-full bg-[#2a2a2a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-                                        placeholder={editingPlatform.name}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        URL
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={urlInput}
-                                        onChange={(e) => setUrlInput(e.target.value)}
-                                        className="w-full bg-[#2a2a2a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
-                                        placeholder={getPlaceholderText(editingPlatform.name)}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-
-                                <div className="flex space-x-3 pt-4">
-                                    <button
-                                        onClick={handleSaveLink}
-                                        disabled={!validateUrl(urlInput) || isSubmitting}
-                                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                                    >
-                                        <Check className="w-4 h-4 mr-2"/>
-                                        {isSubmitting ? 'Guardando...' : 'Guardar'}
-                                    </button>
-                                    <button
-                                        onClick={handleCancelEdit}
-                                        className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-                                        disabled={isSubmitting}
-                                    >
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Active Social Links */}
                 {activeSocialLinks.length > 0 && (
-                    <div className="mb-6">
-                        <h3 className="text-sm text-black font-semibold  mb-3">
-                            Enlaces activos ({activeSocialLinks.length})
-                        </h3>
-                        <div className="space-y-2">
-                            {activeSocialLinks.map((link) => {
-                                const platform = socialMediaPlatforms.find(p =>
-                                    p.name.toLowerCase() === link.label.toLowerCase() ||
-                                    link.label.toLowerCase().includes(p.id.toLowerCase()) ||
-                                    p.id.toLowerCase() === link.label.toLowerCase()
-                                );
+                    <div className="mb-6 space-y-2">
+                        {activeSocialLinks.map((link) => {
+                            const platform = socialMediaPlatforms.find(p =>
+                                p.name.toLowerCase() === link.label.toLowerCase() ||
+                                link.label.toLowerCase().includes(p.id.toLowerCase()) ||
+                                p.id.toLowerCase() === link.label.toLowerCase()
+                            );
 
-                                return (
-                                    <div key={link.id}
-                                         className="flex items-center justify-between p-3 bg-[#FAFFF6] rounded-lg">
-                                        <div className="flex items-center space-x-3">
-                                            <div
-                                                className="w-8 h-8 rounded-full flex items-center justify-center"
-                                                style={{backgroundColor: platform?.color || '#6B7280'}}
-                                            >
-                                                <img
-                                                    src={platform?.icon || '🔗'}
-                                                    alt={link.label}
-                                                    className="w-4 h-4  filter invert brightness-0 contrast-100"
-                                                />
-                                            </div>
-                                            <div>
-                                                <span className="text-sm font-medium text-black">
-                                                    {link.label}
-                                                </span>
-                                                <p className="text-xs text-gray-400 truncate max-w-48">
-                                                    {link.url}
-                                                </p>
-                                            </div>
+                            return (
+                                <div key={link.id} className="flex items-center justify-between p-3 bg-[#FAFFF6] rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <div
+                                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                                            style={{backgroundColor: platform?.color || '#6B7280'}}
+                                        >
+                                            <img
+                                                src={platform?.icon || '🔗'}
+                                                alt={link.label}
+                                                className="w-4 h-4 filter invert brightness-0 contrast-100"
+                                            />
                                         </div>
-                                        <div className="flex items-center space-x-2">
-                                            <button
-                                                onClick={() => handleEditLink(link)}
-                                                className="text-gray-400 hover:text-blue-400 transition-colors p-1"
-                                                disabled={isSubmitting}
-                                            >
-                                                <Edit2 className="w-4 h-4"/>
-                                            </button>
-                                            <button
-                                                onClick={() => window.open(link.url, '_blank')}
-                                                className="text-gray-400 hover:text-green-400 transition-colors p-1"
-                                            >
-                                                <ExternalLink className="w-4 h-4"/>
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-
-                                                    showDeleteConfirmation(
-                                                        link.id,
-                                                        link.label,
-                                                        async () => {
-                                                            try {
-                                                                setIsSubmitting(true);
-                                                                await removeSocialLink(link.id);
-                                                            } catch (error) {
-                                                                const errorMessage = error instanceof Error
-                                                                    ? error.message
-                                                                    : "Error al eliminar el enlace";
-                                                                alert(errorMessage);
-                                                            } finally {
-                                                                setIsSubmitting(false);
-                                                            }
-                                                        }
-                                                    );
-                                                }}
-                                                className="text-gray-400 hover:text-red-400 transition-colors p-1"
-                                                disabled={isSubmitting}
-                                            >
-                                                <X className="w-4 h-4"/>
-                                            </button>
+                                        <div>
+                                            <span className="text-sm font-medium text-black">
+                                                {link.label}
+                                            </span>
+                                            <p className="text-xs text-gray-400 truncate max-w-48">
+                                                {link.url}
+                                            </p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => handleEditLink(link)}
+                                            className="text-gray-400 hover:text-blue-400 transition-colors p-1"
+                                            disabled={isSubmitting}
+                                        >
+                                            <Edit2 className="w-4 h-4"/>
+                                        </button>
+                                        <button
+                                            onClick={() => window.open(link.url, '_blank')}
+                                            className="text-gray-400 hover:text-green-400 transition-colors p-1"
+                                        >
+                                            <ExternalLink className="w-4 h-4"/>
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+
+                                                showDeleteConfirmation(
+                                                    link.id,
+                                                    link.label,
+                                                    async () => {
+                                                        try {
+                                                            setIsSubmitting(true);
+                                                            await removeSocialLink(link.id);
+                                                        } catch (error) {
+                                                            const errorMessage = error instanceof Error
+                                                                ? error.message
+                                                                : "Error al eliminar el enlace";
+                                                            alert(errorMessage);
+                                                        } finally {
+                                                            setIsSubmitting(false);
+                                                        }
+                                                    }
+                                                );
+                                            }}
+                                            className="text-gray-400 hover:text-red-400 transition-colors p-1"
+                                            disabled={isSubmitting}
+                                        >
+                                            <X className="w-4 h-4"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 
-                {/* Social Media Platforms Grid */}
-                <div>
-                    <h3 className="text-sm font-semibold text-black mb-3">
-                        Agregar plataforma
-                    </h3>
-                    <div className="grid grid-cols-4  mb-6">
-                        {socialMediaPlatforms.map((platform) => {
+                {/* Add Social Links Footer */}
+                <div className="border-t border-gray-700 pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm text-gray-600" style={{fontSize:"11px"}}>
+                            ADD SOCIAL LINKS {activeSocialLinks.length} / 8
+                        </span>
+
+                    </div>
+
+                    {/* Social Media Platforms Grid */}
+                    <div className="grid grid-cols-6 gap-1">
+                        {socialMediaPlatforms.slice(0, 30).map((platform) => {
                             const isActive = isPlatformActive(platform);
                             return (
                                 <button
@@ -570,21 +529,20 @@ const SocialPage = () => {
                                     onClick={() => handlePlatformSelect(platform)}
                                     disabled={isSubmitting}
                                     className={`
-                                        relative p-4 rounded-lg transition-all duration-200 
+                                        relative p-5 rounded-lg transition-all duration-200 
                                         ${isActive
                                         ? ''
-                                        : '  hover:border-gray-500'
+                                        : ' hover:bg-gray-700'
                                     }
                                         ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                                     `}
                                 >
                                     {isActive && (
-                                        <div
-                                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
                                             <X className="w-3 h-3 text-white"/>
                                         </div>
                                     )}
-                                    <div className="flex flex-col items-center space-y-1">
+                                    <div className="flex flex-col items-center">
                                         <div
                                             className="w-8 h-8 rounded-full flex items-center justify-center"
                                             style={{backgroundColor: platform.color}}
@@ -595,9 +553,6 @@ const SocialPage = () => {
                                                 className="w-4 h-4 filter invert brightness-0 contrast-100"
                                             />
                                         </div>
-                                        <span className="text-xs text-center text-gray-300 leading-tight">
-                                            {platform.name}
-                                        </span>
                                     </div>
                                 </button>
                             );

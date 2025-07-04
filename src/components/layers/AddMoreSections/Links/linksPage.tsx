@@ -306,7 +306,7 @@ const LinksPage = () => {
     }
 
     return (
-        <div className="w-full max-w-md min-h-sreen mx-auto rounded-lg overflow-hidden">
+        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             {editingIndex === null ? (
                 <div className="p-4">
@@ -316,7 +316,7 @@ const LinksPage = () => {
                             className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                         >
                             <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
-                            <h1 className="text-lg text-black font-semibold hover:text-gray-400">Links</h1>
+                            <h1 className="text-lg text-black font-semibold hover:text-gray-400" style={{fontSize:"17px"}}>Links</h1>
                         </button>
                     </div>
                 </div>

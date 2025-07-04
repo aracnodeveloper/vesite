@@ -300,7 +300,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             />
 
                             {/* Contenido del preview (celular) */}
-                            <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center z-50 relative">
+                            <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center  relative">
                                 <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2  left-20 text-white mb-4 text-center z-60">
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}
                                 </div>
