@@ -387,7 +387,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
 
         try {
-            console.log("Adding regular link:", link);
             const newLink = await createLink({
                 biositeId: biositeData.id,
                 label: link.title,

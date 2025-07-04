@@ -148,7 +148,7 @@ const ProfilePage = () => {
             <div className="p-6">
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>IMÁGENES</h3>
-                    <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
+                        <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
                 </div>
 
                 {!isAdmin && (

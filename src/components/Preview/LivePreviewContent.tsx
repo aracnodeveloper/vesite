@@ -429,13 +429,7 @@ const LivePreviewContent = () => {
         {link.title}
       </span>
                                     </div>
-                                    <p className="text-xs opacity-60 truncate mt-1"
-                                       style={{
-                                           color: themeConfig.colors.text,
-                                           fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
-                                       }}>
-                                        {link.url}
-                                    </p>
+
                                 </div>
                             </a>
 

@@ -230,7 +230,6 @@ export const uploadLinkImage = async (file: File, linkId: string): Promise<strin
         });
         console.log("Link ID:", linkId);
 
-        // Validate inputs
         if (!file || !(file instanceof File)) {
             throw new Error('Archivo no válido');
         }
@@ -239,11 +238,9 @@ export const uploadLinkImage = async (file: File, linkId: string): Promise<strin
             throw new Error('ID de enlace no válido');
         }
 
-        // Create FormData and append the file
         const formData = new FormData();
         formData.append('image', file, file.name);
 
-        // Log FormData contents (for debugging)
         console.log("FormData entries:");
         for (const [key, value] of formData.entries()) {
             console.log(`${key}:`, value);
@@ -255,7 +252,6 @@ export const uploadLinkImage = async (file: File, linkId: string): Promise<strin
         const endpoint = `${LinksImageApi}/${linkId}`;
         console.log("API endpoint:", endpoint);
 
-        // Use api directly instead of apiService to ensure proper headers
         const response = await api.post<UploadResponse>(endpoint, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
