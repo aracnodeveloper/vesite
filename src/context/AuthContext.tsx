@@ -12,6 +12,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const [biositeId, setBiositeId] = useState<string | null>(null);
+    const [activeBiositeId, setActiveBiositeId] = useState<string | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [roleName, setRoleName] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -22,29 +23,10 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
             const data = {email: email, password: password}
             const responseData = await apiService.createReqRes<LoginParams, AuthResponse>(loginApi, data)
 
-
-            console.log('🔍 Server response:', responseData);
-            console.log('🔍 RoleName from response:', responseData.roleName);
-
-            const {accessToken, refreshToken, userId, roleName, biositeId} = responseData;
-
-
-            console.log('🔍 RoleName after destructuring:', roleName);
-            console.log('🔍 RoleName type:', typeof roleName);
-
-            // Verificar que roleName existe
-            if (!roleName) {
-                console.error('❌ No role information received from server');
-                throw new Error('No role information received from server');
-            }
+            const {accessToken, refreshToken, userId, roleName, biositeId, activeBiositeId} = responseData;
 
 
             const userRole = roleName as string;
-
-
-            console.log('🔍 userRole before saving:', userRole);
-            console.log('🔍 userRole type:', typeof userRole);
-            console.log('🔍 userRole length:', userRole?.length);
 
             const accessExpirationDate = new Date();
             const refreshExpirationDate = new Date();
@@ -54,27 +36,16 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
             Cookie.set('accessToken', accessToken, { expires: accessExpirationDate });
             Cookie.set('refreshToken', refreshToken, { expires: refreshExpirationDate });
             Cookie.set('userId', userId, { expires: refreshExpirationDate});
-
-
-            console.log('🔍 About to save roleName cookie with value:', userRole);
             Cookie.set('roleName', userRole, { expires: refreshExpirationDate });
-
-            console.log('🔍 Cookie saved, reading it back:', Cookie.get('roleName'));
-
             Cookie.set('biositeId', biositeId, { expires: refreshExpirationDate});
-
-
-            console.log('🍪 Cookies saved:');
-            console.log('  - accessToken:', Cookie.get('accessToken') ? 'SET' : 'NOT SET');
-            console.log('  - userId:', Cookie.get('userId'));
-            console.log('  - roleName:', Cookie.get('roleName'));
-            console.log('  - biositeId:', Cookie.get('biositeId'));
+            Cookie.set('activeBiositeId', activeBiositeId, { expires: refreshExpirationDate});
 
             setIsAuthenticated(true);
             setUserId(userId);
             setBiositeId(biositeId);
             setAccessToken(accessToken);
             setRoleName(userRole);
+            setActiveBiositeId(activeBiositeId);
 
 
             if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
@@ -107,11 +78,13 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
             Cookie.remove('userId');
             Cookie.remove('roleName');
             Cookie.remove('biositeId');
+            Cookie.remove('activeBiositeId')
             setIsAuthenticated(false);
             setUserId(null);
             setAccessToken(null);
             setRoleName(null);
             setBiositeId(null)
+            setActiveBiositeId(null)
         } catch (err) {
             console.error('Logout error:', err);
         } finally {
@@ -120,7 +93,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     };
 
     return (
-        <AuthContext.Provider value={{isAuthenticated, userId,biositeId, accessToken, roleName, loading, login, logout}}>
+        <AuthContext.Provider value={{isAuthenticated, userId,biositeId, activeBiositeId,accessToken, roleName, loading, login, logout}}>
             {children}
         </AuthContext.Provider>
     );

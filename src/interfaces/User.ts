@@ -1,15 +1,11 @@
-import type {BiositeColors} from "./Biosite.ts";
+import type {UUID} from "../types/authTypes.ts";
 
 export interface CreateBiositeDto {
-    ownerId: string;
+    ownerId: UUID;
     title: string;
     slug: string;
-    themeId?: string;
-    colors?: string | BiositeColors;
-    fonts?: string;
     avatarImage?: string;
     backgroundImage?: string;
-    isActive?: boolean;
 }
 
 export interface CreateUserDto {
@@ -17,6 +13,7 @@ export interface CreateUserDto {
     password: string;
     name?: string;
     parentId?: string;
+    role?: string;
 }
 
 export interface CreatedUser {

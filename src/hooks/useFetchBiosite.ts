@@ -1,5 +1,11 @@
-import {getBiositeApi, updateBiositeApi, registerStudentApi, getBiositesApi} from "../constants/EndpointsRoutes";
-import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../interfaces/Biosite";
+import {
+    getBiositeApi,
+    updateBiositeApi,
+    registerStudentApi,
+    getBiositesApi,
+    getBiositeAdminApi
+} from "../constants/EndpointsRoutes";
+import type { BiositeFull, BiositeUpdateDto } from "../interfaces/Biosite";
 import { useState, useCallback, useRef } from "react";
 import apiService from "../service/apiService.ts";
 import type {CreatedUser,CreateUserDto ,CreateBiositeDto} from "../interfaces/User.ts";
@@ -133,7 +139,7 @@ export const useFetchBiosite = (userId?: string) => {
             setLoading(true);
             setError(null);
 
-            const ownBiosites = await apiService.getById<BiositeFull[]>(`${getBiositeApi}`, parentId);
+            const ownBiosites = await apiService.getById<BiositeFull[]>(`${getBiositeAdminApi}`, parentId);
             const ownBiositesArray = Array.isArray(ownBiosites) ? ownBiosites : [ownBiosites];
 
             const childBiosites = await fetchChildBiosites(parentId);
@@ -221,40 +227,21 @@ export const useFetchBiosite = (userId?: string) => {
                 newUserData
             );
 
-            const defaultColors: BiositeColors = {
-                primary: '#3B82F6',
-                secondary: '#1E40AF',
-                background: '#FFFFFF',
-                text: '#000000',
-                accent: '#3B82F6',
-                profileBackground: '#F3F4F6'
-            };
 
             const biositeDataToSend = {
                 ownerId: createdUser.id,
-                title: createData.title.trim(),
-                slug: createData.slug.trim(),
-                themeId: createData.themeId || 'default',
-                colors: createData.colors || JSON.stringify(defaultColors),
-                fonts: createData.fonts || 'Inter',
-                avatarImage: createData.avatarImage || '',
-                backgroundImage: createData.backgroundImage || '',
-                isActive: createData.isActive !== undefined ? createData.isActive : true
+                title: createdUser.name,
+                slug: createData.slug,
             };
 
             const newBiosite = await apiService.create<typeof biositeDataToSend, BiositeFull>(
-                getBiositeApi,
+                updateBiositeApi,
                 biositeDataToSend
             );
 
             const biositeWithOwner: BiositeFull = {
                 ...newBiosite,
-                owner: {
-                    id: createdUser.id,
-                    email: createdUser.email,
-                    name: createdUser.name || '',
-                    parentId: createdUser.parentId || userId,
-                }
+
             };
 
             if (!biositeData) {
@@ -328,7 +315,7 @@ export const useFetchBiosite = (userId?: string) => {
                 title: biositeResult.title || updateData.title || biositeData.title,
                 slug: biositeResult.slug || updateData.slug || biositeData.slug,
                 links: biositeData.links || [],
-                owner: biositeData.owner,
+                ownerId: biositeData.ownerId,
                 colors: biositeResult.colors || updateData.colors || biositeData.colors
             };
 
@@ -350,6 +337,7 @@ export const useFetchBiosite = (userId?: string) => {
 
             const biosite = await apiService.getById<BiositeFull>(getBiositesApi, biositeId);
             setBiositeData(biosite);
+
             return biosite;
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cambiar de biosite";

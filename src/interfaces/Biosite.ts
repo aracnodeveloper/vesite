@@ -1,3 +1,5 @@
+import type {UUID} from "../types/authTypes.ts";
+
 export interface BiositeColors {
     primary: string;
     secondary: string;
@@ -50,7 +52,7 @@ export interface BiositeLink {
 
 export interface BiositeFull {
     id: string;
-    ownerId: string;
+    ownerId: UUID;
     title: string;
     slug: string;
     themeId: string;
@@ -63,7 +65,6 @@ export interface BiositeFull {
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
-    owner?: BiositeOwner;
     links?: BiositeLink[];
 }
 

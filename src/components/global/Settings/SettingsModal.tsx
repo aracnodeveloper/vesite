@@ -113,7 +113,6 @@ const role = Cookies.get("roleName")
         return role === 'ADMIN' || role === 'SUPER_ADMIN';
     };
 
-    // Fetch user data and biosites when modal opens
     useEffect(() => {
         if (isOpen) {
             const userId = getCurrentUserId();
@@ -173,20 +172,10 @@ const role = Cookies.get("roleName")
             clearError();
 
             const createData = {
-                title: createForm.title.trim(),
+                ownerId: biosite?.ownerId,
+                title: createForm.title.trim() ,
                 slug: createForm.slug.trim(),
-                themeId: 'default',
-                colors: JSON.stringify({
-                    primary: '#3B82F6',
-                    secondary: '#1E40AF',
-                    background: '#FFFFFF',
-                    text: '#000000',
-                    accent: '#3B82F6',
-                    profileBackground: '#F3F4F6'
-                }),
-                fonts: 'Inter',
-                isActive: true,
-                ownerId: biosite?.ownerId
+
 
             };
             const newBiosite = await createBiosite(createData);
@@ -226,7 +215,7 @@ const role = Cookies.get("roleName")
             setError(null);
             clearError();
 
-            const switchedBiosite = await switchToAnotherBiosite(biositeData.id);
+            const switchedBiosite = await switchToAnotherBiosite(biositeData.id, );
 
             if (switchedBiosite && onProfileSelect) {
                 const profile: Profile = {

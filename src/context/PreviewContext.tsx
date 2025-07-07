@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import type {BiositeColors, BiositeFull, BiositeUpdateDto} from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
 import { useFetchBiosite, } from "../hooks/useFetchBiosite";
-import type {CreateBiositeDto} from "../interfaces/User.ts"
+import type {CreateBiositeDto, CreateUserDto} from "../interfaces/User.ts"
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import Cookies from "js-cookie";
 
@@ -275,7 +275,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     }, [fetchUserBiosites]);
 
     const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
-        const userId = Cookies.get("userId");
         try {
             const result = await switchBiosite(biositeId);
             if (result) {
@@ -283,6 +282,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 Cookies.set('activeBiositeId', biositeId);
                 Cookies.set('biositeId', result.id);
                 Cookies.set('userId', result.ownerId);
+                Cookies.set("roleName", use)
                 resetState();
 
             }

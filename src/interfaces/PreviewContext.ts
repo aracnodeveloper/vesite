@@ -1,4 +1,5 @@
 import type {BiositeFull, BiositeUpdateDto} from "./Biosite.ts";
+import type {UUID} from "../types/authTypes.ts";
 
 export interface SocialLink {
     id: string;
@@ -18,16 +19,11 @@ export interface RegularLink {
     isActive: boolean;
 }
 
+
 export interface CreateBiositeDto {
-    ownerId: string;
+    ownerId: UUID;
     title: string;
     slug: string;
-    themeId?: string;
-    colors?: string;
-    fonts?: string;
-    avatarImage?: string;
-    backgroundImage?: string;
-    isActive?: boolean;
 }
 export interface PreviewContextType {
     biosite: BiositeFull | null;

@@ -32,7 +32,6 @@ const LivePreviewContent = () => {
 
     // Determinar si estamos en la ruta expuesta
     const isExposedRoute = location.pathname === '/expoced';
-
     // Fetch user data when component mounts
     useEffect(() => {
         const userId = Cookies.get('userId');
@@ -172,6 +171,7 @@ const LivePreviewContent = () => {
         }
     };
 
+
     // Show loading state if either biosite or user is loading
     if (loading || userLoading) {
         return (
@@ -229,7 +229,7 @@ const LivePreviewContent = () => {
     }
 
     const { title } = biosite;
-    // Use user description if available, otherwise use a default
+
     const description = user?.description || user?.name || 'Tu descripción aquí';
 
     return (
@@ -240,64 +240,158 @@ const LivePreviewContent = () => {
                  fontFamily: themeConfig.fonts.primary,
                  color: themeConfig.colors.text
              }}>
-
+            {isExposedRoute && (
             <div className="relative w-full h-48 flex-shrink-0">
-                {validBackgroundImage ? (
-                    <>
-                        {imageLoadStates.background === 'loading' && (
-                            <div className="absolute inset-0 flex items-center justify-center"
-                                 style={{ backgroundColor: themeConfig.colors.profileBackground }}>
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2"
-                                     style={{ borderColor: themeConfig.colors.primary }}></div>
-                            </div>
-                        )}
-                        <img
-                            src={validBackgroundImage}
-                            alt="Background"
-                            className="w-full h-full object-cover"
-                            onLoadStart={() => handleImageLoadStart('background')}
-                            onLoad={() => handleImageLoad('background')}
-                            onError={() => handleImageError('background', biosite.backgroundImage)}
-                            style={{
-                                display: imageLoadStates.background === 'error' ? 'none' : 'block'
-                            }}
-                        />
-                        {imageLoadStates.background === 'error' && (
-                            <div
-                                className="w-full h-full flex items-center justify-center"
-                                style={{ backgroundColor: themeConfig.colors.primary }}
-                            >
-                                <div className="text-white text-center p-4">
-                                    <div className="mb-2">
-                                        <svg className="w-6 h-6 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
-                                        {title || "Tu Biosite"}
-                                    </h2>
-                                    <p className="text-xs opacity-80">Imagen no disponible</p>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                ) : (
+            {validBackgroundImage ? (
+                <>
+            {imageLoadStates.background === 'loading' && (
+                <div className="absolute inset-0 flex items-center justify-center"
+                style={{ backgroundColor: themeConfig.colors.profileBackground }}>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2"
+                 style={{ borderColor: themeConfig.colors.primary }}></div>
+        </div>
+    )}
+    <img
+        src={validBackgroundImage}
+        alt="Background"
+        className="w-full h-72 object-cover"
+        onLoadStart={() => handleImageLoadStart('background')}
+        onLoad={() => handleImageLoad('background')}
+        onError={() => handleImageError('background', biosite.backgroundImage)}
+        style={{
+            display: imageLoadStates.background === 'error' ? 'none' : 'block'
+        }}
+    />
+{imageLoadStates.background === 'error' && (
+        <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ backgroundColor: themeConfig.colors.primary }}
+        >
+            <div className="text-white text-center p-4">
+                <div className="mb-2">
+                    <svg className="w-6 h-6 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    </svg>
+                </div>
+                <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
+                    {title || "Tu Biosite"}
+                </h2>
+                <p className="text-xs opacity-80">Imagen no disponible</p>
+            </div>
+        </div>
+    )}
+</>
+) : (
+        <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ backgroundColor: themeConfig.colors.primary }}
+        >
+            <div className="text-white text-center p-4">
+                <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
+                    {title || "Tu Biosite"}
+                </h2>
+                <p className="text-xs opacity-80">Imagen de portada</p>
+            </div>
+        </div>
+    )}
+</div>
+            )} : {!isExposedRoute &&(
+            <div className="relative w-full h-48 flex-shrink-0">
+        {validBackgroundImage ? (
+            <>
+                {imageLoadStates.background === 'loading' && (
+                    <div className="absolute inset-0 flex items-center justify-center"
+                         style={{ backgroundColor: themeConfig.colors.profileBackground }}>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2"
+                             style={{ borderColor: themeConfig.colors.primary }}></div>
+                    </div>
+                )}
+                <img
+                    src={validBackgroundImage}
+                    alt="Background"
+                    className="w-full h-full object-cover"
+                    onLoadStart={() => handleImageLoadStart('background')}
+                    onLoad={() => handleImageLoad('background')}
+                    onError={() => handleImageError('background', biosite.backgroundImage)}
+                    style={{
+                        display: imageLoadStates.background === 'error' ? 'none' : 'block'
+                    }}
+                />
+                {imageLoadStates.background === 'error' && (
                     <div
                         className="w-full h-full flex items-center justify-center"
                         style={{ backgroundColor: themeConfig.colors.primary }}
                     >
                         <div className="text-white text-center p-4">
+                            <div className="mb-2">
+                                <svg className="w-6 h-6 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                </svg>
+                            </div>
                             <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
                                 {title || "Tu Biosite"}
                             </h2>
-                            <p className="text-xs opacity-80">Imagen de portada</p>
+                            <p className="text-xs opacity-80">Imagen no disponible</p>
                         </div>
                     </div>
                 )}
+            </>
+        ) : (
+            <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ backgroundColor: themeConfig.colors.primary }}
+            >
+                <div className="text-white text-center p-4">
+                    <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
+                        {title || "Tu Biosite"}
+                    </h2>
+                    <p className="text-xs opacity-80">Imagen de portada</p>
+                </div>
             </div>
-
+        )}
+    </div>
+        )}
             <div className="relative pb-8">
-                <div className="flex justify-center -mt-12 relative z-10 mb-4">
+                {isExposedRoute &&(
+              <div className="flex justify-center -mt-12 relative z-10 mb-4">
+                {validAvatarImage ? (
+                    <div className="relative">
+                {imageLoadStates.avatar === 'loading' && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full border-3 border-white w-16 h-16"
+                    style={{ backgroundColor: themeConfig.colors.profileBackground }}>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2"
+                     style={{ borderColor: themeConfig.colors.primary }}></div>
+            </div>
+            )}
+            <img
+                src={validAvatarImage}
+                alt="Avatar"
+                className="w-44 h-44 rounded-full border-3 border-white object-cover shadow-lg"
+                onLoadStart={() => handleImageLoadStart('avatar')}
+                onLoad={() => handleImageLoad('avatar')}
+                onError={() => handleImageError('avatar', biosite.avatarImage)}
+                style={{
+                    display: imageLoadStates.avatar === 'error' ? 'none' : 'block'
+                }}
+            />
+            {imageLoadStates.avatar === 'error' && (
+                <img
+                    src={defaultAvatar}
+                    alt="Avatar placeholder"
+                    className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                />
+            )}
+        </div>
+    ) : (
+        <img
+            src={defaultAvatar}
+            alt="Avatar placeholder"
+            className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+        />
+    )}
+</div>
+                )} : {!isExposedRoute &&(
+                <div className="flex justify-center -mt-24 relative z-10 mb-4">
                     {validAvatarImage ? (
                         <div className="relative">
                             {imageLoadStates.avatar === 'loading' && (
@@ -334,7 +428,7 @@ const LivePreviewContent = () => {
                         />
                     )}
                 </div>
-
+) }
                 <div className="text-center px-4 mb-4">
                     <h1 className="text-lg font-bold leading-tight"
                         style={{

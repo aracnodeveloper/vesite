@@ -182,11 +182,11 @@ const App = () => {
             <Route
                 path="/expoced"
                 element={
-                    <PrivateRoute>
+
                         <div className="min-h-screen bg-gray-100">
                         <LivePreviewContent/>
                         </div>
-                    </PrivateRoute>
+
                 }
             />
             {/* Catch-all: redirección a inicio */}
