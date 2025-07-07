@@ -1,0 +1,186 @@
+import { useCallback } from "react";
+import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../interfaces/Biosite";
+import type { CreateBiositeDto } from "../interfaces/User.ts";
+
+interface UseBiositeOperationsProps {
+    biositeData: BiositeFull | null;
+    biosite: BiositeFull | null;
+    setBiosite: (biosite: BiositeFull | null) => void;
+    updateBiositeHook: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
+    fetchBiosite: () => Promise<BiositeFull | null>;
+    fetchUserBiosites: () => Promise<BiositeFull[]>;
+    createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
+    switchBiosite: (biositeId: string) => Promise<BiositeFull | null>;
+    themeColor: string;
+    setThemeColorState: (color: string) => void;
+    fontFamily: string;
+    setFontFamilyState: (font: string) => void;
+}
+
+export const useBiositeOperations = ({
+                                         biositeData,
+                                         biosite,
+                                         setBiosite,
+                                         updateBiositeHook,
+                                         fetchBiosite,
+                                         fetchUserBiosites,
+                                         createBiosite,
+                                         switchBiosite,
+                                         themeColor,
+                                         setThemeColorState,
+                                         fontFamily,
+                                         setFontFamilyState
+                                     }: UseBiositeOperationsProps) => {
+
+    const updatePreview = useCallback((data: Partial<BiositeFull>) => {
+        setBiosite(prevBiosite => {
+            if (!prevBiosite) return null;
+            const updated = { ...prevBiosite, ...data };
+            console.log("Preview updated:", updated);
+            return updated;
+        });
+    }, [setBiosite]);
+
+    const updateBiosite = useCallback(async (data: BiositeUpdateDto): Promise<BiositeFull | null> => {
+        try {
+            const result = await updateBiositeHook(data);
+            if (result) {
+                setBiosite(result);
+            }
+            return result;
+        } catch (error) {
+            console.error("PreviewContext: updateBiosite error:", error);
+            throw error;
+        }
+    }, [updateBiositeHook, setBiosite]);
+
+    const refreshBiosite = useCallback(async () => {
+        try {
+            const refreshedBiosite = await fetchBiosite();
+            if (refreshedBiosite) {
+                setBiosite(refreshedBiosite);
+            }
+        } catch (error) {
+            console.error("Error refreshing biosite:", error);
+        }
+    }, [fetchBiosite, setBiosite]);
+
+    const setThemeColor = useCallback(async (color: string) => {
+        if (!biositeData?.id) {
+            throw new Error("No biosite available");
+        }
+        try {
+            setThemeColorState(color);
+
+            const colorsObject: BiositeColors = {
+                primary: color,
+                secondary: color,
+                background: color,
+                text: '#000000',
+                accent: color,
+                profileBackground: color
+            };
+            const updateData: BiositeUpdateDto = {
+                ownerId: biositeData.ownerId,
+                title: biositeData.title,
+                slug: biositeData.slug,
+                themeId: biositeData.themeId,
+                colors: JSON.stringify(colorsObject),
+                fonts: biositeData.fonts || fontFamily,
+                avatarImage: biositeData.avatarImage || '',
+                backgroundImage: biositeData.backgroundImage || '',
+                isActive: biositeData.isActive
+            };
+
+            await updateBiosite(updateData);
+        } catch (error) {
+            console.error("Error updating theme color:", error);
+            if (biositeData.colors) {
+                const previousColor = typeof biositeData.colors === 'string'
+                    ? biositeData.colors
+                    : biositeData.colors.background || '#ffffff';
+                setThemeColorState(previousColor);
+            }
+            throw error;
+        }
+    }, [biositeData, fontFamily, updateBiosite, setThemeColorState]);
+
+    const setFontFamily = useCallback(async (font: string) => {
+        if (!biositeData?.id) {
+            throw new Error("No biosite available");
+        }
+
+        try {
+            console.log("Setting font family:", font);
+            setFontFamilyState(font);
+
+            let colorsString: string;
+            if (typeof biositeData.colors === 'string') {
+                colorsString = biositeData.colors;
+            } else {
+                colorsString = JSON.stringify(biositeData.colors);
+            }
+            const updateData: BiositeUpdateDto = {
+                ownerId: biositeData.ownerId,
+                title: biositeData.title,
+                slug: biositeData.slug,
+                themeId: biositeData.themeId,
+                colors: colorsString,
+                fonts: font,
+                avatarImage: biositeData.avatarImage || '',
+                backgroundImage: biositeData.backgroundImage || '',
+                isActive: biositeData.isActive
+            };
+
+            await updateBiosite(updateData);
+        } catch (error) {
+            console.error("Error updating font family:", error);
+            setFontFamilyState(biositeData.fonts || 'Inter');
+            throw error;
+        }
+    }, [biositeData, updateBiosite, setFontFamilyState]);
+
+    const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
+        try {
+            const result = await createBiosite(data);
+            return result;
+        } catch (error) {
+            console.error("Error creating biosite:", error);
+            throw error;
+        }
+    }, [createBiosite]);
+
+    const getUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+        try {
+            const result = await fetchUserBiosites();
+            return result;
+        } catch (error) {
+            console.error("Error fetching user biosites:", error);
+            throw error;
+        }
+    }, [fetchUserBiosites]);
+
+    const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
+        try {
+            const result = await switchBiosite(biositeId);
+            if (result) {
+                setBiosite(result);
+            }
+            return result;
+        } catch (error) {
+            console.error("Error switching biosite:", error);
+            throw error;
+        }
+    }, [switchBiosite, setBiosite]);
+
+    return {
+        updatePreview,
+        updateBiosite,
+        refreshBiosite,
+        setThemeColor,
+        setFontFamily,
+        createNewBiosite,
+        getUserBiosites,
+        switchToAnotherBiosite
+    };
+};

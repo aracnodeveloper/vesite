@@ -45,9 +45,11 @@ export interface PreviewContextType {
     setFontFamily: (font: string) => Promise<void>;
 
     // Biosite management methods
-    createNewBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
+    createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
     getUserBiosites: () => Promise<BiositeFull[]>;
     switchToAnotherBiosite: (biositeId: string) => Promise<BiositeFull | null>;
+    getChildBiosites?: () => Promise<BiositeFull[]>;
+
 
     // Social links methods
     setSocialLinks: (links: SocialLink[]) => void;
@@ -73,4 +75,3 @@ export interface PreviewContextType {
     clearError: () => void;
 }
 
-// Export the CreateBiositeDto interface for consistency

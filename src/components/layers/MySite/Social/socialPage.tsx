@@ -47,11 +47,10 @@ const SocialPage = () => {
 
     const navigate = useNavigate();
 
-    // Filtrar solo los enlaces sociales activos
+
     const activeSocialLinks = socialLinks.filter(link => {
         if (!link.isActive) return false;
 
-        // Excluir enlaces de música, video y posts sociales
         const excludedKeywords = [
             'spotify', 'music', 'apple music', 'soundcloud', 'audio',
             'youtube', 'video', 'vimeo', 'tiktok video',

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
     ChevronLeft,
     Plus,
@@ -44,7 +44,7 @@ const LinksPage = () => {
     // Filtrar solo los enlaces activos
     const activeLinks = regularLinks.filter(link => link.isActive);
 
-    // Función para validar si una URL de imagen es válida
+    // Función mejorada para validar si una URL de imagen es válida
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
 
@@ -54,16 +54,21 @@ const LinksPage = () => {
             return dataUrlRegex.test(url);
         }
 
-        // Verificar URLs HTTP/HTTPS
+        // Verificar URLs HTTP/HTTPS - Mejorar la validación
         try {
             const urlObj = new URL(url);
-            return ['http:', 'https:'].includes(urlObj.protocol);
+            const isValidProtocol = ['http:', 'https:'].includes(urlObj.protocol);
+            const hasValidExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
+                url.includes('/img/') || // Para tu servidor
+                url.includes('image-'); // Para archivos con formato image-*
+
+            return isValidProtocol && (hasValidExtension || !urlObj.pathname.includes('.'));
         } catch {
             return false;
         }
     };
 
-    // Componente para renderizar la imagen del enlace
+    // Componente mejorado para renderizar la imagen del enlace
     const LinkImage = ({ image, title, size = "small" }: {
         image?: string | null;
         title: string;
@@ -84,15 +89,32 @@ const LinksPage = () => {
         const [imageError, setImageError] = useState(false);
         const [isLoading, setIsLoading] = useState(true);
 
+        // Reset error state when image changes
+        useEffect(() => {
+            if (image) {
+                setImageError(false);
+                setIsLoading(true);
+            }
+        }, [image]);
+
         const handleImageLoad = () => {
+            console.log("Image loaded successfully:", image);
             setIsLoading(false);
             setImageError(false);
         };
 
-        const handleImageError = () => {
+        const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+            console.error("Error loading image:", image, e);
             setIsLoading(false);
             setImageError(true);
         };
+
+        console.log("LinkImage render:", {
+            image,
+            imageError,
+            isLoading,
+            isValid: isValidImageUrl(image)
+        });
 
         if (!image || !isValidImageUrl(image) || imageError) {
             return (
@@ -118,10 +140,24 @@ const LinksPage = () => {
                     className={`w-full h-full object-cover rounded-lg transition-opacity duration-200 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                     onLoad={handleImageLoad}
                     onError={handleImageError}
+                    crossOrigin="anonymous" // Agregar para evitar problemas CORS
                 />
             </div>
         );
     };
+
+    // Debug: Log changes in active links
+    useEffect(() => {
+        console.log("Active links changed:", activeLinks);
+        activeLinks.forEach((link, index) => {
+            console.log(`Link ${index}:`, {
+                id: link.id,
+                title: link.title,
+                image: link.image,
+                imageValid: isValidImageUrl(link.image)
+            });
+        });
+    }, [activeLinks]);
 
     const handleBackClick = () => {
         navigate(-1);
@@ -176,6 +212,7 @@ const LinksPage = () => {
         setEditTitle(link.title);
         setEditUrl(link.url);
         setEditImage(link.image);
+        console.log("Opening edit for link:", link);
     };
 
     const handleSaveEdit = async () => {
@@ -195,13 +232,17 @@ const LinksPage = () => {
 
             await updateRegularLink(linkToUpdate.id, updateData);
 
+            console.log("Link updated successfully");
+
+            // Esperar un poco para que el contexto se actualice
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Ahora sí limpiar los estados
             setEditingIndex(null);
-            // Limpiar los estados de edición
             setEditTitle("");
             setEditUrl("");
             setEditImage(undefined);
 
-            console.log("Link updated successfully");
         } catch (error) {
             console.error("Error updating link:", error);
             alert('Error al actualizar el enlace');
@@ -419,6 +460,15 @@ const LinksPage = () => {
                 {error && (
                     <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
                         <p className="text-red-400 text-sm">{error}</p>
+                    </div>
+                )}
+
+
+                {process.env.NODE_ENV === 'development' && (
+                    <div className="mb-4 p-2 bg-gray-800 rounded">
+                        <p className="text-xs text-gray-400">Debug Info:</p>
+                        <p className="text-xs text-white">Active Links: {activeLinks.length}</p>
+                        <p className="text-xs text-white">Edit Image: {editImage || 'undefined'}</p>
                     </div>
                 )}
 

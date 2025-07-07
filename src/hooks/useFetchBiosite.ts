@@ -1,36 +1,12 @@
-import { getBiositeApi, updateBiositeApi, registerStudentApi } from "../constants/EndpointsRoutes";
+import {getBiositeApi, updateBiositeApi, registerStudentApi, getBiositesApi} from "../constants/EndpointsRoutes";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../interfaces/Biosite";
 import { useState, useCallback, useRef } from "react";
 import apiService from "../service/apiService.ts";
+import type {CreatedUser,CreateUserDto ,CreateBiositeDto} from "../interfaces/User.ts";
 
-export interface CreateBiositeDto {
-    ownerId: string;
-    title: string;
-    slug: string;
-    themeId?: string;
-    colors?: string | BiositeColors;
-    fonts?: string;
-    avatarImage?: string;
-    backgroundImage?: string;
-    isActive?: boolean;
-}
 
-export interface CreateUserDto {
-    email: string;
-    password: string;
-    name?: string;
-    parentId?: string;
-}
-
-export interface CreatedUser {
-    id: string;
-    email: string;
-    name?: string;
-    parentId?: string;
-    role?: string;
-    isActive?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+export interface ChildUser extends CreatedUser {
+    biosites?: BiositeFull[];
 }
 
 export const useFetchBiosite = (userId?: string) => {
@@ -39,6 +15,144 @@ export const useFetchBiosite = (userId?: string) => {
     const [error, setError] = useState<string | null>(null);
     const isInitializedRef = useRef<boolean>(false);
     const currentUserIdRef = useRef<string | undefined>(undefined);
+
+    const fetchUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+        if (!userId) {
+            setError("User ID is required");
+            return [];
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const res = await apiService.getById<BiositeFull[]>(`${getBiositeApi}`, userId);
+            return Array.isArray(res) ? res : [res];
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar los biosites";
+            setError(errorMessage);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, [userId]);
+
+    const fetchChildUsers = useCallback(async (parentId: string): Promise<ChildUser[]> => {
+        if (!parentId) {
+            setError("Parent ID is required");
+            return [];
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const childUsers = await apiService.getById<ChildUser[]>(`/users`, `${parentId}/childrens`);
+            return Array.isArray(childUsers) ? childUsers : [childUsers];
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar usuarios hijos";
+            setError(errorMessage);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchAdminBiosites = useCallback(async (adminId: string): Promise<BiositeFull[]> => {
+        if (!adminId) {
+            setError("Admin ID is required");
+            return [];
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const adminBiosites = await apiService.getById<BiositeFull[]>(`${getBiositesApi}/admin`, adminId);
+            return Array.isArray(adminBiosites) ? adminBiosites : [adminBiosites];
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar biosites del admin";
+            setError(errorMessage);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchChildBiosites = useCallback(async (parentId: string): Promise<BiositeFull[]> => {
+        if (!parentId) {
+            setError("Parent ID is required");
+            return [];
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const adminBiosites = await fetchAdminBiosites(parentId);
+
+            if (adminBiosites.length === 0) {
+                const childUsers = await fetchChildUsers(parentId);
+                const childBiosites: BiositeFull[] = [];
+
+                // Para cada usuario hijo, obtener sus biosites
+                for (const childUser of childUsers) {
+                    try {
+                        const userBiosites = await apiService.getById<BiositeFull[]>(`${getBiositesApi}/user`, childUser.id);
+                        const biositeArray = Array.isArray(userBiosites) ? userBiosites : [userBiosites];
+                        childBiosites.push(...biositeArray);
+                    } catch (error) {
+                        console.warn(`Error fetching biosites for user ${childUser.id}:`, error);
+                    }
+                }
+
+                return childBiosites;
+            }
+
+            return adminBiosites;
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar biosites hijos";
+            setError(errorMessage);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, [fetchAdminBiosites, fetchChildUsers]);
+
+    const fetchCompleteBiositeStructure = useCallback(async (parentId: string): Promise<{
+        ownBiosites: BiositeFull[];
+        childBiosites: BiositeFull[];
+        allBiosites: BiositeFull[];
+    }> => {
+        if (!parentId) {
+            setError("Parent ID is required");
+            return { ownBiosites: [], childBiosites: [], allBiosites: [] };
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const ownBiosites = await apiService.getById<BiositeFull[]>(`${getBiositeApi}`, parentId);
+            const ownBiositesArray = Array.isArray(ownBiosites) ? ownBiosites : [ownBiosites];
+
+            const childBiosites = await fetchChildBiosites(parentId);
+
+            const allBiosites = [...ownBiositesArray, ...childBiosites];
+
+            return {
+                ownBiosites: ownBiositesArray,
+                childBiosites,
+                allBiosites
+            };
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar estructura completa de biosites";
+            setError(errorMessage);
+            return { ownBiosites: [], childBiosites: [], allBiosites: [] };
+        } finally {
+            setLoading(false);
+        }
+    }, [fetchChildBiosites]);
 
     const fetchBiosite = useCallback(async (): Promise<BiositeFull | null> => {
         if (!userId) {
@@ -56,13 +170,12 @@ export const useFetchBiosite = (userId?: string) => {
 
             const res = await apiService.getById<BiositeFull | BiositeFull[]>(getBiositeApi, userId);
 
-            // Handle both array and single object responses
             let biositeResult: BiositeFull;
             if (Array.isArray(res)) {
                 if (res.length === 0) {
                     throw new Error("No biosite found for this user");
                 }
-                biositeResult = res[0]; // Take the first biosite if array
+                biositeResult = res[0];
             } else {
                 biositeResult = res;
             }
@@ -81,28 +194,6 @@ export const useFetchBiosite = (userId?: string) => {
         }
     }, [userId, loading, biositeData]);
 
-    const fetchUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {
-        if (!userId) {
-            setError("User ID is required");
-            return [];
-        }
-
-        try {
-            setLoading(true);
-            setError(null);
-
-            // Using the findAllByAdminId endpoint
-            const res = await apiService.getById<BiositeFull[]>(`${getBiositeApi}`, userId);
-            return Array.isArray(res) ? res : [res];
-        } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar los biosites";
-            setError(errorMessage);
-            return [];
-        } finally {
-            setLoading(false);
-        }
-    }, [userId]);
-
     const createBiosite = useCallback(async (createData: CreateBiositeDto): Promise<BiositeFull | null> => {
         if (!createData.title?.trim() || !createData.slug?.trim()) {
             setError("Title and slug are required");
@@ -118,24 +209,18 @@ export const useFetchBiosite = (userId?: string) => {
             setLoading(true);
             setError(null);
 
-            // Step 1: Create a new user for the biosite
             const newUserData: CreateUserDto = {
-                email: `${createData.slug}@biosite.local`, // Generate email from slug
-                password: `biosite_${createData.slug}_${Date.now()}`, // Generate temporary password
+                email: `${createData.slug}@biosite.local`,
+                password: `biosite_${createData.slug}_${Date.now()}`,
                 name: createData.title,
-                parentId: userId // Set the current user as parent
+                parentId: userId
             };
-
-            console.log("Creating new user for biosite:", newUserData);
 
             const createdUser = await apiService.create<CreateUserDto, CreatedUser>(
                 registerStudentApi,
                 newUserData
             );
 
-            console.log("User created successfully:", createdUser);
-
-            // Step 2: Create the biosite with the new user as owner
             const defaultColors: BiositeColors = {
                 primary: '#3B82F6',
                 secondary: '#1E40AF',
@@ -146,7 +231,7 @@ export const useFetchBiosite = (userId?: string) => {
             };
 
             const biositeDataToSend = {
-                ownerId: createdUser.id, // Use the newly created user ID
+                ownerId: createdUser.id,
                 title: createData.title.trim(),
                 slug: createData.slug.trim(),
                 themeId: createData.themeId || 'default',
@@ -157,25 +242,29 @@ export const useFetchBiosite = (userId?: string) => {
                 isActive: createData.isActive !== undefined ? createData.isActive : true
             };
 
-            console.log("Creating biosite with data:", biositeDataToSend);
-
             const newBiosite = await apiService.create<typeof biositeDataToSend, BiositeFull>(
                 getBiositeApi,
                 biositeDataToSend
             );
 
-            console.log("Biosite created successfully:", newBiosite);
+            const biositeWithOwner: BiositeFull = {
+                ...newBiosite,
+                owner: {
+                    id: createdUser.id,
+                    email: createdUser.email,
+                    name: createdUser.name || '',
+                    parentId: createdUser.parentId || userId,
+                }
+            };
 
-            // If this is the first biosite for the current user, set it as the current one
             if (!biositeData) {
-                setBiositeData(newBiosite);
+                setBiositeData(biositeWithOwner);
                 isInitializedRef.current = true;
                 currentUserIdRef.current = userId;
             }
 
-            return newBiosite;
+            return biositeWithOwner;
         } catch (error: any) {
-            console.error("Error creating biosite and user:", error);
             const errorMessage = error?.response?.data?.message || error?.message || "Error al crear el biosite y usuario";
             setError(errorMessage);
             return null;
@@ -232,18 +321,6 @@ export const useFetchBiosite = (userId?: string) => {
                 biositeResult = updatedBiosite as unknown as BiositeFull;
             }
 
-            if (!biositeResult || typeof biositeResult !== 'object') {
-                const errorMsg = "Invalid biosite data received from API - not an object";
-                setError(errorMsg);
-                return null;
-            }
-
-            if (!biositeResult.id) {
-                const errorMsg = "Invalid biosite data received from API - missing ID";
-                setError(errorMsg);
-                return null;
-            }
-
             const newBiositeData: BiositeFull = {
                 ...biositeData,
                 ...biositeResult,
@@ -271,7 +348,7 @@ export const useFetchBiosite = (userId?: string) => {
             setLoading(true);
             setError(null);
 
-            const biosite = await apiService.getById<BiositeFull>(getBiositeApi, biositeId);
+            const biosite = await apiService.getById<BiositeFull>(getBiositesApi, biositeId);
             setBiositeData(biosite);
             return biosite;
         } catch (error: any) {
@@ -303,6 +380,11 @@ export const useFetchBiosite = (userId?: string) => {
         updateBiosite,
         switchBiosite,
         clearError,
-        resetState
+        resetState,
+
+        fetchChildUsers,
+        fetchAdminBiosites,
+        fetchChildBiosites,
+        fetchCompleteBiositeStructure
     };
 };

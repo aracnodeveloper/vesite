@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type {BiositeColors, BiositeFull, BiositeUpdateDto} from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
-import { useFetchBiosite,type CreateBiositeDto } from "../hooks/useFetchBiosite";
+import { useFetchBiosite, } from "../hooks/useFetchBiosite";
+import type {CreateBiositeDto} from "../interfaces/User.ts"
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import Cookies from "js-cookie";
 
@@ -17,6 +18,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         fetchUserBiosites,
         createBiosite,
         updateBiosite: updateBiositeHook,
+        fetchChildBiosites,
         switchBiosite,
         clearError: clearBiositeError,
         resetState
@@ -273,17 +275,29 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     }, [fetchUserBiosites]);
 
     const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
+        const userId = Cookies.get("userId");
         try {
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
+                Cookies.set('activeBiositeId', biositeId);
+                Cookies.set('biositeId', result.id);
+                Cookies.set('userId', result.ownerId);
+                resetState();
+
             }
             return result;
         } catch (error) {
             console.error("Error switching biosite:", error);
             throw error;
         }
-    }, [switchBiosite]);
+    }, [switchBiosite, resetState]);
+    const getChildBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+        const currentUserId = Cookies.get('userId');
+        if (!currentUserId) throw new Error('No hay userId');
+        return await fetchChildBiosites(currentUserId);
+    }, [fetchChildBiosites]);
+
     const setSocialLinks = useCallback((links: SocialLink[]) => {
         console.log("Setting social links:", links);
         setSocialLinksState(links);
@@ -589,9 +603,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         updateBiosite,
         refreshBiosite,
         // Biosite management
-        createNewBiosite,
+        createBiosite,
         getUserBiosites,
         switchToAnotherBiosite,
+        getChildBiosites,
         // Social links management
         setSocialLinks,
         addSocialLink,

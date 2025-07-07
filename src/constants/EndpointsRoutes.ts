@@ -16,6 +16,7 @@ export const platillaByIdApi = "/platillas"; // GET /{id}
 export const updateBiositeApi = "/biosites";
 export const updateStaticApi = "/biosites/static";
 export const getBiositeApi = "/biosites/user";
+export const getBiositesApi = "/biosites"
 
 //Links
 export const LinksApi = "/links"

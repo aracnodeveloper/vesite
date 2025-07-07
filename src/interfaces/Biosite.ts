@@ -12,11 +12,10 @@ export interface BiositeThemeConfig {
     fonts: {
         primary: string;
         secondary?: string;
-        third?: string;fourth?: string;
+        third?: string;
+        fourth?: string;
         fifth?: string;
         sixth?: string;
-
-
     };
     isDark: boolean;
     isAnimated: boolean;
@@ -29,10 +28,11 @@ export interface BiositeTheme {
 }
 
 export interface BiositeOwner {
-    id: string;
+    id: string; // Fixed: Made id required (not optional)
     email: string;
     name?: string;
     avatar?: string;
+    parentId: string;
 }
 
 export interface BiositeLink {
@@ -65,7 +65,6 @@ export interface BiositeFull {
     updatedAt: string;
     owner?: BiositeOwner;
     links?: BiositeLink[];
-
 }
 
 export interface BiositeUpdateDto {
