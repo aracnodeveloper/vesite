@@ -1,5 +1,5 @@
-import type { BiositeFull, BiositeUpdateDto } from "./Biosite";
-import type { UUID } from "../types/authTypes";
+import type {BiositeFull, BiositeUpdateDto} from "./Biosite.ts";
+import type {UUID} from "../types/authTypes.ts";
 
 export interface SocialLink {
     id: string;
@@ -49,6 +49,7 @@ export interface PreviewContextType {
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
 
+    // Biosite management methods
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
     getUserBiosites: () => Promise<BiositeFull[]>;
     switchToAnotherBiosite: (biositeId: string) => Promise<BiositeFull | null>;
@@ -59,6 +60,7 @@ export interface PreviewContextType {
     removeSocialLink: (linkId: string) => Promise<void>;
     updateSocialLink: (linkId: string, updateData: Partial<SocialLink>) => Promise<void>;
 
+    // Regular links methods
     setRegularLinks: (links: RegularLink[]) => void;
     addRegularLink: (link: Omit<RegularLink, 'id'>) => Promise<void>;
     removeRegularLink: (linkId: string) => Promise<void>;
@@ -79,3 +81,4 @@ export interface PreviewContextType {
 
     clearError: () => void;
 }
+

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import imgP from "../../../../assets/img/img.png";
 import type { BiositeFull } from "../../../../interfaces/Biosite";
+import type { UUID } from "../../../../types/authTypes.ts";
 import apiService from "../../../../service/apiService.ts";
 import { updateBiositeApi } from "../../../../constants/EndpointsRoutes.ts";
 
@@ -51,12 +52,21 @@ const BiositesList: React.FC<BiositeListProps> = ({
     const [showDeleteMenu, setShowDeleteMenu] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    const getCurrentUserId = () => {
+    const getCurrentUserId = (): UUID | null => {
         const userId = document.cookie
             .split('; ')
             .find(row => row.startsWith('userId='))
             ?.split('=')[1];
-        return userId;
+        return userId as UUID || null;
+    };
+
+    const getMainUserId = (): UUID | null => {
+        // Obtener el userId principal (cuenta padre)
+        const mainUserId = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('mainUserId='))
+            ?.split('=')[1];
+        return mainUserId as UUID || getCurrentUserId();
     };
 
     const getAvatarImage = (biositeData?: BiositeFull) => {
@@ -84,12 +94,16 @@ const BiositesList: React.FC<BiositeListProps> = ({
     };
 
     const isMainBiosite = (biositeData: BiositeFull): boolean => {
-        const currentUserId = getCurrentUserId();
-        return biositeData.ownerId === currentUserId;
+        const mainUserId = getMainUserId();
+        return biositeData.ownerId === mainUserId;
     };
 
     const isChildBiosite = (biositeData: BiositeFull): boolean => {
-        return biositeStructure.childBiosites.includes(biositeData);
+        const mainUserId = getMainUserId();
+        // Un biosite es hijo si su ownerId es diferente al mainUserId
+        // pero está en la lista de childBiosites
+        return biositeStructure.childBiosites.some(child => child.id === biositeData.id) &&
+            biositeData.ownerId !== mainUserId;
     };
 
     const handleDeleteBiosite = async (biositeData: BiositeFull) => {
@@ -113,6 +127,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
 
             await apiService.delete(updateBiositeApi, biositeData.id);
 
+            // Si es un biosite hijo, también eliminar el usuario asociado
             if (isChildBiosite(biositeData)) {
                 try {
                     await apiService.delete('/users', biositeData.ownerId);
@@ -228,21 +243,25 @@ const BiositesList: React.FC<BiositeListProps> = ({
         </div>
     );
 
+    // Filtrar correctamente los biosites propios y los hijos
+    const ownBiosites = biositeStructure.ownBiosites.filter(biosite => isMainBiosite(biosite));
+    const childBiosites = biositeStructure.childBiosites.filter(biosite => isChildBiosite(biosite));
+
     return (
         <>
-            {biositeStructure.ownBiosites.length > 0 && (
+            {ownBiosites.length > 0 && (
                 <div className="space-y-2">
                     <h3 className="text-sm font-medium text-gray-600">Mis Biosites</h3>
-                    {biositeStructure.ownBiosites.map((biositeData) => renderBiositeItem(biositeData))}
+                    {ownBiosites.map((biositeData) => renderBiositeItem(biositeData))}
                 </div>
             )}
 
-            {canSeeChildBiosites && biositeStructure.childBiosites.length > 0 && (
+            {canSeeChildBiosites && childBiosites.length > 0 && (
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-gray-600 flex items-center">
                             <Users className="h-4 w-4 mr-2"/>
-                            Biosites Hijos
+                            Biosites Hijos ({childBiosites.length})
                         </h3>
                         <button
                             onClick={() => setShowChildBiosites(!showChildBiosites)}
@@ -254,7 +273,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                             }
                         </button>
                     </div>
-                    {showChildBiosites && biositeStructure.childBiosites.map((biositeData) =>
+                    {showChildBiosites && childBiosites.map((biositeData) =>
                         renderBiositeItem(biositeData, true)
                     )}
                 </div>

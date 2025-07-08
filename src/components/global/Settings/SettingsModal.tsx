@@ -5,6 +5,7 @@ import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useUser } from "../../../hooks/useUser.ts";
 import { useFetchBiosite } from "../../../hooks/useFetchBiosite.ts";
 import type { BiositeFull } from "../../../interfaces/Biosite";
+import type { UUID } from "../../../types/authTypes.ts";
 import Cookies from "js-cookie";
 import CreateBiositeForm from "./Settings/createBiositeForm.tsx";
 import BiositesList from "./Settings/biositeList.tsx";
@@ -84,12 +85,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         password: '',
     });
 
-    const getCurrentUserId = () => {
+    const getCurrentUserId = (): UUID | null => {
         const userId = document.cookie
             .split('; ')
             .find(row => row.startsWith('userId='))
             ?.split('=')[1];
-        return userId;
+        return userId as UUID || null;
+    };
+
+    const getMainUserId = (): UUID | null => {
+        // Obtener el userId principal (no el temporal al cambiar de biosite)
+        const mainUserId = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('mainUserId='))
+            ?.split('=')[1];
+        return mainUserId as UUID || getCurrentUserId();
     };
 
     const canCreateBiosites = () => {
@@ -112,7 +122,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     }, [isOpen]);
 
-    const fetchBiositeStructure = async (userId: string) => {
+    const fetchBiositeStructure = async (userId: UUID) => {
         try {
             setLoading(true);
             setError(null);
@@ -144,7 +154,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }
 
         const currentUserId = getCurrentUserId();
-        if (!currentUserId) {
+        const mainUserId = getMainUserId();
+
+        if (!currentUserId || !mainUserId) {
             setError('Usuario no autenticado. Por favor, inicie sesión nuevamente.');
             return;
         }
@@ -155,17 +167,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             clearError();
 
             const createData = {
-                ownerId: biosite?.ownerId,
+                // Usar el userId principal como ownerId para mantener la jerarquía
+                ownerId: mainUserId,
                 title: createForm.title.trim(),
                 slug: createForm.slug.trim(),
                 password: createForm.password.trim(),
             };
+
             const newBiosite = await createBiosite(createData);
 
             if (newBiosite) {
                 console.log('Biosite and user created successfully:', newBiosite);
-                await fetchBiositeStructure(currentUserId);
-                setCreateForm({ title: '', slug: '', password:'' });
+                await fetchBiositeStructure(mainUserId);
+                setCreateForm({ title: '', slug: '', password: '' });
                 setShowCreateForm(false);
 
                 if (onCreateNewSite) {
@@ -187,6 +201,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setLoading(true);
             setError(null);
             clearError();
+
+            // Guardar el userId principal si no existe
+            const mainUserId = getMainUserId();
+            if (!Cookies.get('mainUserId') && mainUserId) {
+                Cookies.set('mainUserId', mainUserId);
+            }
 
             const switchedBiosite = await switchToAnotherBiosite(biositeData.id);
 
@@ -255,24 +275,25 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             slug: cleanSlug
         }));
     };
+
     const handlePasswordChange = (password: string) => {
         setCreateForm(prev => ({
             ...prev,
             password
         }));
     };
+
     const isLoadingState = loading || contextLoading || biositeLoading || isCreating;
 
     return (
         <Dialog
             open={isOpen}
             onClose={onClose}
-            className="fixed inset-0 min-h-screen overflow-y-auto z-50 flex p-2 items-center justify-start bg-black/50"
+            className="fixed inset-0 h-full  z-50 flex items-center justify-start bg-black/50 "
         >
-            <div className="h-5"></div>
-            <Dialog.Panel className="bg-[#FAFFF6] h-full rounded-lg w-[320px] text-gray-600 shadow-xl">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-[#E0EED5]">
+            <Dialog.Panel className="bg-[#FAFFF6] rounded-lg w-full max-w-[320px] h-full  text-gray-600 shadow-xl flex flex-col">
+                {/* Header - Fixed */}
+                <div className="flex items-center justify-between p-4 border-b border-[#E0EED5] flex-shrink-0">
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 text-sm font-medium"
@@ -285,67 +306,73 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="w-16"></div>
                 </div>
 
-                {/* Error Display */}
-                {error && (
-                    <div className="p-4 bg-red-50 border-l-4 border-red-400">
-                        <div className="flex items-center">
-                            <AlertCircle className="h-4 w-4 text-red-400 mr-2"/>
-                            <p className="text-sm text-red-700">{error}</p>
+                {/* Scrollable Content Area */}
+                <div className="flex-1 overflow-y-auto">
+                    {/* Error Display */}
+                    {error && (
+                        <div className="p-4 bg-red-50 border-l-4 border-red-400 flex-shrink-0">
+                            <div className="flex items-center">
+                                <AlertCircle className="h-4 w-4 text-red-400 mr-2"/>
+                                <p className="text-sm text-red-700">{error}</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-
-                {/* Create Form */}
-                {showCreateForm && (
-                    <CreateBiositeForm
-                        createForm={createForm}
-                        isLoadingState={isLoadingState}
-                        isCreating={isCreating}
-                        onTitleChange={handleTitleChange}
-                        onSlugChange={handleSlugChange}
-                        onPasswordChange={handlePasswordChange}
-                        onCreateBiosite={handleCreateNewBiosite}
-                        onCancel={() => {
-                            setShowCreateForm(false);
-                            setCreateForm({title: '', slug: '',password:''});
-                            setError(null);
-                            clearError();
-                        }}
-                    />
-                )}
-
-                {/* Biosites Section */}
-                <div className="p-4 space-y-3">
-                    {isLoadingState ? (
-                        <div className="flex items-center justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin text-gray-400"/>
-                            <span className="ml-2 text-sm text-gray-500">Cargando biosites...</span>
-                        </div>
-                    ) : (
-                        <BiositesList
-                            biositeStructure={biositeStructure}
-                            currentBiosite={biosite}
-                            canSeeChildBiosites={canSeeChildBiosites()}
-                            canCreateBiosites={canCreateBiosites()}
-                            isLoadingState={isLoadingState}
-                            onProfileSwitch={handleProfileSwitch}
-                            onCreateNewSite={handleCreateNewSite}
-                            onRefreshStructure={() => {
-                                const currentUserId = getCurrentUserId();
-                                if (currentUserId) {
-                                    fetchBiositeStructure(currentUserId);
-                                }
-                            }}
-                            onError={setError}
-                            clearError={clearError}
-                        />
                     )}
+
+                    {/* Create Form */}
+                    {showCreateForm && (
+                        <div className="flex-shrink-0">
+                            <CreateBiositeForm
+                                createForm={createForm}
+                                isLoadingState={isLoadingState}
+                                isCreating={isCreating}
+                                onTitleChange={handleTitleChange}
+                                onSlugChange={handleSlugChange}
+                                onPasswordChange={handlePasswordChange}
+                                onCreateBiosite={handleCreateNewBiosite}
+                                onCancel={() => {
+                                    setShowCreateForm(false);
+                                    setCreateForm({title: '', slug: '', password: ''});
+                                    setError(null);
+                                    clearError();
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {/* Biosites Section */}
+                    <div className="p-4 space-y-3">
+                        {isLoadingState ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="h-6 w-6 animate-spin text-gray-400"/>
+                                <span className="ml-2 text-sm text-gray-500">Cargando biosites...</span>
+                            </div>
+                        ) : (
+                            <BiositesList
+                                biositeStructure={biositeStructure}
+                                currentBiosite={biosite}
+                                canSeeChildBiosites={canSeeChildBiosites()}
+                                canCreateBiosites={canCreateBiosites()}
+                                isLoadingState={isLoadingState}
+                                onProfileSwitch={handleProfileSwitch}
+                                onCreateNewSite={handleCreateNewSite}
+                                onRefreshStructure={() => {
+                                    const mainUserId = getMainUserId();
+                                    if (mainUserId) {
+                                        fetchBiositeStructure(mainUserId);
+                                    }
+                                }}
+                                onError={setError}
+                                clearError={clearError}
+                            />
+                        )}
+                    </div>
                 </div>
 
-                {/* Settings Footer */}
-                <SettingsFooter onLogout={onLogout} />
+                {/* Footer - Fixed */}
+                <div className="flex-shrink-0">
+                    <SettingsFooter onLogout={onLogout} />
+                </div>
             </Dialog.Panel>
-            <div className="h-5"></div>
         </Dialog>
     );
 };

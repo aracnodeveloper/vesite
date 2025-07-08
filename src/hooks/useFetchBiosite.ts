@@ -229,7 +229,7 @@ export const useFetchBiosite = (userId?: string) => {
 
 
             const biositeDataToSend = {
-                ownerId: createdUser.id,
+                ownerId: createdUser.id ,
                 title: createdUser.name,
                 slug: createData.slug,
             };

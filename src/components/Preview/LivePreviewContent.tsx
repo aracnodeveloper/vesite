@@ -71,7 +71,7 @@ const LivePreviewContent = () => {
                  color: themeConfig.colors.text
              }}>
 
-            <div className={`w-full ${isExposedRoute ? 'max-w-full' : 'max-w-sm'} mx-auto`}>
+            <div className={`w-full ${isExposedRoute ? 'max-w-full' : 'max-w-sm'} min-h-screen mx-auto`}>
 
                 {/* Sección de fondo */}
                 <BackgroundSection

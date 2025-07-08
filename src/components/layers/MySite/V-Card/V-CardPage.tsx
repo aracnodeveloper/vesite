@@ -44,7 +44,7 @@ const VCardPage = () => {
             fetchBusinessCardBySlug(slug);
         } else {
             fetchBusinessCardByUserId(currentUserId);
-            // También cargar datos del usuario si no hay slug (es decir, es el usuario actual)
+
             if (currentUserId) {
                 fetchUser(currentUserId);
             }
@@ -53,7 +53,6 @@ const VCardPage = () => {
 
     useEffect(() => {
         if (businessCard?.data) {
-            // Parse the JSON string back to object if it exists
             try {
                 const parsedData = typeof businessCard.data === 'string'
                     ? JSON.parse(businessCard.data)
@@ -61,7 +60,6 @@ const VCardPage = () => {
                 setCardData(parsedData);
             } catch (error) {
                 console.error('Error parsing business card data:', error);
-                // If parsing fails, use the data as is or set defaults
                 setCardData(businessCard.data || {
                     name: '', title: '', company: '', email: '', phone: '', website: ''
                 });
@@ -81,15 +79,14 @@ const VCardPage = () => {
         if (!businessCard || !currentUserId) return;
 
         try {
-            // Actualizar la business card
+
             await updateBusinessCard(businessCard.id, {
                id: Cookies.get('userId'),
                 ownerId: Cookies.get('userId'),
-                data: JSON.stringify(cardData), // Convert to JSON string
+                data: JSON.stringify(cardData),
                 isActive: true
             });
 
-            // Actualizar el usuario con el teléfono y nombre si están disponibles
             const userUpdateData: any = {};
             if (cardData.phone) {
                 userUpdateData.phone = cardData.phone;
@@ -101,7 +98,6 @@ const VCardPage = () => {
                 userUpdateData.site = cardData.website;
             }
 
-            // Solo actualizar el usuario si hay datos para actualizar y no estamos viendo una V-Card externa
             if (Object.keys(userUpdateData).length > 0 && !slug) {
                 await updateUser(currentUserId, userUpdateData);
             }
