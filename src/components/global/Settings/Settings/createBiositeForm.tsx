@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 interface CreateBiositeData {
     title: string;
     slug: string;
+    password: string;
 }
 
 interface CreateBiositeFormProps {

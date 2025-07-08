@@ -18,7 +18,6 @@ import SocialPage from "./components/layers/MySite/Social/socialPage.tsx";
 import VideoPage from "./components/layers/AddMoreSections/Video/videoPage.tsx";
 import MusicPage from "./components/layers/AddMoreSections/Music-Posdcast/musicPage.tsx";
 import PostPage from "./components/layers/AddMoreSections/Socialpost/socialPostPage.tsx";
-import TextBoxPage from "./components/layers/AddMoreSections/TextBox/textBoxPage.tsx";
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
@@ -80,14 +79,6 @@ const App = () => {
             }
             />
 
-            <Route path="/textBox" element={
-                <PrivateRoute>
-                    <Layout>
-                        <TextBoxPage />
-                    </Layout>
-                </PrivateRoute>
-            }
-            />
 
 
             <Route path="/videos" element={

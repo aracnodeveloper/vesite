@@ -83,6 +83,8 @@ const VCardPage = () => {
         try {
             // Actualizar la business card
             await updateBusinessCard(businessCard.id, {
+               id: Cookies.get('userId'),
+                ownerId: Cookies.get('userId'),
                 data: JSON.stringify(cardData), // Convert to JSON string
                 isActive: true
             });

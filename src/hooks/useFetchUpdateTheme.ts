@@ -11,7 +11,7 @@ export const useUpdateTheme = () => {
     const updateTheme = async (data: Omit<UpdateThemeDto, "biositeId">) => {
         if (!biositeId) return;
         setLoading(true);
-        await apiService.update(`${themesApi}/${biositeId}`, {
+        await apiService.update(`${themesApi}`,`${biositeId}`, {
             ...data,
             biositeId,
         });

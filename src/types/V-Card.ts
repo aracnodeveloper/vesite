@@ -11,25 +11,22 @@ export interface VCardData {
 export interface BusinessCard {
     id: string;
     ownerId: string;
-    slug: string;
+    slug?: string;
     qrCodeUrl?: string;
-    data?: any; // JSON data
+    data?: any;
     isActive?: boolean;
-    createdAt: string;
-    updatedAt: string;
 }
 
 export interface CreateBusinessCardDto {
     ownerId: string;
-    slug: string;
     qrCodeUrl?: string;
     data?: any;
     isActive?: boolean;
 }
 
 export interface UpdateBusinessCardDto {
-    slug?: string;
-    qrCodeUrl?: string;
+    id: string;
+    ownerId: string;
     data?: any;
     isActive?: boolean;
 }

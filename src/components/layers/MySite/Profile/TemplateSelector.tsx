@@ -206,16 +206,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 })}
             </div>
 
-            {/* Debug info (only in development) */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
-                    <p><strong>Debug:</strong></p>
-                    <p>Templates count: {templates.length}</p>
-                    <p>Current theme: {currentThemeId}</p>
-                    <p>Selected: {selectedTemplate}</p>
-                    <p>Loading: {loading ? 'Yes' : 'No'}</p>
-                </div>
-            )}
+
         </div>
     );
 };

@@ -1,18 +1,19 @@
 import { useCallback } from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
 import type { SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
+import type {Link} from "../interfaces/Links.ts";
 
 interface UseLinkOperationsProps {
     biositeData: BiositeFull | null;
     links: any[];
     socialLinks: SocialLink[];
-    setSocialLinksState: (links: SocialLink[]) => void;
-    setRegularLinksState: (links: RegularLink[]) => void;
+    setSocialLinksState: (links: SocialLink[] | ((prev: SocialLink[]) => SocialLink[])) => void;
+    setRegularLinksState: (links: RegularLink[] | ((prev: RegularLink[]) => RegularLink[])) => void;
     createLink: (data: any) => Promise<any>;
     updateLink: (linkId: string, data: any) => Promise<any>;
     deleteLink: (linkId: string) => Promise<boolean>;
     reorderLinks: (biositeId: string, data: any) => Promise<any>;
-    fetchLinks: () => Promise<void>;
+    fetchLinks: () => Promise<Link[]>;
     getIconIdentifier: (iconPath: string) => string;
 }
 
@@ -79,7 +80,7 @@ export const useLinkOperations = ({
 
             if (success) {
                 console.log("Social link removed successfully from backend");
-                setSocialLinksState(prev => {
+                setSocialLinksState((prev: SocialLink[]) => {
                     const updated = prev.filter(link => link.id !== linkId);
                     console.log("Local social links updated after deletion:", updated);
                     return updated;
@@ -92,7 +93,7 @@ export const useLinkOperations = ({
 
                 if (!stillExists) {
                     console.log("Link was actually deleted despite returning false");
-                    setSocialLinksState(prev => prev.filter(link => link.id !== linkId));
+                    setSocialLinksState((prev: SocialLink[]) => prev.filter(link => link.id !== linkId));
                 } else {
                     throw new Error("No se pudo eliminar el enlace del servidor");
                 }
@@ -155,7 +156,7 @@ export const useLinkOperations = ({
         try {
             console.log("Removing regular link:", linkId);
             await deleteLink(linkId);
-            setRegularLinksState(prev => prev.filter(link => link.id !== linkId));
+            setRegularLinksState((prev: RegularLink[]) => prev.filter(link => link.id !== linkId));
             console.log("Regular link removed successfully");
             await fetchLinks();
         } catch (error) {

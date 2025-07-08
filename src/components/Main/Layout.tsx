@@ -16,7 +16,7 @@ import imgP6 from "../../assets/img/img_6.png"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 
-import LivePreviewContent from "../Preview/LivePreviewContent";
+import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 import PhonePreview from "../Preview/phonePreview.tsx";
 import SettingsModal from "../global/Settings/SettingsModal.tsx";
 
@@ -140,7 +140,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const getItemStyles = (item: any) => {
         if (activeItem === item.id) {
             const colorClasses = {
-                green: "text-green-600 border-l-4 border-green-300 lg:border-l-4 ",
+                green: "text-[#98C022] border-l-4 border-[#98C022] lg:border-l-4 ",
                 orange: "text-orange-600 border-l-4 border-orange-300 lg:border-l-4 ",
                 blue: "text-blue-600 border-l-4 border-blue-300 lg:border-l-4 ",
             };
@@ -298,6 +298,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-60"
                                 >
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}
+                                </div>
+                                <div
+                                    onClick={handleExpoced}
+                                    className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-lg p-2 right-20 text-white mb-4 text-center z-60"
+                                >{ 'Actualizar'}
                                 </div>
                                 <PhonePreview>
                                     <LivePreviewContent />

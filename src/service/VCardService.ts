@@ -19,12 +19,10 @@ export const businessCardService = {
         return response;
     },
 
-    // Obtener todas las business cards (solo SUPER_ADMIN)
     getAllBusinessCards: async (): Promise<BusinessCard[]> => {
         return await apiService.getAll<BusinessCard[]>(businessCardsApi);
     },
 
-    // Obtener business card por ID
     getBusinessCardById: async (id: string): Promise<BusinessCard> => {
         return await apiService.getById<BusinessCard>(businessCardsApi, id);
     },

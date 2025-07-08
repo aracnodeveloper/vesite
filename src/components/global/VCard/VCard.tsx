@@ -149,10 +149,10 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     return (
         <>
             {/* Botón VCard */}
-            <div className="px-4 mb-4">
+            <div className="px-4 mb-4 cursor-pointer">
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="block w-full p-4 rounded-xl text-center transition-all duration-300  relative overflow-hidden group border-2 border-gray-400"
+                    className="block w-full p-4 rounded-xl text-center transition-all duration-300  relative overflow-hidden group border-2 border-gray-400 cursor-pointer"
                     style={{
                         background: `linear-gradient(135deg, ${themeConfig.colors.primary} 100%, ${themeConfig.colors.accent} 100%)`,
                         boxShadow: `0 4px 20px ${themeConfig.colors.primary}20 `
@@ -190,7 +190,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                             </h2>
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                             >
                                 <X size={20} style={{ color: themeConfig.colors.text }} />
                             </button>
@@ -295,7 +295,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                         }}
                                     >
                                         <Download size={18} />
-                                        <span className="text-sm font-medium">Descargar</span>
+                                        <span className="text-sm font-medium cursor-pointer">Descargar</span>
                                     </button>
                                     <button
                                         onClick={shareVCard}
@@ -306,7 +306,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                         }}
                                     >
                                         <Share2 size={18} />
-                                        <span className="text-sm font-medium">Compartir</span>
+                                        <span className="text-sm font-medium cursor-pointer">Compartir</span>
                                     </button>
                                 </div>
                             </>

@@ -1,5 +1,5 @@
-import type {BiositeFull, BiositeUpdateDto} from "./Biosite.ts";
-import type {UUID} from "../types/authTypes.ts";
+import type { BiositeFull, BiositeUpdateDto } from "./Biosite";
+import type { UUID } from "../types/authTypes";
 
 export interface SocialLink {
     id: string;
@@ -19,6 +19,12 @@ export interface RegularLink {
     isActive: boolean;
 }
 
+export interface AppLink {
+    id: string;
+    store: 'appstore' | 'googleplay';
+    url: string;
+    isActive: boolean;
+}
 
 export interface CreateBiositeDto {
     ownerId: UUID;
@@ -26,10 +32,12 @@ export interface CreateBiositeDto {
     slug: string;
     password?: string;
 }
+
 export interface PreviewContextType {
     biosite: BiositeFull | null;
     socialLinks: SocialLink[];
     regularLinks: RegularLink[];
+    appLinks: AppLink[];
     loading: boolean;
     error: string | null;
     updatePreview: (data: Partial<BiositeFull>) => void;
@@ -41,27 +49,27 @@ export interface PreviewContextType {
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
 
-    // Biosite management methods
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
     getUserBiosites: () => Promise<BiositeFull[]>;
     switchToAnotherBiosite: (biositeId: string) => Promise<BiositeFull | null>;
     getChildBiosites?: () => Promise<BiositeFull[]>;
 
-
-    // Social links methods
     setSocialLinks: (links: SocialLink[]) => void;
     addSocialLink: (link: SocialLink) => Promise<void>;
     removeSocialLink: (linkId: string) => Promise<void>;
     updateSocialLink: (linkId: string, updateData: Partial<SocialLink>) => Promise<void>;
 
-    // Regular links methods
     setRegularLinks: (links: RegularLink[]) => void;
     addRegularLink: (link: Omit<RegularLink, 'id'>) => Promise<void>;
     removeRegularLink: (linkId: string) => Promise<void>;
     updateRegularLink: (linkId: string, updateData: Partial<RegularLink>) => Promise<void>;
     reorderRegularLinks: (links: RegularLink[]) => Promise<void>;
 
-    // Special content methods
+    setAppLinks: (links: AppLink[]) => void;
+    addAppLink: (link: Omit<AppLink, 'id'>) => Promise<void>;
+    removeAppLink: (linkId: string) => Promise<void>;
+    updateAppLink: (linkId: string, data: Partial<AppLink>) => Promise<void>;
+
     getMusicEmbed: () => any;
     setMusicEmbed: (url: string, note?: string) => Promise<void>;
     getSocialPost: () => any;
@@ -71,4 +79,3 @@ export interface PreviewContextType {
 
     clearError: () => void;
 }
-

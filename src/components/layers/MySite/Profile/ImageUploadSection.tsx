@@ -41,23 +41,12 @@ const ImageUploadSection = ({
         try {
             const urlObj = new URL(url);
             const isHttps = ['http:', 'https:'].includes(urlObj.protocol);
+            const hasValidExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
+                url.includes('/img/') || // Para tu servidor
+                url.includes('image-'); // Para archivos con formato image-*
 
-            const blockedDomains = [
-                'visitaecuador.com',
-                'suspicious-domain.com',
-                'blocked-site.net'
-            ];
 
-            const isDomainBlocked = blockedDomains.some(domain =>
-                urlObj.hostname.includes(domain) || urlObj.hostname === domain
-            );
-
-            if (isDomainBlocked) {
-                console.warn(`Blocked domain detected: ${urlObj.hostname}`);
-                return false;
-            }
-
-            return isHttps;
+            return isHttps && (hasValidExtension || !urlObj.pathname.includes('.'));
         } catch (error) {
             console.warn('Invalid URL:', url, error);
             return false;

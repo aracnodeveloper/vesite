@@ -143,7 +143,6 @@
 
 /* NUEVO: Contenedor para embeds de Spotify */
 .spotify-embed {
-    height: 152px;
     border-radius: 8px;
     overflow: hidden;
 }
@@ -168,16 +167,11 @@
 
 /* NUEVO: Contenedor para embeds de Instagram */
 .instagram-embed {
-    width: 100%;
     max-width: 100%;
     border-radius: 8px;
     overflow: hidden;
 }
 
-.instagram-embed iframe {
-    min-height: 400px;
-    height: auto;
-}
 
 /* Efectos adicionales para mayor realismo */
 .phone-container .phone-screen::before {

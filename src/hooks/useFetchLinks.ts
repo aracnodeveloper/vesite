@@ -1,42 +1,8 @@
 import { useState, useCallback } from "react";
 import apiService from "../service/apiService";
 import { LinksApi} from "../constants/EndpointsRoutes.ts";
+import type {Link, CreateLinkDto, UpdateLinkDto} from "../interfaces/Links.ts";
 
-// Interface que coincide con el backend
-interface Link {
-    id: string;
-    biositeId: string;
-    label: string;
-    url: string;
-    icon: string;
-    image?: string;
-    isActive: boolean;
-    color?: string;
-    orderIndex: number;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface CreateLinkDto {
-    biositeId: string;
-    label: string;
-    url: string;
-    icon: string;
-    image?:string;
-    orderIndex: number;
-    isActive?: boolean;
-}
-
-interface UpdateLinkDto {
-    label?: string;
-    url?: string;
-    image?:string;
-    icon?: string;
-    orderIndex?: number;
-    isActive?: boolean;
-}
-
-// Lista de plataformas sociales para identificar qué enlaces son sociales
 const SOCIAL_PLATFORMS = [
     'instagram', 'tiktok', 'twitter', 'x', 'youtube', 'facebook', 'twitch',
     'linkedin', 'snapchat', 'threads', 'email', 'gmail', 'pinterest', 'spotify',
@@ -140,7 +106,6 @@ export const useFetchLinks = (biositeId?: string) => {
             }
 
             const response = await apiService.delete(LinksApi, linkId);
-
 
 
         } catch (error: any) {

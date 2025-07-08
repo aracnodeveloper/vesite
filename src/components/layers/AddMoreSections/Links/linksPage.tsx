@@ -5,14 +5,14 @@ import {
     X,
     Check,
     GripVertical,
-    ImagePlus,
     Edit2,
     ExternalLink,
-    Link as LinkIcon,
 } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { useNavigate } from "react-router-dom";
 import { uploadLinkImage } from "../../MySite/Profile/lib/uploadImage.ts";
+import { message } from "antd";
+import LinkEditForm from "./Components/LinksEditForm.tsx";
 
 const LinksPage = () => {
     const {
@@ -31,9 +31,9 @@ const LinksPage = () => {
     const [editTitle, setEditTitle] = useState("");
     const [editUrl, setEditUrl] = useState("");
     const [editImage, setEditImage] = useState<string | undefined>(undefined);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Drag and drop state
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -41,112 +41,172 @@ const LinksPage = () => {
 
     const navigate = useNavigate();
 
-    // Filtrar solo los enlaces activos
     const activeLinks = regularLinks.filter(link => link.isActive);
 
-    // Función mejorada para validar si una URL de imagen es válida
+    // Placeholders similares a ImageUploadSection
+    const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
+
+    // Función de validación mejorada (igual que ImageUploadSection)
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
 
         // Verificar data URLs (base64)
         if (url.startsWith('data:')) {
             const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
-            return dataUrlRegex.test(url);
+            const isValid = dataUrlRegex.test(url);
+            if (isValid) {
+                const base64Part = url.split(',')[1];
+                return base64Part && base64Part.length > 10;
+            }
+            return false;
         }
 
-        // Verificar URLs HTTP/HTTPS - Mejorar la validación
         try {
             const urlObj = new URL(url);
-            const isValidProtocol = ['http:', 'https:'].includes(urlObj.protocol);
+            const isHttps = ['http:', 'https:'].includes(urlObj.protocol);
             const hasValidExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
-                url.includes('/img/') || // Para tu servidor
-                url.includes('image-'); // Para archivos con formato image-*
+                url.includes('/img/') ||
+                url.includes('image-');
 
-            return isValidProtocol && (hasValidExtension || !urlObj.pathname.includes('.'));
-        } catch {
+            return isHttps && (hasValidExtension || !urlObj.pathname.includes('.'));
+        } catch (error) {
+            console.warn('Invalid URL:', url, error);
             return false;
         }
     };
 
-    // Componente mejorado para renderizar la imagen del enlace
-    const LinkImage = ({ image, title, size = "small" }: {
-        image?: string | null;
-        title: string;
-        size?: "small" | "medium" | "large"
-    }) => {
-        const sizeClasses = {
-            small: "w-8 h-8",
-            medium: "w-12 h-12",
-            large: "w-16 h-16"
-        };
-
-        const iconSizes = {
-            small: 16,
-            medium: 20,
-            large: 24
-        };
-
-        const [imageError, setImageError] = useState(false);
-        const [isLoading, setIsLoading] = useState(true);
-
-        // Reset error state when image changes
-        useEffect(() => {
-            if (image) {
-                setImageError(false);
-                setIsLoading(true);
-            }
-        }, [image]);
-
-        const handleImageLoad = () => {
-            console.log("Image loaded successfully:", image);
-            setIsLoading(false);
-            setImageError(false);
-        };
-
-        const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-            console.error("Error loading image:", image, e);
-            setIsLoading(false);
-            setImageError(true);
-        };
-
-        console.log("LinkImage render:", {
-            image,
-            imageError,
-            isLoading,
-            isValid: isValidImageUrl(image)
-        });
-
-        if (!image || !isValidImageUrl(image) || imageError) {
-            return (
-                <div className={`${sizeClasses[size]} rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 border border-blue-200`}>
-                    <LinkIcon
-                        size={iconSizes[size]}
-                        className="text-blue-600"
-                    />
-                </div>
-            );
+    // Función de validación de archivos (igual que ImageUploadSection)
+    const validateFile = (file: File): boolean => {
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            message.error('Formato de archivo no válido. Solo se permiten: JPG, PNG, WebP, GIF');
+            return false;
         }
 
-        return (
-            <div className={`${sizeClasses[size]} rounded-lg overflow-hidden flex-shrink-0 relative`}>
-                {isLoading && (
-                    <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
-                        <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-                    </div>
-                )}
-                <img
-                    src={image}
-                    alt={title}
-                    className={`w-full h-full object-cover rounded-lg transition-opacity duration-200 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-                    onLoad={handleImageLoad}
-                    onError={handleImageError}
-                    crossOrigin="anonymous" // Agregar para evitar problemas CORS
-                />
-            </div>
-        );
+        // Check file size (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            message.error('El archivo es demasiado grande. Tamaño máximo: 5MB');
+            return false;
+        }
+
+        return true;
     };
 
-    // Debug: Log changes in active links
+    // Función de manejo de upload mejorada
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log("=== HANDLE IMAGE UPLOAD DEBUG ===");
+        const file = e.target.files?.[0];
+
+        if (!file) {
+            console.log("No file selected");
+            return;
+        }
+
+        console.log("File selected:", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified
+        });
+
+        // Validar archivo
+        if (!validateFile(file)) {
+            e.target.value = ''; // Limpiar input
+            return;
+        }
+
+        // Si estamos editando un enlace existente
+        if (editingIndex !== null) {
+            const linkToUpdate = activeLinks[editingIndex];
+            console.log("Updating existing link:", linkToUpdate);
+
+            if (linkToUpdate.id) {
+                try {
+                    setUploadingImage(true);
+                    console.log("Uploading image for link ID:", linkToUpdate.id);
+
+                    const loadingMessage = message.loading('Subiendo imagen del enlace...', 0);
+
+                    // Subir imagen usando el endpoint específico
+                    const imageUrl = await uploadLinkImage(file, linkToUpdate.id);
+                    console.log("Image uploaded successfully:", imageUrl);
+
+                    loadingMessage();
+
+                    // Validar la URL de la imagen subida
+                    if (!isValidImageUrl(imageUrl)) {
+                        console.error("Uploaded image URL is invalid:", imageUrl);
+                        throw new Error("La URL de la imagen subida no es válida");
+                    }
+
+                    // Actualizar el estado local para mostrar la imagen inmediatamente
+                    setEditImage(imageUrl);
+
+                    message.success('Imagen del enlace actualizada correctamente');
+                    console.log("Image URL set in edit state:", imageUrl);
+
+                } catch (error) {
+                    console.error("Error uploading link image:", error);
+
+                    // Mensaje de error más específico
+                    let errorMessage = 'Error al subir la imagen del enlace';
+                    if (error instanceof Error) {
+                        errorMessage = error.message;
+                    }
+                    message.error(errorMessage);
+
+                    // Fallback a base64 si falla la subida
+                    console.log("Falling back to base64...");
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        if (typeof reader.result === "string") {
+                            setEditImage(reader.result);
+                            message.info('Imagen cargada localmente (se guardará al confirmar)');
+                        }
+                    };
+                    reader.onerror = () => {
+                        message.error('Error al procesar la imagen');
+                    };
+                    reader.readAsDataURL(file);
+                } finally {
+                    setUploadingImage(false);
+                }
+            } else {
+                // Si no hay ID del enlace, usar base64 como fallback
+                console.log("No link ID, using base64 fallback");
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (typeof reader.result === "string") {
+                        setEditImage(reader.result);
+                        message.info('Imagen cargada localmente');
+                    }
+                };
+                reader.onerror = () => {
+                    message.error('Error al procesar la imagen');
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            // Para nuevos enlaces, usar base64
+            console.log("New link, using base64");
+            const reader = new FileReader();
+            reader.onload = () => {
+                if (typeof reader.result === "string") {
+                    setEditImage(reader.result);
+                    message.info('Imagen cargada localmente');
+                }
+            };
+            reader.onerror = () => {
+                message.error('Error al procesar la imagen');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+        e.target.value = '';
+    };
+
     useEffect(() => {
         console.log("Active links changed:", activeLinks);
         activeLinks.forEach((link, index) => {
@@ -167,8 +227,6 @@ const LinksPage = () => {
         if (newUrl.trim()) {
             try {
                 setIsSubmitting(true);
-
-                // Calcular el siguiente orderIndex basado en enlaces activos
                 const maxOrderIndex = Math.max(...activeLinks.map(link => link.orderIndex), -1);
 
                 const newLink = {
@@ -185,7 +243,7 @@ const LinksPage = () => {
                 console.log("Link added successfully");
             } catch (error) {
                 console.error("Error adding link:", error);
-                alert('Error al agregar el enlace');
+                message.error('Error al agregar el enlace');
             } finally {
                 setIsSubmitting(false);
             }
@@ -200,7 +258,7 @@ const LinksPage = () => {
             console.log("Link deleted successfully");
         } catch (error) {
             console.error("Error deleting link:", error);
-            alert('Error al eliminar el enlace');
+            message.error('Error al eliminar el enlace');
         } finally {
             setIsSubmitting(false);
         }
@@ -234,10 +292,8 @@ const LinksPage = () => {
 
             console.log("Link updated successfully");
 
-            // Esperar un poco para que el contexto se actualice
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Ahora sí limpiar los estados
             setEditingIndex(null);
             setEditTitle("");
             setEditUrl("");
@@ -245,95 +301,17 @@ const LinksPage = () => {
 
         } catch (error) {
             console.error("Error updating link:", error);
-            alert('Error al actualizar el enlace');
+            message.error('Error al actualizar el enlace');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        if (!file.type.startsWith('image/')) {
-            console.error('Please select an image file');
-            alert('Por favor selecciona un archivo de imagen válido');
-            return;
-        }
-
-        // Validar tamaño (opcional - máximo 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            console.error('Image size should be less than 5MB');
-            alert('El tamaño de la imagen debe ser menor a 5MB');
-            return;
-        }
-
-        // Si estamos editando un enlace existente
-        if (editingIndex !== null) {
-            const linkToUpdate = activeLinks[editingIndex];
-
-            if (linkToUpdate.id) {
-                try {
-                    setUploadingImage(true);
-                    console.log("Uploading image for link ID:", linkToUpdate.id);
-
-                    // Subir imagen usando el endpoint específico
-                    const imageUrl = await uploadLinkImage(file, linkToUpdate.id);
-                    console.log("Image uploaded successfully:", imageUrl);
-
-                    // Actualizar el estado local para mostrar la imagen inmediatamente
-                    setEditImage(imageUrl);
-
-                    console.log("Image URL set in edit state:", imageUrl);
-
-                } catch (error) {
-                    console.error("Error uploading link image:", error);
-                    alert('Error al subir la imagen al servidor');
-
-                    // Fallback a base64 si falla la subida
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        if (typeof reader.result === "string") {
-                            setEditImage(reader.result);
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                } finally {
-                    setUploadingImage(false);
-                }
-            } else {
-                // Si no hay ID del enlace, usar base64 como fallback
-                const reader = new FileReader();
-                reader.onload = () => {
-                    if (typeof reader.result === "string") {
-                        setEditImage(reader.result);
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        } else {
-            // Para nuevos enlaces, usar base64
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (typeof reader.result === "string") {
-                    setEditImage(reader.result);
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
-        e.target.value = '';
-    };
-
-    // HTML5 Drag and Drop handlers
     const handleDragStart = (e: React.DragEvent, index: number) => {
         setDraggedIndex(index);
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/html', '');
 
-        // Add a slight delay to show drag feedback
         setTimeout(() => {
             const target = e.target as HTMLElement;
             target.style.opacity = '0.5';
@@ -392,7 +370,7 @@ const LinksPage = () => {
             console.log("Links reordered successfully");
         } catch (error) {
             console.error("Error reordering links:", error);
-            alert('Error al reordenar los enlaces');
+            message.error('Error al reordenar los enlaces');
         } finally {
             setDraggedIndex(null);
             setDragOverIndex(null);
@@ -411,7 +389,11 @@ const LinksPage = () => {
         setNewUrl("");
     };
 
-    // Debug logs
+    // Función para obtener imagen segura con fallback
+    const getSafeImageUrl = (imageUrl: string | null | undefined): string => {
+        return isValidImageUrl(imageUrl) ? imageUrl! : placeholderLinkImage;
+    };
+
     console.log("Active links:", activeLinks);
     console.log("Current edit image:", editImage);
 
@@ -426,33 +408,38 @@ const LinksPage = () => {
         );
     }
 
+    if (editingIndex !== null) {
+        const linkToEdit = activeLinks[editingIndex];
+        return (
+            <LinkEditForm
+                link={linkToEdit}
+                editTitle={editTitle}
+                editUrl={editUrl}
+                editImage={editImage}
+                isSubmitting={isSubmitting}
+                onTitleChange={setEditTitle}
+                onUrlChange={setEditUrl}
+                onImageChange={setEditImage}
+                onSave={handleSaveEdit}
+                onCancel={handleCancelEdit}
+            />
+        );
+    }
+
     return (
         <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
-            {editingIndex === null ? (
-                <div className="p-4">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleBackClick}
-                            className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
-                        >
-                            <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
-                            <h1 className="text-lg text-black font-semibold hover:text-gray-400" style={{fontSize:"17px"}}>Links</h1>
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                <div className="p-4">
+            <div className="p-4">
+                <div className="flex items-center gap-3">
                     <button
-                        onClick={handleCancelEdit}
-                        className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
-                        disabled={isSubmitting}
+                        onClick={handleBackClick}
+                        className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
                     >
-                        <ChevronLeft className="w-5 h-5 mr-1 text-black"/>
-                        <h1 className="text-lg text-black font-semibold">Editar Link</h1>
+                        <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
+                        <h1 className="text-lg text-black font-semibold hover:text-gray-400" style={{fontSize:"17px"}}>Links</h1>
                     </button>
                 </div>
-            )}
+            </div>
 
             {/* Main Content */}
             <div className="p-4">
@@ -464,233 +451,150 @@ const LinksPage = () => {
                 )}
 
 
-                {process.env.NODE_ENV === 'development' && (
-                    <div className="mb-4 p-2 bg-gray-800 rounded">
-                        <p className="text-xs text-gray-400">Debug Info:</p>
-                        <p className="text-xs text-white">Active Links: {activeLinks.length}</p>
-                        <p className="text-xs text-white">Edit Image: {editImage || 'undefined'}</p>
-                    </div>
-                )}
-
-                {/* Edit mode */}
-                {editingIndex !== null ? (
-                    <div className="space-y-4">
+                <div className="space-y-6">
+                    {/* Active Links Section */}
+                    {activeLinks.length > 0 && (
                         <div>
-                            <p className="text-sm mb-1 text-gray-600">NOMBRE</p>
-                            <input
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                className="w-full p-3 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
-                                placeholder="Nombre del enlace"
-                                disabled={isSubmitting}
-                            />
-                        </div>
-
-                        <div>
-                            <p className="text-sm mb-1 text-gray-600">URL</p>
-                            <input
-                                value={editUrl}
-                                onChange={(e) => setEditUrl(e.target.value)}
-                                className="w-full p-3 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
-                                placeholder="https://ejemplo.com"
-                                disabled={isSubmitting}
-                            />
-                        </div>
-
-                        <div>
-                            <p className="text-sm mb-1 text-gray-600">IMAGEN (opcional)</p>
-                            <div className="flex items-center space-x-2">
-                                {editImage ? (
-                                    <div className="relative">
-                                        <LinkImage
-                                            image={editImage}
-                                            title={editTitle || "Link"}
-                                            size="large"
-                                        />
-                                        <button
-                                            onClick={() => setEditImage(undefined)}
-                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-                                            disabled={isSubmitting || uploadingImage}
-                                        >
-                                            <X size={12} />
-                                        </button>
-                                        {uploadingImage && (
-                                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 hover:bg-gray-50 transition-colors relative"
-                                        disabled={isSubmitting || uploadingImage}
+                            <h3 className="text-sm text-gray-600 font-semibold mb-3">
+                                Enlaces activos ({activeLinks.length})
+                            </h3>
+                            <div className="space-y-2">
+                                {activeLinks.map((link, index) => (
+                                    <div
+                                        key={link.id}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                        onDragOver={handleDragOver}
+                                        onDragEnter={(e) => handleDragEnter(e, index)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        className={`
+                                            flex items-center justify-between p-3 bg-[#FAFFF6] rounded-lg border border-gray-200
+                                            cursor-move hover:bg-[#F0F9E8] transition-colors
+                                            ${dragOverIndex === index ? 'border-blue-500 bg-blue-50' : ''}
+                                            ${draggedIndex === index ? 'opacity-50' : ''}
+                                        `}
                                     >
-                                        {uploadingImage ? (
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
-                                        ) : (
-                                            <ImagePlus size={24} className="text-gray-400" />
-                                        )}
-                                    </button>
-                                )}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="hidden"
-                                    disabled={uploadingImage}
-                                />
-                            </div>
-                            {uploadingImage && (
-                                <p className="text-sm text-blue-600 mt-1">Subiendo imagen...</p>
-                            )}
-                        </div>
+                                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                            <GripVertical size={16} className="text-gray-400 flex-shrink-0" />
 
-                        <div className="flex space-x-3 pt-4">
-                            <button
-                                onClick={handleSaveEdit}
-                                disabled={isSubmitting || !editTitle.trim() || !editUrl.trim() || uploadingImage}
-                                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                {isSubmitting ? "Guardando..." : "Guardar cambios"}
-                            </button>
-                            <button
-                                onClick={handleCancelEdit}
-                                disabled={isSubmitting || uploadingImage}
-                                className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    // Main links view
-                    <div className="space-y-6">
-                        {/* Active Links Section */}
-                        {activeLinks.length > 0 && (
-                            <div>
-                                <h3 className="text-sm text-gray-600 font-semibold mb-3">
-                                    Enlaces activos ({activeLinks.length})
-                                </h3>
-                                <div className="space-y-2">
-                                    {activeLinks.map((link, index) => (
-                                        <div
-                                            key={link.id}
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(e, index)}
-                                            onDragEnd={handleDragEnd}
-                                            onDragOver={handleDragOver}
-                                            onDragEnter={(e) => handleDragEnter(e, index)}
-                                            onDragLeave={handleDragLeave}
-                                            onDrop={(e) => handleDrop(e, index)}
-                                            className={`
-                                                flex items-center justify-between p-3 bg-[#FAFFF6] rounded-lg border border-gray-200
-                                                cursor-move hover:bg-[#F0F9E8] transition-colors
-                                                ${dragOverIndex === index ? 'border-blue-500 bg-blue-50' : ''}
-                                                ${draggedIndex === index ? 'opacity-50' : ''}
-                                            `}
-                                        >
-                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                <GripVertical size={16} className="text-gray-400 flex-shrink-0" />
-
-                                                <LinkImage
-                                                    image={link.image}
-                                                    title={link.title}
-                                                    size="small"
+                                            {/* Imagen mejorada con manejo de errores */}
+                                            <div className="w-8 h-8 rounded-md overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200">
+                                                <img
+                                                    src={getSafeImageUrl(link.image)}
+                                                    alt={link.title}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        console.warn('Link image failed to load:', link.image);
+                                                        const img = e.target as HTMLImageElement;
+                                                        if (img.src !== placeholderLinkImage) {
+                                                            img.src = placeholderLinkImage;
+                                                        }
+                                                    }}
                                                 />
-
-                                                <div className="flex-1 min-w-0">
-                                                    <span className="text-sm font-medium text-black block truncate">
-                                                        {link.title}
-                                                    </span>
-                                                    <p className="text-xs text-gray-400 truncate max-w-48">
-                                                        {link.url}
-                                                    </p>
-                                                </div>
                                             </div>
 
-                                            <div className="flex items-center space-x-2 flex-shrink-0">
-                                                <button
-                                                    onClick={() => handleOpenEdit(index)}
-                                                    className="text-gray-400 hover:text-blue-400 transition-colors p-1"
-                                                    disabled={isSubmitting}
-                                                >
-                                                    <Edit2 className="w-4 h-4"/>
-                                                </button>
-                                                <button
-                                                    onClick={() => window.open(link.url, '_blank')}
-                                                    className="text-gray-400 hover:text-green-400 transition-colors p-1"
-                                                >
-                                                    <ExternalLink className="w-4 h-4"/>
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDelete(index);
-                                                    }}
-                                                    disabled={isSubmitting}
-                                                    className="text-gray-400 hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    <X className="w-4 h-4"/>
-                                                </button>
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-sm font-medium text-black block truncate">
+                                                    {link.title}
+                                                </span>
+                                                <p className="text-xs text-gray-400 truncate max-w-48">
+                                                    {link.url}
+                                                </p>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
+
+                                        <div className="flex items-center space-x-2 flex-shrink-0">
+                                            <button
+                                                onClick={() => handleOpenEdit(index)}
+                                                className="text-gray-400 hover:text-blue-400 transition-colors p-1"
+                                                disabled={isSubmitting}
+                                            >
+                                                <Edit2 className="w-4 h-4"/>
+                                            </button>
+                                            <button
+                                                onClick={() => window.open(link.url, '_blank')}
+                                                className="text-gray-400 hover:text-green-400 transition-colors p-1"
+                                            >
+                                                <ExternalLink className="w-4 h-4"/>
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(index);
+                                                }}
+                                                disabled={isSubmitting}
+                                                className="text-gray-400 hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <X className="w-4 h-4"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        )}
-
-                        {/* Add New Link Section */}
-                        <div>
-                            <h3 className="text-sm font-semibold text-gray-600 mb-3">
-                                Agregar enlace
-                            </h3>
-
-                            {adding ? (
-                                <div className="flex items-center space-x-2 p-3 bg-white rounded-lg border border-gray-300">
-                                    <input
-                                        value={newUrl}
-                                        onChange={(e) => setNewUrl(e.target.value)}
-                                        placeholder="Ingresa una URL"
-                                        className="flex-1 bg-transparent text-black placeholder-gray-400 focus:outline-none"
-                                        autoFocus
-                                        disabled={isSubmitting}
-                                        onKeyPress={(e) => {
-                                            if (e.key === 'Enter') {
-                                                handleConfirmAdd();
-                                            }
-                                        }}
-                                    />
-                                    <button
-                                        onClick={handleConfirmAdd}
-                                        disabled={!newUrl.trim() || isSubmitting}
-                                        className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Check size={20} />
-                                    </button>
-                                    <button
-                                        onClick={handleCancelAdd}
-                                        disabled={isSubmitting}
-                                        className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setAdding(true)}
-                                    disabled={isSubmitting}
-                                    className="w-full p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center"
-                                >
-                                    <Plus size={20} className="mb-1" />
-                                    <span className="text-sm">Agregar enlace</span>
-                                </button>
-                            )}
                         </div>
+                    )}
+
+                    {/* Add New Link Section */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-600 mb-3">
+                            Agregar enlace
+                        </h3>
+
+                        {adding ? (
+                            <div className="flex items-center space-x-2 p-3 bg-white rounded-lg border border-gray-300">
+                                <input
+                                    value={newUrl}
+                                    onChange={(e) => setNewUrl(e.target.value)}
+                                    placeholder="Ingresa una URL"
+                                    className="flex-1 bg-transparent text-black placeholder-gray-400 focus:outline-none"
+                                    autoFocus
+                                    disabled={isSubmitting}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleConfirmAdd();
+                                        }
+                                    }}
+                                />
+                                <button
+                                    onClick={handleConfirmAdd}
+                                    disabled={!newUrl.trim() || isSubmitting}
+                                    className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <Check size={20} />
+                                </button>
+                                <button
+                                    onClick={handleCancelAdd}
+                                    disabled={isSubmitting}
+                                    className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setAdding(true)}
+                                disabled={isSubmitting}
+                                className="w-full p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center"
+                            >
+                                <Plus size={20} className="mb-1" />
+                                <span className="text-sm">Agregar enlace</span>
+                            </button>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
+
+            {/* Hidden file input for image upload */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+                multiple={false}
+            />
         </div>
     );
 };
