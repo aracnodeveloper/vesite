@@ -4,8 +4,7 @@ export interface CreateBiositeDto {
     ownerId: UUID;
     title: string;
     slug: string;
-    avatarImage?: string;
-    backgroundImage?: string;
+    password: string;
 }
 
 export interface CreateUserDto {

@@ -24,6 +24,7 @@ export interface CreateBiositeDto {
     ownerId: UUID;
     title: string;
     slug: string;
+    password?: string;
 }
 export interface PreviewContextType {
     biosite: BiositeFull | null;

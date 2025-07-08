@@ -518,7 +518,7 @@ const SocialPage = () => {
                     </div>
 
                     {/* Social Media Platforms Grid */}
-                    <div className="grid grid-cols-6 gap-1 bg-[#C7E1AB] rounded-lg">
+                    <div className="grid grid-cols-6 gap-1  rounded-lg">
                         {socialMediaPlatforms.slice(0, 30).map((platform) => {
                             const isActive = isPlatformActive(platform);
                             return (
@@ -542,13 +542,13 @@ const SocialPage = () => {
                                     )}
                                     <div className="flex flex-col items-center">
                                         <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center"
-                                            style={{color: platform.color}}
+                                            className="w-6 h-6 rounded-lg flex bg-gray-600 items-center justify-center"
+
                                         >
                                             <img
                                                 src={platform.icon}
                                                 alt={platform.name}
-                                                className="w-4 h-4 filter invert brightness-0 contrast-100"
+                                                className="w-4 h-4 filter text-black  invert brightness-0 contrast-100"
                                             />
                                         </div>
                                     </div>

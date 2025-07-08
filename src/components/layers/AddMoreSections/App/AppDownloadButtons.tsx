@@ -4,7 +4,7 @@ export const AppDownloadButtons = () => {
     const googlePlayUrl = "https://play.google.com/store/apps/details?id=com.visitaEcuador&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1&pli=1";
 
     return (
-        <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md  mx-auto">
+        <div className="flex flex-wrap  lg:flex-row gap-2 w-full max-w-md  mx-auto">
             <a
                 href={appStoreUrl}
                 target="_blank"

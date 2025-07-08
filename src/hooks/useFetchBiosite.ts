@@ -217,7 +217,7 @@ export const useFetchBiosite = (userId?: string) => {
 
             const newUserData: CreateUserDto = {
                 email: `${createData.slug}@biosite.local`,
-                password: `biosite_${createData.slug}_${Date.now()}`,
+                password: createData.password || `biosite_${createData.slug}_${Date.now()}`,
                 name: createData.title,
                 parentId: userId
             };

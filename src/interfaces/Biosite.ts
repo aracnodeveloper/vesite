@@ -52,7 +52,7 @@ export interface BiositeLink {
 
 export interface BiositeFull {
     id: string;
-    ownerId: UUID;
+    ownerId: string;
     title: string;
     slug: string;
     themeId: string;

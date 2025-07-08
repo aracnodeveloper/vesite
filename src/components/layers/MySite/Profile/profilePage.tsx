@@ -159,10 +159,11 @@ const ProfilePage = () => {
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <div className="h-5">
-                                <h4 className="text-sm font-medium text-blue-800 mb-1" style={{ fontSize: "11px" }}>Imagen de fondo</h4>
+                            <div className="h-10">
                                 <p className="text-sm text-blue-700" style={{ fontSize: "11px" }}>
-                                    {biosite.backgroundImage ? 'Tienes una imagen de fondo personalizada configurada.' : 'Se aplicará una imagen de fondo por defecto a tu perfil.'}
+                                    {biosite.backgroundImage ? 'Primero debes configurar tu imagen de Avatar para comenzar ☝️' +
+                                        'Tienes una imagen de fondo personalizada configurada.' : 'Primero debes configurar tu imagen de Avatar para comenzar ☝️' +
+                                        'Se aplicará una imagen de fondo por defecto a tu perfil.'}
                                 </p>
                             </div>
                         </div>
@@ -199,7 +200,7 @@ const ProfilePage = () => {
                         </div>
 
                         <Form.Item className="mb-0">
-                            <Button type="primary" htmlType="submit" className="w-full bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 rounded-lg py-2 h-auto" loading={loading} disabled={!biosite.id}>
+                            <Button type="default" htmlType="submit" className="w-full bg-blue-600 text-black hover:text-green700 hover:bg-blue-700 border-green-600 hover:border-green-700 rounded-lg py-2 h-auto" loading={loading} disabled={!biosite.id}>
                                 {loading ? 'Actualizando...' : 'Actualizar Perfil'}
                             </Button>
                         </Form.Item>

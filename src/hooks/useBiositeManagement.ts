@@ -1,45 +1,37 @@
 import { useCallback } from "react";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../interfaces/Biosite";
 import type { CreateBiositeDto } from "../interfaces/User.ts";
+import Cookies from "js-cookie";
 
 interface UseBiositeOperationsProps {
     biositeData: BiositeFull | null;
-    biosite: BiositeFull | null;
-    setBiosite: (biosite: BiositeFull | null) => void;
-    updateBiositeHook: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
-    fetchBiosite: () => Promise<BiositeFull | null>;
-    fetchUserBiosites: () => Promise<BiositeFull[]>;
-    createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
-    switchBiosite: (biositeId: string) => Promise<BiositeFull | null>;
+    fontFamily: string;
     themeColor: string;
     setThemeColorState: (color: string) => void;
-    fontFamily: string;
     setFontFamilyState: (font: string) => void;
+    updateBiositeHook: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
+    setBiosite: (biosite: BiositeFull | null) => void;
+    createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
+    fetchUserBiosites: () => Promise<BiositeFull[]>;
+    switchBiosite: (biositeId: string) => Promise<BiositeFull | null>;
+    fetchChildBiosites: (userId: string) => Promise<BiositeFull[]>;
+    resetState: () => void;
 }
 
 export const useBiositeOperations = ({
                                          biositeData,
-                                         biosite,
-                                         setBiosite,
-                                         updateBiositeHook,
-                                         fetchBiosite,
-                                         fetchUserBiosites,
-                                         createBiosite,
-                                         switchBiosite,
+                                         fontFamily,
                                          themeColor,
                                          setThemeColorState,
-                                         fontFamily,
-                                         setFontFamilyState
+                                         setFontFamilyState,
+                                         updateBiositeHook,
+                                         setBiosite,
+                                         createBiosite,
+                                         fetchUserBiosites,
+                                         switchBiosite,
+                                         fetchChildBiosites,
+                                         resetState
                                      }: UseBiositeOperationsProps) => {
-
-    const updatePreview = useCallback((data: Partial<BiositeFull>) => {
-        setBiosite(prevBiosite => {
-            if (!prevBiosite) return null;
-            const updated = { ...prevBiosite, ...data };
-            console.log("Preview updated:", updated);
-            return updated;
-        });
-    }, [setBiosite]);
 
     const updateBiosite = useCallback(async (data: BiositeUpdateDto): Promise<BiositeFull | null> => {
         try {
@@ -56,14 +48,14 @@ export const useBiositeOperations = ({
 
     const refreshBiosite = useCallback(async () => {
         try {
-            const refreshedBiosite = await fetchBiosite();
-            if (refreshedBiosite) {
-                setBiosite(refreshedBiosite);
-            }
+            if (!biositeData?.id) return;
+
+            // Simular refresh usando el biositeData actual
+            setBiosite(biositeData);
         } catch (error) {
             console.error("Error refreshing biosite:", error);
         }
-    }, [fetchBiosite, setBiosite]);
+    }, [biositeData, setBiosite]);
 
     const setThemeColor = useCallback(async (color: string) => {
         if (!biositeData?.id) {
@@ -165,22 +157,54 @@ export const useBiositeOperations = ({
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
+                Cookies.set('activeBiositeId', biositeId);
+                Cookies.set('biositeId', biositeId);
+                Cookies.set('biositeId', result.id);
+                Cookies.set('userId', result.ownerId);
+                resetState();
             }
             return result;
         } catch (error) {
             console.error("Error switching biosite:", error);
             throw error;
         }
+    }, [switchBiosite, resetState, setBiosite]);
+
+    const getChildBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+        const currentUserId = Cookies.get('userId');
+        if (!currentUserId) throw new Error('No hay userId');
+        return await fetchChildBiosites(currentUserId);
+    }, [fetchChildBiosites]);
+
+    // Nueva función para cargar un biosite específico por ID
+    const loadBiositeById = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
+        try {
+            console.log('Loading biosite by ID:', biositeId);
+            const result = await switchBiosite(biositeId);
+            if (result) {
+                setBiosite(result);
+                // Actualizar cookies
+                Cookies.set('activeBiositeId', biositeId);
+                Cookies.set('biositeId', biositeId);
+                Cookies.set('userId', result.ownerId);
+                console.log('Biosite loaded successfully:', result);
+            }
+            return result;
+        } catch (error) {
+            console.error("Error loading biosite by ID:", error);
+            throw error;
+        }
     }, [switchBiosite, setBiosite]);
 
     return {
-        updatePreview,
         updateBiosite,
         refreshBiosite,
         setThemeColor,
         setFontFamily,
-        createNewBiosite,
+        createBiosite: createNewBiosite,
         getUserBiosites,
-        switchToAnotherBiosite
+        switchToAnotherBiosite,
+        getChildBiosites,
+        loadBiositeById // Nueva función exportada
     };
 };
