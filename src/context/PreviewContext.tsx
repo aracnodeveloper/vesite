@@ -77,23 +77,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         return fileName.toLowerCase();
     }, []);
 
-    useEffect(() => {
-        if (!userId) {
-            setBiosite(null);
-            setSocialLinksState([]);
-            setRegularLinksState([]);
-            setThemeColorState('#ffffff');
-            setFontFamilyState('Inter');
-            resetState();
-            initializationRef.current = {};
-            return;
-        }
 
-        if (userId && !initializationRef.current[userId]) {
-            initializationRef.current[userId] = true;
-            fetchBiosite();
-        }
-    }, [userId, fetchBiosite, resetState]);
 
     useEffect(() => {
         if (biositeData) {
