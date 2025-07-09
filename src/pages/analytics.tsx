@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getBiositeAnalytics, getClicksGroupedByLabel } from "../service/apiService";
 import Cookies from 'js-cookie';
+import LivePreviewContent from "../components/Preview/LivePreviewContent.tsx";
+import PhonePreview from "../components/Preview/phonePreview.tsx";
 
 interface DailyActivity {
   day: string;
@@ -23,14 +25,19 @@ const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Calcular métricas totales
+  const totalViews = analyticsData?.dailyActivity.reduce((sum, activity) => sum + activity.views, 0) || 0;
+  const totalClicks = analyticsData?.dailyActivity.reduce((sum, activity) => sum + activity.clicks, 0) || 0;
+  const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError(null);
-        
+
         // Obtener la cookie del token
         const token = Cookies.get('accessToken');
-        
+
         if (!token) {
           throw new Error('No se encontró el token de acceso');
         }
@@ -64,7 +71,7 @@ const Analytics = () => {
 
         // Hacer las llamadas a la API
         console.log('Iniciando llamadas a la API...');
-        
+
         const [analytics, clicks] = await Promise.allSettled([
           getBiositeAnalytics(userId),
           biositeId ? getClicksGroupedByLabel(biositeId) : Promise.resolve([])
@@ -76,7 +83,7 @@ const Analytics = () => {
         // Manejar resultado de analytics
         if (analytics.status === 'fulfilled') {
           console.log('Analytics data recibida:', analytics.value);
-          
+
           // Verificar si la respuesta es HTML (error) o datos válidos
           if (typeof analytics.value === 'string' && analytics.value.includes('<!doctype html>')) {
             console.error('La API de analytics devolvió HTML en lugar de JSON - posible error 404 o de autenticación');
@@ -134,7 +141,7 @@ const Analytics = () => {
         // Manejar resultado de clicks
         if (clicks.status === 'fulfilled') {
           console.log('Clicks data recibida:', clicks.value);
-          
+
           // Verificar si la respuesta es HTML (error) o datos válidos
           if (typeof clicks.value === 'string' && clicks.value.includes('<!doctype html>')) {
             console.error('La API de clicks devolvió HTML en lugar de JSON - posible error 404 o de autenticación');
@@ -164,74 +171,121 @@ const Analytics = () => {
 
   if (error) {
     return (
-      <div className="text-white p-6">
-        <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
-          <h3 className="text-red-400 font-semibold mb-2">Error</h3>
-          <p className="text-red-300">{error}</p>
+        <div className="text-white p-6">
+          <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
+            <h3 className="text-red-400 font-semibold mb-2">Error</h3>
+            <p className="text-red-300">{error}</p>
+          </div>
         </div>
-      </div>
     );
   }
 
   if (!analyticsData) {
     return (
-      <div className="text-white p-6">
-        <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
-          <h3 className="text-yellow-400 font-semibold mb-2">Sin datos</h3>
-          <p className="text-yellow-300">No se pudieron cargar los datos de analytics.</p>
+        <div className="text-white p-6">
+          <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
+            <h3 className="text-yellow-400 font-semibold mb-2">Sin datos</h3>
+            <p className="text-yellow-300">No se pudieron cargar los datos de analytics.</p>
+          </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-white px-6 py-16 ">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl text-black font-semibold mb-2 text-center">Analytics</h1>
-        <p className="text-center text-gray-400 text-sm mb-10">
-          Visualize engagement with your Bio Site
-        </p>
+      <div className="h-full  text-white px-6 py-16 ">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="absolute left-50 top-10 text-3xl text-gray-600 font-semibold mb-2 text-start">Analytics</h1>
 
-        <div className="mb-10">
-          <h2 className="text-xl text-gray-600 font-semibold mb-4">Daily Activity</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {analyticsData.dailyActivity.map((activity, index) => (
-              <div key={index} className="bg-[#1e1e1e] p-6 rounded-xl border border-[#2a2a2a]">
-                <p className="text-sm text-gray-400">Day: {activity.day}</p>
-                <p className="text-sm text-gray-400">Views: {activity.views}</p>
-                <p className="text-sm text-gray-400">Clicks: {activity.clicks}</p>
+          <div
+              className="absolute left-6/17 top-1/3 transform   bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700"
+              style={{height:"600px", width:"600px"}}
+          >
+
+          </div>
+
+          <div className="relative flex items-center justify-center mb-16">
+            <div
+                className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
+              <div className="text-xs text-gray-400 mb-1">VIEWS</div>
+              <div className="text-4xl font-bold text-white">{totalViews}</div>
+            </div>
+
+            {/* Phone Preview - Centro */}
+            <div className=" z-10 overflow-y-hidden">
+              <PhonePreview>
+                <LivePreviewContent/>
+              </PhonePreview>
+            </div>
+
+            {/* Círculo de Clicks - Derecha superior */}
+            <div
+                className="absolute right-20 top-1/2 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
+              <div className="text-xs text-gray-400 mb-1">CLICKS</div>
+              <div className="text-2xl font-bold text-white">{totalClicks}</div>
+            </div>
+
+            {/* Círculo de CTR - Derecha inferior */}
+            <div
+                className="absolute right-40 bottom-30 w-32 h-32 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
+              <div className="text-xs text-gray-400 mb-1">CTR</div>
+              <div className="text-2xl font-bold text-white">{ctr}%</div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-5">
+            {/* Daily Activity */}
+            <div className="mb-10 bg-black rounded-3xl p-10">
+              <h2 className="text-xl text-gray-400 font-semibold mb-6">Daily Activity</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {analyticsData.dailyActivity.map((activity, index) => (
+                    <div key={index} className="bg-[#1e1e1e] p-6 rounded-xl border border-[#2a2a2a]">
+                      <p className="text-sm text-gray-400 mb-2">Day: {activity.day}</p>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-lg font-semibold text-white">{activity.views}</p>
+                          <p className="text-xs text-gray-500">Views</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-white">{activity.clicks}</p>
+                          <p className="text-xs text-gray-500">Clicks</p>
+                        </div>
+                      </div>
+                    </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Clicks by Link */}
+            <div className="mb-10 bg-black rounded-3xl p-10">
+              <h2 className="text-xl text-gray-400 font-semibold mb-6">Clicks by Link</h2>
+              {clicksData.length > 0 ? (
+                  <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#2a2a2a]">
+                      <tr>
+                        <th className="px-6 py-4 text-gray-400 font-medium">Label</th>
+                        <th className="px-6 py-4 text-gray-400 font-medium">Clicks</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {clicksData.map((click, index) => (
+                          <tr key={click.label} className={index % 2 === 0 ? 'bg-[#1e1e1e]' : 'bg-[#252525]'}>
+                            <td className="px-6 py-4 text-white">{click.label}</td>
+                            <td className="px-6 py-4 text-white font-semibold">{click.clicks}</td>
+                          </tr>
+                      ))}
+                      </tbody>
+                    </table>
+                  </div>
+              ) : (
+                  <div className="bg-[#1e1e1e] p-8 rounded-xl border border-[#2a2a2a] text-center">
+                    <p className="text-gray-400">No click data available.</p>
+                  </div>
+              )}
+            </div>
           </div>
         </div>
-
-        <div className="mb-10">
-          <h2 className="text-xl text-gray-600 font-semibold mb-4">Clicks by Link</h2>
-          {clicksData.length > 0 ? (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr>
-                  <th className="border-b p-2">Label</th>
-                  <th className="border-b p-2">Clicks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clicksData.map((click) => (
-                  <tr key={click.label}>
-                    <td className="border-b p-2">{click.label}</td>
-                    <td className="border-b p-2">{click.clicks}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="bg-[#1e1e1e] p-6 rounded-xl border border-[#2a2a2a]">
-              <p className="text-gray-400">No click data available.</p>
-            </div>
-          )}
-        </div>
+        <div className="h-10"></div>
       </div>
-    </div>
   );
 };
 

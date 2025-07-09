@@ -69,7 +69,7 @@ export interface BiositeFull {
 }
 
 export interface BiositeUpdateDto {
-    ownerId: UUID;
+    ownerId: string;
     title: string;
     slug: string;
     themeId: string;

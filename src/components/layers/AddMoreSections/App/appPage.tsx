@@ -1,6 +1,6 @@
 // === AppPage.tsx ===
 import { useState, useEffect } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
 
 const AppPage = () => {
@@ -9,10 +9,15 @@ const AppPage = () => {
         appLinks,
         updateAppLink,
         addAppLink,
+        loading,
+        error
     } = usePreview();
 
     const [appStoreUrl, setAppStoreUrl] = useState("");
     const [googlePlayUrl, setGooglePlayUrl] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [saveMessage, setSaveMessage] = useState("");
 
     useEffect(() => {
         const appStore = appLinks.find(link => link.store === "appstore");
@@ -22,22 +27,72 @@ const AppPage = () => {
     }, [appLinks]);
 
     const handleSave = async () => {
+        setIsSaving(true);
+        setSaveStatus('idle');
+        setSaveMessage("");
+
+        try {
+            const appStore = appLinks.find(link => link.store === "appstore");
+            const googlePlay = appLinks.find(link => link.store === "googleplay");
+
+            // Manejar App Store
+            if (appStore && appStoreUrl) {
+                await updateAppLink(appStore.id, { url: appStoreUrl, isActive: true });
+            } else if (!appStore && appStoreUrl) {
+                await addAppLink({ store: "appstore", url: appStoreUrl, isActive: true });
+            }
+
+            // Manejar Google Play
+            if (googlePlay && googlePlayUrl) {
+                await updateAppLink(googlePlay.id, { url: googlePlayUrl, isActive: true });
+            } else if (!googlePlay && googlePlayUrl) {
+                await addAppLink({ store: "googleplay", url: googlePlayUrl, isActive: true });
+            }
+
+            setSaveStatus('success');
+            setSaveMessage("Enlaces actualizados correctamente");
+
+            // Limpiar mensaje después de 3 segundos
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 3000);
+
+        } catch (error) {
+            console.error('Error saving app links:', error);
+            setSaveStatus('error');
+            setSaveMessage("Error al actualizar los enlaces. Inténtalo de nuevo.");
+
+            // Limpiar mensaje después de 5 segundos
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 5000);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const isValidUrl = (url: string, type: 'appstore' | 'googleplay') => {
+        if (!url) return true; // URL vacía es válida
+
+        if (type === 'appstore') {
+            return url.includes('apps.apple.com') || url.includes('itunes.apple.com');
+        } else {
+            return url.includes('play.google.com');
+        }
+    };
+
+    const hasChanges = () => {
         const appStore = appLinks.find(link => link.store === "appstore");
         const googlePlay = appLinks.find(link => link.store === "googleplay");
 
-        if (appStore) {
-            await updateAppLink(appStore.id, { url: appStoreUrl, isActive: true });
-        } else if (appStoreUrl) {
-            await addAppLink({ store: "appstore", url: appStoreUrl, isActive: true });
-        }
-
-        if (googlePlay) {
-            await updateAppLink(googlePlay.id, { url: googlePlayUrl, isActive: true });
-        } else if (googlePlayUrl) {
-            await addAppLink({ store: "googleplay", url: googlePlayUrl, isActive: true });
-        }
-
-        alert("Enlaces actualizados correctamente");
+        return (
+            (appStore?.url !== appStoreUrl) ||
+            (googlePlay?.url !== googlePlayUrl) ||
+            (!appStore && appStoreUrl) ||
+            (!googlePlay && googlePlayUrl)
+        );
     };
 
     return (
@@ -67,34 +122,102 @@ const AppPage = () => {
                     </p>
                 </div>
 
+                {/* Mensaje de estado general */}
+                {error && (
+                    <div className="w-full max-w-md p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-700">
+                        <AlertCircle className="w-4 h-4" />
+                        <span className="text-sm">{error}</span>
+                    </div>
+                )}
+
+                {/* Mensaje de guardado */}
+                {saveMessage && (
+                    <div className={`w-full max-w-md p-3 border rounded-md flex items-center gap-2 ${
+                        saveStatus === 'success'
+                            ? 'bg-green-50 border-green-200 text-green-700'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                        {saveStatus === 'success' ? (
+                            <CheckCircle className="w-4 h-4" />
+                        ) : (
+                            <AlertCircle className="w-4 h-4" />
+                        )}
+                        <span className="text-sm">{saveMessage}</span>
+                    </div>
+                )}
+
                 <div className="w-full max-w-md space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">App Store URL</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            App Store URL
+                        </label>
                         <input
-                            type="text"
-                            className="w-full px-4 py-2 border rounded-md text-sm"
+                            type="url"
+                            className={`w-full px-4 py-2 border rounded-md text-sm transition-colors ${
+                                appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')
+                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                            }`}
                             placeholder="https://apps.apple.com/..."
                             value={appStoreUrl}
                             onChange={(e) => setAppStoreUrl(e.target.value)}
+                            disabled={isSaving || loading}
                         />
+                        {appStoreUrl && !isValidUrl(appStoreUrl, 'appstore') && (
+                            <p className="mt-1 text-sm text-red-600">
+                                La URL debe ser de la App Store (apps.apple.com)
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Google Play URL</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Google Play URL
+                        </label>
                         <input
-                            type="text"
-                            className="w-full px-4 py-2 border rounded-md text-sm"
+                            type="url"
+                            className={`w-full px-4 py-2 border rounded-md text-sm transition-colors ${
+                                googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay')
+                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                            }`}
                             placeholder="https://play.google.com/store/apps/..."
                             value={googlePlayUrl}
                             onChange={(e) => setGooglePlayUrl(e.target.value)}
+                            disabled={isSaving || loading}
                         />
+                        {googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay') && (
+                            <p className="mt-1 text-sm text-red-600">
+                                La URL debe ser de Google Play (play.google.com)
+                            </p>
+                        )}
                     </div>
 
                     <button
                         onClick={handleSave}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition"
+                        disabled={
+                            isSaving ||
+                            loading ||
+                            !hasChanges() ||
+                            (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
+                            (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
+                        }
+                        className={`w-full py-2 px-4 rounded-md transition flex items-center justify-center gap-2 ${
+                            isSaving || loading || !hasChanges() ||
+                            (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
+                            (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
                     >
-                        Guardar cambios
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Guardando...
+                            </>
+                        ) : (
+                            'Guardar cambios'
+                        )}
                     </button>
                 </div>
             </div>

@@ -1,4 +1,3 @@
-// === PreviewContext.tsx ===
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
@@ -70,7 +69,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             '/assets/icons/whatsapp.svg': 'whatsapp',
             '/assets/icons/telegram.svg': 'telegram',
             '/assets/icons/amazon.svg': 'amazon',
-            '/assets/icons/onlyfans.svg': 'onlyfans'
+            '/assets/icons/onlyfans.svg': 'onlyfans',
+            '/assets/icons/appstore.svg': 'appstore',
+            '/assets/icons/googleplay.svg': 'googleplay'
         };
 
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
@@ -79,6 +80,44 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         const fileName = iconPath.split('/').pop()?.replace('.svg', '') || 'link';
         return fileName.toLowerCase();
     }, []);
+
+    // Función para identificar si un enlace es de app store
+    const isAppStoreLink = useCallback((link: any): boolean => {
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        return (
+            labelLower.includes('app store') ||
+            labelLower.includes('appstore') ||
+            urlLower.includes('apps.apple.com') ||
+            labelLower.includes('google play') ||
+            labelLower.includes('googleplay') ||
+            urlLower.includes('play.google.com')
+        );
+    }, []);
+
+    // Función para determinar el tipo de store
+    const getStoreType = useCallback((link: any): 'appstore' | 'googleplay' => {
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        if (labelLower.includes('google play') || urlLower.includes('play.google.com')) {
+            return 'googleplay';
+        }
+        return 'appstore';
+    }, []);
+
+    // Función para obtener app links desde los links generales
+    const getAppLinks = useCallback(() => {
+        return links
+            .filter(isAppStoreLink)
+            .map(link => ({
+                id: link.id,
+                store: getStoreType(link),
+                url: link.url,
+                isActive: link.isActive
+            }));
+    }, [links, isAppStoreLink, getStoreType]);
 
     useEffect(() => {
         const initializeBiosite = async () => {
@@ -136,29 +175,38 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     useEffect(() => {
         if (links && Array.isArray(links)) {
             const socialLinksFromAPI = getSocialLinks();
-            const socialLinksFormatted = socialLinksFromAPI.map(link => ({
-                id: link.id,
-                label: link.label,
-                name: link.label,
-                url: link.url,
-                icon: link.icon,
-                color: link.color || '#3B82F6',
-                isActive: link.isActive
-            }));
+            const socialLinksFormatted = socialLinksFromAPI
+                .filter(link => !isAppStoreLink(link)) // Excluir app store links de social links
+                .map(link => ({
+                    id: link.id,
+                    label: link.label,
+                    name: link.label,
+                    url: link.url,
+                    icon: link.icon,
+                    color: link.color || '#3B82F6',
+                    isActive: link.isActive
+                }));
+
             const regularLinksFromAPI = getRegularLinks();
-            const regularLinksFormatted = regularLinksFromAPI.map(link => ({
-                id: link.id,
-                title: link.label,
-                url: link.url,
-                image: undefined,
-                orderIndex: link.orderIndex,
-                isActive: link.isActive
-            }));
+            const regularLinksFormatted = regularLinksFromAPI
+                .filter(link => !isAppStoreLink(link)) // Excluir app store links de regular links
+                .map(link => ({
+                    id: link.id,
+                    title: link.label,
+                    url: link.url,
+                    image: undefined,
+                    orderIndex: link.orderIndex,
+                    isActive: link.isActive
+                }));
+
+            // Obtener app links desde los links generales
+            const appLinksFromAPI = getAppLinks();
 
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
+            setAppLinksState(appLinksFromAPI);
         }
-    }, [links, getSocialLinks, getRegularLinks, biositeData?.id]);
+    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink, biositeData?.id]);
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
         setBiosite(prev => prev ? { ...prev, ...data } : null);
@@ -200,19 +248,77 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         getIconIdentifier
     });
 
+    // Implementación mejorada de las funciones de app links usando la API
     const addAppLink = async (link: Omit<AppLink, 'id'>) => {
-        const newLink: AppLink = { ...link, id: crypto.randomUUID() };
-        setAppLinksState(prev => [...prev, newLink]);
+        if (!biositeData?.id) {
+            throw new Error('Biosite ID is required');
+        }
+
+        try {
+            const icon = link.store === 'appstore' ? 'appstore' : 'googleplay';
+            const label = link.store === 'appstore' ? 'App Store' : 'Google Play';
+
+            const linkData = {
+                biositeId: biositeData.id,
+                label,
+                url: link.url,
+                icon,
+                orderIndex: links.length,
+                isActive: link.isActive
+            };
+
+            const newLink = await createLink(linkData);
+
+            if (newLink) {
+                // El estado se actualizará automáticamente a través del useEffect que escucha los cambios en links
+                console.log('App link created successfully:', newLink);
+            }
+        } catch (error) {
+            console.error('Error creating app link:', error);
+            throw error;
+        }
     };
 
     const removeAppLink = async (id: string) => {
-        setAppLinksState(prev => prev.filter(link => link.id !== id));
+        try {
+            const success = await deleteLink(id);
+            if (success) {
+                // El estado se actualizará automáticamente a través del useEffect que escucha los cambios en links
+                console.log('App link deleted successfully:', id);
+            }
+        } catch (error) {
+            console.error('Error deleting app link:', error);
+            throw error;
+        }
     };
 
     const updateAppLink = async (id: string, data: Partial<AppLink>) => {
-        setAppLinksState(prev =>
-            prev.map(link => (link.id === id ? { ...link, ...data } : link))
-        );
+        try {
+            const updateData: any = {};
+
+            if (data.url !== undefined) {
+                updateData.url = data.url;
+            }
+
+            if (data.isActive !== undefined) {
+                updateData.isActive = data.isActive;
+            }
+
+            if (data.store !== undefined) {
+                updateData.icon = data.store === 'appstore' ? 'appstore' : 'googleplay';
+                updateData.label = data.store === 'appstore' ? 'App Store' : 'Google Play';
+            }
+
+            const updatedLink = await updateLink(id, updateData);
+
+            if (updatedLink) {
+                // El estado se actualizará automáticamente a través del useEffect que escucha los cambios en links
+                console.log('App link updated successfully:', updatedLink);
+            }
+        } catch (error) {
+            console.error('Error updating app link:', error);
+            throw error;
+        }
     };
 
     const contextValue: PreviewContextType = {
