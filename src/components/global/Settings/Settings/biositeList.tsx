@@ -1,3 +1,5 @@
+// biositeList.tsx - Correcciones para la lógica de biosites hijos
+
 import React, { useState, useEffect } from "react";
 import {
     Check,
@@ -93,17 +95,17 @@ const BiositesList: React.FC<BiositeListProps> = ({
         return imgP;
     };
 
+    // CORRECCIÓN: Un biosite es principal si su ownerId es igual al mainUserId
     const isMainBiosite = (biositeData: BiositeFull): boolean => {
         const mainUserId = getMainUserId();
         return biositeData.ownerId === mainUserId;
     };
 
+    // CORRECCIÓN: Un biosite es hijo si su ownerId es diferente al mainUserId
+    // Esto significa que pertenece a un usuario hijo
     const isChildBiosite = (biositeData: BiositeFull): boolean => {
         const mainUserId = getMainUserId();
-        // Un biosite es hijo si su ownerId es diferente al mainUserId
-        // pero está en la lista de childBiosites
-        return biositeStructure.childBiosites.some(child => child.id === biositeData.id) &&
-            biositeData.ownerId !== mainUserId;
+        return biositeData.ownerId !== mainUserId;
     };
 
     const handleDeleteBiosite = async (biositeData: BiositeFull) => {
@@ -243,8 +245,10 @@ const BiositesList: React.FC<BiositeListProps> = ({
         </div>
     );
 
-    // Filtrar correctamente los biosites propios y los hijos
+    // CORRECCIÓN: Los biosites propios son los que pertenecen directamente al usuario principal
     const ownBiosites = biositeStructure.ownBiosites.filter(biosite => isMainBiosite(biosite));
+
+    // CORRECCIÓN: Los biosites hijos son los que pertenecen a usuarios hijos (diferentes al mainUserId)
     const childBiosites = biositeStructure.childBiosites.filter(biosite => isChildBiosite(biosite));
 
     return (

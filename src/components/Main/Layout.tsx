@@ -201,6 +201,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             disabled: false
         };
     };
+    const placeholderAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23e5e7eb'/%3E%3Cpath d='M40 20c-6 0-10 4-10 10s4 10 10 10 10-4 10-10-4-10-10-10zM20 60c0-10 9-15 20-15s20 5 20 15v5H20v-5z' fill='%239ca3af'/%3E%3C/svg%3E";
 
     const buttonContent = getButtonContent();
 
@@ -256,6 +257,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {/* Desktop Sidebar */}
                 <div className="hidden lg:flex w-16 xl:w-14 bg-[#FAFFF6] shadow-lg mt-10 mb-4 flex-col items-center space-y-6 rounded-full mr-4">
                     <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
+
                         <img
                             src={getAvatarImage()}
                             onClick={handleOpenSettings}
@@ -263,6 +265,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             alt="perfil"
                             onError={handleAvatarError}
                         />
+                        {!getAvatarImage &&(
+                        <img
+                            src={placeholderAvatar}
+                            onClick={handleOpenSettings}
+                            className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover"
+                            alt="perfil"
+                            onError={handleAvatarError}
+                        />
+                    )}
                     </button>
 
                     <div className="flex flex-col space-y-4 mt-7">

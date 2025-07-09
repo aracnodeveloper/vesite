@@ -185,7 +185,7 @@ const VCardPage = () => {
                     <div className="flex space-x-2">
                         <button
                             onClick={handleRegenerateQR}
-                            className="p-2 hover:bg-gray-100 rounded-lg"
+                            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                             title="Regenerar código QR"
                         >
                             <QrCode size={20} />
@@ -194,14 +194,14 @@ const VCardPage = () => {
                             <>
                                 <button
                                     onClick={handleSaveAndGenerate}
-                                    className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                    className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 cursor-pointer"
                                     disabled={isLoading}
                                 >
                                     <Save size={20} />
                                 </button>
                                 <button
                                     onClick={() => setIsEditing(false)}
-                                    className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 cursor-pointer"
                                 >
                                     <X size={20} />
                                 </button>
@@ -209,7 +209,7 @@ const VCardPage = () => {
                         ) : (
                             <button
                                 onClick={() => setIsEditing(true)}
-                                className="p-2 hover:bg-gray-100 rounded-lg"
+                                className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                             >
                                 <Edit size={20} />
                             </button>
