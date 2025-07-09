@@ -1,6 +1,6 @@
 //AUTH
 export const loginApi: string = "/auth/login"
-export const registerStudentApi: string = "/auth/register"
+export const registerStudentApi: string = "/auth/register-admin"
 
 //METRICS
 export const metricsApi = "/biosites/analytics";

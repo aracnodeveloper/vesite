@@ -119,21 +119,23 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }));
     }, [links, isAppStoreLink, getStoreType]);
 
+    // Simplificación de la inicialización - solo usar userId y biositeId
     useEffect(() => {
         const initializeBiosite = async () => {
             if (!userId || initialized) return;
 
             try {
-                const activeBiositeId = Cookies.get('activeBiositeId') || Cookies.get('biositeId');
+                const biositeId = Cookies.get('biositeId');
 
-                if (activeBiositeId) {
-                    await loadBiositeById(activeBiositeId);
+                if (biositeId) {
+                    // Cargar biosite específico por ID
+                    await loadBiositeById(biositeId);
                 } else {
+                    // Cargar el primer biosite del usuario
                     const userBiosites = await fetchUserBiosites();
                     if (userBiosites && userBiosites.length > 0) {
                         const firstBiosite = userBiosites[0];
                         await switchBiosite(firstBiosite.id);
-                        Cookies.set('activeBiositeId', firstBiosite.id);
                         Cookies.set('biositeId', firstBiosite.id);
                     }
                 }
@@ -176,7 +178,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         if (links && Array.isArray(links)) {
             const socialLinksFromAPI = getSocialLinks();
             const socialLinksFormatted = socialLinksFromAPI
-                .filter(link => !isAppStoreLink(link)) // Excluir app store links de social links
+                .filter(link => !isAppStoreLink(link))
                 .map(link => ({
                     id: link.id,
                     label: link.label,
@@ -189,7 +191,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             const regularLinksFromAPI = getRegularLinks();
             const regularLinksFormatted = regularLinksFromAPI
-                .filter(link => !isAppStoreLink(link)) // Excluir app store links de regular links
+                .filter(link => !isAppStoreLink(link))
                 .map(link => ({
                     id: link.id,
                     title: link.label,
@@ -199,7 +201,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     isActive: link.isActive
                 }));
 
-            // Obtener app links desde los links generales
             const appLinksFromAPI = getAppLinks();
 
             setSocialLinksState(socialLinksFormatted);
@@ -248,7 +249,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         getIconIdentifier
     });
 
-    // Implementación mejorada de las funciones de app links usando la API
+    // Implementación de app links sin complejidad adicional
     const addAppLink = async (link: Omit<AppLink, 'id'>) => {
         if (!biositeData?.id) {
             throw new Error('Biosite ID is required');
@@ -268,9 +269,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             };
 
             const newLink = await createLink(linkData);
-
             if (newLink) {
-                // El estado se actualizará automáticamente a través del useEffect que escucha los cambios en links
                 console.log('App link created successfully:', newLink);
             }
         } catch (error) {
@@ -283,7 +282,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         try {
             const success = await deleteLink(id);
             if (success) {
-                // El estado se actualizará automáticamente a través del useEffect que escucha los cambios en links
                 console.log('App link deleted successfully:', id);
             }
         } catch (error) {
@@ -310,9 +308,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }
 
             const updatedLink = await updateLink(id, updateData);
-
             if (updatedLink) {
-                // El estado se actualizará automáticamente a través del useEffect que escucha los cambios en links
                 console.log('App link updated successfully:', updatedLink);
             }
         } catch (error) {

@@ -104,12 +104,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const canCreateBiosites = () => {
         if (!user) return false;
-        return role === 'ADMIN' || role === 'SUPER_ADMIN';
+        return  role === 'SUPER_ADMIN';
     };
 
     const canSeeChildBiosites = () => {
         if (!user) return false;
-        return role === 'ADMIN' || role === 'SUPER_ADMIN';
+        return  role === 'SUPER_ADMIN';
     };
 
     useEffect(() => {
@@ -139,7 +139,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     allBiosites: ownBiosites
                 });
             }
-        } catch (err: any) {
+        } catch (err:   any) {
             console.error('Error fetching biosite structure:', err);
             setError(err?.message || 'Error al cargar la estructura de biosites');
         } finally {

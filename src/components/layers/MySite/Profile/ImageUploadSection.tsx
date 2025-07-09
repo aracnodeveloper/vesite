@@ -218,7 +218,7 @@ const ImageUploadSection = ({
             });
     };
 
-    const canEditCover = role === "ADMIN" || role === "SUPER_ADMIN";
+    const canEditCover =  role === "SUPER_ADMIN";
 
     // Get safe image URLs with fallback
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;

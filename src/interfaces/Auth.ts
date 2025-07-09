@@ -4,7 +4,6 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     userId: string | null;
     biositeId: string | null;
-    activeBiositeId: string | null;
     accessToken: string | null;
     loading: boolean;
     roleName: string | null;
@@ -17,7 +16,6 @@ export interface AuthResponse {
     userId: UUID;
     roleName: string;
     biositeId: UUID;
-    activeBiositeId: UUID;
     accessToken: string;
     refreshToken: string;
 

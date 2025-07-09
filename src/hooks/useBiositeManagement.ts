@@ -49,8 +49,6 @@ export const useBiositeOperations = ({
     const refreshBiosite = useCallback(async () => {
         try {
             if (!biositeData?.id) return;
-
-            // Simular refresh usando el biositeData actual
             setBiosite(biositeData);
         } catch (error) {
             console.error("Error refreshing biosite:", error);
@@ -103,7 +101,6 @@ export const useBiositeOperations = ({
         }
 
         try {
-            console.log("Setting font family:", font);
             setFontFamilyState(font);
 
             let colorsString: string;
@@ -152,29 +149,16 @@ export const useBiositeOperations = ({
         }
     }, [fetchUserBiosites]);
 
+    // Función simplificada para cambiar biosite
     const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
         try {
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
 
-                // Guardar el userId principal antes de cambiarlo
-                const currentUserId = Cookies.get('userId');
-                if (currentUserId && !Cookies.get('mainUserId')) {
-                    Cookies.set('mainUserId', currentUserId);
-                }
-
-                // Actualizar cookies para el nuevo biosite
-                Cookies.set('activeBiositeId', biositeId);
-                Cookies.set('biositeId', result.id);
+                // Solo actualizar las cookies necesarias
+                Cookies.set('biositeId', biositeId);
                 Cookies.set('userId', result.ownerId);
-
-                // NO cambiar el rol, mantener el rol de la cuenta principal
-                const mainUserRole = Cookies.get('roleName');
-                if (mainUserRole) {
-                    // Mantener el rol original
-                    Cookies.set('roleName', mainUserRole);
-                }
 
                 resetState();
                 await refreshBiosite();
@@ -186,49 +170,14 @@ export const useBiositeOperations = ({
         }
     }, [switchBiosite, resetState, setBiosite, refreshBiosite]);
 
-// También agregar una función para restaurar la sesión principal:
-    const switchToMainBiosite = useCallback(async (): Promise<BiositeFull | null> => {
-        try {
-            const mainUserId = Cookies.get('mainUserId');
-            if (!mainUserId) {
-                throw new Error('No se encontró el usuario principal');
-            }
-
-            // Buscar el biosite principal del usuario
-            const userBiosites = await getUserBiosites();
-            const mainBiosite = userBiosites.find(biosite => biosite.ownerId === mainUserId);
-
-            if (mainBiosite) {
-                return await switchToAnotherBiosite(mainBiosite.id);
-            }
-
-            throw new Error('No se encontró el biosite principal');
-        } catch (error) {
-            console.error("Error switching to main biosite:", error);
-            throw error;
-        }
-    }, [switchToAnotherBiosite, getUserBiosites]);
-
-// Función para limpiar cookies de sesión temporal
-    const cleanupTempSession = useCallback(() => {
-        const mainUserId = Cookies.get('mainUserId');
-        if (mainUserId) {
-            Cookies.set('userId', mainUserId);
-            Cookies.remove('mainUserId');
-        }
-    }, []);
-
-// Función mejorada para logout
+    // Función simplificada para logout
     const handleLogout = useCallback(() => {
-        cleanupTempSession();
         // Limpiar todas las cookies
         Cookies.remove('userId');
         Cookies.remove('biositeId');
-        Cookies.remove('activeBiositeId');
         Cookies.remove('roleName');
-        Cookies.remove('mainUserId');
         // Redirect o lógica de logout
-    }, [cleanupTempSession]);
+    }, []);
 
     const getChildBiosites = useCallback(async (): Promise<BiositeFull[]> => {
         const currentUserId = Cookies.get('userId');
@@ -236,17 +185,18 @@ export const useBiositeOperations = ({
         return await fetchChildBiosites(currentUserId);
     }, [fetchChildBiosites]);
 
-    // Nueva función para cargar un biosite específico por ID
+    // Función para cargar un biosite específico por ID
     const loadBiositeById = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
         try {
             console.log('Loading biosite by ID:', biositeId);
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
-                // Actualizar cookies
-                Cookies.set('activeBiositeId', biositeId);
+
+                // Actualizar cookies simples
                 Cookies.set('biositeId', biositeId);
                 Cookies.set('userId', result.ownerId);
+
                 console.log('Biosite loaded successfully:', result);
             }
             return result;
@@ -265,8 +215,7 @@ export const useBiositeOperations = ({
         getUserBiosites,
         switchToAnotherBiosite,
         handleLogout,
-        cleanupTempSession,
         getChildBiosites,
-        loadBiositeById // Nueva función exportada
+        loadBiositeById
     };
 };
