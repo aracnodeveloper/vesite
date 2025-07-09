@@ -215,42 +215,29 @@ export const useFetchBiosite = (userId?: string) => {
             setLoading(true);
             setError(null);
 
-            const newUserData: CreateUserDto = {
+            // Crear usuario con biosite personalizado en una sola llamada
+            const createUserWithBiositeData = {
                 email: `${createData.slug}@biosite.com`,
                 password: createData.password || `biosite_${createData.slug}_${Date.now()}`,
                 name: createData.title,
-                parentId: userId
+                parentId: userId,
             };
 
-            const createdUser = await apiService.create<CreateUserDto, CreatedUser>(
-                registerStudentApi,
-                newUserData
+            // Llamar a un endpoint que cree usuario + biosite personalizado
+            const result = await apiService.create<typeof createUserWithBiositeData, { user: CreatedUser, biosite: BiositeFull }>(
+                registerStudentApi, // Nuevo endpoint
+                createUserWithBiositeData
             );
 
-
-            const biositeDataToSend = {
-                ownerId: createdUser.id ,
-                title: createdUser.name,
-                slug: createData.slug,
-            };
-
-            const newBiosite = await apiService.create<typeof biositeDataToSend, BiositeFull>(
-                updateBiositeApi,
-                biositeDataToSend
-            );
-
-            const biositeWithOwner: BiositeFull = {
-                ...newBiosite,
-
-            };
+            const newBiosite = result.biosite;
 
             if (!biositeData) {
-                setBiositeData(biositeWithOwner);
+                setBiositeData(newBiosite);
                 isInitializedRef.current = true;
                 currentUserIdRef.current = userId;
             }
 
-            return biositeWithOwner;
+            return newBiosite;
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al crear el biosite y usuario";
             setError(errorMessage);

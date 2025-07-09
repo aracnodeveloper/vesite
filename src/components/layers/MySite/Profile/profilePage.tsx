@@ -21,7 +21,7 @@ const ProfilePage = () => {
     const [form] = Form.useForm();
 
     const isAdmin = role === 'admin' || role === 'ADMIN';
-    const DEFAULT_BACKGROUND = 'https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80';
+    const DEFAULT_BACKGROUND = 'https://visitaecuador.com/ve/img/contenido/publicidad/25_04_29_07_07_28whatsapp_image_2025_04_29_at_16.15.16.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
 
     useEffect(() => {
@@ -190,7 +190,7 @@ const ProfilePage = () => {
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>SITIO</h3>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>Bio.site/</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>Ve.site/</label>
                                 <div className="flex">
                                     <Form.Item name="slug" rules={[{ required: true, message: 'El slug es requerido' }, { min: 3, message: 'El slug debe tener al menos 3 caracteres' }, { max: 30, message: 'El slug no puede tener más de 30 caracteres' }, { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }]} className="flex-1 mb-0">
                                         <Input placeholder="sitioReynaldomartinez31" disabled={loading} maxLength={30} className="rounded-l-lg border-r-0 h-16 " style={{ fontSize: "11px" }} />

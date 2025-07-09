@@ -359,7 +359,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                     onClick={handleExpoced}
                                     className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-60"
                                 >
-                                    URL: bio.site/{biosite?.slug || 'tu-slug'}
+                                    URL: Ve.site/{biosite?.slug || 'tu-slug'}
                                 </div>
 
                                 {/* Botón dinámico de Actualizar/Compartir */}

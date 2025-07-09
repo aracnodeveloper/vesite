@@ -9,7 +9,6 @@ export const useLivePreview = () => {
     const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
 
-    // Funciones de utilidad
     const parseColors = (colors: string | BiositeColors | null | undefined): BiositeColors => {
         const defaultColors: BiositeColors = { primary: '#3B82F6', secondary: '#1F2937' };
 
@@ -48,10 +47,8 @@ export const useLivePreview = () => {
             const urlObj = new URL(url);
             const isHttps = ['http:', 'https:'].includes(urlObj.protocol);
 
-            const blockedDomains = ['visitaecuador.com'];
-            const isDomainBlocked = blockedDomains.some(domain => urlObj.hostname.includes(domain));
 
-            return isHttps && !isDomainBlocked;
+            return isHttps ;
         } catch {
             return false;
         }
