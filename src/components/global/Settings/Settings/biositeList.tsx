@@ -9,7 +9,7 @@ import {
     Trash2,
     Loader2
 } from "lucide-react";
-import imgP from "../../../../assets/img/img.png";
+import imgP from "../../../../../public/img/img.png";
 import type { BiositeFull } from "../../../../interfaces/Biosite";
 import type { UUID } from "../../../../types/authTypes.ts";
 import apiService from "../../../../service/apiService.ts";

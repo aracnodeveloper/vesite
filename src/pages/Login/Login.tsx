@@ -14,7 +14,7 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
-import imgP6 from "../../assets/img/img_8.png";
+import imgP6 from "../../../public/img/img_8.png";
 
 const { Content } = Layout;
 

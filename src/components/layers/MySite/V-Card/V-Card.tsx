@@ -17,7 +17,7 @@ const V_Card = () => {
         >
             <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-white border border-black rounded-lg flex items-center justify-center">
-                    <img className="w-20 h-10" src="/src/assets/img/v.png"/>
+                    <img className="w-20 h-10" src="/img/v.png"/>
 
 
 

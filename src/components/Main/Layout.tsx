@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { Dialog } from "@headlessui/react";
 
-import imgP from "../../assets/img/img.png";
-import imgP6 from "../../assets/img/img_6.png"
+import imgP from "../../../public/img/img.png";
+import imgP6 from "../../../public/img/img_6.png"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
