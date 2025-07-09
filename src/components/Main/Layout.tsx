@@ -8,6 +8,8 @@ import {
     X,
     Smartphone,
     LogOut,
+    RefreshCw,
+    Share2,
 } from "lucide-react";
 import { Dialog } from "@headlessui/react";
 
@@ -15,6 +17,8 @@ import imgP from "../../assets/img/img.png";
 import imgP6 from "../../assets/img/img_6.png"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
+import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
+import { useUpdateShareActions } from "../../hooks/useUpdateShareActions.ts";
 
 import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 import PhonePreview from "../Preview/phonePreview.tsx";
@@ -29,6 +33,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const { logout } = useAuthContext();
     const { biosite } = usePreview();
+    const { hasChanges, markAsSaved, resetChangeDetection } = useChangeDetection();
+    const { isUpdating, handleUpdate, handleShare } = useUpdateShareActions();
+
     const [activeItem, setActiveItem] = useState<string>("layers");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
@@ -43,6 +50,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             console.warn("No hay slug disponible para la navegación");
         }
     };
+
+    // Función para manejar el botón de actualizar/compartir
+    const handleUpdateShareAction = async () => {
+        if (hasChanges) {
+            await handleUpdate();
+            markAsSaved();
+        } else {
+            await handleShare();
+        }
+    };
+
+    // Resetear detección de cambios cuando cambie el biosite
+    useEffect(() => {
+        if (biosite) {
+            resetChangeDetection();
+        }
+    }, [biosite?.id]);
 
     const sidebarItems = [
         { icon: Layers, label: "Layers", id: "layers", to: "/sections", color: "green" },
@@ -152,6 +176,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const togglePreview = () => {
         setShowPreview(!showPreview);
     };
+
+    // Determinar el texto y el ícono del botón
+    const getButtonContent = () => {
+        if (isUpdating) {
+            return {
+                text: "Actualizando...",
+                icon: <RefreshCw className="w-3 h-3 animate-spin" />,
+                disabled: true
+            };
+        }
+
+        if (hasChanges) {
+            return {
+                text: "Actualizar",
+                icon: <RefreshCw className="w-3 h-3" />,
+                disabled: false
+            };
+        }
+
+        return {
+            text: "Compartir",
+            icon: <Share2 className="w-3 h-3" />,
+            disabled: false
+        };
+    };
+
+    const buttonContent = getButtonContent();
 
     return (
         <>
@@ -299,11 +350,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 >
                                     URL: bio.site/{biosite?.slug || 'tu-slug'}
                                 </div>
-                                <div
-                                    onClick={handleExpoced}
-                                    className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-lg p-2 right-20 text-white mb-4 text-center z-60"
-                                >{ 'Actualizar'}
-                                </div>
+
+                                {/* Botón dinámico de Actualizar/Compartir */}
+                                <button
+                                    onClick={handleUpdateShareAction}
+                                    disabled={buttonContent.disabled}
+                                    className={`absolute text-xs top-10 rounded-lg p-2 right-20 text-white mb-4 text-center z-60 flex items-center space-x-1 transition-all duration-200 ${
+                                        buttonContent.disabled
+                                            ? 'bg-[#464C3666] cursor-not-allowed opacity-70'
+                                            : hasChanges
+                                                ? 'bg-[#98C022] hover:bg-[#86A81E] cursor-pointer'
+                                                : 'bg-[#464C3666] hover:bg-[#464C36AA] cursor-pointer'
+                                    }`}
+                                    title={hasChanges ? 'Actualizar vista previa' : 'Compartir enlace'}
+                                >
+                                    {buttonContent.icon}
+                                    <span>{buttonContent.text}</span>
+                                </button>
+
                                 <PhonePreview>
                                     <LivePreviewContent />
                                 </PhonePreview>
