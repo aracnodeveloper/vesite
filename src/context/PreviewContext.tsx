@@ -11,6 +11,7 @@ const PreviewContext = createContext<PreviewContextType | undefined>(undefined);
 
 export const PreviewProvider = ({ children }: { children: React.ReactNode }) => {
     const userId = Cookies.get('userId');
+    const biositeId = Cookies.get('biositeId')
     const {
         biositeData,
         loading: biositeLoading,
@@ -119,8 +120,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 isActive: link.isActive
             }));
     }, [links, isAppStoreLink, getStoreType]);
+
     useEffect(() => {
-        if (!userId) {
+        if (!biositeId) {
             setBiosite(null);
             setSocialLinksState([]);
             setRegularLinksState([]);
@@ -131,11 +133,11 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             return;
         }
 
-        if (userId && !initializationRef.current[userId]) {
-            initializationRef.current[userId] = true;
+        if (biositeId && !initializationRef.current[biositeId]) {
+            initializationRef.current[biositeId] = true;
             fetchBiosite();
         }
-    }, [userId, fetchBiosite, resetState]);
+    }, [biositeId, fetchBiosite, resetState]);
     // Simplificación de la inicialización - solo usar userId y biositeId
     useEffect(() => {
         const initializeBiosite = async () => {
