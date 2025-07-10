@@ -24,7 +24,6 @@ export interface BiositeThemeConfig {
 }
 
 export interface BiositeTheme {
-    id: string;
     name: string;
     config: BiositeThemeConfig;
 }
