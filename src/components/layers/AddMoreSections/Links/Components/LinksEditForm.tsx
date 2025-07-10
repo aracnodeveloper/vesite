@@ -139,7 +139,7 @@ const LinkEditForm = ({
                         <input
                             value={editTitle}
                             onChange={(e) => onTitleChange(e.target.value)}
-                            className="w-full p-3 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
+                            className="w-full p-5 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
                             placeholder="Nombre del enlace"
                             disabled={isSubmitting}
                         />
@@ -150,7 +150,7 @@ const LinkEditForm = ({
                         <input
                             value={editUrl}
                             onChange={(e) => onUrlChange(e.target.value)}
-                            className="w-full p-3 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
+                            className="w-full p-5 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
                             placeholder="https://ejemplo.com"
                             disabled={isSubmitting}
                         />
@@ -182,7 +182,7 @@ const LinkEditForm = ({
                             ) : (
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 hover:bg-gray-50 transition-colors relative"
+                                    className="w-full h-32 rounded-lg border-2 cursor-pointer border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 hover:bg-gray-50 transition-colors relative"
                                     disabled={isSubmitting || uploadingImage}
                                 >
                                     {uploadingImage ? (

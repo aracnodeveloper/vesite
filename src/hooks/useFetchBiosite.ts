@@ -200,6 +200,27 @@ export const useFetchBiosite = (userId?: string) => {
         }
     }, [userId, loading, biositeData]);
 
+    const fetchBiositeBySlug = useCallback(async (slug: string): Promise<BiositeFull | null> => {
+        if (!slug) {
+            setError("Slug is required");
+            return null;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const biosite = await apiService.getById<BiositeFull>('/biosites/slug', slug);
+            return biosite;
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite por slug";
+            setError(errorMessage);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const createBiosite = useCallback(async (createData: CreateBiositeDto): Promise<BiositeFull | null> => {
         if (!createData.title?.trim() || !createData.slug?.trim()) {
             setError("Title and slug are required");
@@ -335,31 +356,93 @@ export const useFetchBiosite = (userId?: string) => {
         }
     }, []);
 
-    const clearError = () => setError(null);
+    const deleteBiosite = useCallback(async (biositeId: string): Promise<boolean> => {
+        if (!biositeId) {
+            setError("Biosite ID is required");
+            return false;
+        }
 
-    const resetState = () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            await apiService.delete(getBiositesApi, biositeId);
+
+            // Si el biosite eliminado es el actual, limpiar el estado
+            if (biositeData?.id === biositeId) {
+                setBiositeData(null);
+                isInitializedRef.current = false;
+                currentUserIdRef.current = undefined;
+            }
+
+            return true;
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al eliminar el biosite";
+            setError(errorMessage);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }, [biositeData]);
+
+    const refreshBiosite = useCallback(async (): Promise<BiositeFull | null> => {
+        if (!biositeData?.id) {
+            return null;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const refreshedBiosite = await apiService.getById<BiositeFull>(getBiositesApi, biositeData.id);
+            setBiositeData(refreshedBiosite);
+
+            return refreshedBiosite;
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al refrescar el biosite";
+            setError(errorMessage);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, [biositeData]);
+
+    const clearError = useCallback(() => {
+        setError(null);
+    }, []);
+
+    const resetState = useCallback(() => {
         setBiositeData(null);
         setError(null);
         setLoading(false);
         isInitializedRef.current = false;
         currentUserIdRef.current = undefined;
-    };
+    }, []);
 
     return {
+        // Estado
         biositeData,
         loading,
         error,
+
+        // Métodos principales
         fetchBiosite,
-        fetchUserBiosites,
+        fetchBiositeBySlug,
         createBiosite,
         updateBiosite,
+        deleteBiosite,
         switchBiosite,
-        clearError,
-        resetState,
+        refreshBiosite,
 
+        // Métodos de usuario
+        fetchUserBiosites,
         fetchChildUsers,
         fetchAdminBiosites,
         fetchChildBiosites,
-        fetchCompleteBiositeStructure
+        fetchCompleteBiositeStructure,
+
+        // Utilidades
+        clearError,
+        resetState
     };
 };

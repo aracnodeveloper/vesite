@@ -149,14 +149,12 @@ export const useBiositeOperations = ({
         }
     }, [fetchUserBiosites]);
 
-    // Función simplificada para cambiar biosite
     const switchToAnotherBiosite = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
         try {
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
 
-                // Solo actualizar las cookies necesarias
                 Cookies.set('biositeId', biositeId);
                 Cookies.set('userId', result.ownerId);
 
@@ -170,13 +168,10 @@ export const useBiositeOperations = ({
         }
     }, [switchBiosite, resetState, setBiosite, refreshBiosite]);
 
-    // Función simplificada para logout
     const handleLogout = useCallback(() => {
-        // Limpiar todas las cookies
         Cookies.remove('userId');
         Cookies.remove('biositeId');
         Cookies.remove('roleName');
-        // Redirect o lógica de logout
     }, []);
 
     const getChildBiosites = useCallback(async (): Promise<BiositeFull[]> => {
@@ -185,7 +180,6 @@ export const useBiositeOperations = ({
         return await fetchChildBiosites(currentUserId);
     }, [fetchChildBiosites]);
 
-    // Función para cargar un biosite específico por ID
     const loadBiositeById = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
         try {
             console.log('Loading biosite by ID:', biositeId);
@@ -193,7 +187,6 @@ export const useBiositeOperations = ({
             if (result) {
                 setBiosite(result);
 
-                // Actualizar cookies simples
                 Cookies.set('biositeId', biositeId);
                 Cookies.set('userId', result.ownerId);
 

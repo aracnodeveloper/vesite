@@ -12,7 +12,7 @@ import {
 import VCardButton from "../global/VCard/VCard.tsx";
 
 import Cookies from "js-cookie";
-import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
+// import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 const LivePreviewContent = () => {
     const {
@@ -313,11 +313,11 @@ const LivePreviewContent = () => {
                         </div>
                     )}
 
-                    {/* App Download Buttons */}
+                    {/* App Download Buttons
                     <div className="mt-6">
                         <AppDownloadButtons />
                     </div>
-
+                    */}
                     {/* Espacio final */}
                     <div className="h-8"></div>
                 </div>

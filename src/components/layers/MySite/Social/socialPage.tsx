@@ -373,13 +373,13 @@ const SocialPage = () => {
                                 <button
                                     onClick={handleSaveLink}
                                     disabled={!validateUrl(urlInput) || isSubmitting}
-                                    className="w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                    className="w-8 h-8  cursor-pointer text-green-600 rounded-full hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 >
                                     <Check className="w-4 h-4"/>
                                 </button>
                                 <button
                                     onClick={handleCancelEdit}
-                                    className="w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors flex items-center justify-center"
+                                    className="w-8 h-8  text-red-600 rounded-full hover:bg-gray-300 transition-colors flex items-center justify-center"
                                     disabled={isSubmitting}
                                 >
                                     <X className="w-4 h-4"/>
@@ -462,17 +462,13 @@ const SocialPage = () => {
                                     <div className="flex items-center space-x-2">
                                         <button
                                             onClick={() => handleEditLink(link)}
-                                            className="text-gray-400 hover:text-blue-400 transition-colors p-1"
+                                            className="text-gray-400 hover:text-blue-400 cursor-pointer transition-colors p-1"
                                             disabled={isSubmitting}
+                                            title="Editar"
                                         >
                                             <Edit2 className="w-4 h-4"/>
                                         </button>
-                                        <button
-                                            onClick={() => window.open(link.url, '_blank')}
-                                            className="text-gray-400 hover:text-green-400 transition-colors p-1"
-                                        >
-                                            <ExternalLink className="w-4 h-4"/>
-                                        </button>
+
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
@@ -496,7 +492,8 @@ const SocialPage = () => {
                                                     }
                                                 );
                                             }}
-                                            className="text-gray-400 hover:text-red-400 transition-colors p-1"
+                                            className="text-gray-400 hover:text-red-400 cursor-pointer transition-colors p-1"
+                                            title="Eliminar"
                                             disabled={isSubmitting}
                                         >
                                             <X className="w-4 h-4"/>

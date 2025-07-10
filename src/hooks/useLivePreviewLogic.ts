@@ -1,4 +1,3 @@
-// hooks/useLivePreviewLogic.ts
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";

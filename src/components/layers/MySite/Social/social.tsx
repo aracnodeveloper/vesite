@@ -21,15 +21,15 @@ const Social = () => {
                             fill="#0EBBAA"/>
                         <path
                             d="M18.5714 28.9285C19.9916 28.9285 21.1429 27.7772 21.1429 26.3571C21.1429 24.9369 19.9916 23.7856 18.5714 23.7856C17.1513 23.7856 16 24.9369 16 26.3571C16 27.7772 17.1513 28.9285 18.5714 28.9285Z"
-                            stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path
                             d="M30.1428 23.1429C31.563 23.1429 32.7143 21.9916 32.7143 20.5714C32.7143 19.1513 31.563 18 30.1428 18C28.7227 18 27.5714 19.1513 27.5714 20.5714C27.5714 21.9916 28.7227 23.1429 30.1428 23.1429Z"
-                            stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path
                             d="M30.1428 34.7144C31.563 34.7144 32.7143 33.5631 32.7143 32.143C32.7143 30.7228 31.563 29.5715 30.1428 29.5715C28.7227 29.5715 27.5714 30.7228 27.5714 32.143C27.5714 33.5631 28.7227 34.7144 30.1428 34.7144Z"
-                            stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M20.1272 24.3128L27.6486 21.1885M20.1272 28.4013L27.6486 31.5256" stroke="white"
-                              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
 
                 </div>

@@ -8,8 +8,6 @@ export interface Link {
     isActive: boolean;
     color?: string;
     orderIndex: number;
-    createdAt: string;
-    updatedAt: string;
 }
 
 export interface CreateLinkDto {

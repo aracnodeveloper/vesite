@@ -213,7 +213,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     id: link.id,
                     title: link.label,
                     url: link.url,
-                    image: undefined,
+                    image: link.image,
                     orderIndex: link.orderIndex,
                     isActive: link.isActive
                 }));

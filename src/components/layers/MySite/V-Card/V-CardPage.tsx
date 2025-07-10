@@ -195,12 +195,14 @@ const VCardPage = () => {
                                 <button
                                     onClick={handleSaveAndGenerate}
                                     className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 cursor-pointer"
+                                    title="Guardar"
                                     disabled={isLoading}
                                 >
                                     <Save size={20} />
                                 </button>
                                 <button
                                     onClick={() => setIsEditing(false)}
+                                    title="Salir"
                                     className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 cursor-pointer"
                                 >
                                     <X size={20} />
@@ -209,6 +211,7 @@ const VCardPage = () => {
                         ) : (
                             <button
                                 onClick={() => setIsEditing(true)}
+                                title="Editar"
                                 className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                             >
                                 <Edit size={20} />

@@ -36,7 +36,7 @@ const LinkImage = ({ image, title, size = "small" }: LinkImageProps) => {
     const sizeClasses = {
         small: "w-8 h-8",
         medium: "w-12 h-12",
-        large: "w-16 h-16"
+        large: "w-full h-16"
     };
 
     const iconSizes = {

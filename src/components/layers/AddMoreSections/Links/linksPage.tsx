@@ -22,7 +22,8 @@ const LinksPage = () => {
         updateRegularLink,
         reorderRegularLinks,
         loading,
-        error
+        error,
+        refreshBiosite  // Add this to refresh the biosite data
     } = usePreview();
 
     const [adding, setAdding] = useState(false);
@@ -213,7 +214,7 @@ const LinksPage = () => {
             console.log(`Link ${index}:`, {
                 id: link.id,
                 title: link.title,
-                image: link.image,
+                image: editImage,
                 imageValid: isValidImageUrl(link.image)
             });
         });
@@ -232,6 +233,7 @@ const LinksPage = () => {
                 const newLink = {
                     title: newUrl,
                     url: newUrl,
+                    icon: undefined,
                     image: undefined,
                     orderIndex: maxOrderIndex + 1,
                     isActive: true
@@ -292,12 +294,16 @@ const LinksPage = () => {
 
             console.log("Link updated successfully");
 
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // IMPORTANT: Refresh the biosite data to get the updated links
+            await refreshBiosite();
 
+            // Clear edit state
             setEditingIndex(null);
             setEditTitle("");
             setEditUrl("");
-            setEditImage(undefined);
+            setEditImage(editImage);
+
+            message.success('Enlace actualizado correctamente');
 
         } catch (error) {
             console.error("Error updating link:", error);
@@ -450,7 +456,6 @@ const LinksPage = () => {
                     </div>
                 )}
 
-
                 <div className="space-y-6">
                     {/* Active Links Section */}
                     {activeLinks.length > 0 && (
@@ -461,7 +466,7 @@ const LinksPage = () => {
                             <div className="space-y-2">
                                 {activeLinks.map((link, index) => (
                                     <div
-                                        key={link.id}
+                                        key={`${link.id}-${link.image}`} // Force re-render when image changes
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, index)}
                                         onDragEnd={handleDragEnd}
@@ -508,24 +513,19 @@ const LinksPage = () => {
                                         <div className="flex items-center space-x-2 flex-shrink-0">
                                             <button
                                                 onClick={() => handleOpenEdit(index)}
-                                                className="text-gray-400 hover:text-blue-400 transition-colors p-1"
+                                                className="text-gray-400 cursor-pointer hover:text-blue-400 transition-colors p-1"
                                                 disabled={isSubmitting}
                                             >
                                                 <Edit2 className="w-4 h-4"/>
                                             </button>
-                                            <button
-                                                onClick={() => window.open(link.url, '_blank')}
-                                                className="text-gray-400 hover:text-green-400 transition-colors p-1"
-                                            >
-                                                <ExternalLink className="w-4 h-4"/>
-                                            </button>
+
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDelete(index);
                                                 }}
                                                 disabled={isSubmitting}
-                                                className="text-gray-400 hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="text-gray-400 cursor-pointer hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 <X className="w-4 h-4"/>
                                             </button>
@@ -576,7 +576,7 @@ const LinksPage = () => {
                             <button
                                 onClick={() => setAdding(true)}
                                 disabled={isSubmitting}
-                                className="w-full p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center"
+                                className="w-full cursor-pointer p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center"
                             >
                                 <Plus size={20} className="mb-1" />
                                 <span className="text-sm">Agregar enlace</span>

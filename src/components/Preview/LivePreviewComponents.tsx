@@ -229,6 +229,7 @@ export const SocialLinksSection = ({
         </div>
     )
 );
+const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
 
 export const RegularLinksSection = ({
                                         regularLinksData,
@@ -245,14 +246,14 @@ export const RegularLinksSection = ({
                     target={isExposedRoute ? "_blank" : undefined}
                     rel={isExposedRoute ? "noopener noreferrer" : undefined}
                     onClick={isExposedRoute ? undefined : handleLinksClick}
-                    className={` w-full p-4 rounded-lg border-2 text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+                    className={` w-full p-2 rounded-lg border-2 text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md ${!isExposedRoute ? 'cursor-pointer' : ''}`}
                     style={{
                         borderColor: themeConfig.colors.primary,
                         transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
                     }}
                 >
                     {link.image && (
-                        <div className="w-8 h-8 rounded-lg overflow-hidden mr-2 flex-shrink-0">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden mr-2 flex-shrink-0">
                             <img
                                 key={link.id}
                                 src={link.image}
@@ -262,7 +263,13 @@ export const RegularLinksSection = ({
                         </div>
                     )}
                     {!link.image && (
-                        <span className="text-xs mr-2">🔗</span>
+                        <div className="w-10 h-10 rounded-lg overflow-hidden mr-2 flex-shrink-0">
+                            <img
+                                src={placeholderLinkImage}
+                                alt={link.title}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
                     )}
                     <div className="grid grid-cols-1 gap-1">
                         <div className="flex items-center">
