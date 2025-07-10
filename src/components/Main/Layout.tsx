@@ -7,13 +7,12 @@ import {
     Menu,
     X,
     Smartphone,
-    LogOut,
     RefreshCw,
     Share2,
 } from "lucide-react";
-import { Dialog } from "@headlessui/react";
 
 import imgP from "../../../public/img/img.png";
+import imgP2 from "../../../public/img/fondo_1.svg";
 import imgP6 from "../../../public/img/img_6.png"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
@@ -39,7 +38,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [activeItem, setActiveItem] = useState<string>("layers");
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
-    const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
 
@@ -101,16 +99,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         setAvatarError(true);
     };
 
-    const showLogoutModal = () => setIsLogoutDialogOpen(true);
-    const handleCancelLogout = () => setIsLogoutDialogOpen(false);
-    const handleConfirmLogout = () => {
-        setIsLogoutDialogOpen(false);
-        logout();
-        navigate("/login");
-    };
+
 
     const handleOpenSettings = () => setIsSettingsModalOpen(true);
-    const handleCloseSettings = () => setIsSettingsModalOpen(false);
 
     const handleLogoutFromSettings = () => {
         setIsSettingsModalOpen(false);
@@ -337,7 +328,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div
                                 className="absolute inset-0"
                                 style={{
-                                    background: 'white',
+                                    background: `url(${imgP2}) no-repeat center center`,
                                     backgroundSize: 'cover',
                                     height: '100%',
                                     opacity: 0.6,
@@ -347,7 +338,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center relative">
                                 <div
                                     onClick={handleExpoced}
-                                    className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-60"
+                                    className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50"
                                 >
                                     URL: Ve.site/{biosite?.slug || 'tu-slug'}
                                 </div>
@@ -356,7 +347,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 <button
                                     onClick={handleUpdateShareAction}
                                     disabled={buttonContent.disabled}
-                                    className={`absolute text-xs top-10 rounded-lg p-2 right-20 text-white mb-4 text-center z-60 flex items-center space-x-1 transition-all duration-200 ${
+                                    className={`absolute text-xs top-10 rounded-lg p-2 right-20 text-white mb-4 text-center z-50 flex items-center space-x-1 transition-all duration-200 ${
                                         buttonContent.disabled
                                             ? 'bg-[#464C3666] cursor-not-allowed opacity-70'
                                             : hasChanges

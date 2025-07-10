@@ -7,7 +7,7 @@ import { useFetchBiosite } from "../../../hooks/useFetchBiosite.ts";
 import type { BiositeFull } from "../../../interfaces/Biosite";
 import type { UUID } from "../../../types/authTypes.ts";
 import Cookies from "js-cookie";
-import CreateBiositeForm from "./Settings/createBiositeForm.tsx";
+import CreateBiositeWizard from "./Settings/createBiositeForm.tsx";
 import BiositesList from "./Settings/biositeList.tsx";
 import SettingsFooter from "./Settings/settingsFooter";
 
@@ -36,6 +36,8 @@ interface CreateBiositeData {
     title: string;
     slug: string;
     password: string;
+    userName: string;
+    profileImage?: string;
 }
 
 interface BiositeStructure {
@@ -78,11 +80,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
-    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [showCreateWizard, setShowCreateWizard] = useState(false);
+    const [createdBiositeUrl, setCreatedBiositeUrl] = useState<string | null>(null);
     const [createForm, setCreateForm] = useState<CreateBiositeData>({
         title: '',
         slug: '',
         password: '',
+        userName: '',
+        profileImage: ''
     });
 
     const getCurrentUserId = (): UUID | null => {
@@ -94,7 +99,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     };
 
     const getMainUserId = (): UUID | null => {
-        // Obtener el userId principal (no el temporal al cambiar de biosite)
         const mainUserId = document.cookie
             .split('; ')
             .find(row => row.startsWith('mainUserId='))
@@ -104,12 +108,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const canCreateBiosites = () => {
         if (!user) return false;
-        return  role === 'SUPER_ADMIN';
+        return role === 'SUPER_ADMIN';
     };
 
     const canSeeChildBiosites = () => {
         if (!user) return false;
-        return  role === 'SUPER_ADMIN';
+        return role === 'SUPER_ADMIN';
     };
 
     useEffect(() => {
@@ -139,7 +143,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     allBiosites: ownBiosites
                 });
             }
-        } catch (err:   any) {
+        } catch (err: any) {
             console.error('Error fetching biosite structure:', err);
             setError(err?.message || 'Error al cargar la estructura de biosites');
         } finally {
@@ -167,7 +171,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             clearError();
 
             const createData = {
-                // Usar el userId principal como ownerId para mantener la jerarquía
                 ownerId: mainUserId,
                 title: createForm.title.trim(),
                 slug: createForm.slug.trim(),
@@ -179,14 +182,25 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             if (newBiosite) {
                 console.log('Biosite and user created successfully:', newBiosite);
                 await fetchBiositeStructure(mainUserId);
-                setCreateForm({ title: '', slug: '', password: '' });
-                setShowCreateForm(false);
+
+                // Set the created biosite URL
+                setCreatedBiositeUrl(`bio.site/${newBiosite.slug}`);
+
+                // Reset form
+                setCreateForm({
+                    title: '',
+                    slug: '',
+                    password: '',
+                    userName: '',
+                    profileImage: ''
+                });
 
                 if (onCreateNewSite) {
                     onCreateNewSite();
                 }
 
-                await handleProfileSwitch(newBiosite);
+                // Don't switch immediately, let user see success screen
+                // await handleProfileSwitch(newBiosite);
             }
         } catch (err: any) {
             console.error('Error creating biosite and user:', err);
@@ -202,7 +216,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setError(null);
             clearError();
 
-            // Guardar el userId principal si no existe
             const mainUserId = getMainUserId();
             if (!Cookies.get('mainUserId') && mainUserId) {
                 Cookies.set('mainUserId', mainUserId);
@@ -244,7 +257,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setError('No tienes permisos para crear nuevos biosites. Solo usuarios ADMIN y SUPER_ADMIN pueden crear biosites.');
             return;
         }
-        setShowCreateForm(true);
+        setShowCreateWizard(true);
+        setError(null);
+        clearError();
+    };
+
+    const handleCloseWizard = () => {
+        setShowCreateWizard(false);
+        setCreatedBiositeUrl(null);
+        setCreateForm({
+            title: '',
+            slug: '',
+            password: '',
+            userName: '',
+            profileImage: ''
+        });
         setError(null);
         clearError();
     };
@@ -283,97 +310,110 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }));
     };
 
+    const handleUserNameChange = (userName: string) => {
+        setCreateForm(prev => ({
+            ...prev,
+            userName
+        }));
+    };
+
+    const handleProfileImageChange = (image: string) => {
+        setCreateForm(prev => ({
+            ...prev,
+            profileImage: image
+        }));
+    };
+
     const isLoadingState = loading || contextLoading || biositeLoading || isCreating;
 
     return (
-        <Dialog
-            open={isOpen}
-            onClose={onClose}
-            className="fixed inset-0 h-full  z-50 flex items-center justify-start bg-black/50 "
-        >
-            <Dialog.Panel className="bg-[#FAFFF6] rounded-lg w-full max-w-[320px] h-full  text-gray-600 shadow-xl flex flex-col">
-                {/* Header - Fixed */}
-                <div className="flex items-center justify-between p-4 border-b border-[#E0EED5] flex-shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 text-sm font-medium"
-                    >
-                        CANCEL
-                    </button>
-                    <Dialog.Title className="text-black font-medium">
-                        Settings
-                    </Dialog.Title>
-                    <div className="w-16"></div>
-                </div>
-
-                {/* Scrollable Content Area */}
-                <div className="flex-1 overflow-y-auto">
-                    {/* Error Display */}
-                    {error && (
-                        <div className="p-4 bg-red-50 border-l-4 border-red-400 flex-shrink-0">
-                            <div className="flex items-center">
-                                <AlertCircle className="h-4 w-4 text-red-400 mr-2"/>
-                                <p className="text-sm text-red-700">{error}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Create Form */}
-                    {showCreateForm && (
-                        <div className="flex-shrink-0">
-                            <CreateBiositeForm
-                                createForm={createForm}
-                                isLoadingState={isLoadingState}
-                                isCreating={isCreating}
-                                onTitleChange={handleTitleChange}
-                                onSlugChange={handleSlugChange}
-                                onPasswordChange={handlePasswordChange}
-                                onCreateBiosite={handleCreateNewBiosite}
-                                onCancel={() => {
-                                    setShowCreateForm(false);
-                                    setCreateForm({title: '', slug: '', password: ''});
-                                    setError(null);
-                                    clearError();
-                                }}
-                            />
-                        </div>
-                    )}
-
-                    {/* Biosites Section */}
-                    <div className="p-4 space-y-3">
-                        {isLoadingState ? (
-                            <div className="flex items-center justify-center py-8">
-                                <Loader2 className="h-6 w-6 animate-spin text-gray-400"/>
-                                <span className="ml-2 text-sm text-gray-500">Cargando biosites...</span>
-                            </div>
-                        ) : (
-                            <BiositesList
-                                biositeStructure={biositeStructure}
-                                currentBiosite={biosite}
-                                canSeeChildBiosites={canSeeChildBiosites()}
-                                canCreateBiosites={canCreateBiosites()}
-                                isLoadingState={isLoadingState}
-                                onProfileSwitch={handleProfileSwitch}
-                                onCreateNewSite={handleCreateNewSite}
-                                onRefreshStructure={() => {
-                                    const mainUserId = getMainUserId();
-                                    if (mainUserId) {
-                                        fetchBiositeStructure(mainUserId);
-                                    }
-                                }}
-                                onError={setError}
-                                clearError={clearError}
-                            />
-                        )}
+        <>
+            {/* Settings Modal */}
+            <Dialog
+                open={isOpen && !showCreateWizard}
+                onClose={onClose}
+                className="fixed inset-0 h-full z-50 flex items-center justify-start bg-black/50"
+            >
+                <Dialog.Panel className="bg-[#FAFFF6] rounded-lg w-full max-w-[320px] h-full text-gray-600 shadow-xl flex flex-col">
+                    {/* Header - Fixed */}
+                    <div className="flex items-center justify-between p-4 border-b border-[#E0EED5] flex-shrink-0">
+                        <button
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-gray-600 text-sm  cursor-pointer font-medium"
+                        >
+                            CANCEL
+                        </button>
+                        <Dialog.Title className="text-black font-medium">
+                            Settings
+                        </Dialog.Title>
+                        <div className="w-16"></div>
                     </div>
-                </div>
 
-                {/* Footer - Fixed */}
-                <div className="flex-shrink-0">
-                    <SettingsFooter onLogout={onLogout} />
-                </div>
-            </Dialog.Panel>
-        </Dialog>
+                    {/* Scrollable Content Area */}
+                    <div className="flex-1 overflow-y-auto">
+                        {/* Error Display */}
+                        {error && (
+                            <div className="p-4 bg-red-50 border-l-4 border-red-400 flex-shrink-0">
+                                <div className="flex items-center">
+                                    <AlertCircle className="h-4 w-4 text-red-400 mr-2"/>
+                                    <p className="text-sm text-red-700">{error}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Biosites Section */}
+                        <div className="p-4 space-y-3">
+                            {isLoadingState ? (
+                                <div className="flex items-center justify-center py-8">
+                                    <Loader2 className="h-6 w-6 animate-spin text-gray-400"/>
+                                    <span className="ml-2 text-sm text-gray-500">Cargando biosites...</span>
+                                </div>
+                            ) : (
+                                <BiositesList
+                                    biositeStructure={biositeStructure}
+                                    currentBiosite={biosite}
+                                    canSeeChildBiosites={canSeeChildBiosites()}
+                                    canCreateBiosites={canCreateBiosites()}
+                                    isLoadingState={isLoadingState}
+                                    onProfileSwitch={handleProfileSwitch}
+                                    onCreateNewSite={handleCreateNewSite}
+                                    onRefreshStructure={() => {
+                                        const mainUserId = getMainUserId();
+                                        if (mainUserId) {
+                                            fetchBiositeStructure(mainUserId);
+                                        }
+                                    }}
+                                    onError={setError}
+                                    clearError={clearError}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer - Fixed */}
+                    <div className="flex-shrink-0">
+                        <SettingsFooter onLogout={onLogout} />
+                    </div>
+                </Dialog.Panel>
+            </Dialog>
+
+            {/* Create Biosite Wizard */}
+            {showCreateWizard && (
+                <CreateBiositeWizard
+                    createForm={createForm}
+                    isLoadingState={isLoadingState}
+                    isCreating={isCreating}
+                    onTitleChange={handleTitleChange}
+                    onSlugChange={handleSlugChange}
+                    onPasswordChange={handlePasswordChange}
+                    onUserNameChange={handleUserNameChange}
+                    onProfileImageChange={handleProfileImageChange}
+                    onCreateBiosite={handleCreateNewBiosite}
+                    onCancel={handleCloseWizard}
+                    createdBiositeUrl={createdBiositeUrl}
+                />
+            )}
+        </>
     );
 };
 
