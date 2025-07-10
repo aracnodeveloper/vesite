@@ -290,7 +290,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
 
                     {/* Settings Button */}
-                    <div className="mt-auto z-10">
+                    <div className="mt-auto pb-5 z-10">
                         <button
                             onClick={handleOpenSettings}
                             className="p-2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer z-10"
@@ -303,16 +303,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </button>
                     </div>
 
-                    {/* Logout Button */}
-                    <div className="mb-4 z-10">
-                        <button
-                            onClick={showLogoutModal}
-                            className="p-2 text-gray-500 hover:text-red-500 transition-colors cursor-pointer z-10"
-                            title="Logout"
-                        >
-                            <LogOut size={20} />
-                        </button>
-                    </div>
                 </div>
 
                 {/* Main Content Area */}
@@ -407,31 +397,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 onCreateNewSite={handleCreateNewSite}
             />
 
-            {/* Logout Dialog */}
-            <Dialog
-                open={isLogoutDialogOpen}
-                onClose={handleCancelLogout}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            >
-                <Dialog.Panel className="bg-[#2a2a2a] rounded-lg p-6 w-[90%] max-w-sm text-white shadow-xl">
-                    <Dialog.Title className="text-lg font-semibold mb-4">Cerrar sesión</Dialog.Title>
-                    <p className="text-sm mb-6">¿Estás seguro que deseas cerrar sesión?</p>
-                    <div className="flex justify-end gap-4">
-                        <button
-                            onClick={handleCancelLogout}
-                            className="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-700 text-sm cursor-pointer"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            onClick={handleConfirmLogout}
-                            className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-sm cursor-pointer"
-                        >
-                            Cerrar sesión
-                        </button>
-                    </div>
-                </Dialog.Panel>
-            </Dialog>
+
         </>
     );
 };

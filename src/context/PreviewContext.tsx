@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {createContext, useContext, useEffect, useState, useCallback, useRef} from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
@@ -46,6 +46,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [themeColor, setThemeColorState] = useState<string>('#ffffff');
     const [fontFamily, setFontFamilyState] = useState<string>('Inter');
     const [initialized, setInitialized] = useState(false);
+    const initializationRef = useRef<{ [key: string]: boolean }>({});
 
     const loading = biositeLoading || linksLoading;
     const error = biositeError || linksError;
@@ -118,7 +119,23 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 isActive: link.isActive
             }));
     }, [links, isAppStoreLink, getStoreType]);
+    useEffect(() => {
+        if (!userId) {
+            setBiosite(null);
+            setSocialLinksState([]);
+            setRegularLinksState([]);
+            setThemeColorState('#ffffff');
+            setFontFamilyState('Inter');
+            resetState();
+            initializationRef.current = {};
+            return;
+        }
 
+        if (userId && !initializationRef.current[userId]) {
+            initializationRef.current[userId] = true;
+            fetchBiosite();
+        }
+    }, [userId, fetchBiosite, resetState]);
     // Simplificación de la inicialización - solo usar userId y biositeId
     useEffect(() => {
         const initializeBiosite = async () => {
