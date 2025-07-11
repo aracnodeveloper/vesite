@@ -1,4 +1,5 @@
 import { useLivePreviewLogic } from '../../hooks/useLivePreviewLogic.ts';
+import { useEffect } from 'react';
 import {
     LoadingComponent,
     ErrorComponent,
@@ -49,12 +50,20 @@ const LivePreviewContent = () => {
         handleSocialClick
     } = useLivePreviewLogic();
 
-    // Show loading state if either biosite or user is loading
+    useEffect(() => {
+        if (!loading && !userLoading && !biosite) {
+            const timer = setTimeout(() => {
+                window.location.reload();
+            }, 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [loading, userLoading, biosite]);
+
     if (loading || userLoading) {
         return <LoadingComponent themeConfig={themeConfig} />;
     }
 
-    // Show error state if there's an error
     if (error || userError) {
         return <ErrorComponent error={error || userError} themeConfig={themeConfig} />;
     }
