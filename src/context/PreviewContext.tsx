@@ -3,15 +3,15 @@ import type { BiositeFull } from "../interfaces/Biosite";
 import type { PreviewContextType, SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
-import Cookies from "js-cookie";
 import { useBiositeOperations } from "../hooks/useBiositeManagement";
 import { useLinkOperations } from "../hooks/useLinksManagement";
+import Cookie from "js-cookie";
 
 const PreviewContext = createContext<PreviewContextType | undefined>(undefined);
 
 export const PreviewProvider = ({ children }: { children: React.ReactNode }) => {
-    const userId = Cookies.get('userId');
-    const biositeId = Cookies.get('biositeId')
+    const userId = Cookie.get('userId');
+    const biositeId = Cookie.get('biositeId')
     const {
         biositeData,
         loading: biositeLoading,
@@ -144,7 +144,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             if (!userId || initialized) return;
 
             try {
-                const biositeId = Cookies.get('biositeId');
+                const biositeId = Cookie.get('biositeId');
 
                 if (biositeId) {
                     // Cargar biosite específico por ID
@@ -155,7 +155,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     if (userBiosites && userBiosites.length > 0) {
                         const firstBiosite = userBiosites[0];
                         await switchBiosite(firstBiosite.id);
-                        Cookies.set('biositeId', firstBiosite.id);
+                        Cookie.set('biositeId', firstBiosite.id);
                     }
                 }
 

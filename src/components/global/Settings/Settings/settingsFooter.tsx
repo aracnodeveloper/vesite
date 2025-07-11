@@ -12,19 +12,19 @@ const SettingsFooter: React.FC<SettingsFooterProps> = ({ onLogout }) => {
                 {/* Support */}
                 <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
                     <HelpCircle size={20} className="text-gray-400"/>
-                    <span className="text-gray-600 text-sm">Support</span>
+                    <span className="text-gray-600 text-sm">Soporte</span>
                 </div>
 
                 {/* Terms of Use */}
                 <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
                     <FileText size={20} className="text-gray-400"/>
-                    <span className="text-gray-600 text-sm">Terms of Use</span>
+                    <span className="text-gray-600 text-sm">Terminos de Condición</span>
                 </div>
 
                 {/* Privacy Policy */}
                 <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer">
                     <Shield size={20} className="text-gray-400"/>
-                    <span className="text-gray-600 text-sm">Privacy Policy</span>
+                    <span className="text-gray-600 text-sm">Politica de Privacidad</span>
                 </div>
 
                 {/* Log Out */}
@@ -33,7 +33,7 @@ const SettingsFooter: React.FC<SettingsFooterProps> = ({ onLogout }) => {
                     className="flex items-center space-x-3 p-2 rounded-lg hover:bg-red-50 cursor-pointer"
                 >
                     <LogOut size={20} className="text-gray-400 hover:text-red-500"/>
-                    <span className="text-red-600 text-sm font-medium">Log Out</span>
+                    <span className="text-red-600 text-sm font-medium">Cerrar Sesion</span>
                 </div>
             </div>
         </div>

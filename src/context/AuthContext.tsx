@@ -75,6 +75,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
             Cookie.remove('userId');
             Cookie.remove('roleName');
             Cookie.remove('biositeId');
+            Cookie.remove('mainUserId');
             setIsAuthenticated(false);
             setUserId(null);
             setAccessToken(null);

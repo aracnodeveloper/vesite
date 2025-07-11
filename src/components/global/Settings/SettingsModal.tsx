@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import {AlertCircle, ChevronLeft, Loader2} from "lucide-react";
 import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useUser } from "../../../hooks/useUser.ts";
 import { useFetchBiosite } from "../../../hooks/useFetchBiosite.ts";
@@ -341,10 +341,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 text-sm  cursor-pointer font-medium"
                         >
-                            CANCEL
+                            <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
                         </button>
                         <Dialog.Title className="text-black font-medium">
-                            Settings
+                            CONFIGURACIONES
                         </Dialog.Title>
                         <div className="w-16"></div>
                     </div>

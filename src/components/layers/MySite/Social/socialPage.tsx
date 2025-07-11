@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, X, ExternalLink, Edit2, Check, AlertTriangle } from "lucide-react";
+import { ChevronLeft, X, Edit2, Check, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { socialMediaPlatforms } from "../../../../media/socialPlataforms.ts";
@@ -47,6 +47,48 @@ const SocialPage = () => {
 
     const navigate = useNavigate();
 
+    // Función para formatear URLs de WhatsApp
+    const formatWhatsAppUrl = (url: string): string => {
+        // Si ya está en formato correcto, devolver como está
+        if (url.includes('wa.me/') || url.includes('api.whatsapp.com/send')) {
+            return url;
+        }
+
+        // Extraer número de teléfono de diferentes formatos
+        let phoneNumber = '';
+
+        // Si es solo un número
+        if (/^\+?\d+$/.test(url.replace(/[\s\-\(\)]/g, ''))) {
+            phoneNumber = url.replace(/[\s\-\(\)]/g, '');
+        }
+        // Si contiene whatsapp.com
+        else if (url.includes('whatsapp.com')) {
+            const match = url.match(/phone=(\d+)/);
+            if (match) {
+                phoneNumber = match[1];
+            }
+        }
+        // Si es otro formato, intentar extraer números
+        else {
+            phoneNumber = url.replace(/\D/g, '');
+        }
+
+        // Asegurar que tenga código de país si no lo tiene
+        if (phoneNumber && !phoneNumber.startsWith('1') && !phoneNumber.startsWith('5') && phoneNumber.length >= 10) {
+            // Si no tiene código de país, asumir que es de Ecuador (+593)
+            if (phoneNumber.length === 9 || phoneNumber.length === 10) {
+                phoneNumber = '593' + phoneNumber;
+            }
+        }
+
+        return phoneNumber ? `https://wa.me/${phoneNumber}` : url;
+    };
+
+    const isWhatsAppPlatform = (platform: SocialPlatform): boolean => {
+        return platform.id === 'whatsapp' ||
+            platform.name.toLowerCase().includes('whatsapp') ||
+            platform.icon.includes('whatsapp');
+    };
 
     const activeSocialLinks = socialLinks.filter(link => {
         if (!link.isActive) return false;
@@ -86,12 +128,10 @@ const SocialPage = () => {
             );
         });
 
-        // Solo mostrar si encontramos una plataforma social válida
         return platform !== undefined;
     });
 
     useEffect(() => {
-        // Clear error when component mounts
         if (error) {
             clearError();
         }
@@ -173,7 +213,6 @@ const SocialPage = () => {
                 }
             );
         } else {
-            // If link doesn't exist, show inline form to add it
             setEditingPlatform(platform);
             setLabelInput(platform.name);
             setUrlInput('');
@@ -187,25 +226,28 @@ const SocialPage = () => {
         try {
             setIsSubmitting(true);
 
-            // Check if this is an update or a new link
+            // Formatear URL si es WhatsApp
+            let processedUrl = urlInput.trim();
+            if (isWhatsAppPlatform(editingPlatform)) {
+                processedUrl = formatWhatsAppUrl(processedUrl);
+            }
+
             const existingLink = activeSocialLinks.find(link => link.id === editingLink);
 
             if (existingLink) {
-                // Update existing link
                 await updateSocialLink(existingLink.id, {
                     label: labelInput.trim() || editingPlatform.name,
-                    url: urlInput.trim(),
+                    url: processedUrl,
                     icon: editingPlatform.icon,
                     color: editingPlatform.color,
                     isActive: editingPlatform.isActive,
                 });
                 console.log(`Updated ${editingPlatform.name} link`);
             } else {
-                // Create new link
                 const newSocialLink = {
                     id: `temp-${Date.now()}`,
                     label: labelInput.trim() || editingPlatform.name,
-                    url: urlInput.trim(),
+                    url: processedUrl,
                     icon: editingPlatform.icon,
                     color: editingPlatform.color,
                     isActive: editingPlatform.isActive,
@@ -215,7 +257,6 @@ const SocialPage = () => {
                 console.log(`Added ${editingPlatform.name} link`);
             }
 
-            // Reset form
             handleCancelEdit();
         } catch (error) {
             console.error(`Error saving ${editingPlatform.name} link:`, error);
@@ -264,7 +305,7 @@ const SocialPage = () => {
             'Apple Music': 'https://music.apple.com/profile/username',
             'Discord': 'https://discord.gg/servername',
             'Tumblr': 'https://username.tumblr.com',
-            'WhatsApp': 'https://wa.me/1234567890',
+            'WhatsApp': '+593987654321 o 0987654321',
             'Telegram': 'https://t.me/username',
             'Amazon': 'https://amazon.com/dp/productid',
             'OnlyFans': 'https://onlyfans.com/username'
@@ -300,6 +341,18 @@ const SocialPage = () => {
         if (editingPlatform?.id === 'email') {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(url) || url.startsWith('mailto:');
+        }
+
+        // Validación especial para WhatsApp
+        if (editingPlatform && isWhatsAppPlatform(editingPlatform)) {
+            const phoneRegex = /^[\+]?[\d\s\-\(\)]+$/;
+            if (phoneRegex.test(url)) {
+                return true;
+            }
+            if (url.includes('wa.me/') || url.includes('whatsapp.com')) {
+                return true;
+            }
+            return false;
         }
 
         try {
@@ -509,7 +562,7 @@ const SocialPage = () => {
                 <div className="border-t border-gray-700 pt-4">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-600" style={{fontSize:"11px"}}>
-                            ADD SOCIAL LINKS {activeSocialLinks.length} / 8
+                            AÑADE LINKS SOCIALES {activeSocialLinks.length} / 8
                         </span>
 
                     </div>

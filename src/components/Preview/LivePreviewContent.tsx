@@ -12,7 +12,7 @@ import {
 } from './LivePreviewComponents';
 import VCardButton from "../global/VCard/VCard.tsx";
 
-import Cookies from "js-cookie";
+import Cookie from "js-cookie";
 // import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 const LivePreviewContent = () => {
@@ -49,9 +49,8 @@ const LivePreviewContent = () => {
         handleLinksClick,
         handleSocialClick
     } = useLivePreviewLogic();
-
     useEffect(() => {
-        if (!loading && !userLoading && !biosite) {
+        if (!loading && !userLoading && !biosite  ) {
             const timer = setTimeout(() => {
                 window.location.reload();
             }, 500);
@@ -259,7 +258,7 @@ const LivePreviewContent = () => {
                     {/* V-Card Button */}
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={user?.id || Cookies.get('userId')}
+                        userId={user?.id || Cookie.get('userId')}
                     />
                     {/* VIDEO EMBED */}
                     {videoEmbed && (

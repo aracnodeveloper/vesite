@@ -31,6 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuthContext();
+
     const { biosite } = usePreview();
     const { hasChanges, markAsSaved, resetChangeDetection } = useChangeDetection();
     const { isUpdating, handleUpdate, handleShare } = useUpdateShareActions();

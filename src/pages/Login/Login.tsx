@@ -3,11 +3,9 @@ import Cookies from "js-cookie";
 import {
     Alert,
     Button,
-    Card,
     Form,
     Input,
     Layout,
-    Space,
     Typography,
 } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
@@ -69,31 +67,32 @@ export const Login: FC = () => {
             }}
         >
             {/* Header */}
-            <div className="absolute top-5 left-10 right-10 bg-[#FAFFF6] rounded-lg  shadow-lg z-10 flex justify-between items-center p-3">
+            <div className="absolute top-5 left-4 right-4 lg:left-10 lg:right-10 bg-[#FAFFF6] rounded-lg shadow-lg z-10 flex flex-col sm:flex-row justify-between items-center p-3 gap-3 sm:gap-0">
                 <Typography.Title
                     level={3}
-                    className="text-gray-600 m-0 font-light  border-b-5 border-[#E0EED5]"
-                    style={{ fontSize: '20px' }}
+                    className="text-gray-600 m-0 font-light border-b-5 border-[#E0EED5]"
+                    style={{ fontSize: '25px' }}
                 >
                     VeSites
                 </Typography.Title>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 w-full sm:w-auto">
                     <Form
                         layout="inline"
                         onFinish={onFinish}
-                        className="flex items-center space-x-3"
+                        className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto"
                     >
                         <Form.Item
                             name="email"
-                            rules={[{ required: true, message: "E-mail required" }]}
-                            className="mb-0"
+                            rules={[{ required: true, message: "Cedula o Correo requerido" }]}
+                            className="mb-0 w-full sm:w-auto"
                         >
                             <Input
                                 placeholder="Correo"
                                 className="rounded-lg border-gray-300 px-4 py-2"
                                 style={{
-                                    width: '200px',
+                                    width: '100%',
+                                    minWidth: '200px',
                                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
                                     border: '1px solid #d1d5db'
                                 }}
@@ -102,27 +101,28 @@ export const Login: FC = () => {
 
                         <Form.Item
                             name="password"
-                            rules={[{ required: true, message: "Password required" }]}
-                            className="mb-0"
+                            rules={[{ required: true, message: "Contraseña requerida" }]}
+                            className="mb-0 w-full sm:w-auto"
                         >
                             <Input.Password
                                 placeholder="Password"
                                 className="rounded-lg border-gray-300 px-4 py-2"
                                 iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                                 style={{
-                                    width: '200px',
+                                    width: '100%',
+                                    minWidth: '200px',
                                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
                                     border: '1px solid #d1d5db'
                                 }}
                             />
                         </Form.Item>
 
-                        <Form.Item className="mb-0">
+                        <Form.Item className="mb-0 w-full sm:w-auto">
                             <Button
                                 type="primary"
                                 htmlType="submit"
                                 loading={loading}
-                                className="rounded-lg px-6 py-2 bg-gray-400 hover:bg-gray-500 border-0"
+                                className="rounded-lg px-6 py-2 bg-gray-400 hover:bg-gray-500 border-0 w-full sm:w-auto"
                                 style={{
                                     backgroundColor: loading ? undefined : '#9ca3af',
                                     color: 'white'
@@ -136,12 +136,12 @@ export const Login: FC = () => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 flex items-center justify-center pl-16 pr-16">
-                <div className="flex items-center justify-between w-full max-w-6xl">
+            <div className="flex-1 flex items-center justify-center px-4 sm:px-8 lg:px-16 pt-32 sm:pt-16">
+                <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-6xl gap-8 lg:gap-0">
                     {/* Left Side - Video/Image placeholder */}
-                    <div className="flex-1 mr-12">
+                    <div className="flex-1 w-full lg:mr-12 order-2 lg:order-1">
                         <div
-                            className="w-full h-80 bg-gray-900 rounded-lg shadow-lg"
+                            className="w-full h-60 sm:h-80 bg-gray-900 rounded-lg shadow-lg"
                             style={{
                                 backgroundColor: '#1a1a1a',
                                 borderRadius: '8px'
@@ -152,13 +152,13 @@ export const Login: FC = () => {
                     </div>
 
                     {/* Right Side - Text Content */}
-                    <div className="flex-1 ml-12">
-                        <div className="text-left">
+                    <div className="flex-1 w-full lg:ml-12 order-1 lg:order-2">
+                        <div className="text-center lg:text-left">
                             <Typography.Title
                                 level={1}
                                 className="text-gray-600 mb-6 font-light"
                                 style={{
-                                    fontSize: '48px',
+                                    fontSize: 'clamp(28px, 5vw, 48px)',
                                     lineHeight: '1.2',
                                     color: '#6b7280'
                                 }}
@@ -167,9 +167,9 @@ export const Login: FC = () => {
                             </Typography.Title>
 
                             <Typography.Text
-                                className="text-gray-500 text-xl"
+                                className="text-gray-500"
                                 style={{
-                                    fontSize: '24px',
+                                    fontSize: 'clamp(16px, 3vw, 24px)',
                                     color: '#9ca3af',
                                     fontWeight: '300'
                                 }}
@@ -183,7 +183,7 @@ export const Login: FC = () => {
 
             {/* Error Alert */}
             {error && (
-                <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="absolute top-40 sm:top-32 lg:top-24 left-1/2 transform -translate-x-1/2 z-20 px-4 w-full max-w-md">
                     <Alert
                         message={error}
                         type="error"
