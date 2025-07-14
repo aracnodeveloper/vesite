@@ -136,7 +136,7 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="w-full h-full mb-10 max-w-md mx-auto rounded-lg">
+        <div className="w-full h-full mb-10 p-2 max-w-md mx-auto rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors">
@@ -152,24 +152,7 @@ const ProfilePage = () => {
                         <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
                 </div>
 
-                {!isAdmin && (
-                    <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0">
-                                <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                </svg>
-                            </div>
-                            <div className="h-10">
-                                <p className="text-sm text-blue-700" style={{ fontSize: "11px" }}>
-                                    {biosite.backgroundImage ? 'Primero debes configurar tu imagen de Avatar para comenzar ☝️' +
-                                        'Tienes una imagen de fondo personalizada configurada.' : 'Primero debes configurar tu imagen de Avatar para comenzar ☝️' +
-                                        'Se aplicará una imagen de fondo por defecto a tu perfil.'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
+
 
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
