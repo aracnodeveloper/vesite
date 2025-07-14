@@ -237,10 +237,10 @@ const ImageUploadSection = ({
                     maxCount={1}
                 >
                     <div className="relative group cursor-pointer">
-                        <div className="w-28 h-28 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden">
+                        <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden">
                             <Image
-                                width={120}
-                                height={120}
+                                width={100}
+                                height={100}
                                 src={safeAvatarImage}
                                 className="object-cover "
                                 fallback={placeholderAvatar}
@@ -281,10 +281,10 @@ const ImageUploadSection = ({
                         maxCount={1}
                     >
                         <div className="relative group cursor-pointer">
-                            <div className="w-72 h-28 bg-gray-100 rounded-lg border-gray-400  border  flex items-center justify-center overflow-hidden">
+                            <div className="w-72 h-24 bg-gray-100 rounded-lg border-gray-400  border  flex items-center justify-center overflow-hidden">
                                 <Image
                                     width={340}
-                                    height={120}
+                                    height={100}
                                     src={safeBackgroundImage}
                                     className="rounded-lg object-cover"
                                     fallback={placeholderBackground}

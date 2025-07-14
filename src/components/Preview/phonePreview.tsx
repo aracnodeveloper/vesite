@@ -13,7 +13,7 @@ const PhonePreview: FC<PhonePreviewProps> = ({
                                                  title = "Vista previa móvil"
                                              }) => {
     return (
-        <div className={`phone-frame ${className}`} role="region" aria-label={title}>
+        <div className={`phone-frame  ${className} `} role="region" aria-label={title}>
             <div className="phone-container">
                 <div className="phone-screen">
                     <div className="phone-content">

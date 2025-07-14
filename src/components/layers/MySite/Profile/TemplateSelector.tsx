@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { useTemplates } from '../../../../hooks/useTemplates';
+
 export interface Platilla {
     id: string;
     name?: string;
@@ -25,11 +26,9 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     const { templates, loading: loadingTemplates, error, refetch } = useTemplates();
     const [selectedTemplate, setSelectedTemplate] = useState<string>(currentThemeId);
 
-
     useEffect(() => {
         setSelectedTemplate(currentThemeId);
     }, [currentThemeId]);
-
 
     const handleRetry = () => {
         refetch();
@@ -69,9 +68,9 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     <Loader2 className="w-5 h-5 animate-spin text-blue-500 mr-2" />
                     <span className="text-sm text-gray-500">Cargando plantillas...</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="aspect-[9/16] bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="flex gap-4 justify-center">
+                    {[1, 2].map((i) => (
+                        <div key={i} className="w-24 h-40 bg-gray-200 rounded-lg animate-pulse"></div>
                     ))}
                 </div>
             </div>
@@ -93,25 +92,14 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         );
     }
 
+    // Limitar a solo las primeras 2 plantillas
+    const limitedTemplates = templates.slice(0, 2);
+
     return (
         <div className="space-y-4">
-            {/* Current selected template info */}
-            {selectedTemplate && (
-                <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <p className="text-sm text-blue-600 font-medium">
-                        {templates.find(t => t.id === selectedTemplate)?.name || 'Plantilla Seleccionada'}
-                    </p>
-                    {templates.find(t => t.id === selectedTemplate)?.description && (
-                        <p className="text-xs text-blue-500 mt-1">
-                            {templates.find(t => t.id === selectedTemplate)?.description}
-                        </p>
-                    )}
-                </div>
-            )}
-
-            {/* Templates grid */}
-            <div className="grid grid-cols-2 gap-3">
-                {templates.map((template) => {
+            {/* Templates - Solo 2 plantillas en una fila */}
+            <div className="flex gap-4 justify-center">
+                {limitedTemplates.map((template) => {
                     const isSelected = selectedTemplate === template.id;
                     const isLoading = loading && isSelected;
 
@@ -119,7 +107,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                         <div
                             key={template.id}
                             className={`
-                                relative aspect-[9/16] rounded-lg overflow-hidden cursor-pointer
+                                relative w-24 h-40 rounded-lg overflow-hidden cursor-pointer
                                 transition-all duration-200 transform border-2
                                 ${isSelected
                                 ? 'border-blue-500 shadow-lg scale-105 bg-blue-50'
@@ -150,20 +138,20 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                                             className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center"
                                             style={{ display: 'none' }}
                                         >
-                                            <div className="text-center p-4">
-                                                <div className="w-8 h-8 bg-gray-400 rounded-full mx-auto mb-2"></div>
-                                                <div className="w-16 h-2 bg-gray-400 rounded mx-auto mb-1"></div>
-                                                <div className="w-12 h-2 bg-gray-400 rounded mx-auto"></div>
+                                            <div className="text-center p-2">
+                                                <div className="w-4 h-4 bg-gray-400 rounded-full mx-auto mb-1"></div>
+                                                <div className="w-8 h-1 bg-gray-400 rounded mx-auto mb-1"></div>
+                                                <div className="w-6 h-1 bg-gray-400 rounded mx-auto"></div>
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
                                     // Default placeholder when no preview URL
                                     <div className="flex-1 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
-                                        <div className="text-center p-4">
-                                            <div className="w-8 h-8 bg-gray-400 rounded-full mx-auto mb-2"></div>
-                                            <div className="w-16 h-2 bg-gray-400 rounded mx-auto mb-1"></div>
-                                            <div className="w-12 h-2 bg-gray-400 rounded mx-auto"></div>
+                                        <div className="text-center p-2">
+                                            <div className="w-4 h-4 bg-gray-400 rounded-full mx-auto mb-1"></div>
+                                            <div className="w-8 h-1 bg-gray-400 rounded mx-auto mb-1"></div>
+                                            <div className="w-6 h-1 bg-gray-400 rounded mx-auto"></div>
                                         </div>
                                     </div>
                                 )}
@@ -171,28 +159,16 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 
                             {/* Selection indicator */}
                             {isSelected && (
-                                <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-md">
-                                    <Check className="w-4 h-4 text-white" />
+                                <div className="absolute top-1 right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center shadow-md">
+                                    <Check className="w-3 h-3 text-white" />
                                 </div>
                             )}
-
-                            {/* Template name overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3">
-                                <p className="text-xs font-medium truncate">
-                                    {template.name || `Plantilla ${template.index || 1}`}
-                                </p>
-                                {template.description && (
-                                    <p className="text-xs opacity-75 truncate mt-1">
-                                        {template.description}
-                                    </p>
-                                )}
-                            </div>
 
                             {/* Loading overlay */}
                             {isLoading && (
                                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center backdrop-blur-sm">
-                                    <div className="bg-white/90 rounded-full p-2">
-                                        <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                                    <div className="bg-white/90 rounded-full p-1">
+                                        <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
                                     </div>
                                 </div>
                             )}
@@ -206,7 +182,12 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 })}
             </div>
 
-
+            {/* Template name below */}
+            <div className="text-center">
+                <p className="text-xs text-gray-600 font-medium">
+                    {limitedTemplates.find(t => t.id === selectedTemplate)?.name || 'Plantilla Seleccionada'}
+                </p>
+            </div>
         </div>
     );
 };

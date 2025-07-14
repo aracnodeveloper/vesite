@@ -1,18 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { message } from 'antd';
-
-// Define the API endpoint - adjust this path according to your routing
-const TEMPLATES_ENDPOINT = '/api/platillas';
-
-export interface Platilla {
-    id: string;
-    name?: string;
-    description?: string;
-    previewUrl?: string;
-    index?: number;
-    config: any; // JSON configuration
-    isActive?: boolean;
-}
+import apiService from '../service/apiService';
+import { plantillasApi } from '../constants/EndpointsRoutes';
+import type {Platilla} from '../interfaces/Templates.ts'
 
 interface UseTemplatesReturn {
     templates: Platilla[];
@@ -22,68 +12,25 @@ interface UseTemplatesReturn {
     getTemplateById: (id: string) => Platilla | undefined;
     getActiveTemplates: () => Platilla[];
     refetch: () => Promise<Platilla[]>;
+    createTemplate: (data: Omit<Platilla, 'id'>) => Promise<Platilla>;
+    updateTemplate: (id: string, data: Partial<Platilla>) => Promise<Platilla>;
+    deleteTemplate: (id: string) => Promise<void>;
 }
 
 export const useTemplates = (): UseTemplatesReturn => {
     const [templates, setTemplates] = useState<Platilla[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const abortControllerRef = useRef<AbortController | null>(null);
     const isMountedRef = useRef(true);
 
-    const getAuthHeaders = useCallback(() => {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        return {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-        };
-    }, []);
-
     const fetchTemplates = useCallback(async (): Promise<Platilla[]> => {
-        // Cancel previous request if still pending
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-
-        // Create new abort controller for this request
-        abortControllerRef.current = new AbortController();
-
         try {
             setLoading(true);
             setError(null);
 
-            console.log('Fetching templates from:', TEMPLATES_ENDPOINT);
+            console.log('Fetching templates from:', plantillasApi);
 
-            const response = await fetch(TEMPLATES_ENDPOINT, {
-                method: 'GET',
-                headers: getAuthHeaders(),
-                signal: abortControllerRef.current.signal
-            });
-
-            if (!response.ok) {
-                let errorMessage = `Error ${response.status}: ${response.statusText}`;
-
-                switch (response.status) {
-                    case 401:
-                        errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
-                        break;
-                    case 403:
-                        errorMessage = 'No tienes permisos para ver las plantillas.';
-                        break;
-                    case 404:
-                        errorMessage = 'No se encontraron plantillas.';
-                        break;
-                    case 500:
-                        errorMessage = 'Error del servidor. Inténtalo más tarde.';
-                        break;
-                    default:
-                        break;
-                }
-
-                throw new Error(errorMessage);
-            }
-
-            const data = await response.json();
+            const data = await apiService.getAll<Platilla[]>(plantillasApi);
             console.log('Templates data received:', data);
 
             // Validate data structure
@@ -91,15 +38,13 @@ export const useTemplates = (): UseTemplatesReturn => {
                 throw new Error('La respuesta del servidor no es válida');
             }
 
-            // Filter only active templates and sort by index
-            const activeTemplates = data
+            const processedTemplates = data
                 .filter((template: any) => {
-                    // Validate template structure
                     if (!template || typeof template !== 'object' || !template.id) {
                         console.warn('Invalid template found:', template);
                         return false;
                     }
-                    return template.isActive !== false; // Include if isActive is true or undefined
+                    return template.isActive !== false;
                 })
                 .sort((a: Platilla, b: Platilla) => (a.index || 0) - (b.index || 0))
                 .map((template: any) => ({
@@ -112,30 +57,30 @@ export const useTemplates = (): UseTemplatesReturn => {
                     isActive: template.isActive !== false
                 }));
 
-            console.log('Processed templates:', activeTemplates);
+            console.log('Processed templates:', processedTemplates);
 
-            // Only update state if component is still mounted
             if (isMountedRef.current) {
-                setTemplates(activeTemplates);
+                setTemplates(processedTemplates);
                 setError(null);
             }
 
-            return activeTemplates;
+            return processedTemplates;
         } catch (error) {
-            // Don't handle aborted requests as errors
-            if (error instanceof Error && error.name === 'AbortError') {
-                console.log('Template fetch was aborted');
-                return [];
-            }
-
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido al cargar plantillas';
             console.error('Error fetching templates:', error);
 
             if (isMountedRef.current) {
                 setError(errorMessage);
 
-                // Only show error message for non-auth issues
-                if (!errorMessage.includes('autorizado') && !errorMessage.includes('permisos')) {
+                if (errorMessage.includes('401')) {
+                    message.error('No autorizado. Por favor, inicia sesión nuevamente.');
+                } else if (errorMessage.includes('403')) {
+                    message.error('No tienes permisos para ver las plantillas.');
+                } else if (errorMessage.includes('404')) {
+                    message.error('No se encontraron plantillas.');
+                } else if (errorMessage.includes('500')) {
+                    message.error('Error del servidor. Inténtalo más tarde.');
+                } else {
                     message.error(`Error al cargar las plantillas: ${errorMessage}`);
                 }
             }
@@ -146,7 +91,7 @@ export const useTemplates = (): UseTemplatesReturn => {
                 setLoading(false);
             }
         }
-    }, [getAuthHeaders]);
+    }, []);
 
     const getTemplateById = useCallback((id: string): Platilla | undefined => {
         return templates.find(template => template.id === id);
@@ -156,17 +101,78 @@ export const useTemplates = (): UseTemplatesReturn => {
         return templates.filter(template => template.isActive !== false);
     }, [templates]);
 
-    // Auto-fetch templates on hook initialization
+    const createTemplate = useCallback(async (data: Omit<Platilla, 'id'>): Promise<Platilla> => {
+        try {
+            setLoading(true);
+            const newTemplate = await apiService.create<Omit<Platilla, 'id'>, Platilla>(plantillasApi, data);
+
+            if (isMountedRef.current) {
+                setTemplates(prev => [...prev, newTemplate].sort((a, b) => (a.index || 0) - (b.index || 0)));
+            }
+
+            message.success('Plantilla creada exitosamente');
+            return newTemplate;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error al crear plantilla';
+            console.error('Error creating template:', error);
+            message.error(errorMessage);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const updateTemplate = useCallback(async (id: string, data: Partial<Platilla>): Promise<Platilla> => {
+        try {
+            setLoading(true);
+            const updatedTemplate = await apiService.update<Partial<Platilla>>(plantillasApi, id, data);
+
+            if (isMountedRef.current) {
+                setTemplates(prev =>
+                    prev.map(template =>
+                        template.id === id ? { ...template, ...updatedTemplate } : template
+                    ).sort((a, b) => (a.index || 0) - (b.index || 0))
+                );
+            }
+
+            message.success('Plantilla actualizada exitosamente');
+            return updatedTemplate;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error al actualizar plantilla';
+            console.error('Error updating template:', error);
+            message.error(errorMessage);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const deleteTemplate = useCallback(async (id: string): Promise<void> => {
+        try {
+            setLoading(true);
+            await apiService.delete(plantillasApi, id);
+
+            if (isMountedRef.current) {
+                setTemplates(prev => prev.filter(template => template.id !== id));
+            }
+
+            message.success('Plantilla eliminada exitosamente');
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error al eliminar plantilla';
+            console.error('Error deleting template:', error);
+            message.error(errorMessage);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         isMountedRef.current = true;
         fetchTemplates();
 
-        // Cleanup function
         return () => {
             isMountedRef.current = false;
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
         };
     }, [fetchTemplates]);
 
@@ -177,6 +183,9 @@ export const useTemplates = (): UseTemplatesReturn => {
         fetchTemplates,
         getTemplateById,
         getActiveTemplates,
-        refetch: fetchTemplates
+        refetch: fetchTemplates,
+        createTemplate,
+        updateTemplate,
+        deleteTemplate
     };
 };

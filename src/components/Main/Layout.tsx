@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import imgP from "../../../public/img/img.png";
-import imgP2 from "../../../public/img/fondo_1.svg";
+import imgP2 from "../../../public/img/fondo.svg";
 import imgP6 from "../../../public/img/img_6.png"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
@@ -302,7 +302,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <main
                         className={`${
                             showPreview && window.innerWidth >= 768 ? "lg:flex-1" : "flex-1"
-                        } flex justify-center items-center overflow-y-auto p-3 sm:p-6 min-h-screen`}
+                        } flex justify-center  items-center overflow-y-auto p-3 sm:p-6 min-h-screen`}
                         style={{
                             background: `url(${imgP6}) no-repeat center center`,
                             backgroundSize: 'cover',
@@ -312,26 +312,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         {children}
                     </main>
 
-                    {/* Preview Section - Solo se muestra si NO estamos en analytics */}
                     {!isAnalyticsRoute && showPreview && (
                         <div className="w-full md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[800px] mt-0 lg:mt-0 p-0 md:p-0 flex justify-center items-center relative">
-                            {/* Background difuminado con avatar */}
-                            <div
-                                className="absolute inset-0 opacity-20"
-                                style={{
-                                    backgroundSize: 'cover',
-                                    filter: 'blur(40px)',
-                                    transform: 'scale(1.1)',
-                                }}
-                            />
 
                             {/* Background overlay con imgP6 */}
                             <div
-                                className="absolute inset-0"
+                                className="absolute inset-0 "
                                 style={{
                                     background: `url(${imgP2}) no-repeat center center`,
                                     backgroundSize: 'cover',
                                     height: '100%',
+                                    width:'100%',
                                     opacity: 0.6,
                                 }}
                             />

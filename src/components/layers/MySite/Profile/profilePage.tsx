@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
+import TemplateSelector from "./TemplateSelector.tsx";
 
 const { TextArea } = Input;
 
@@ -135,7 +136,7 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
+        <div className="w-full h-full mb-10 max-w-md mx-auto rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors">
@@ -173,15 +174,13 @@ const ProfilePage = () => {
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
                     <Form form={form} layout="vertical" onFinish={handleFinish}>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>NOMBRE</label>
+                        <div className="mb-0">
                             <Form.Item name="title" rules={[{ required: true, message: 'El título es requerido' }, { min: 2, message: 'El título debe tener al menos 2 caracteres' }, { max: 50, message: 'El título no puede tener más de 50 caracteres' }]} className="mb-0">
-                                <Input placeholder="diseño" disabled={loading} maxLength={50} className="rounded-lg border-gray-300 h-16 " style={{ fontSize: "12px" }} />
+                                <Input placeholder="Añade tu nombre" disabled={loading} maxLength={50} className="rounded-lg border-gray-300 h-16 " style={{ fontSize: "12px" }} />
                             </Form.Item>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>DESCRIPCIÓN</label>
+                        <div className="mb-0">
                             <Form.Item name="description" rules={[{ max: 250, message: 'La descripción no puede tener más de 250 caracteres' }]} className="mb-0">
                                 <TextArea placeholder="Cuéntanos acerca de ti..." disabled={loading} maxLength={250} rows={4} className="rounded-lg border-gray-300 resize-none" style={{ fontSize: "12px" }} showCount />
                             </Form.Item>
@@ -190,15 +189,63 @@ const ProfilePage = () => {
                         <div className="mb-6">
                             <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>SITIO</h3>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-400 mb-2 ml-2" style={{ fontSize: "11px" }}>Ve.site/</label>
                                 <div className="flex">
-                                    <Form.Item name="slug" rules={[{ required: true, message: 'El slug es requerido' }, { min: 3, message: 'El slug debe tener al menos 3 caracteres' }, { max: 30, message: 'El slug no puede tener más de 30 caracteres' }, { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }]} className="flex-1 mb-0">
-                                        <Input placeholder="sitioReynaldomartinez31" disabled={loading} maxLength={30} className="rounded-l-lg border-r-0 h-16 " style={{ fontSize: "11px" }} />
+                                    <Form.Item name="slug"  rules={[{ required: true, message: 'El slug es requerido' }, { min: 3, message: 'El slug debe tener al menos 3 caracteres' }, { max: 30, message: 'El slug no puede tener más de 30 caracteres' }, { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }]} className="flex-1 mb-0">
+                                        <Input placeholder="Ve.site/" disabled={loading} maxLength={30} className="rounded-l-lg border-r-0 h-16 " style={{ fontSize: "11px" }} />
                                     </Form.Item>
                                 </div>
                             </div>
                         </div>
+                        <div className="mb-6">
+                            <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
+                                DISEÑO
+                            </h3>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <TemplateSelector
+                                    currentThemeId={biosite.themeId}
+                                    onTemplateChange={async (templateId: string) => {
+                                        if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
 
+                                        try {
+                                            const loadingMessage = message.loading('Actualizando plantilla...', 0);
+
+                                            // Función para asegurar que colors sea string
+                                            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
+                                                if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                                                if (typeof colors === 'string') {
+                                                    try { JSON.parse(colors); return colors; } catch { return '{"primary":"#3B82F6","secondary":"#1F2937"}'; }
+                                                }
+                                                return JSON.stringify(colors);
+                                            };
+
+                                            const updateData: BiositeUpdateDto = {
+                                                ownerId: biosite.ownerId || userId,
+                                                title: biosite.title,
+                                                slug: biosite.slug,
+                                                themeId: templateId,
+                                                colors: ensureColorsAsString(biosite.colors),
+                                                fonts: biosite.fonts || '',
+                                                avatarImage: biosite.avatarImage || '',
+                                                backgroundImage: biosite.backgroundImage || DEFAULT_BACKGROUND,
+                                                isActive: biosite.isActive ?? true
+                                            };
+
+                                            const updated = await updateBiosite(updateData);
+                                            if (updated) {
+                                                updatePreview(updated);
+                                                loadingMessage();
+                                                message.success('Plantilla actualizada exitosamente');
+                                            }
+                                        } catch (error) {
+                                            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+                                            console.error("Error al actualizar plantilla:", errorMessage);
+                                            message.error(`Error al actualizar la plantilla: ${errorMessage}`);
+                                        }
+                                    }}
+                                    loading={loading}
+                                />
+                            </div>
+                        </div>
                         <Form.Item className="mb-0">
                             <Button type="default" htmlType="submit" className="w-full bg-blue-600 text-black hover:text-green700 hover:bg-blue-700 border-green-600 hover:border-green-700 rounded-lg py-2 h-auto" loading={loading} disabled={!biosite.id}>
                                 {loading ? 'Actualizando...' : 'Actualizar Perfil'}
@@ -206,7 +253,10 @@ const ProfilePage = () => {
                         </Form.Item>
                     </Form>
                 </div>
+
             </div>
+
+
         </div>
     );
 };
