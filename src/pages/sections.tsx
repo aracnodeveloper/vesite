@@ -1,19 +1,13 @@
-
 import Add from "../components/layers/AddMoreSections/addMore";
 import MySite from "../components/layers/MySite/Mysite";
 
 const Sections = () => {
-
-
     return (
-        <div className="flex flex-wrap">
-            {/* Panel de edición */}
-            <div className=" p-4">
+        <div className="flex flex-wrap justify-center w-full p-4 2xl:max-w-[350px] mt-20">
+            <div>
                 <MySite />
                 <Add />
             </div>
-
-
         </div>
     );
 };

@@ -196,14 +196,14 @@ const Analytics = () => {
         <div className="max-w-7xl mx-auto">
           <h1 className="absolute left-50 top-10 text-3xl text-gray-600 font-semibold mb-2 text-start">Analytics</h1>
 
-          <div
-              className="absolute left-6/17 top-1/3 transform   bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700"
-              style={{height:"600px", width:"600px"}}
-          >
-
-          </div>
+        
 
           <div className="relative flex items-center justify-center mb-16">
+             <div
+              className="absolute transform bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700"
+              style={{height:"600px", width:"600px"}}
+            >
+            </div>
             <div
                 className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
               <div className="text-xs text-gray-400 mb-1">VIEWS</div>
@@ -217,9 +217,11 @@ const Analytics = () => {
               </PhonePreview>
             </div>
 
+           
+
             {/* Círculo de Clicks - Derecha superior */}
             <div
-                className="absolute right-20 top-1/2 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
+                className="absolute right-20 top-82 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
               <div className="text-xs text-gray-400 mb-1">CLICKS</div>
               <div className="text-2xl font-bold text-white">{totalClicks}</div>
             </div>
@@ -233,7 +235,7 @@ const Analytics = () => {
           </div>
           <div className="flex flex-wrap gap-5">
             {/* Daily Activity */}
-            <div className="mb-10 bg-black rounded-3xl p-10">
+            <div className=" bg-black rounded-3xl p-10">
               <h2 className="text-xl text-gray-400 font-semibold mb-6">Daily Activity</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {analyticsData.dailyActivity.map((activity, index) => (
@@ -255,7 +257,7 @@ const Analytics = () => {
             </div>
 
             {/* Clicks by Link */}
-            <div className="mb-10 bg-black rounded-3xl p-10">
+            <div className="bg-black rounded-3xl p-10">
               <h2 className="text-xl text-gray-400 font-semibold mb-6">Clicks by Link</h2>
               {clicksData.length > 0 ? (
                   <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] overflow-hidden">
@@ -286,7 +288,7 @@ const Analytics = () => {
         </div>
         <div className="h-10"></div>
       </div>
-  );
+  );  
 };
 
 export default Analytics;
