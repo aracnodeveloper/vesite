@@ -2,10 +2,11 @@ import {ChevronRight} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Social = () => {
+
     const navigate = useNavigate();
 
     const handleSocialClick = () => {
-        navigate('/social');
+        navigate("/social");
     };
 
     return (

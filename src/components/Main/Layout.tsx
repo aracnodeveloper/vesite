@@ -10,7 +10,10 @@ import {
     Edit3,
     BarChartHorizontalBig,
     Palette,
-    GanttChart
+    GanttChart,
+    User, // Added for Profile icon
+    Share, // Added for Social icon
+    CreditCard // Added for V-Card icon
 } from "lucide-react";
 
 import imgP from "../../../public/img/img.png";
@@ -26,14 +29,109 @@ import PhonePreview from "../Preview/phonePreview.tsx";
 import SettingsModal from "../global/Settings/SettingsModal.tsx";
 
 // Componentes de las secciones para el Drawer
-import Sections from "../../pages/sections.tsx";
+import Sections from "../../pages/sections.tsx"; // Assuming this is the main Sections page
 import StylesPage from "../../pages/styles.tsx";
 import Analytics from "../../pages/analytics.tsx";
+import SocialPage from "../layers/MySite/Social/socialPage.tsx";
+import ProfilePage from "../layers/MySite/Profile/profilePage.tsx";
+import VCardPage from "../layers/MySite/V-Card/V-CardPage.tsx";
+import LinksPage from "../layers/AddMoreSections/Links/linksPage.tsx";
+import MusicPage from "../layers/AddMoreSections/Music-Posdcast/musicPage.tsx";
+import PostPage from "../layers/AddMoreSections/Socialpost/socialPostPage.tsx";
+import AppPage from "../layers/AddMoreSections/App/appPage.tsx";
 
 
 interface LayoutProps {
     children?: React.ReactNode;
 }
+
+// New component for Sections content within the drawer to handle subsections
+interface SectionsWithDrawerInteractionProps {
+    onSubsectionClick: (section: string) => void;
+}
+
+const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps> = ({ onSubsectionClick }) => {
+    return (
+        <div className="w-full">
+            <div className="max-w-2xl mx-auto">
+                {/* My Site Section */}
+                <div className="mb-8">
+                    <h3 className="text-white text-xl font-medium mb-6">My Site</h3>
+                    <div className="space-y-3">
+                        {/* Profile Card */}
+                        <div
+                            onClick={() => onSubsectionClick('profile')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors flex items-center space-x-3"
+                        >
+                            <User className="w-5 h-5 text-blue-400" />
+                            <div>
+                                <h4 className="text-white font-medium">Profile</h4>
+                                <p className="text-gray-400 text-sm">Manage your profile information</p>
+                            </div>
+                        </div>
+                        {/* Social Card */}
+                        <div
+                            onClick={() => onSubsectionClick('social')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors flex items-center space-x-3"
+                        >
+                            <Share className="w-5 h-5 text-green-400" />
+                            <div>
+                                <h4 className="text-white font-medium">Social</h4>
+                                <p className="text-gray-400 text-sm">Connect your social media</p>
+                            </div>
+                        </div>
+                        {/* V-Card */}
+                        <div
+                            onClick={() => onSubsectionClick('VCard')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors flex items-center space-x-3"
+                        >
+                            <CreditCard className="w-5 h-5 text-purple-400" />
+                            <div>
+                                <h4 className="text-white font-medium">V-Card</h4>
+                                <p className="text-gray-400 text-sm">Digital business card</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* Add More Sections */}
+                <div>
+                    <h3 className="text-white text-xl font-medium mb-6">Add More Sections</h3>
+                    <div className="space-y-3">
+                        <div
+                            onClick={() => onSubsectionClick('links')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
+                        >
+                            <h4 className="text-white font-medium">Links</h4>
+                            <p className="text-gray-400 text-sm">Add important links</p>
+                        </div>
+                        <div
+                            onClick={() => onSubsectionClick('music')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
+                        >
+                            <h4 className="text-white font-medium">Music</h4>
+                            <p className="text-gray-400 text-sm">Share your music</p>
+                        </div>
+                        <div
+                            onClick={() => onSubsectionClick('post')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
+                        >
+                            <h4 className="text-white font-medium">Post</h4>
+                            <p className="text-gray-400 text-sm">Share posts</p>
+                        </div>
+                        <div
+                            onClick={() => onSubsectionClick('app')}
+                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
+                        >
+                            <h4 className="text-white font-medium">App</h4>
+                            <p className="text-gray-400 text-sm">Connect apps</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
@@ -45,7 +143,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { isUpdating, handleUpdate, handleShare } = useUpdateShareActions();
 
     const [activeItem, setActiveItem] = useState<string>("layers");
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // This state seems unused for the mobile drawer
     const [showPreview, setShowPreview] = useState(true);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
@@ -59,19 +157,41 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const drawerRef = useRef<HTMLDivElement>(null);
     const dragHandleRef = useRef<HTMLDivElement>(null);
 
+    // Estado para manejar si estamos en la vista principal de secciones o en una subsección
+    const [isInSubsection, setIsInSubsection] = useState(false);
+
 
     // --- Lógica para el Drawer Deslizable ---
 
     const handleDrawerSectionClick = (section: string) => {
         setSelectedSection(section);
         setIsDrawerOpen(true);
+        setIsInSubsection(false); // Resetear cuando se abre una nueva sección principal
         setCurrentDrawerHeight(85); // Altura inicial al abrir
+    };
+
+    // Nueva función para manejar clicks en subsecciones de MySite
+    const handleMySiteSubsectionClick = (subsection: string) => {
+        setSelectedSection(subsection);
+        setIsInSubsection(true);
+        setCurrentDrawerHeight(85);
     };
 
     const closeDrawer = () => {
         setIsDrawerOpen(false);
         setSelectedSection(null);
+        setIsInSubsection(false); // Ensure this is reset when drawer is fully closed
     };
+
+    const goBackToSections = () => {
+        if (isInSubsection) {
+            setSelectedSection('sections'); // Go back to the main "Sections" view
+            setIsInSubsection(false);
+        } else {
+            closeDrawer(); // If not in a subsection, just close the drawer
+        }
+    };
+
 
     const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
         setIsDragging(true);
@@ -84,6 +204,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
         const deltaY = currentY - dragStartY;
+        // Calculate new height, ensuring it stays within reasonable bounds (e.g., 0% to 95% of viewport height)
         const newHeight = Math.max(0, Math.min(95, currentDrawerHeight - (deltaY / window.innerHeight) * 100));
 
         setCurrentDrawerHeight(newHeight);
@@ -95,10 +216,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (!isDragging) return;
         setIsDragging(false);
 
+        // If drawer is dragged below a certain threshold, close it
         if (currentDrawerHeight < 40) {
             closeDrawer();
         } else {
-            setCurrentDrawerHeight(85); // Vuelve a la altura completa
+            setCurrentDrawerHeight(85); // Otherwise, snap back to full height
         }
     };
 
@@ -119,8 +241,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }, [isDragging, dragStartY, currentDrawerHeight]);
 
     const getDrawerTitle = () => {
-        if (!selectedSection) return "My Site";
-        return selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1);
+        if (!selectedSection) return "My Site"; // Default title if no section is selected
+
+        const titles: { [key: string]: string } = {
+            'sections': 'Sections',
+            'style': 'Style',
+            'analytics': 'Analytics',
+            'profile': 'Profile',
+            'social': 'Social',
+            'VCard': 'V-Card',
+            'links': 'Links',
+            'videos': 'Videos', // Note: This might be redundant if VCardPage is used for videos
+            'music': 'Music',
+            'post': 'Post',
+            'app': 'App'
+        };
+
+        return titles[selectedSection] || selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1);
     }
 
     // --- Fin de la lógica del Drawer ---
@@ -198,14 +335,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         const currentItem = sidebarItems.find((item) => location.pathname.includes(item.id));
         if (currentItem) {
             setActiveItem(currentItem.id);
+
         }
     }, [location.pathname]);
 
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 1024) {
-                setIsMobileMenuOpen(false);
-                setShowPreview(true);
+                setIsMobileMenuOpen(false); // Ensure mobile menu is closed on desktop
+                setShowPreview(true); // Ensure preview is shown on desktop
             }
         };
         handleResize();
@@ -216,13 +354,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const isAnalyticsRoute = location.pathname === '/analytics';
 
     useEffect(() => {
-        setAvatarError(false);
+        setAvatarError(false); // Reset avatar error when biosite avatar image changes
     }, [biosite?.avatarImage]);
 
     const handleItemClick = (item: any) => {
         setActiveItem(item.id);
         navigate(item.to);
-        setIsMobileMenuOpen(false);
+        setIsMobileMenuOpen(false); // Close mobile menu if open
     };
 
     const getItemStyles = (item: any) => {
@@ -243,14 +381,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return { text: "Share", icon: <Share2 className="w-3 h-3" />, disabled: false };
     };
 
-    const placeholderAvatar = "data:image/svg+xml,...";
     const buttonContent = getButtonContent();
 
     // -- RENDERIZADO CONDICIONAL PARA EL DRAWER --
     const renderDrawerContent = () => {
         switch (selectedSection) {
             case 'sections':
-                return <Sections />;
+                // Pass the handler to the Sections component
+                return (
+                    <div className="p-4">
+                        <SectionsWithDrawerInteraction onSubsectionClick={handleMySiteSubsectionClick} />
+                    </div>
+                );
             case 'style':
                 return <StylesPage />;
             case 'analytics':
@@ -258,7 +400,56 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="text-white p-4">
                         <Analytics />
                     </div>
-                )
+                );
+            case 'profile':
+                return (
+                    <div className="p-4">
+                        <ProfilePage />
+                    </div>
+                );
+            case 'social':
+                return (
+                    <div className="p-4">
+                        <SocialPage />
+                    </div>
+                );
+            case 'VCard':
+                return (
+                    <div className="p-4">
+                        <VCardPage />
+                    </div>
+                );
+            case 'links':
+                return (
+                    <div className="p-4">
+                        <LinksPage />
+                    </div>
+                );
+            case 'videos':
+                // Assuming Videos also uses VCardPage or a similar component, adjust as needed
+                return (
+                    <div className="p-4">
+                        <VCardPage />
+                    </div>
+                );
+            case 'music':
+                return (
+                    <div className="p-4">
+                        <MusicPage />
+                    </div>
+                );
+            case 'post':
+                return (
+                    <div className="p-4">
+                        <PostPage />
+                    </div>
+                );
+            case 'app':
+                return (
+                    <div className="p-4">
+                        <AppPage />
+                    </div>
+                );
             default:
                 return null;
         }
@@ -282,6 +473,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                     <div className="mt-auto pb-5 z-10">
                         <button onClick={handleOpenSettings} className="p-2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer z-10" title="Settings">
+                            {/* SVG for Settings Icon */}
                             <svg width="22" height="22" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M25.6666 5.99313C25.6666 4.70796 24.6253 3.66663 23.3401 3.66663H20.6616C19.3746 3.66663 18.3333 4.70796 18.3333 5.99313C18.3333 7.05279 17.6073 7.96213 16.6191 8.35079C16.4627 8.41435 16.3081 8.47913 16.1553 8.54513C15.1818 8.96679 14.025 8.83846 13.2733 8.08863C12.8368 7.65313 12.2454 7.40855 11.6288 7.40855C11.0122 7.40855 10.4208 7.65313 9.98429 8.08863L8.08863 9.98429C7.65313 10.4208 7.40855 11.0122 7.40855 11.6288C7.40855 12.2454 7.65313 12.8368 8.08863 13.2733C8.84029 14.025 8.96863 15.18 8.54329 16.1553C8.47648 16.3088 8.41231 16.4634 8.35079 16.6191C7.96213 17.6073 7.05279 18.3333 5.99313 18.3333C4.70796 18.3333 3.66663 19.3746 3.66663 20.6598V23.3401C3.66663 24.6253 4.70796 25.6666 5.99313 25.6666C7.05279 25.6666 7.96213 26.3926 8.35079 27.3808C8.41435 27.5372 8.47851 27.6918 8.54329 27.8446C8.96679 28.8181 8.83846 29.975 8.08863 30.7266C7.65313 31.1631 7.40855 31.7545 7.40855 32.3711C7.40855 32.9877 7.65313 33.5791 8.08863 34.0156L9.98429 35.9113C10.4208 36.3468 11.0122 36.5914 11.6288 36.5914C12.2454 36.5914 12.8368 36.3468 13.2733 35.9113C14.025 35.1596 15.18 35.0313 16.1553 35.4548C16.3081 35.522 16.4627 35.5868 16.6191 35.6491C17.6073 36.0378 18.3333 36.9471 18.3333 38.0068C18.3333 39.292 19.3746 40.3333 20.6598 40.3333H23.3401C24.6253 40.3333 25.6666 39.292 25.6666 38.0068C25.6666 36.9471 26.3926 36.0378 27.3808 35.6473C27.5372 35.5862 27.6918 35.5226 27.8446 35.4566C28.8181 35.0313 29.975 35.1615 30.7248 35.9113C31.1614 36.3474 31.7532 36.5923 32.3702 36.5923C32.9872 36.5923 33.5791 36.3474 34.0156 35.9113L35.9113 34.0156C36.3468 33.5791 36.5914 32.9877 36.5914 32.3711C36.5914 31.7545 36.3468 31.1631 35.9113 30.7266C35.1596 29.975 35.0313 28.82 35.4548 27.8446C35.522 27.6918 35.5868 27.5372 35.6491 27.3808C36.0378 26.3926 36.9471 25.6666 38.0068 25.6666C39.292 25.6666 40.3333 24.6253 40.3333 23.3401V20.6616C40.3333 19.3765 39.292 18.3351 38.0068 18.3351C36.9471 18.3351 36.0378 17.6091 35.6473 16.621C35.5858 16.4653 35.5216 16.3106 35.4548 16.1571C35.0331 15.1836 35.1615 14.0268 35.9113 13.2751C36.3468 12.8386 36.5914 12.2472 36.5914 11.6306C36.5914 11.014 36.3468 10.4226 35.9113 9.98613L34.0156 8.09046C33.5791 7.65496 32.9877 7.41038 32.3711 7.41038C31.7545 7.41038 31.1631 7.65496 30.7266 8.09046C29.975 8.84213 28.82 8.97046 27.8446 8.54696C27.6911 8.47954 27.5365 8.41475 27.3808 8.35263C26.3926 7.96213 25.6666 7.05096 25.6666 5.99313Z" stroke="currentColor" strokeWidth="2.5"></path><path d="M29.3333 22C29.3333 23.9449 28.5607 25.8101 27.1854 27.1854C25.8101 28.5607 23.9449 29.3333 22 29.3333C20.055 29.3333 18.1898 28.5607 16.8145 27.1854C15.4392 25.8101 14.6666 23.9449 14.6666 22C14.6666 20.055 15.4392 18.1898 16.8145 16.8145C18.1898 15.4392 20.055 14.6666 22 14.6666C23.9449 14.6666 25.8101 15.4392 27.1854 16.8145C28.5607 18.1898 29.3333 20.055 29.3333 22Z" stroke="currentColor" strokeWidth="2.5"></path>
                             </svg>
@@ -317,12 +509,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* --- VISTA MÓVIL --- */}
             <div className="lg:hidden flex flex-col h-screen" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%'}}>
                 <header className="flex items-center justify-between p-3 z-10">
-                    <img src={getAvatarImage()} onClick={handleOpenSettings} className="w-8 h-8 rounded-full object-cover" alt="profile" />
+                    <img src={getAvatarImage()} onClick={handleOpenSettings} className="w-8 h-8 cursor-pointer rounded-full object-cover" alt="profile" />
                     <div className="flex items-center space-x-2">
+                        {/* More options button (three dots) - consider functionality */}
                         <button className="p-2 text-white rounded-full hover:bg-black/20">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
                         </button>
-                        <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`px-4 py-2 text-xs rounded-full flex items-center space-x-1.5 transition-colors ${buttonContent.disabled ? 'bg-gray-600 text-gray-400' : 'bg-white text-black'}`}>
+                        <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`px-4 cursor-pointer py-2 text-xs rounded-full flex items-center space-x-1.5 transition-colors ${buttonContent.disabled ? 'bg-gray-600 text-gray-400' : 'bg-white text-black'}`}>
                             {buttonContent.icon}
                             <span>{buttonContent.text}</span>
                         </button>
@@ -340,7 +533,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <button
                             key={item.id}
                             onClick={() => handleDrawerSectionClick(item.id)}
-                            className={`flex flex-col items-center space-y-1 p-3 transition-colors ${selectedSection === item.id ? 'text-white' : 'text-white hover:text-white'}`}
+                            className={`flex cursor-pointer flex-col items-center space-y-1 p-3 transition-colors ${selectedSection === item.id ? 'text-white' : 'text-white hover:text-white'}`}
                         >
                             {item.id === 'sections' && <GanttChart size={22} />}
                             {item.id === 'style' && <Palette size={22} />}
@@ -365,11 +558,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         >
                             <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto" />
                             <div className="flex items-center justify-between px-4 pt-3">
-                                <button onClick={closeDrawer} className="flex items-center space-x-2 text-white">
+                                {/* Back button for drawer navigation */}
+                                <button onClick={goBackToSections} className="flex items-center space-x-2 text-white">
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
                                 <h2 className="text-white font-semibold">{getDrawerTitle()}</h2>
-                                <Edit3 className="w-5 h-5 text-gray-500" />
+                                <Edit3 className="w-5 h-5 text-gray-500" /> {/* Edit icon - consider functionality */}
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto">
