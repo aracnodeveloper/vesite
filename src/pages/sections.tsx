@@ -3,8 +3,8 @@ import MySite from "../components/layers/MySite/Mysite";
 
 const Sections = () => {
     return (
-        <div className="flex flex-wrap justify-center w-full p-4 2xl:max-w-[350px] mt-20">
-            <div>
+        <div className="flex flex-wrap justify-center w-full p-4 mt-4">
+            <div className="max-w-2xl transform scale-[0.9] origin-top">
                 <MySite />
                 <Add />
             </div>

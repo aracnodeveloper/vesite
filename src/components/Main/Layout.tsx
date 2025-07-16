@@ -4,9 +4,6 @@ import {
     Layers,
     Droplet,
     BarChart3,
-    Menu,
-    X,
-    Smartphone,
     RefreshCw,
     Share2,
     ArrowLeft,
@@ -301,10 +298,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <div className="w-full md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[750px] mt-0 lg:mt-0 p-0 md:p-0 flex justify-center items-center relative">
                             <div className="absolute inset-0" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%', opacity: 0.6 }} />
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center relative transition-transform duration-300 ease-in-out origin-center scale-[.60] md:scale-[.68] lg:scale-[.72] xl:scale-[.76] 2xl:scale-[.80]">
-                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-10 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50">
+                                <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-0 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50">
                                     URL: Ve.site/{biosite?.slug || 'your-slug'}
                                 </div>
-                                <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`absolute text-xs top-10 rounded-lg p-2 right-20 text-white mb-4 text-center z-50 flex items-center space-x-1 transition-all duration-200 ${buttonContent.disabled ? 'bg-[#464C3666] cursor-not-allowed' : hasChanges ? 'bg-[#98C022] hover:bg-[#86A81E]' : 'bg-[#464C3666] hover:bg-[#464C36AA]'} cursor-pointer`} title={hasChanges ? 'Update preview' : 'Share link'}>
+                                <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`absolute text-xs top-0 rounded-lg p-2 right-20 text-white mb-4 text-center z-50 flex items-center space-x-1 transition-all duration-200 ${buttonContent.disabled ? 'bg-[#464C3666] cursor-not-allowed' : hasChanges ? 'bg-[#98C022] hover:bg-[#86A81E]' : 'bg-[#464C3666] hover:bg-[#464C36AA]'} cursor-pointer`} title={hasChanges ? 'Update preview' : 'Share link'}>
                                     {buttonContent.icon}
                                     <span>{buttonContent.text}</span>
                                 </button>
