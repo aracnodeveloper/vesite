@@ -281,7 +281,7 @@ const ImageUploadSection = ({
                         maxCount={1}
                     >
                         <div className="relative group cursor-pointer">
-                            <div className="w-72 h-24 bg-gray-100 rounded-lg border-gray-400  border  flex items-center justify-center overflow-hidden">
+                            <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400  border  flex items-center justify-center overflow-hidden">
                                 <Image
                                     width={340}
                                     height={100}
