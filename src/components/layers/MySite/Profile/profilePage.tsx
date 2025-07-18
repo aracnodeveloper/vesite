@@ -136,54 +136,54 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="w-full h-full mb-10 p-2 max-w-md mx-auto rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="w-full h-full">
+            <div className="px-6 py-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
-                    <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors">
-                        <ChevronLeft className="w-5 h-5 mr-1 hover:text-gray-400" />
-                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400" style={{ fontSize: "17px" }}>Perfil</h1>
+                    <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                        <ChevronLeft className="w-5 h-5 mr-1" />
+                        <h1 className="text-lg font-semibold " style={{ fontSize: "17px" }}>Perfil</h1>
                     </button>
                 </div>
             </div>
 
             <div className="p-6">
                 <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>IMÁGENES</h3>
+                    <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>IMÁGENES</h3>
                         <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
                 </div>
 
-
-
                 <div className="mb-6">
-                    <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
+                    <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
                     <Form form={form} layout="vertical" onFinish={handleFinish}>
                         <div className="mb-0">
                             <Form.Item name="title" rules={[{ required: true, message: 'El título es requerido' }, { min: 2, message: 'El título debe tener al menos 2 caracteres' }, { max: 50, message: 'El título no puede tener más de 50 caracteres' }]} className="mb-0">
-                                <Input placeholder="Añade tu nombre" disabled={loading} maxLength={50} className="rounded-lg border-gray-300 h-16 " style={{ fontSize: "12px" }} />
+                                <Input placeholder="Añade tu nombre" disabled={loading} maxLength={50} className="rounded-lg border-gray-600 bg-[#2A2A2A] text-white h-16 placeholder-gray-500" style={{ fontSize: "12px" }} />
                             </Form.Item>
                         </div>
 
                         <div className="mb-0">
                             <Form.Item name="description" rules={[{ max: 250, message: 'La descripción no puede tener más de 250 caracteres' }]} className="mb-0">
-                                <TextArea placeholder="Cuéntanos acerca de ti..." disabled={loading} maxLength={250} rows={4} className="rounded-lg border-gray-300 resize-none" style={{ fontSize: "12px" }} showCount />
+                                <TextArea placeholder="Cuéntanos acerca de ti..." disabled={loading} maxLength={250} rows={4} className="rounded-lg border-gray-600 bg-[#2A2A2A] text-white resize-none placeholder-gray-500" style={{ fontSize: "12px" }} showCount />
                             </Form.Item>
                         </div>
 
                         <div className="mb-6">
-                            <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>SITIO</h3>
+                            <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
+                                SITIO
+                            </h3>
                             <div className="mb-4">
                                 <div className="flex">
                                     <Form.Item name="slug"  rules={[{ required: true, message: 'El slug es requerido' }, { min: 3, message: 'El slug debe tener al menos 3 caracteres' }, { max: 30, message: 'El slug no puede tener más de 30 caracteres' }, { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }]} className="flex-1 mb-0">
-                                        <Input placeholder="Ve.site/" disabled={loading} maxLength={30} className="rounded-l-lg border-r-0 h-16 " style={{ fontSize: "11px" }} />
+                                        <Input placeholder="Ve.site/" disabled={loading} maxLength={30} className="rounded-l-lg border-r-0 border-gray-600 bg-[#2A2A2A] text-white h-16 placeholder-gray-500" style={{ fontSize: "11px" }} />
                                     </Form.Item>
                                 </div>
                             </div>
                         </div>
                         <div className="mb-6">
-                            <h3 className="text-sm font-medium text-black mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
+                            <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
                                 DISEÑO
                             </h3>
-                            <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="bg-[#FFFF] rounded-lg p-4">
                                 <TemplateSelector
                                     currentThemeId={biosite.themeId}
                                     onTemplateChange={async (templateId: string) => {
@@ -191,8 +191,6 @@ const ProfilePage = () => {
 
                                         try {
                                             const loadingMessage = message.loading('Actualizando plantilla...', 0);
-
-                                            // Función para asegurar que colors sea string
                                             const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
                                                 if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
                                                 if (typeof colors === 'string') {
@@ -230,16 +228,13 @@ const ProfilePage = () => {
                             </div>
                         </div>
                         <Form.Item className="mb-0">
-                            <Button type="default" htmlType="submit" className="w-full bg-blue-600 text-black hover:text-green700 hover:bg-blue-700 border-green-600 hover:border-green-700 rounded-lg py-2 h-auto" loading={loading} disabled={!biosite.id}>
+                            <Button type="default" htmlType="submit" className="w-full bg-blue-600 text-white hover:bg-blue-700 border-none rounded-lg py-2 h-auto" loading={loading} disabled={!biosite.id}>
                                 {loading ? 'Actualizando...' : 'Actualizar Perfil'}
                             </Button>
                         </Form.Item>
                     </Form>
                 </div>
-
             </div>
-
-
         </div>
     );
 };
