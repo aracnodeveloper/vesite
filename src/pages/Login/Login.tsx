@@ -13,7 +13,6 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import imgP6 from "../../../public/img/img_8.png";
-
 const { Content } = Layout;
 
 export const Login: FC = () => {
@@ -41,8 +40,8 @@ export const Login: FC = () => {
             if (response.success) {
                 const token = Cookies.get("accessToken");
                 if (token) {
-                    navigate("/sections", { replace: true });
-
+                    // Recargar la página antes de navegar
+                    window.location.href = "/sections";
                 } else {
                     setError("Login failed. No token found.");
                 }
@@ -140,15 +139,15 @@ export const Login: FC = () => {
                 <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-6xl gap-8 lg:gap-0">
                     {/* Left Side - Video/Image placeholder */}
                     <div className="flex-1 w-full lg:mr-12 order-2 lg:order-1">
-                        <div
+                        <img
                             className="w-full h-60 sm:h-80 bg-gray-900 rounded-lg shadow-lg"
+                            src='../../../public/Video/video_1.GIF'
                             style={{
-                                backgroundColor: '#1a1a1a',
-                                borderRadius: '8px'
+                                borderRadius: '20px'
                             }}
-                        >
+                        />
                             {/* Placeholder for video/image content */}
-                        </div>
+
                     </div>
 
                     {/* Right Side - Text Content */}

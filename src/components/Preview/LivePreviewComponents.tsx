@@ -48,17 +48,18 @@ export const NoBiositeComponent = ({ themeConfig }: { themeConfig: BiositeThemeC
     </div>
 );
 
-export const BackgroundSection = ({
-                                      isExposedRoute,
-                                      validBackgroundImage,
-                                      imageLoadStates,
-                                      handleImageLoadStart,
-                                      handleImageLoad,
-                                      handleImageError,
-                                      biosite,
-                                      themeConfig
-                                  }: any) => (
-    <div className={`relative w-full  flex-shrink-0 ${isExposedRoute ? 'h-96' : 'h-48'}`}>
+// Template 1: Layout por defecto (imagen de fondo con clipPath)
+export const BackgroundSectionTemplate1 = ({
+                                               isExposedRoute,
+                                               validBackgroundImage,
+                                               imageLoadStates,
+                                               handleImageLoadStart,
+                                               handleImageLoad,
+                                               handleImageError,
+                                               biosite,
+                                               themeConfig
+                                           }: any) => (
+    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-96' : 'h-48'}`}>
         {validBackgroundImage ? (
             <>
                 {imageLoadStates.background === 'loading' && (
@@ -78,7 +79,6 @@ export const BackgroundSection = ({
                     style={{
                         display: imageLoadStates.background === 'error' ? 'none' : 'block',
                         clipPath: 'ellipse(100% 80% at 50% 0%)',
-
                     }}
                 />
                 {imageLoadStates.background === 'error' && (
@@ -116,31 +116,34 @@ export const BackgroundSection = ({
     </div>
 );
 
-export const AvatarSection = ({
-                                  isExposedRoute,
-                                  validAvatarImage,
-                                  imageLoadStates,
-                                  handleImageLoadStart,
-                                  handleImageLoad,
-                                  handleImageError,
-                                  biosite,
-                                  themeConfig,
-                                  defaultAvatar
-                              }: any) => (
-    <div className={`flex justify-center ${isExposedRoute ? '-mt-44' : '-mt-24'} relative z-10 mb-4`}>
-        {validAvatarImage ? (
+// Template 2: Dos imágenes cuadradas
+export const BackgroundSectionTemplate2 = ({
+                                               isExposedRoute,
+                                               validBackgroundImage,
+                                               validAvatarImage,
+                                               imageLoadStates,
+                                               handleImageLoadStart,
+                                               handleImageLoad,
+                                               handleImageError,
+                                               biosite,
+                                               themeConfig,
+                                               defaultAvatar
+                                           }: any) => (
+    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-80' : 'h-64'} p-4`}
+         style={{ backgroundColor: themeConfig.colors.background }}>
+        <div className="flex justify-center items-center space-x-4 h-full">
+            {/* Primera imagen cuadrada (Avatar) */}
             <div className="relative">
                 {imageLoadStates.avatar === 'loading' && (
-                    <div className={`absolute inset-0 flex items-center justify-center rounded-full border-3 border-white ${isExposedRoute ? 'w-16 h-16' : 'w-16 h-16'}`}
-                         style={{ backgroundColor: themeConfig.colors.profileBackground }}>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2"
+                    <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gray-200">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2"
                              style={{ borderColor: themeConfig.colors.primary }}></div>
                     </div>
                 )}
                 <img
-                    src={validAvatarImage}
+                    src={validAvatarImage || defaultAvatar}
                     alt="Avatar"
-                    className={`${isExposedRoute ? 'w-44 h-44' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
+                    className={`${isExposedRoute ? 'w-32 h-32' : 'w-24 h-24'} rounded-lg object-cover shadow-lg transform rotate-3`}
                     onLoadStart={() => handleImageLoadStart('avatar')}
                     onLoad={() => handleImageLoad('avatar')}
                     onError={() => handleImageError('avatar', biosite.avatarImage)}
@@ -152,40 +155,160 @@ export const AvatarSection = ({
                     <img
                         src={defaultAvatar}
                         alt="Avatar placeholder"
-                        className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                        className={`${isExposedRoute ? 'w-32 h-32' : 'w-24 h-24'} rounded-lg object-cover shadow-lg transform rotate-3`}
                     />
                 )}
             </div>
-        ) : (
-            <img
-                src={defaultAvatar}
-                alt="Avatar placeholder"
-                className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
-            />
-        )}
+
+            {/* Segunda imagen cuadrada (Background) */}
+            <div className="relative">
+                {imageLoadStates.background === 'loading' && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gray-200">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2"
+                             style={{ borderColor: themeConfig.colors.primary }}></div>
+                    </div>
+                )}
+                {validBackgroundImage ? (
+                    <>
+                        <img
+                            src={validBackgroundImage}
+                            alt="Background"
+                            className={`${isExposedRoute ? 'w-32 h-32' : 'w-24 h-24'} rounded-lg object-cover shadow-lg transform -rotate-3`}
+                            onLoadStart={() => handleImageLoadStart('background')}
+                            onLoad={() => handleImageLoad('background')}
+                            onError={() => handleImageError('background', biosite.backgroundImage)}
+                            style={{
+                                display: imageLoadStates.background === 'error' ? 'none' : 'block'
+                            }}
+                        />
+                        {imageLoadStates.background === 'error' && (
+                            <div
+                                className={`${isExposedRoute ? 'w-32 h-32' : 'w-24 h-24'} rounded-lg shadow-lg transform -rotate-3 flex items-center justify-center`}
+                                style={{ backgroundColor: themeConfig.colors.primary }}
+                            >
+                                <div className="text-white text-center p-2">
+                                    <svg className="w-6 h-6 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div
+                        className={`${isExposedRoute ? 'w-32 h-32' : 'w-24 h-24'} rounded-lg shadow-lg transform -rotate-3 flex items-center justify-center`}
+                        style={{ backgroundColor: themeConfig.colors.primary }}
+                    >
+                        <div className="text-white text-center p-2">
+                            <svg className="w-6 h-6 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
     </div>
 );
 
-export const UserInfoSection = ({ biosite, user, description, themeConfig }: any) => (
-    <div className="text-center px-4 mb-4">
-        <h1 className="text-lg font-bold leading-tight"
-            style={{
-                color: themeConfig.colors.text,
-                fontFamily: themeConfig.fonts.primary || themeConfig.fonts.secondary
-            }}>
-            {biosite.title || user?.name || "Tu nombre aquí"}
-        </h1>
+// Componente principal que selecciona el layout según el themeId
+export const BackgroundSection = (props: any) => {
+    const { biosite } = props;
 
-        <p className="text-sm mt-2 px-2 leading-relaxed"
-           style={{
-               color: themeConfig.colors.text,
-               opacity: 0.8,
-               fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
-           }}>
-            {description}
-        </p>
-    </div>
-);
+    // Determinar qué template usar basado en el themeId
+    const isTemplate2 = biosite?.themeId === '2' || biosite?.themeId === 'template2';
+
+    if (isTemplate2) {
+        return <BackgroundSectionTemplate2 {...props} />;
+    } else {
+        return <BackgroundSectionTemplate1 {...props} />;
+    }
+};
+
+// Avatar Section - Solo para Template 1 (Template 2 maneja las imágenes en BackgroundSection)
+export const AvatarSection = ({
+                                  isExposedRoute,
+                                  validAvatarImage,
+                                  imageLoadStates,
+                                  handleImageLoadStart,
+                                  handleImageLoad,
+                                  handleImageError,
+                                  biosite,
+                                  themeConfig,
+                                  defaultAvatar
+                              }: any) => {
+    // No mostrar avatar separado en Template 2
+    const isTemplate2 = biosite?.themeId === '2' || biosite?.themeId === 'template2';
+    if (isTemplate2) {
+        return null;
+    }
+
+    return (
+        <div className={`flex justify-center ${isExposedRoute ? '-mt-44' : '-mt-24'} relative z-10 mb-4`}>
+            {validAvatarImage ? (
+                <div className="relative">
+                    {imageLoadStates.avatar === 'loading' && (
+                        <div className={`absolute inset-0 flex items-center justify-center rounded-full border-3 border-white ${isExposedRoute ? 'w-16 h-16' : 'w-16 h-16'}`}
+                             style={{ backgroundColor: themeConfig.colors.profileBackground }}>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2"
+                                 style={{ borderColor: themeConfig.colors.primary }}></div>
+                        </div>
+                    )}
+                    <img
+                        src={validAvatarImage}
+                        alt="Avatar"
+                        className={`${isExposedRoute ? 'w-44 h-44' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
+                        onLoadStart={() => handleImageLoadStart('avatar')}
+                        onLoad={() => handleImageLoad('avatar')}
+                        onError={() => handleImageError('avatar', biosite.avatarImage)}
+                        style={{
+                            display: imageLoadStates.avatar === 'error' ? 'none' : 'block'
+                        }}
+                    />
+                    {imageLoadStates.avatar === 'error' && (
+                        <img
+                            src={defaultAvatar}
+                            alt="Avatar placeholder"
+                            className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                        />
+                    )}
+                </div>
+            ) : (
+                <img
+                    src={defaultAvatar}
+                    alt="Avatar placeholder"
+                    className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                />
+            )}
+        </div>
+    );
+};
+
+export const UserInfoSection = ({ biosite, user, description, themeConfig }: any) => {
+    // Ajustar márgenes para Template 2
+    const isTemplate2 = biosite?.themeId === '2' || biosite?.themeId === 'template2';
+
+    return (
+        <div className={`text-center px-4 ${isTemplate2 ? 'mb-6 mt-4' : 'mb-4'}`}>
+            <h1 className="text-lg font-bold leading-tight"
+                style={{
+                    color: themeConfig.colors.text,
+                    fontFamily: themeConfig.fonts.primary || themeConfig.fonts.secondary
+                }}>
+                {biosite.title || user?.name || "Tu nombre aquí"}
+            </h1>
+
+            <p className="text-sm mt-2 px-2 leading-relaxed"
+               style={{
+                   color: themeConfig.colors.text,
+                   opacity: 0.8,
+                   fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
+               }}>
+                {description}
+            </p>
+        </div>
+    );
+};
 
 export const SocialLinksSection = ({
                                        realSocialLinks,
@@ -209,7 +332,6 @@ export const SocialLinksSection = ({
                             onClick={isExposedRoute ? undefined : handleSocialClick}
                             className={`w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
                             style={{
-                                backgroundColor: 'gray',
                                 transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
                             }}
                         >
@@ -217,7 +339,8 @@ export const SocialLinksSection = ({
                                 <img
                                     src={platform.icon}
                                     alt={link.label}
-                                    className="w-4 h-4 filter brightness-0 invert"
+                                    className="w-4 h-4 filter text-black brightness-0 invert"
+                                    style={{color:'black'}}
                                 />
                             ) : (
                                 <span className="text-white text-sm">🔗</span>
@@ -229,6 +352,7 @@ export const SocialLinksSection = ({
         </div>
     )
 );
+
 const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
 
 export const RegularLinksSection = ({
@@ -246,9 +370,8 @@ export const RegularLinksSection = ({
                     target={isExposedRoute ? "_blank" : undefined}
                     rel={isExposedRoute ? "noopener noreferrer" : undefined}
                     onClick={isExposedRoute ? undefined : handleLinksClick}
-                    className={` w-full p-2 rounded-lg border-2 text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+                    className={`w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md ${!isExposedRoute ? 'cursor-pointer' : ''}`}
                     style={{
-                        borderColor: themeConfig.colors.primary,
                         transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
                     }}
                 >
@@ -273,11 +396,7 @@ export const RegularLinksSection = ({
                     )}
                     <div className="grid grid-cols-1 gap-1">
                         <div className="flex items-center">
-                            <span className="font-medium text-xs truncate"
-                                  style={{
-                                      color: themeConfig.colors.text,
-                                      fontFamily: themeConfig.fonts.primary
-                                  }}>
+                            <span className="font-medium text-xs truncate">
                                 {link.title}
                             </span>
                         </div>
@@ -287,4 +406,3 @@ export const RegularLinksSection = ({
         </div>
     )
 );
-

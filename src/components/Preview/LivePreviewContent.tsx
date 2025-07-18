@@ -145,7 +145,7 @@ const LivePreviewContent = () => {
                                         <iframe
                                             src={getSpotifyEmbedUrl(musicEmbed.url)!}
                                             width="100%"
-                                            height={isExposedRoute ? "152" : "100"}
+                                            height={isExposedRoute ? "80" : "80"}
                                             frameBorder="0"
                                             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                             loading="lazy"
@@ -209,7 +209,6 @@ const LivePreviewContent = () => {
                                             height={isExposedRoute ? "700" : "400"}
                                             frameBorder="0"
                                             scrolling="no"
-                                            allowTransparency
                                             loading="lazy"
                                             title={socialPost.label}
                                         ></iframe>

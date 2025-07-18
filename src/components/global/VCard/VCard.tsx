@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Mail, Globe, Building, QrCode, Download, Share2, X } from 'lucide-react';
+import {Phone, Mail, Globe, QrCode, Download, Share2, X } from 'lucide-react';
 import Cookies from 'js-cookie';
-
-// Import del hook VCard existente
 import { useBusinessCard } from '../../../hooks/useVCard';
+import imgP from "../../../../public/img/img.png";
+import {usePreview} from "../../../context/PreviewContext.tsx";
 
-// Interfaces
 interface VCardData {
     name: string;
     title: string;
@@ -46,6 +45,8 @@ interface VCardButtonProps {
 
 const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
+    const { biosite } = usePreview();
     const [cardData, setCardData] = useState<VCardData>({
         name: '',
         title: '',
@@ -57,7 +58,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
     const currentUserId = userId || Cookies.get('userId');
 
-    // Usar el hook existente
     const {
         businessCard,
         loading,
@@ -65,14 +65,12 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         fetchBusinessCardByUserId
     } = useBusinessCard();
 
-    // Obtener business card cuando se abre el modal
     useEffect(() => {
         if (isModalOpen && currentUserId) {
             fetchBusinessCardByUserId(currentUserId);
         }
     }, [isModalOpen, currentUserId]);
 
-    // Actualizar cardData cuando cambie businessCard
     useEffect(() => {
         if (businessCard?.data) {
             try {
@@ -146,29 +144,45 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         return null;
     }
 
+
+    const getAvatarImage = () => {
+        if (avatarError || !biosite?.avatarImage) {
+            return imgP;
+        }
+        if (typeof biosite.avatarImage === 'string' && biosite.avatarImage.trim()) {
+            if (biosite.avatarImage.startsWith('data:')) {
+                const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
+                return dataUrlRegex.test(biosite.avatarImage) ? biosite.avatarImage : imgP;
+            }
+            try {
+                new URL(biosite.avatarImage);
+                return biosite.avatarImage;
+            } catch {
+                return imgP;
+            }
+        }
+        return imgP;
+    };
+    const handleAvatarError = () => {
+        setAvatarError(true);
+    };
     return (
         <>
             {/* Botón VCard */}
             <div className="px-4 mb-4 cursor-pointer">
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="block w-full p-4 rounded-xl text-center transition-all duration-300  relative overflow-hidden group border-2 border-gray-400 cursor-pointer"
-                    style={{
-                        background: `linear-gradient(135deg, ${themeConfig.colors.primary} 100%, ${themeConfig.colors.accent} 100%)`,
-                        boxShadow: `0 4px 20px ${themeConfig.colors.primary}20 `
-                    }}
+                    className="block w-full p-2 rounded-xl text-center bg-white transition-all duration-300  shadow-md relative overflow-hidden group  cursor-pointer"
+
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-white bg-opacity-20 rounded-lg">
-                            <User className="w-5 h-5 text-black" />
+                        <div className="flex items-center justify-center w-14 h-14  bg-opacity-20 rounded-full">
+                            <img src={getAvatarImage()}  className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover" alt="perfil" onError={handleAvatarError} />
                         </div>
                         <div className="text-left">
-                            <div className="text-black font-bold text-base" style={{ fontFamily: themeConfig.fonts.primary }}>
-                                Mi Tarjeta Digital
-                            </div>
-                            <div className="text-black text-sm opacity-90" style={{ fontFamily: themeConfig.fonts.secondary }}>
-                                Comparte tu información de contacto
+                            <div className="text-black font-bold text-base " style={{ fontFamily: themeConfig.fonts.primary }}>
+                             VCard
                             </div>
                         </div>
                         <QrCode className="w-6 h-6 text-black ml-auto" />
@@ -178,10 +192,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
             {/* Modal VCard */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0  bg-gray-300 flex items-center justify-center p-4 z-50">
                     <div
                         className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto"
-                        style={{ backgroundColor: themeConfig.colors.background }}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b">

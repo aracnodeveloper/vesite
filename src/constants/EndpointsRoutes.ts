@@ -9,8 +9,8 @@ export const metricsApi = "/biosites/analytics";
 export const themesApi ="/themes"
 
 // Plantillas - Nuevos endpoints
-export const plantillasApi = "/platillas";
-export const platillaByIdApi = "/platillas"; // GET /{id}
+export const plantillasApi = "/plantillas";
+export const platillaByIdApi = "/plantillas"; // GET /{id}
 
 //Profile
 export const updateBiositeApi = "/biosites";

@@ -183,7 +183,7 @@ const ProfilePage = () => {
                             <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
                                 DISEÑO
                             </h3>
-                            <div className="bg-[#FFFF] rounded-lg p-4">
+                            <div className=" rounded-lg p-4">
                                 <TemplateSelector
                                     currentThemeId={biosite.themeId}
                                     onTemplateChange={async (templateId: string) => {

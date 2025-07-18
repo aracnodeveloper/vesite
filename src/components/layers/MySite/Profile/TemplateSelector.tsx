@@ -92,13 +92,11 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         );
     }
 
-    // Limitar a solo las primeras 2 plantillas
     const limitedTemplates = templates.slice(0, 2);
 
     return (
         <div className="space-y-4">
-            {/* Templates - Solo 2 plantillas en una fila */}
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-start">
                 {limitedTemplates.map((template) => {
                     const isSelected = selectedTemplate === template.id;
                     const isLoading = loading && isSelected;
