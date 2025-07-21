@@ -168,7 +168,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     };
     return (
         <>
-            {/* Botón VCard */}
             <div className="px-4 mb-4 cursor-pointer">
                 <button
                     onClick={() => setIsModalOpen(true)}
@@ -190,13 +189,11 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                 </button>
             </div>
 
-            {/* Modal VCard */}
             {isModalOpen && (
                 <div className="fixed inset-0  bg-gray-300 flex items-center justify-center p-4 z-50">
                     <div
                         className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto"
                     >
-                        {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b">
                             <h2 className="text-xl font-bold" style={{ color: "black", fontFamily: themeConfig.fonts.primary }}>
                                 Mi Tarjeta Digital

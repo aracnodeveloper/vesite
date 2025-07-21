@@ -21,7 +21,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
     const handleClick = () => {
         if (isExposedRoute) {
             // Si está en la ruta expuesta (preview/editor), ir al editor
-            window.location.href = '/editor';
+            window.location.href = '/expoced';
         } else {
             // Si está en la ruta pública, ir a visitaecuador.com/vesite
             window.location.href = 'https://visitaecuador.com/vesite';

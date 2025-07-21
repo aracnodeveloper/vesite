@@ -27,9 +27,6 @@ import { useUpdateShareActions } from "../../hooks/useUpdateShareActions.ts";
 import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 import PhonePreview from "../Preview/phonePreview.tsx";
 import SettingsModal from "../global/Settings/SettingsModal.tsx";
-
-// Componentes de las secciones para el Drawer
-import Sections from "../../pages/sections.tsx"; // Assuming this is the main Sections page
 import StylesPage from "../../pages/styles.tsx";
 import Analytics from "../../pages/analytics.tsx";
 import SocialPage from "../layers/MySite/Social/socialPage.tsx";
@@ -45,7 +42,6 @@ interface LayoutProps {
     children?: React.ReactNode;
 }
 
-// New component for Sections content within the drawer to handle subsections
 interface SectionsWithDrawerInteractionProps {
     onSubsectionClick: (section: string) => void;
 }
@@ -264,12 +260,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const handleExpoced = () => {
         if (biosite?.slug) {
-            navigate("/expoced");
+            const url = `/expoced`; // o la ruta interna que uses
+            window.open(url, '_blank');
         } else {
             console.warn("No hay slug disponible para la navegación");
         }
     };
-
     const handleUpdateShareAction = async () => {
         if (hasChanges) {
             await handleUpdate();
