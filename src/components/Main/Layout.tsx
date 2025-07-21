@@ -507,8 +507,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             {/* --- VISTA MÓVIL --- */}
-            <div className="lg:hidden flex flex-col h-screen" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%'}}>
-                <header className="flex items-center justify-between p-3 z-10">
+            <div className="lg:hidden flex flex-col h-screen relative" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%'}}>
+                {/* Overlay para opacar la imagen de fondo */}
+                <div className="absolute inset-0 bg-white opacity-24 z-0"></div>
+
+                <header className="flex items-center justify-between p-3 z-10 relative">
                     <img src={getAvatarImage()} onClick={handleOpenSettings} className="w-8 h-8 cursor-pointer rounded-full object-cover" alt="profile" />
                     <div className="flex items-center space-x-2">
                         {/* More options button (three dots) - consider functionality */}
@@ -522,7 +525,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-hidden flex items-center justify-center p-0">
+                <main className="flex-1 overflow-hidden flex items-center justify-center p-0" style={{ maxHeight: 'calc(100vh - 120px)' }}> {/* Adjusted height */}
                     <PhonePreview className="mobile-view">
                         <LivePreviewContent />
                     </PhonePreview>
@@ -547,7 +550,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {isDrawerOpen && (
                     <div
                         ref={drawerRef}
-                        className="fixed bottom-0 left-0 right-0 bg-[#1C1C1C]/80 backdrop-blur-lg rounded-t-2xl shadow-2xl z-50 flex flex-col pointer-events-auto"
+                        className="fixed bottom-0 left-0 right-0 bg-[#E0EED5]/70 backdrop-blur-lg rounded-t-2xl shadow-2xl z-50 flex flex-col pointer-events-auto"
                         style={{ height: `${currentDrawerHeight}vh`, transition: isDragging ? 'none' : 'height 0.3s ease-in-out' }}
                     >
                         <div
@@ -559,10 +562,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto" />
                             <div className="flex items-center justify-between px-4 pt-3">
                                 {/* Back button for drawer navigation */}
-                                <button onClick={goBackToSections} className="flex items-center space-x-2 text-white">
+                                <button onClick={goBackToSections} className="flex items-center space-x-2 text-gray-800">
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
-                                <h2 className="text-white font-semibold">{getDrawerTitle()}</h2>
+                                <h2 className="text-gray-800 font-semibold">{getDrawerTitle()}</h2>
                                 <Edit3 className="w-5 h-5 text-gray-500" /> {/* Edit icon - consider functionality */}
                             </div>
                         </div>
