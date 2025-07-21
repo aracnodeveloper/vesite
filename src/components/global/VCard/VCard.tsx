@@ -177,9 +177,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-3">
-                        <div className="flex items-center justify-center w-14 h-14  bg-opacity-20 rounded-full">
-                            <img src={getAvatarImage()}  className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover" alt="perfil" onError={handleAvatarError} />
-                        </div>
+
+                            <img src={getAvatarImage()}  className="rounded-lg w-10 h-10 xl:w-10 xl:h-10 object-cover" alt="perfil" onError={handleAvatarError} />
+
                         <div className="text-left">
                             <div className="text-black font-bold text-base " style={{ fontFamily: themeConfig.fonts.primary }}>
                              VCard
