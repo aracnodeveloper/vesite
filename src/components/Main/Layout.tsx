@@ -260,12 +260,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const handleExpoced = () => {
         if (biosite?.slug) {
-            const url = `/expoced`; // o la ruta interna que uses
+            const url = `/expoced`;
             window.open(url, '_blank');
         } else {
             console.warn("No hay slug disponible para la navegación");
         }
     };
+
     const handleUpdateShareAction = async () => {
         if (hasChanges) {
             await handleUpdate();
