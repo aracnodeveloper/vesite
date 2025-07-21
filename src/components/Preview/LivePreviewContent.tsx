@@ -13,6 +13,7 @@ import {
 import VCardButton from "../global/VCard/VCard.tsx";
 
 import Cookie from "js-cookie";
+import ConditionalNavButton from "../ConditionalNavButton.tsx";
 // import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 const LivePreviewContent = () => {
@@ -319,6 +320,12 @@ const LivePreviewContent = () => {
                             </div>
                         </div>
                     )}
+
+
+                    <ConditionalNavButton
+                        isExposedRoute={isExposedRoute}
+                        themeConfig={themeConfig}
+                    />
 
                     {/* App Download Buttons
                     <div className="mt-6">
