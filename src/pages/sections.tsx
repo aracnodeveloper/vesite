@@ -10,8 +10,8 @@ const Sections = () => {
 
     return (
         <DragDropProvider>
-            <div className="flex flex-wrap justify-center w-full p-4 mt-4">
-                <div className="max-w-2xl transform scale-[0.9] origin-top">
+            <div className="flex flex-wrap max-h-screen justify-center w-full p-4 mt-4">
+                <div className="max-w-2xl transform scale-[0.8] origin-top">
                     <MySite />
 
                     {/* Tab Navigation */}

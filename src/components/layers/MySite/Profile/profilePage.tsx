@@ -116,7 +116,7 @@ const ProfilePage = () => {
 
     if (!biosite) {
         return (
-            <div className="p-6 max-w-xl mx-auto">
+            <div className="p-6 max-w-xl mx-auto ">
                 <div className="text-center text-red-500 py-8">
                     <div className="mb-4">
                         <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
@@ -136,7 +136,7 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full  mb-10 p-2 max-w-md mx-auto">
             <div className="px-6 py-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
