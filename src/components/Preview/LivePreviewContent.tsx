@@ -1,5 +1,5 @@
 import { useLivePreviewLogic } from '../../hooks/useLivePreviewLogic.ts';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
     LoadingComponent,
     ErrorComponent,
@@ -8,12 +8,13 @@ import {
     AvatarSection,
     UserInfoSection,
     SocialLinksSection,
-    RegularLinksSection,
+    RegularLinksSection, TwoSquareImagesSection,
 } from './LivePreviewComponents';
 import VCardButton from "../global/VCard/VCard.tsx";
 
 import Cookie from "js-cookie";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
+import {useTemplates} from "../../hooks/useTemplates.ts";
 // import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 const LivePreviewContent = () => {
@@ -50,8 +51,11 @@ const LivePreviewContent = () => {
         handleLinksClick,
         handleSocialClick
     } = useLivePreviewLogic();
+
+    const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
+
     useEffect(() => {
-        if (!loading && !userLoading && !biosite  ) {
+        if (!loading && !userLoading && !biosite) {
             const timer = setTimeout(() => {
                 window.location.reload();
             }, 500);
@@ -60,7 +64,44 @@ const LivePreviewContent = () => {
         }
     }, [loading, userLoading, biosite]);
 
-    if (loading || userLoading) {
+    // Memoized template selection with better debugging
+    const currentTemplate = useMemo(() => {
+        console.log('=== TEMPLATE SELECTION DEBUG ===');
+        console.log('Templates loaded:', isTemplatesLoaded);
+        console.log('Available templates:', templates);
+        console.log('Biosite themeId:', biosite?.themeId);
+        console.log('Biosite themeId type:', typeof biosite?.themeId);
+
+        // If templates are not loaded yet, return undefined
+        if (!isTemplatesLoaded || !templates.length) {
+            console.log('Templates not loaded or empty');
+            return undefined;
+        }
+
+        // If biosite has a valid themeId, try to find that template
+        if (biosite?.themeId &&
+            biosite.themeId !== 'null' &&
+            biosite.themeId !== null &&
+            biosite.themeId !== undefined) {
+
+            console.log('Looking for template with ID:', biosite.themeId);
+            const template = getTemplateById(biosite.themeId);
+            console.log('Found template:', template);
+
+            if (template) {
+                return template;
+            } else {
+                console.log('Template not found, available template IDs:', templates.map(t => t.id));
+            }
+        }
+
+        // Fallback to default template (first template or index 0)
+        const defaultTemplate = getDefaultTemplate();
+        console.log('Using default template:', defaultTemplate);
+        return defaultTemplate;
+    }, [biosite?.themeId, templates, isTemplatesLoaded, getTemplateById, getDefaultTemplate]);
+
+    if (loading || userLoading || !isTemplatesLoaded) {
         return <LoadingComponent themeConfig={themeConfig} />;
     }
 
@@ -72,6 +113,22 @@ const LivePreviewContent = () => {
         return <NoBiositeComponent themeConfig={themeConfig} />;
     }
 
+    // If we still don't have a template, show loading
+    if (!currentTemplate) {
+        console.log('No template available, showing loading...');
+        return <LoadingComponent themeConfig={themeConfig} />;
+    }
+
+    // Determinar qué layout usar basado en el índice de la plantilla
+    // Template con index 1 (segunda plantilla) = dos imágenes cuadradas
+    const isSecondTemplate = currentTemplate.index === 1;
+
+    console.log('=== FINAL TEMPLATE INFO ===');
+    console.log('Current template:', currentTemplate);
+    console.log('Is second template:', isSecondTemplate);
+    console.log('Theme ID from biosite:', biosite.themeId);
+    console.log('Template index:', currentTemplate.index);
+
     return (
         <div className={`w-full ${isExposedRoute ? 'min-h-screen flex items-center justify-center' : 'min-h-screen flex items-center justify-center'} `}
              style={{
@@ -82,33 +139,59 @@ const LivePreviewContent = () => {
 
             <div className={`w-full ${isExposedRoute ? 'max-w-full' : 'max-w-sm'} min-h-screen mx-auto`}>
 
-                {/* Sección de fondo */}
-                <BackgroundSection
-                    isExposedRoute={isExposedRoute}
-                    validBackgroundImage={validBackgroundImage}
-                    imageLoadStates={imageLoadStates}
-                    handleImageLoadStart={handleImageLoadStart}
-                    handleImageLoad={handleImageLoad}
-                    handleImageError={handleImageError}
-                    biosite={biosite}
-                    themeConfig={themeConfig}
-                />
+                {/* Layout condicional basado en la plantilla */}
+                {isSecondTemplate ? (
+                    // Template 2: Dos imágenes cuadradas
+                    <>
+                        {/* Fondo sólido para la segunda plantilla */}
+                        <div className="w-full h-24" style={{ backgroundColor: themeConfig.colors.background }}></div>
+
+                        {/* Dos imágenes cuadradas */}
+                        <TwoSquareImagesSection
+                            isExposedRoute={isExposedRoute}
+                            validBackgroundImage={validBackgroundImage}
+                            validAvatarImage={validAvatarImage}
+                            imageLoadStates={imageLoadStates}
+                            handleImageLoadStart={handleImageLoadStart}
+                            handleImageLoad={handleImageLoad}
+                            handleImageError={handleImageError}
+                            biosite={biosite}
+                            themeConfig={themeConfig}
+                            defaultAvatar={defaultAvatar}
+                        />
+                    </>
+                ) : (
+                    // Template 1: Layout por defecto
+                    <>
+                        {/* Sección de fondo */}
+                        <BackgroundSection
+                            isExposedRoute={isExposedRoute}
+                            validBackgroundImage={validBackgroundImage}
+                            imageLoadStates={imageLoadStates}
+                            handleImageLoadStart={handleImageLoadStart}
+                            handleImageLoad={handleImageLoad}
+                            handleImageError={handleImageError}
+                            biosite={biosite}
+                            themeConfig={themeConfig}
+                        />
+
+                        {/* Avatar circular */}
+                        <AvatarSection
+                            isExposedRoute={isExposedRoute}
+                            validAvatarImage={validAvatarImage}
+                            imageLoadStates={imageLoadStates}
+                            handleImageLoadStart={handleImageLoadStart}
+                            handleImageLoad={handleImageLoad}
+                            handleImageError={handleImageError}
+                            biosite={biosite}
+                            themeConfig={themeConfig}
+                            defaultAvatar={defaultAvatar}
+                        />
+                    </>
+                )}
 
                 {/* Contenido principal */}
                 <div className={`w-full ${isExposedRoute ? 'max-w-md' : 'max-w-sm'} mx-auto`}>
-
-                    {/* Avatar */}
-                    <AvatarSection
-                        isExposedRoute={isExposedRoute}
-                        validAvatarImage={validAvatarImage}
-                        imageLoadStates={imageLoadStates}
-                        handleImageLoadStart={handleImageLoadStart}
-                        handleImageLoad={handleImageLoad}
-                        handleImageError={handleImageError}
-                        biosite={biosite}
-                        themeConfig={themeConfig}
-                        defaultAvatar={defaultAvatar}
-                    />
 
                     {/* Información del usuario */}
                     <UserInfoSection
@@ -194,7 +277,6 @@ const LivePreviewContent = () => {
                         </div>
                     )}
 
-
                     {/* SOCIAL POST EMBED */}
                     {socialPost && (
                         <div className="px-4 mb-4">
@@ -260,6 +342,7 @@ const LivePreviewContent = () => {
                         themeConfig={themeConfig}
                         userId={user?.id || Cookie.get('userId')}
                     />
+
                     {/* VIDEO EMBED */}
                     {videoEmbed && (
                         <div className="px-4 mb-4">
@@ -320,7 +403,6 @@ const LivePreviewContent = () => {
                             </div>
                         </div>
                     )}
-
 
                     <ConditionalNavButton
                         isExposedRoute={isExposedRoute}

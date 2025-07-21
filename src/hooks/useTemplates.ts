@@ -15,12 +15,15 @@ interface UseTemplatesReturn {
     createTemplate: (data: Omit<Platilla, 'id'>) => Promise<Platilla>;
     updateTemplate: (id: string, data: Partial<Platilla>) => Promise<Platilla>;
     deleteTemplate: (id: string) => Promise<void>;
+    getDefaultTemplate: () => Platilla | undefined; // NEW: Get default template
+    isTemplatesLoaded: boolean; // NEW: Check if templates are loaded
 }
 
 export const useTemplates = (): UseTemplatesReturn => {
     const [templates, setTemplates] = useState<Platilla[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isTemplatesLoaded, setIsTemplatesLoaded] = useState(false);
     const isMountedRef = useRef(true);
 
     const fetchTemplates = useCallback(async (): Promise<Platilla[]> => {
@@ -62,6 +65,7 @@ export const useTemplates = (): UseTemplatesReturn => {
             if (isMountedRef.current) {
                 setTemplates(processedTemplates);
                 setError(null);
+                setIsTemplatesLoaded(true); // Mark as loaded
             }
 
             return processedTemplates;
@@ -71,6 +75,7 @@ export const useTemplates = (): UseTemplatesReturn => {
 
             if (isMountedRef.current) {
                 setError(errorMessage);
+                setIsTemplatesLoaded(true); // Mark as loaded even with error
 
                 if (errorMessage.includes('401')) {
                     message.error('No autorizado. Por favor, inicia sesión nuevamente.');
@@ -93,12 +98,27 @@ export const useTemplates = (): UseTemplatesReturn => {
         }
     }, []);
 
-    const getTemplateById = useCallback((id: string): Platilla | undefined => {
+    const getTemplateById = useCallback((id: string | null | undefined): Platilla | undefined => {
+        if (!id || id === 'null' || !templates.length) {
+            return undefined;
+        }
         return templates.find(template => template.id === id);
     }, [templates]);
 
     const getActiveTemplates = useCallback((): Platilla[] => {
         return templates.filter(template => template.isActive !== false);
+    }, [templates]);
+
+    // NEW: Get default template (first template or template with index 0)
+    const getDefaultTemplate = useCallback((): Platilla | undefined => {
+        if (!templates.length) return undefined;
+
+        // First try to find template with index 0
+        const defaultTemplate = templates.find(template => template.index === 0);
+        if (defaultTemplate) return defaultTemplate;
+
+        // Fallback to first template
+        return templates[0];
     }, [templates]);
 
     const createTemplate = useCallback(async (data: Omit<Platilla, 'id'>): Promise<Platilla> => {
@@ -186,6 +206,8 @@ export const useTemplates = (): UseTemplatesReturn => {
         refetch: fetchTemplates,
         createTemplate,
         updateTemplate,
-        deleteTemplate
+        deleteTemplate,
+        getDefaultTemplate, // NEW
+        isTemplatesLoaded // NEW
     };
 };

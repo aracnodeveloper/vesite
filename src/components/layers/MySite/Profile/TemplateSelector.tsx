@@ -69,7 +69,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     <span className="text-sm text-gray-500">Cargando plantillas...</span>
                 </div>
                 <div className="flex gap-4 justify-center">
-                    {[1, 2].map((i) => (
+                    {[1, 2,3].map((i) => (
                         <div key={i} className="w-24 h-40 bg-gray-200 rounded-lg animate-pulse"></div>
                     ))}
                 </div>
@@ -92,7 +92,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         );
     }
 
-    const limitedTemplates = templates.slice(0, 2);
+    const limitedTemplates = templates.slice(0, 3);
 
     return (
         <div className="space-y-4">

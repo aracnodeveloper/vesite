@@ -10,13 +10,8 @@ export const useUpdateShareActions = () => {
     const handleUpdate = async () => {
         setIsUpdating(true);
         try {
-            // Simular un pequeño delay para mostrar el estado de carga
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Aquí podrías agregar lógica adicional si necesitas hacer alguna operación
-            // Por ejemplo, refrescar datos del servidor
-
-            // Forzar re-render del componente
             window.location.reload();
         } catch (error) {
             console.error('Error updating preview:', error);

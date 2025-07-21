@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
 import TemplateSelector from "./TemplateSelector.tsx";
+import {useTemplates} from "../../../../hooks/useTemplates.ts";
 
 const { TextArea } = Input;
 
@@ -21,8 +22,7 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
-    const isAdmin = role === 'admin' || role === 'ADMIN';
-    const DEFAULT_BACKGROUND = 'https://visitaecuador.com/ve/img/contenido/publicidad/25_04_29_07_07_28whatsapp_image_2025_04_29_at_16.15.16.jpeg';
+    const DEFAULT_BACKGROUND = 'blob:https://web.whatsapp.com/2ce74555-d90f-4ab3-a5e7-2d40d85ed2f9';
     const loading = previewLoading || updateLoading || userLoading;
 
     useEffect(() => {
@@ -46,6 +46,50 @@ const ProfilePage = () => {
             });
         }
     }, [biosite, user, form]);
+
+
+    const handleTemplateChange = async (templateId: string) => {
+        if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
+
+        try {
+            const loadingMessage = message.loading('Actualizando plantilla...', 0);
+
+            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
+                if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                if (typeof colors === 'string') {
+                    try { JSON.parse(colors); return colors; } catch { return '{"primary":"#3B82F6","secondary":"#1F2937"}'; }
+                }
+                return JSON.stringify(colors);
+            };
+
+            const updateData: BiositeUpdateDto = {
+                themeId: templateId,
+            };
+
+            console.log('Updating biosite with new themeId:', templateId);
+
+            const updated = await updateBiosite(updateData);
+            if (updated) {
+                // Update the local biosite state immediately
+                const updatedBiosite = {
+                    ...biosite,
+                    themeId: templateId
+                };
+
+                // Update preview with the immediately updated biosite
+                updatePreview(updatedBiosite);
+
+                console.log('Successfully updated biosite with new themeId:', updated.themeId);
+                loadingMessage();
+                message.success('Plantilla actualizada exitosamente');
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            console.error("Error al actualizar plantilla:", errorMessage);
+            message.error(`Error al actualizar la plantilla: ${errorMessage}`);
+        }
+    };
+
 
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
@@ -102,6 +146,7 @@ const ProfilePage = () => {
     const handleBackClick = () => {
         navigate(-1);
     };
+
 
     if (loading && !biosite) {
         return (
@@ -186,43 +231,7 @@ const ProfilePage = () => {
                             <div className=" rounded-lg p-4">
                                 <TemplateSelector
                                     currentThemeId={biosite.themeId}
-                                    onTemplateChange={async (templateId: string) => {
-                                        if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
-
-                                        try {
-                                            const loadingMessage = message.loading('Actualizando plantilla...', 0);
-                                            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
-                                                if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                                                if (typeof colors === 'string') {
-                                                    try { JSON.parse(colors); return colors; } catch { return '{"primary":"#3B82F6","secondary":"#1F2937"}'; }
-                                                }
-                                                return JSON.stringify(colors);
-                                            };
-
-                                            const updateData: BiositeUpdateDto = {
-                                                ownerId: biosite.ownerId || userId,
-                                                title: biosite.title,
-                                                slug: biosite.slug,
-                                                themeId: templateId,
-                                                colors: ensureColorsAsString(biosite.colors),
-                                                fonts: biosite.fonts || '',
-                                                avatarImage: biosite.avatarImage || '',
-                                                backgroundImage: biosite.backgroundImage || DEFAULT_BACKGROUND,
-                                                isActive: biosite.isActive ?? true
-                                            };
-
-                                            const updated = await updateBiosite(updateData);
-                                            if (updated) {
-                                                updatePreview(updated);
-                                                loadingMessage();
-                                                message.success('Plantilla actualizada exitosamente');
-                                            }
-                                        } catch (error) {
-                                            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-                                            console.error("Error al actualizar plantilla:", errorMessage);
-                                            message.error(`Error al actualizar la plantilla: ${errorMessage}`);
-                                        }
-                                    }}
+                                    onTemplateChange={handleTemplateChange}
                                     loading={loading}
                                 />
                             </div>

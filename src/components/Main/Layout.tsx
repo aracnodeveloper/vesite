@@ -153,20 +153,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const drawerRef = useRef<HTMLDivElement>(null);
     const dragHandleRef = useRef<HTMLDivElement>(null);
 
-    // Estado para manejar si estamos en la vista principal de secciones o en una subsección
     const [isInSubsection, setIsInSubsection] = useState(false);
 
 
-    // --- Lógica para el Drawer Deslizable ---
 
     const handleDrawerSectionClick = (section: string) => {
         setSelectedSection(section);
         setIsDrawerOpen(true);
-        setIsInSubsection(false); // Resetear cuando se abre una nueva sección principal
-        setCurrentDrawerHeight(85); // Altura inicial al abrir
+        setIsInSubsection(false);
+        setCurrentDrawerHeight(85);
     };
 
-    // Nueva función para manejar clicks en subsecciones de MySite
     const handleMySiteSubsectionClick = (subsection: string) => {
         setSelectedSection(subsection);
         setIsInSubsection(true);
@@ -176,15 +173,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const closeDrawer = () => {
         setIsDrawerOpen(false);
         setSelectedSection(null);
-        setIsInSubsection(false); // Ensure this is reset when drawer is fully closed
+        setIsInSubsection(false);
     };
 
     const goBackToSections = () => {
         if (isInSubsection) {
-            setSelectedSection('sections'); // Go back to the main "Sections" view
+            setSelectedSection('sections');
             setIsInSubsection(false);
         } else {
-            closeDrawer(); // If not in a subsection, just close the drawer
+            closeDrawer();
         }
     };
 
@@ -200,11 +197,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
         const deltaY = currentY - dragStartY;
-        // Calculate new height, ensuring it stays within reasonable bounds (e.g., 0% to 95% of viewport height)
         const newHeight = Math.max(0, Math.min(95, currentDrawerHeight - (deltaY / window.innerHeight) * 100));
 
         setCurrentDrawerHeight(newHeight);
-        // Actualizamos dragStartY para que el movimiento sea fluido
         setDragStartY(currentY);
     };
 
@@ -212,11 +207,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (!isDragging) return;
         setIsDragging(false);
 
-        // If drawer is dragged below a certain threshold, close it
         if (currentDrawerHeight < 40) {
             closeDrawer();
         } else {
-            setCurrentDrawerHeight(85); // Otherwise, snap back to full height
+            setCurrentDrawerHeight(85);
         }
     };
 
@@ -237,7 +231,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }, [isDragging, dragStartY, currentDrawerHeight]);
 
     const getDrawerTitle = () => {
-        if (!selectedSection) return "My Site"; // Default title if no section is selected
+        if (!selectedSection) return "My Site";
 
         const titles: { [key: string]: string } = {
             'sections': 'Sections',
@@ -247,7 +241,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             'social': 'Social',
             'VCard': 'V-Card',
             'links': 'Links',
-            'videos': 'Videos', // Note: This might be redundant if VCardPage is used for videos
+            'videos': 'Videos',
             'music': 'Music',
             'post': 'Post',
             'app': 'App'
@@ -256,7 +250,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return titles[selectedSection] || selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1);
     }
 
-    // --- Fin de la lógica del Drawer ---
 
     const handleExpoced = () => {
         if (biosite?.slug) {

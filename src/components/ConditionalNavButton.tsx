@@ -21,7 +21,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
     const handleClick = () => {
         if (isExposedRoute) {
             // Si está en la ruta expuesta (preview/editor), ir al editor
-            window.location.href = '/expoced';
+            window.location.href = '/sections';
         } else {
             // Si está en la ruta pública, ir a visitaecuador.com/vesite
             window.location.href = 'https://visitaecuador.com/vesite';
@@ -32,7 +32,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
         <div className="px-4 mb-4">
             <button
                 onClick={handleClick}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-full border transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                className="w-full flex items-center cursor-pointer justify-center gap-2 py-3 px-4 rounded-full border transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style={{
                     backgroundColor: isExposedRoute ? themeConfig.colors.accent || '#3B82F6' : 'transparent',
                     borderColor: themeConfig.colors.accent || '#3B82F6',
@@ -51,7 +51,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
                     </svg>
                 </div>
                 <span className="font-medium text-sm">
-                    {isExposedRoute ? 'IR AL EDITOR' : 'CREAR UN BIOSITE GRATIS'}
+                    {isExposedRoute ? 'IR AL EDITOR' : 'CREAR UN VESITE GRATIS'}
                 </span>
                 <svg
                     className="w-4 h-4"

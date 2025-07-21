@@ -167,6 +167,8 @@ export const useLivePreviewLogic = () => {
         }
     };
 
+
+
     const themeConfig = getThemeConfig();
     const musicEmbed = getMusicEmbed();
     const socialPost = getSocialPost();
