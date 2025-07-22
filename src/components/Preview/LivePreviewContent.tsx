@@ -63,7 +63,7 @@ const LivePreviewContent = () => {
         }
     }, [loading, userLoading, biosite]);
 
-    // Fixed template selection logic
+
     const currentTemplate = useMemo(() => {
         console.log('=== TEMPLATE SELECTION DEBUG ===');
         console.log('Templates loaded:', isTemplatesLoaded);
