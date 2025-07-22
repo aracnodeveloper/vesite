@@ -5,7 +5,7 @@ export const registerStudentApi: string = "/auth/register"
 //METRICS
 export const metricsApi = "/biosites/analytics";
 
-//Themes-Templates
+//Themes.ts-Templates
 export const themesApi ="/themes"
 
 // Plantillas - Nuevos endpoints

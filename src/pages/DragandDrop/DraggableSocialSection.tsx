@@ -52,7 +52,6 @@ export const DraggableSocialSection: React.FC<DraggableSocialSectionProps> = ({ 
                                     className="w-6 h-6"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
-                                        e.currentTarget.nextElementSibling!.style.display = 'block';
                                     }}
                                 />
                             ) : null}

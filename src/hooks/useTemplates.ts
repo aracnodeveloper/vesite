@@ -150,13 +150,13 @@ export const useTemplates = (): UseTemplatesReturn => {
             if (isMountedRef.current) {
                 setTemplates(prev =>
                     prev.map(template =>
-                        template.id === id ? { ...template, ...updatedTemplate } : template
+                        template.id === id ? { ...template, ...updatedTemplate } as Platilla : template
                     ).sort((a, b) => (a.index || 0) - (b.index || 0))
                 );
             }
 
             message.success('Plantilla actualizada exitosamente');
-            return updatedTemplate;
+            return updatedTemplate as Platilla;
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error al actualizar plantilla';
             console.error('Error updating template:', error);

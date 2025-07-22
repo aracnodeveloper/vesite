@@ -32,6 +32,8 @@ export const ErrorComponent = ({ error, themeConfig }: { error: string, themeCon
     </div>
 );
 
+const DEFAULT_BACKGROUND = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8UyjYtM090RbFQfQUjZgzvsNZ4I7PWQcD3A&s';
+
 export const NoBiositeComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
     <div className="w-full h-full flex items-center justify-center"
          style={{ backgroundColor: themeConfig.colors.background }}>
@@ -84,33 +86,29 @@ export const BackgroundSection = ({
                 {imageLoadStates.background === 'error' && (
                     <div
                         className="w-full h-full flex items-center justify-center"
-                        style={{ backgroundColor: themeConfig.colors.primary }}
+                        style={{
+                            backgroundImage: `url(${DEFAULT_BACKGROUND})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat'
+                        }}
                     >
-                        <div className="text-white text-center p-4">
-                            <div className="mb-2">
-                                <svg className="w-6 h-6 mx-auto opacity-60" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                </svg>
-                            </div>
-                            <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
-                                {biosite.title || "Tu Biosite"}
-                            </h2>
-                            <p className="text-xs opacity-80">Imagen no disponible</p>
-                        </div>
+
                     </div>
                 )}
             </>
         ) : (
             <div
                 className="w-full h-full flex items-center justify-center"
-                style={{ backgroundColor: themeConfig.colors.primary }}
+                style={{
+                    backgroundImage: `url(${DEFAULT_BACKGROUND})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    clipPath: 'ellipse(100% 80% at 50% 0%)',
+                }}
             >
-                <div className="text-white text-center p-4">
-                    <h2 className="text-base font-bold" style={{ fontFamily: themeConfig.fonts.primary }}>
-                        {biosite.title || "Tu Biosite"}
-                    </h2>
-                    <p className="text-xs opacity-80">Imagen de portada</p>
-                </div>
+
             </div>
         )}
     </div>
@@ -138,7 +136,7 @@ export const AvatarSection = ({
                     </div>
                 )}
                 <img
-                    src={validAvatarImage}
+                    src={validAvatarImage }
                     alt="Avatar"
                     className={`${isExposedRoute ? 'w-44 h-44' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
                     onLoadStart={() => handleImageLoadStart('avatar')}
@@ -160,7 +158,7 @@ export const AvatarSection = ({
             <img
                 src={defaultAvatar}
                 alt="Avatar placeholder"
-                className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                className="w-20 h-20 rounded-full border-3 border-white object-cover shadow-lg mt-5"
             />
         )}
     </div>
@@ -241,8 +239,13 @@ export const TwoSquareImagesSection = ({
                     />
                     {imageLoadStates.background === 'error' && (
                         <div className="w-32 h-32 rounded-lg flex items-center justify-center shadow-lg"
-                             style={{ backgroundColor: themeConfig.colors.primary }}>
-                            <div className="text-white text-center p-2">
+                             style={{
+                                 backgroundImage: `url(${DEFAULT_BACKGROUND})`,
+                                 backgroundSize: 'cover',
+                                 backgroundPosition: 'center',
+                                 backgroundRepeat: 'no-repeat'
+                             }}>
+                            <div className="text-white text-center p-2 bg-black bg-opacity-50 rounded">
                                 <svg className="w-6 h-6 mx-auto opacity-60 mb-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                                 </svg>
@@ -253,8 +256,13 @@ export const TwoSquareImagesSection = ({
                 </>
             ) : (
                 <div className="w-32 h-32 rounded-lg flex items-center justify-center shadow-lg"
-                     style={{ backgroundColor: themeConfig.colors.primary }}>
-                    <div className="text-white text-center p-2">
+                     style={{
+                         backgroundImage: `url(${DEFAULT_BACKGROUND})`,
+                         backgroundSize: 'cover',
+                         backgroundPosition: 'center',
+                         backgroundRepeat: 'no-repeat'
+                     }}>
+                    <div className="text-white text-center p-2 bg-black bg-opacity-50 rounded">
                         <svg className="w-6 h-6 mx-auto opacity-60 mb-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                         </svg>

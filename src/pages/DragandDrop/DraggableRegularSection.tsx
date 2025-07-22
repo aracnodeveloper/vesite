@@ -49,7 +49,6 @@ export const DraggableRegularSection: React.FC<DraggableRegularSectionProps> = (
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
-                                        e.currentTarget.nextElementSibling!.style.display = 'flex';
                                     }}
                                 />
                             ) : null}

@@ -1,7 +1,8 @@
 import apiService from '../service/apiService';
 import type {BiositeTheme, BiositeThemeConfig} from "../interfaces/Biosite.ts";
 import {themesApi} from "../constants/EndpointsRoutes.ts";
-import type {CityTheme, CreateCustomThemeRequest, FontOption, ThemeCategory} from "../hooks/useFetchUpdateTheme.ts";
+import type { CreateCustomThemeRequest,CityTheme,ThemeCategory,FontOption} from '../interfaces/Themes.ts'
+
 export const themeService = {
     // Obtener todos los temas
     getAllThemes: () => apiService.getAll<BiositeTheme[]>(themesApi),
