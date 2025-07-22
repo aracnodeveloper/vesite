@@ -201,18 +201,16 @@ const PublicBiositeView = () => {
         biosite: biositeData.biosite,
         socialLinks: biositeData.socialLinks,
         regularLinks: biositeData.regularLinks,
-        appLinks: biositeData.appLinks,
         themeColor: biositeData.biosite.colors,
         fontFamily: biositeData.biosite.fonts || 'Inter',
         loading: false,
         error: null
     };
 
+
     return (
         <div className="min-h-screen">
             <LivePreviewContent
-                publicData={mockPreviewContext}
-                isPublicView={true}
             />
         </div>
     );

@@ -27,7 +27,7 @@ export const useUpdateShareActions = () => {
             return;
         }
 
-        const shareUrl = `https://visitaecuador.com/vesite/Ve.site/${biosite.slug}`;
+        const shareUrl = `http://localhost:5173Ve.site/${biosite.slug}`;
 
         try {
             // Verificar si el navegador soporta la Web Share API
