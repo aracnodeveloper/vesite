@@ -15,7 +15,6 @@ import VCardButton from "../global/VCard/VCard.tsx";
 import Cookie from "js-cookie";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
 import {useTemplates} from "../../hooks/useTemplates.ts";
-// import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 const LivePreviewContent = () => {
     const {
@@ -64,7 +63,7 @@ const LivePreviewContent = () => {
         }
     }, [loading, userLoading, biosite]);
 
-    // Memoized template selection with better debugging
+    // Fixed template selection logic
     const currentTemplate = useMemo(() => {
         console.log('=== TEMPLATE SELECTION DEBUG ===');
         console.log('Templates loaded:', isTemplatesLoaded);
@@ -82,7 +81,8 @@ const LivePreviewContent = () => {
         if (biosite?.themeId &&
             biosite.themeId !== 'null' &&
             biosite.themeId !== null &&
-            biosite.themeId !== undefined) {
+            biosite.themeId !== undefined &&
+            biosite.themeId.trim() !== '') {
 
             console.log('Looking for template with ID:', biosite.themeId);
             const template = getTemplateById(biosite.themeId);
@@ -119,15 +119,19 @@ const LivePreviewContent = () => {
         return <LoadingComponent themeConfig={themeConfig} />;
     }
 
-    // Determinar qué layout usar basado en el índice de la plantilla
-    // Template con index 1 (segunda plantilla) = dos imágenes cuadradas
-    const isSecondTemplate = currentTemplate.index === 1;
+    // Fixed template layout determination
+    // Check by template ID or index to determine layout
+    const isSecondTemplate = currentTemplate.id === 'bc1452d1-a688-4567-a424-2a0f09103499' ||
+        currentTemplate.index === 1 ||
+        currentTemplate.name?.toLowerCase().includes('square') ||
+        currentTemplate.name?.toLowerCase().includes('dos');
 
     console.log('=== FINAL TEMPLATE INFO ===');
     console.log('Current template:', currentTemplate);
     console.log('Is second template:', isSecondTemplate);
     console.log('Theme ID from biosite:', biosite.themeId);
     console.log('Template index:', currentTemplate.index);
+    console.log('Template ID:', currentTemplate.id);
 
     return (
         <div className={`w-full ${isExposedRoute ? 'min-h-screen flex items-center justify-center' : 'min-h-screen flex items-center justify-center'} `}
@@ -409,11 +413,6 @@ const LivePreviewContent = () => {
                         themeConfig={themeConfig}
                     />
 
-                    {/* App Download Buttons
-                    <div className="mt-6">
-                        <AppDownloadButtons />
-                    </div>
-                    */}
                     {/* Espacio final */}
                     <div className="h-8"></div>
                 </div>

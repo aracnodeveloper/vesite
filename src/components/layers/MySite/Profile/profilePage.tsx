@@ -47,7 +47,6 @@ const ProfilePage = () => {
         }
     }, [biosite, user, form]);
 
-
     const handleTemplateChange = async (templateId: string) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
 
@@ -64,24 +63,37 @@ const ProfilePage = () => {
 
             const updateData: BiositeUpdateDto = {
                 themeId: templateId,
+                ownerId: biosite.ownerId || userId,
+                title: biosite.title,
+                slug: biosite.slug,
+                colors: ensureColorsAsString(biosite.colors),
+                fonts: biosite.fonts || '',
+                avatarImage: biosite.avatarImage || '',
+                backgroundImage: biosite.backgroundImage || DEFAULT_BACKGROUND,
+                isActive: biosite.isActive ?? true
             };
 
-            console.log('Updating biosite with new themeId:', templateId);
+            console.log('Template selected:', templateId);
+            console.log('Updating biosite with data:', updateData);
 
             const updated = await updateBiosite(updateData);
             if (updated) {
-                // Update the local biosite state immediately
-                const updatedBiosite = {
-                    ...biosite,
+                console.log('Successfully updated biosite:', updated);
+                console.log('New themeId in response:', updated.themeId);
+
+                updatePreview({
+                    ...updated,
                     themeId: templateId
-                };
+                });
 
-                // Update preview with the immediately updated biosite
-                updatePreview(updatedBiosite);
+                setTimeout(() => {
+                    fetchBiosite();
+                }, 100);
 
-                console.log('Successfully updated biosite with new themeId:', updated.themeId);
                 loadingMessage();
                 message.success('Plantilla actualizada exitosamente');
+            } else {
+                throw new Error('No se recibió respuesta del servidor');
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -89,7 +101,6 @@ const ProfilePage = () => {
             message.error(`Error al actualizar la plantilla: ${errorMessage}`);
         }
     };
-
 
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') return;
@@ -147,7 +158,6 @@ const ProfilePage = () => {
         navigate(-1);
     };
 
-
     if (loading && !biosite) {
         return (
             <div className="p-6 max-w-xl mx-auto">
@@ -194,9 +204,8 @@ const ProfilePage = () => {
             <div className="p-6">
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>IMÁGENES</h3>
-                        <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
+                    <ImageUploadSection biosite={biosite} loading={loading} userId={userId} updateBiosite={updateBiosite} updatePreview={updatePreview} role={role} />
                 </div>
-
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
                     <Form form={form} layout="vertical" onFinish={handleFinish}>

@@ -309,6 +309,7 @@ export const SocialLinksSection = ({
                             onClick={isExposedRoute ? undefined : handleSocialClick}
                             className={`w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
                             style={{
+                                backgroundColor: 'gray',
                                 transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
                             }}
                         >
