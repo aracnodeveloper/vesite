@@ -65,28 +65,19 @@ const LivePreviewContent = () => {
 
 
     const currentTemplate = useMemo(() => {
-        console.log('=== TEMPLATE SELECTION DEBUG ===');
-        console.log('Templates loaded:', isTemplatesLoaded);
-        console.log('Available templates:', templates);
-        console.log('Biosite themeId:', biosite?.themeId);
-        console.log('Biosite themeId type:', typeof biosite?.themeId);
 
-        // If templates are not loaded yet, return undefined
         if (!isTemplatesLoaded || !templates.length) {
             console.log('Templates not loaded or empty');
             return undefined;
         }
 
-        // If biosite has a valid themeId, try to find that template
         if (biosite?.themeId &&
             biosite.themeId !== 'null' &&
             biosite.themeId !== null &&
             biosite.themeId !== undefined &&
             biosite.themeId.trim() !== '') {
 
-            console.log('Looking for template with ID:', biosite.themeId);
             const template = getTemplateById(biosite.themeId);
-            console.log('Found template:', template);
 
             if (template) {
                 return template;
@@ -95,7 +86,6 @@ const LivePreviewContent = () => {
             }
         }
 
-        // Fallback to default template (first template or index 0)
         const defaultTemplate = getDefaultTemplate();
         console.log('Using default template:', defaultTemplate);
         return defaultTemplate;
@@ -126,12 +116,6 @@ const LivePreviewContent = () => {
         currentTemplate.name?.toLowerCase().includes('square') ||
         currentTemplate.name?.toLowerCase().includes('dos');
 
-    console.log('=== FINAL TEMPLATE INFO ===');
-    console.log('Current template:', currentTemplate);
-    console.log('Is second template:', isSecondTemplate);
-    console.log('Theme ID from biosite:', biosite.themeId);
-    console.log('Template index:', currentTemplate.index);
-    console.log('Template ID:', currentTemplate.id);
 
     return (
         <div className={`w-full ${isExposedRoute ? 'min-h-screen flex items-center justify-center' : 'min-h-screen flex items-center justify-center'} `}
