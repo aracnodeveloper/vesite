@@ -4,7 +4,7 @@ import { usePreview } from "../../../../context/PreviewContext";
 import { useFetchBiosite } from "../../../../hooks/useFetchBiosite";
 import { useUser } from "../../../../hooks/useUser";
 import Cookies from "js-cookie";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Biosite";
@@ -24,9 +24,17 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
+    // Estado para controlar la visibilidad de la advertencia
+    const [showWarning, setShowWarning] = useState(true);
+
     const isAdmin = role === 'admin' || role === 'ADMIN';
     const DEFAULT_BACKGROUND = 'https://visitaecuador.com/ve/img/contenido/publicidad/25_04_29_07_07_28whatsapp_image_2025_04_29_at_16.15.16.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
+
+    // Función para alternar la visibilidad de la advertencia
+    const toggleWarning = () => {
+        setShowWarning(!showWarning);
+    };
 
     useEffect(() => {
         if (biosite && !loading) {
@@ -308,24 +316,30 @@ const ProfilePage = () => {
                     />
                 </div>
 
-                {/* Non-admin background info */}
                 {!isAdmin && (
                     <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0">
-                                <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="flex-shrink-0 cursor-pointer">
+                                <svg
+                                    className="w-5 h-5 text-blue-500 mt-0.5 cursor-pointer hover:text-blue-600 transition-colors"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    onClick={toggleWarning}
+                                >
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <div className="h-10">
-                                <h4 className="text-sm font-medium text-blue-800 mb-1"  style={{fontSize:"11px"}}>Imagen de fondo</h4>
-                                <p className="text-sm text-blue-700"  style={{fontSize:"11px"}}>
-                                    {biosite.backgroundImage
-                                        ? 'Tienes una imagen de fondo personalizada ya previa configurada             Al configurar debes llenar todos los campos y añadir una imagen '
-                                        : 'Se aplicará una imagen de fondo por defecto a el perfil VeSite...  Al configurar debes llenar todos los campos y añadir una imagen'
-                                    }
-                                </p>
-                            </div>
+                            {showWarning && (
+                                <div className="h-20 lg:h-10">
+                                    <h4 className="text-sm font-medium text-blue-800 mb-1" style={{fontSize:"11px"}}>Imagen de fondo</h4>
+                                    <p className="text-sm text-blue-700" style={{fontSize:"11px"}}>
+                                        {biosite.backgroundImage
+                                            ? 'Tienes una imagen de fondo personalizada ya previa configurada             Al configurar debes llenar todos los campos y añadir una imagen '
+                                            : 'Se aplicará una imagen de fondo por defecto a el perfil VeSite...  Al configurar debes llenar todos los campos y añadir una imagen'
+                                        }
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
