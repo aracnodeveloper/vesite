@@ -550,7 +550,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <button
                             key={item.id}
                             onClick={() => handleDrawerSectionClick(item.id)}
-                            className={`flex cursor-pointer flex-col items-center space-y-1 p-3 -mt-12 transition-colors ${selectedSection === item.id ? 'text-white' : 'text-white hover:text-white'}`}
+                            className={`flex cursor-pointer flex-col items-center space-y-1 p-3 -mt-20 transition-colors ${selectedSection === item.id ? 'text-white' : 'text-white hover:text-white'}`}
                         >
                             {item.id === 'sections' && <GanttChart size={22} />}
                             {item.id === 'style' && <Palette size={22} />}

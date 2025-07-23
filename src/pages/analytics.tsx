@@ -241,7 +241,7 @@ const Analytics = () => {
 
           {/* --- VISTA DESKTOP --- */}
           <div className="hidden lg:block">
-            <h1 className="absolute left-50 top-10 text-3xl text-gray-600 font-semibold mb-2 text-start">Analítica</h1>
+            <h1 className="absolute left-50 top-10 text-lg text-gray-600 font-semibold mb-2 text-start">Analiticas</h1>
 
             <div className="relative flex items-center justify-center mb-16">
               <div

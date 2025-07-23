@@ -112,7 +112,7 @@ const PostPage = () => {
                     </label>
                     <textarea
                         className="bg-[#FAFFF6] w-full rounded-md px-4 py-3 text-sm text-black placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                        placeholder="Add a note about this post..."
+                        placeholder="Añade un titulo para este post"
                         rows={3}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}

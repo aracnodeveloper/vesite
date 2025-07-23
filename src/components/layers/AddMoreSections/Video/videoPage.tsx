@@ -119,7 +119,7 @@ const VideoPage = () => {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="bg-[#FAFFF6] w-full rounded-md px-4 py-3 text-sm text-black placeholder:text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Add a title for your video"
+                        placeholder="Añade un titulo para el video"
                         disabled={isSubmitting}
                         maxLength={50}
                     />
