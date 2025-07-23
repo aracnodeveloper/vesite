@@ -11,7 +11,7 @@ import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Bio
 import ImageUploadSection from "./ImageUploadSection";
 //import TemplateSelector from "./TemplateSelector.tsx";
 import { useTemplates } from "../../../../hooks/useTemplates.ts";
-
+import imgP from "../../../../../public/img/Banner.jpg"
 const { TextArea } = Input;
 
 const ProfilePage = () => {
@@ -24,8 +24,9 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
-    const DEFAULT_BACKGROUND = 'blob:https://web.whatsapp.com/2ce74555-d90f-4ab3-a5e7-2d40d85ed2f9';
-    const loading = previewLoading || updateLoading || userLoading || templatesLoading;
+    const isAdmin = role === 'admin' || role === 'ADMIN';
+    const DEFAULT_BACKGROUND = 'https://visitaecuador.com/ve/img/contenido/publicidad/25_04_29_07_07_28whatsapp_image_2025_04_29_at_16.15.16.jpeg';
+    const loading = previewLoading || updateLoading || userLoading;
 
     useEffect(() => {
         if (biosite && !loading) {
@@ -189,23 +190,23 @@ const ProfilePage = () => {
             const getBackgroundImage = (): string => biosite.backgroundImage || DEFAULT_BACKGROUND;
 
             const loadingMessage = message.loading('Actualizando perfil...', 0);
-
-            // Validate current theme ID before using it
-            let validThemeId = biosite.themeId;
-            try {
-                validThemeId = getValidTemplateId(biosite.themeId || '');
-            } catch (error) {
-                console.error('Template validation error:', error);
-                message.error('Error: No se puede validar la plantilla actual');
-                loadingMessage();
-                return;
-            }
-
+            {/*
+                // Validate current theme ID before using it
+                let validThemeId = biosite.themeId;
+                try {
+                    validThemeId = getValidTemplateId(biosite.themeId || '');
+                } catch (error) {
+                    console.error('Template validation error:', error);
+                    message.error('Error: No se puede validar la plantilla actual');
+                    loadingMessage();
+                    return;
+                }
+           */ }
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || biosite.title,
                 slug: values.slug || biosite.slug,
-                themeId: validThemeId, // Use validated theme ID
+                themeId: biosite.themeId,
                 colors: ensureColorsAsString(biosite.colors),
                 fonts: biosite.fonts || '',
                 avatarImage: biosite.avatarImage || '',
@@ -307,6 +308,29 @@ const ProfilePage = () => {
                     />
                 </div>
 
+                {/* Non-admin background info */}
+                {!isAdmin && (
+                    <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="h-10">
+                                <h4 className="text-sm font-medium text-blue-800 mb-1"  style={{fontSize:"11px"}}>Imagen de fondo</h4>
+                                <p className="text-sm text-blue-700"  style={{fontSize:"11px"}}>
+                                    {biosite.backgroundImage
+                                        ? 'Tienes una imagen de fondo personalizada ya  configurada.               Al configurar debes llenar todos los campos y añadir una imagen '
+                                        : 'Se aplicará una imagen de fondo por defecto a tu perfil.'
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* About Section */}
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
                     <Form form={form} layout="vertical" onFinish={handleFinish}>

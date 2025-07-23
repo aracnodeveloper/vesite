@@ -1,5 +1,6 @@
 import type {BiositeThemeConfig} from "../../interfaces/Biosite.ts";
 
+import imgP from "../../../public/img/Banner.jpg"
 export const LoadingComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
     <div className="w-full h-full p-5 flex items-center justify-center"
          style={{
@@ -32,7 +33,7 @@ export const ErrorComponent = ({ error, themeConfig }: { error: string, themeCon
     </div>
 );
 
-const DEFAULT_BACKGROUND = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8UyjYtM090RbFQfQUjZgzvsNZ4I7PWQcD3A&s';
+const DEFAULT_BACKGROUND = "https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg";
 
 export const NoBiositeComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
     <div className="w-full h-full flex items-center justify-center"
