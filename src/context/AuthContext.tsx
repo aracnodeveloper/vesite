@@ -19,7 +19,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     const login = async (email: string, password: string) => {
         try {
             setLoading(true);
-            const data = {email: email, password: password}
+            const data = {usuario: email, password: password}
             const responseData = await apiService.createReqRes<LoginParams, AuthResponse>(loginApi, data)
 
             const {accessToken, refreshToken, userId, roleName, biositeId} = responseData;

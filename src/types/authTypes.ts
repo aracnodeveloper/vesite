@@ -1,5 +1,5 @@
 export type LoginParams = {
-    email: string;
+    usuario: string;
     password: string;
 };
 
