@@ -321,8 +321,8 @@ const ProfilePage = () => {
                                 <h4 className="text-sm font-medium text-blue-800 mb-1"  style={{fontSize:"11px"}}>Imagen de fondo</h4>
                                 <p className="text-sm text-blue-700"  style={{fontSize:"11px"}}>
                                     {biosite.backgroundImage
-                                        ? 'Tienes una imagen de fondo personalizada ya  configurada.               Al configurar debes llenar todos los campos y añadir una imagen '
-                                        : 'Se aplicará una imagen de fondo por defecto a tu perfil.'
+                                        ? 'Tienes una imagen de fondo personalizada ya previa configurada             Al configurar debes llenar todos los campos y añadir una imagen '
+                                        : 'Se aplicará una imagen de fondo por defecto a el perfil VeSite...  Al configurar debes llenar todos los campos y añadir una imagen'
                                     }
                                 </p>
                             </div>
