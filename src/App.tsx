@@ -178,7 +178,7 @@ const App = () => {
 
                         {/* Ruta de preview para usuarios autenticados */}
                         <Route
-                            path="/expoced"
+                            path="vesite/expoced"
                             element={
                                 <PrivateRoute>
                                     <div className="min-h-screen bg-gray-100">
