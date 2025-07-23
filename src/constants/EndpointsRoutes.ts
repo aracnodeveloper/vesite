@@ -1,5 +1,5 @@
 //AUTH
-export const loginApi: string = "/auth/login"
+export const loginApi: string = "/auth/login-flexible"
 export const registerStudentApi: string = "/auth/register"
 
 //METRICS
