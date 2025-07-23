@@ -539,18 +539,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </header>
 
-                <main className={`flex-1 overflow-hidden flex items-center justify-center p-0 ${isDrawerOpen ? 'pointer-events-none' : ''}`} style={{ maxHeight: 'calc(100vh - 120px)' }}> {/* Adjusted height */}
+                <main className={`flex-1 overflow-hidden flex items-center justify-center p-0 ${isDrawerOpen ? 'pointer-events-none' : ''}`} style={{ maxHeight: 'calc(100vh - 100px)' }}> {/* Adjusted height */}
                     <PhonePreview className="mobile-view">
                         <LivePreviewContent />
                     </PhonePreview>
                 </main>
 
-                <nav className="w-full flex justify-around z-10">
+                <nav className="w-full flex mb-20 justify-around z-10">
                     {sidebarItems.map((item) => (
                         <button
                             key={item.id}
                             onClick={() => handleDrawerSectionClick(item.id)}
-                            className={`flex cursor-pointer flex-col items-center space-y-1 p-3 transition-colors ${selectedSection === item.id ? 'text-white' : 'text-white hover:text-white'}`}
+                            className={`flex cursor-pointer flex-col items-center space-y-1 p-3 -mt-12 transition-colors ${selectedSection === item.id ? 'text-white' : 'text-white hover:text-white'}`}
                         >
                             {item.id === 'sections' && <GanttChart size={22} />}
                             {item.id === 'style' && <Palette size={22} />}

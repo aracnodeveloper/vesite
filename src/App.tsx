@@ -30,7 +30,7 @@ const App = () => {
     return (
         <AuthProvider>
             <PreviewProvider>
-                <BrowserRouter basename="/vesite">
+                <BrowserRouter >
                     <Routes>
                         {/* Rutas públicas */}
                         <Route path="/" element={<Navigate to="/sections" />} />
