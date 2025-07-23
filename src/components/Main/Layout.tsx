@@ -61,8 +61,8 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                         >
                             <User className="w-5 h-5 text-blue-400" />
                             <div>
-                                <h4 className="text-white font-medium">Profile</h4>
-                                <p className="text-gray-400 text-sm">Manage your profile information</p>
+                                <h4 className="text-white font-medium">Perfil</h4>
+                                <p className="text-gray-400 text-sm">Maneja tu informacion de perfil</p>
                             </div>
                         </div>
                         {/* Social Card */}
@@ -73,7 +73,7 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                             <Share className="w-5 h-5 text-green-400" />
                             <div>
                                 <h4 className="text-white font-medium">Social</h4>
-                                <p className="text-gray-400 text-sm">Connect your social media</p>
+                                <p className="text-gray-400 text-sm">Conecta tus redes sociales</p>
                             </div>
                         </div>
                         {/* V-Card */}
@@ -84,7 +84,7 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                             <CreditCard className="w-5 h-5 text-purple-400" />
                             <div>
                                 <h4 className="text-white font-medium">V-Card</h4>
-                                <p className="text-gray-400 text-sm">Digital business card</p>
+                                <p className="text-gray-400 text-sm">Tarjeta digital</p>
                             </div>
                         </div>
                     </div>
@@ -98,29 +98,23 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                             className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
                         >
                             <h4 className="text-white font-medium">Links</h4>
-                            <p className="text-gray-400 text-sm">Add important links</p>
+                            <p className="text-gray-400 text-sm">Links Varios</p>
                         </div>
                         <div
                             onClick={() => onSubsectionClick('music')}
                             className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
                         >
-                            <h4 className="text-white font-medium">Music</h4>
-                            <p className="text-gray-400 text-sm">Share your music</p>
+                            <h4 className="text-white font-medium">Musica</h4>
+                            <p className="text-gray-400 text-sm">Comparte tu musica</p>
                         </div>
                         <div
                             onClick={() => onSubsectionClick('post')}
                             className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
                         >
                             <h4 className="text-white font-medium">Post</h4>
-                            <p className="text-gray-400 text-sm">Share posts</p>
+                            <p className="text-gray-400 text-sm">Post de Instragram</p>
                         </div>
-                        <div
-                            onClick={() => onSubsectionClick('app')}
-                            className="bg-[#2A2A2A] rounded-lg p-4 cursor-pointer hover:bg-[#3A3A3A] transition-colors"
-                        >
-                            <h4 className="text-white font-medium">App</h4>
-                            <p className="text-gray-400 text-sm">Connect apps</p>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -155,7 +149,37 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const [isInSubsection, setIsInSubsection] = useState(false);
 
+    // Control del scroll del body cuando el drawer está abierto
+    useEffect(() => {
+        if (isDrawerOpen) {
+            // Prevenir scroll del body cuando el drawer está abierto
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
 
+            // También prevenir el scroll en dispositivos iOS
+            const preventDefault = (e: TouchEvent) => {
+                if (e.target && drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
+                    e.preventDefault();
+                }
+            };
+
+            document.addEventListener('touchmove', preventDefault, { passive: false });
+
+            return () => {
+                document.removeEventListener('touchmove', preventDefault);
+            };
+        } else {
+            // Restaurar scroll del body cuando el drawer se cierra
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }
+
+        // Cleanup al desmontar el componente
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        };
+    }, [isDrawerOpen]);
 
     const handleDrawerSectionClick = (section: string) => {
         setSelectedSection(section);
@@ -497,7 +521,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             {/* --- VISTA MÓVIL --- */}
-            <div className="lg:hidden flex flex-col h-screen relative" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%'}}>
+            <div className={`lg:hidden flex flex-col h-screen relative ${isDrawerOpen ? 'overflow-hidden' : ''}`} style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%'}}>
                 {/* Overlay para opacar la imagen de fondo */}
                 <div className="absolute inset-0 bg-white opacity-24 z-0"></div>
 
@@ -515,7 +539,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-hidden flex items-center justify-center p-0" style={{ maxHeight: 'calc(100vh - 120px)' }}> {/* Adjusted height */}
+                <main className={`flex-1 overflow-hidden flex items-center justify-center p-0 ${isDrawerOpen ? 'pointer-events-none' : ''}`} style={{ maxHeight: 'calc(100vh - 120px)' }}> {/* Adjusted height */}
                     <PhonePreview className="mobile-view">
                         <LivePreviewContent />
                     </PhonePreview>
@@ -538,31 +562,36 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                 {/* --- Drawer Deslizable --- */}
                 {isDrawerOpen && (
-                    <div
-                        ref={drawerRef}
-                        className="fixed bottom-0 left-0 right-0 bg-[#E0EED5]/70 backdrop-blur-lg rounded-t-2xl shadow-2xl z-50 flex flex-col pointer-events-auto"
-                        style={{ height: `${currentDrawerHeight}vh`, transition: isDragging ? 'none' : 'height 0.3s ease-in-out' }}
-                    >
+                    <>
+                        {/* Overlay para bloquear interacción con el fondo */}
+                        <div className="fixed inset-0  z-40" onClick={closeDrawer} />
+
                         <div
-                            ref={dragHandleRef}
-                            onMouseDown={handleDragStart}
-                            onTouchStart={handleDragStart}
-                            className="w-full py-4 cursor-grab active:cursor-grabbing flex-shrink-0"
+                            ref={drawerRef}
+                            className="fixed bottom-0 left-0 right-0 bg-[#E0EED5]/70 backdrop-blur-lg rounded-t-2xl shadow-2xl z-50 flex flex-col pointer-events-auto"
+                            style={{ height: `${currentDrawerHeight}vh`, transition: isDragging ? 'none' : 'height 0.3s ease-in-out' }}
                         >
-                            <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto" />
-                            <div className="flex items-center justify-between px-4 pt-3">
-                                {/* Back button for drawer navigation */}
-                                <button onClick={goBackToSections} className="flex items-center space-x-2 text-gray-800">
-                                    <ArrowLeft className="w-5 h-5" />
-                                </button>
-                                <h2 className="text-gray-800 font-semibold">{getDrawerTitle()}</h2>
-                                <Edit3 className="w-5 h-5 text-gray-500" /> {/* Edit icon - consider functionality */}
+                            <div
+                                ref={dragHandleRef}
+                                onMouseDown={handleDragStart}
+                                onTouchStart={handleDragStart}
+                                className="w-full py-4 cursor-grab active:cursor-grabbing flex-shrink-0"
+                            >
+                                <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto" />
+                                <div className="flex items-center justify-between px-4 pt-3">
+                                    {/* Back button for drawer navigation */}
+                                    <button onClick={goBackToSections} className="flex items-center space-x-2 text-gray-800">
+                                        <ArrowLeft className="w-5 h-5" />
+                                    </button>
+                                    <h2 className="text-gray-800 font-semibold">{getDrawerTitle()}</h2>
+                                    <Edit3 className="w-5 h-5 text-gray-500" /> {/* Edit icon - consider functionality */}
+                                </div>
+                            </div>
+                            <div className="flex-1 overflow-y-auto">
+                                {renderDrawerContent()}
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto">
-                            {renderDrawerContent()}
-                        </div>
-                    </div>
+                    </>
                 )}
             </div>
             <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} onLogout={handleLogoutFromSettings} onProfileSelect={handleProfileSelect} onCreateNewSite={handleCreateNewSite} />

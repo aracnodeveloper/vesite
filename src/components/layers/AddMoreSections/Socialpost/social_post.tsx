@@ -18,7 +18,7 @@ const Post =() =>{
                 </div>
                 <div>
                     <div className="text-black font-medium">Social Post</div>
-                    <div className="text-gray-400 text-sm">Showcase a post from a social media account</div>
+                    <div className="text-gray-400 text-sm">Publicaciones de Instagram</div>
                 </div>
             </div>
             <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-pink-600 hover:border-pink-600 transition-colors">

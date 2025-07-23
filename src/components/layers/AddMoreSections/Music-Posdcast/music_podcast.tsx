@@ -19,7 +19,7 @@ const Musics =() =>{
                 </div>
                 <div>
                     <div className="text-black font-medium">Music / Podcast</div>
-                    <div className="text-gray-400 text-sm">Add audio from Spotify, Apple Music, etc</div>
+                    <div className="text-gray-400 text-sm">Añade Musica </div>
                 </div>
             </div>
             <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-purple-600 hover:border-purple-600 transition-colors">

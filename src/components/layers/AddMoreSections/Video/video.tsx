@@ -18,7 +18,7 @@ const Videos =() =>{
                 </div>
                 <div>
                     <div className="text-black font-medium">Video</div>
-                    <div className="text-gray-400 text-sm">Embed a video from YouTube, Twitch, etc</div>
+                    <div className="text-gray-400 text-sm">Añade un video de Youtube que quieras mostrar </div>
                 </div>
             </div>
             <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-blue-600 hover:border-blue-600 transition-colors">
