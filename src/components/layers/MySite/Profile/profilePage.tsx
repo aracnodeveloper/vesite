@@ -28,7 +28,7 @@ const ProfilePage = () => {
     const [showWarning, setShowWarning] = useState(true);
 
     const isAdmin = role === 'admin' || role === 'ADMIN';
-    const DEFAULT_BACKGROUND = 'https://visitaecuador.com/ve/img/contenido/publicidad/25_04_29_07_07_28whatsapp_image_2025_04_29_at_16.15.16.jpeg';
+    const DEFAULT_BACKGROUND = 'https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
 
     // Función para alternar la visibilidad de la advertencia
