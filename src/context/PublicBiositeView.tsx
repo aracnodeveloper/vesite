@@ -251,7 +251,7 @@ const PublicBiositeView = () => {
                     appLinks
                 });
 
-            
+
 
             } catch (error: any) {
                 const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
@@ -525,7 +525,7 @@ const PublicBiositeView = () => {
                     {/* V-Card Button */}
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={user?.id}
+                        userId={user.id}
                     />
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (
