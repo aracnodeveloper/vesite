@@ -31,7 +31,7 @@ export const useUpdateShareActions = () => {
 
         // Construir la URL correcta usando el origen actual
         const baseUrl = window.location.origin;
-        const shareUrl = `${baseUrl}/Ve.site/${biosite.slug}`;
+        const shareUrl = `${baseUrl}/vesite/Ve.site/${biosite.slug}`;
 
         console.log('Sharing URL:', shareUrl); // Para debug
 
