@@ -24,7 +24,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
             window.location.href = '/sections';
         } else {
             // Si está en la ruta pública, ir a visitaecuador.com/vesite
-            window.location.href = 'https://visitaecuador.com/vesite';
+            window.location.href = 'https://visitaecuador.com/vesite' ;
         }
     };
 

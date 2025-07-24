@@ -36,6 +36,7 @@ import LinksPage from "../layers/AddMoreSections/Links/linksPage.tsx";
 import MusicPage from "../layers/AddMoreSections/Music-Posdcast/musicPage.tsx";
 import PostPage from "../layers/AddMoreSections/Socialpost/socialPostPage.tsx";
 import AppPage from "../layers/AddMoreSections/App/appPage.tsx";
+import ShareButton from "../ShareButton.tsx";
 
 
 interface LayoutProps {
@@ -507,6 +508,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-0 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50">
                                     URL: Ve.site/{biosite?.slug || 'your-slug'}
                                 </div>
+                                <ShareButton/>
                                 <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`absolute text-xs top-0 rounded-lg p-2 right-20 text-white mb-4 text-center z-50 flex items-center space-x-1 transition-all duration-200 ${buttonContent.disabled ? 'bg-[#464C3666] cursor-not-allowed' : hasChanges ? 'bg-[#98C022] hover:bg-[#86A81E]' : 'bg-[#464C3666] hover:bg-[#464C36AA]'} cursor-pointer`} title={hasChanges ? 'Update preview' : 'Share link'}>
                                     {buttonContent.icon}
                                     <span>{buttonContent.text}</span>
