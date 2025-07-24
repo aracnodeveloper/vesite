@@ -5,7 +5,7 @@ import {
     Droplet,
     BarChart3,
     RefreshCw,
-    Share2,
+ //   Share2,
     ArrowLeft,
     Edit3,
     BarChartHorizontalBig,
@@ -289,8 +289,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (hasChanges) {
             await handleUpdate();
             markAsSaved();
-        } else {
-            await handleShare();
         }
     };
 
@@ -393,7 +391,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const getButtonContent = () => {
         if (isUpdating) return { text: "Updating...", icon: <RefreshCw className="w-3 h-3 animate-spin" />, disabled: true };
         if (hasChanges) return { text: "Update", icon: <RefreshCw className="w-3 h-3" />, disabled: false };
-        return { text: "Share", icon: <Share2 className="w-3 h-3" />, disabled: false };
+        return { text: "Update", icon: <RefreshCw className="w-3 h-3" />, disabled: false };
     };
 
     const buttonContent = getButtonContent();
@@ -508,7 +506,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-0 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50">
                                     URL: Ve.site/{biosite?.slug || 'your-slug'}
                                 </div>
-                                <div className="absolute top-0">
+                                <div className="absolute top-0 right-40">
                                 <ShareButton/></div>
                                 <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`absolute text-xs top-0 rounded-lg p-2 right-20 text-white mb-4 text-center z-50 flex items-center space-x-1 transition-all duration-200 ${buttonContent.disabled ? 'bg-[#464C3666] cursor-not-allowed' : hasChanges ? 'bg-[#98C022] hover:bg-[#86A81E]' : 'bg-[#464C3666] hover:bg-[#464C36AA]'} cursor-pointer`} title={hasChanges ? 'Update preview' : 'Share link'}>
                                     {buttonContent.icon}
@@ -530,12 +528,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
                 <header className="flex items-center justify-between p-3 z-10 relative">
                     <img src={getAvatarImage()} onClick={handleOpenSettings} className="w-8 h-8 cursor-pointer rounded-full object-cover" alt="profile" />
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-5">
                         {/* More options button (three dots) - consider functionality */}
-                        <button className="p-2 text-white rounded-full hover:bg-black/20">
+                        <button className="p-2 text-gray-400 rounded-full hover:bg-black/20 " onClick={handleOpenSettings}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
                         </button>
-                        <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`px-4 cursor-pointer py-2 text-xs rounded-full flex items-center space-x-1.5 transition-colors ${buttonContent.disabled ? 'bg-gray-600 text-gray-400' : 'bg-white text-black'}`}>
+                        <div className="absolute top-3.5 right-18">
+                            <ShareButton/>
+                        </div>
+                        <button onClick={handleUpdateShareAction} disabled={buttonContent.disabled} className={`px-4 cursor-pointer py-2 text-xs rounded-lg flex items-center space-x-1.5 transition-colors ${buttonContent.disabled ? 'bg-gray-600 text-gray-400' : 'bg-white text-black'}`}>
                             {buttonContent.icon}
                             <span>{buttonContent.text}</span>
                         </button>

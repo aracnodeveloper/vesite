@@ -1,4 +1,5 @@
 import { useUpdateShareActions } from '../hooks/useUpdateShareActions';
+import {Share2} from "lucide-react";
 
 const ShareButton = () => {
     const { handleShare, isSharing, canShare, shareUrl } = useUpdateShareActions();
@@ -24,7 +25,7 @@ const ShareButton = () => {
         return {
             text: 'Compartir',
             disabled: false,
-            icon: <span>🔗</span>
+            icon: <span><Share2  className="h-4 w-4 lg:text-black text-gray-400" /></span>
         };
     };
 
@@ -46,15 +47,14 @@ const ShareButton = () => {
             <button
                 onClick={handleClick}
                 disabled={buttonContent.disabled}
-                className={`px-4 cursor-pointer py-2 text-xs rounded-full flex items-center space-x-1.5 transition-colors ${
+                className={`px-4 cursor-pointer py-2 text-xs h-8 rounded-lg flex items-center space-x-1.5 transition-colors ${
                     buttonContent.disabled
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-black hover:bg-gray-100'
+                        : 'bg-transparent lg:bg-gray-100 text-black hover:bg-gray-100'
                 }`}
                 title={shareUrl || 'Compartir biosite'}
             >
                 {buttonContent.icon}
-                <span>{buttonContent.text}</span>
             </button>
 
         </div>
