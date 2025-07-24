@@ -586,7 +586,7 @@ const PublicBiositeView = () => {
                                  style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
 
                                 {/* Iframe siempre visible */}
-                                {isInstagramUrl(socialPost.url) ? (
+                                {getInstagramEmbedUrl(socialPost.url) ? (
                                     <div className="embed-container instagram-embed">
                                         <iframe
                                             src={getInstagramEmbedUrl(socialPost.url)!}
