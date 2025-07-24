@@ -509,7 +509,7 @@ const PublicBiositeView = () => {
 
                     {/* Links sociales */}
                     <SocialLinksSection
-                        realSocialLinks={biositeData.socialLinks.filter(link => link.isActive)}
+                        realSocialLinks={socialLinksData }
                         findPlatformForLink={findPlatformForLink}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
@@ -517,7 +517,7 @@ const PublicBiositeView = () => {
 
                     {/* Links regulares */}
                     <RegularLinksSection
-                        regularLinksData={biositeData.regularLinks.filter(link => link.isActive)}
+                        regularLinksData={biositeData.regularLinks.filter(link => link.isActive ) }
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
                     />
