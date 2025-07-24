@@ -525,7 +525,7 @@ const PublicBiositeView = () => {
                     {/* V-Card Button */}
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={user.id}
+                        userId={user?.id}
                     />
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (
