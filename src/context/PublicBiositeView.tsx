@@ -1,7 +1,6 @@
-// PublicBiositeView.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type { BiositeFull } from "../interfaces/Biosite";
+import type {BiositeFull, BiositeLink} from "../interfaces/Biosite";
 import type { SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
 import apiService from "../service/apiService";
 import {
@@ -18,6 +17,7 @@ import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {usePreview} from "./PreviewContext.tsx";
+import {useUser} from "../hooks/useUser.ts";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -35,7 +35,7 @@ interface PublicUser {
 const PublicBiositeView = () => {
     const { slug } = useParams<{ slug: string }>();
     const [biositeData, setBiositeData] = useState<PublicBiositeData | null>(null);
-    const [user, setUser] = useState<PublicUser | null>(null);
+    const {user}= useUser();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
@@ -98,11 +98,35 @@ const PublicBiositeView = () => {
         return 'appstore';
     };
 
-    const processLinks = (links: any[]) => {
+    const processLinks = (links: any) => {
         const socialLinks: SocialLink[] = [];
         const regularLinks: RegularLink[] = [];
         const appLinks: AppLink[] = [];
+        const filterRealSocialLinks = (links: SocialLink[]) => {
+            return links.filter(link => {
+                if (!link.isActive) return false;
 
+                const excludedKeywords = [
+                    'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+                    'youtube', 'video', 'vimeo', 'tiktok video',
+                    'post', 'publicacion', 'contenido',
+                    'music embed', 'video embed', 'social post',
+                    'embed', 'player'
+                ];
+
+                const labelLower = link.label.toLowerCase();
+                const urlLower = link.url.toLowerCase();
+
+                const isExcluded = excludedKeywords.some(keyword =>
+                    labelLower.includes(keyword) || urlLower.includes(keyword)
+                );
+
+                if (isExcluded) return false;
+
+                const platform = findPlatformForLink(link);
+                return platform !== undefined && platform !== null;
+            });
+        };
         links.forEach(link => {
             const iconIdentifier = getIconIdentifier(link.icon);
             if (isAppStoreLink(link)) {
@@ -218,7 +242,7 @@ const PublicBiositeView = () => {
                 }
 
                 // Procesar los links
-                const { socialLinks, regularLinks, appLinks } = processLinks(biosite.links || []);
+                const { socialLinks, regularLinks, appLinks } = processLinks(biosite.links);
 
                 setBiositeData({
                     biosite,
@@ -227,12 +251,7 @@ const PublicBiositeView = () => {
                     appLinks
                 });
 
-                // Simular datos de usuario si no existen
-                setUser({
-                    id: biosite.ownerId || 'public-user',
-                    name: biosite.title || 'Usuario',
-                    description: user?.description || 'Description'
-                });
+            
 
             } catch (error: any) {
                 const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
@@ -500,7 +519,6 @@ const PublicBiositeView = () => {
                     <RegularLinksSection
                         regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}
-                        handleLinksClick={() => {}} // No hay navegación en vista pública
                         themeConfig={themeConfig}
                     />
 
