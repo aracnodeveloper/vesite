@@ -39,7 +39,7 @@ const PublicBiositeView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
-    const {socialLinks, regularLinks,getMusicEmbed, getSocialPost, getVideoEmbed} = usePreview()
+    const {getMusicEmbed, getSocialPost, getVideoEmbed} = usePreview()
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
 
@@ -98,54 +98,94 @@ const PublicBiositeView = () => {
         return 'appstore';
     };
 
+    // Función para determinar si un enlace es social basado en plataforma
+    const isSocialLink = (link: any): boolean => {
+        const iconIdentifier = getIconIdentifier(link.icon);
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        // Lista de plataformas sociales conocidas
+        const socialPlatforms = [
+            'instagram', 'tiktok', 'twitter', 'facebook', 'twitch',
+            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
+            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
+        ];
+
+        // Verificar por icono
+        if (socialPlatforms.includes(iconIdentifier)) {
+            return true;
+        }
+
+        // Verificar por dominio en la URL
+        const socialDomains = [
+            'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
+            'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
+            'pinterest.com', 'discord.gg', 'discord.com', 'tumblr.com',
+            'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com'
+        ];
+
+        const hasSocialDomain = socialDomains.some(domain => urlLower.includes(domain));
+        if (hasSocialDomain) {
+            return true;
+        }
+
+        // Verificar por label
+        const socialKeywords = [
+            'instagram', 'tiktok', 'twitter', 'facebook', 'twitch',
+            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
+            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
+        ];
+
+        return socialKeywords.some(keyword => labelLower.includes(keyword));
+    };
+
+    // Función para verificar si es un enlace de embed (música, video, post)
+    const isEmbedLink = (link: any): boolean => {
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        const embedKeywords = [
+            'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+            'youtube', 'video', 'vimeo', 'tiktok video',
+            'post', 'publicacion', 'contenido',
+            'music embed', 'video embed', 'social post',
+            'embed', 'player'
+        ];
+
+        return embedKeywords.some(keyword =>
+            labelLower.includes(keyword) || urlLower.includes(keyword)
+        );
+    };
+
     const processLinks = (links: any) => {
         const socialLinks: SocialLink[] = [];
         const regularLinks: RegularLink[] = [];
         const appLinks: AppLink[] = [];
-        const filterRealSocialLinks = (links: SocialLink[]) => {
-            return links.filter(link => {
-                if (!link.isActive) return false;
 
-                const excludedKeywords = [
-                    'spotify', 'music', 'apple music', 'soundcloud', 'audio',
-                    'youtube', 'video', 'vimeo', 'tiktok video',
-                    'post', 'publicacion', 'contenido',
-                    'music embed', 'video embed', 'social post',
-                    'embed', 'player'
-                ];
-
-                const labelLower = link.label.toLowerCase();
-                const urlLower = link.url.toLowerCase();
-
-                const isExcluded = excludedKeywords.some(keyword =>
-                    labelLower.includes(keyword) || urlLower.includes(keyword)
-                );
-
-                if (isExcluded) return false;
-
-                const platform = findPlatformForLink(link);
-                return platform !== undefined && platform !== null;
-            });
-        };
         links.forEach(link => {
             const iconIdentifier = getIconIdentifier(link.icon);
+
             if (isAppStoreLink(link)) {
+                // Enlaces de tiendas de aplicaciones
                 appLinks.push({
                     id: link.id,
                     store: getStoreType(link),
                     url: link.url,
                     isActive: link.isActive
                 });
-            } else if (link.type === 'social') {
+            } else if (isSocialLink(link) && !isEmbedLink(link)) {
+                // Enlaces sociales reales (no embeds)
                 socialLinks.push({
                     id: link.id,
                     label: link.label,
+                    name: link.label, // Agregar la propiedad name
                     url: link.url,
                     icon: iconIdentifier,
                     color: link.color || '#3B82F6',
                     isActive: link.isActive
                 });
-            } else {
+            } else if (!isEmbedLink(link) && !isSocialLink(link)) {
+                // Enlaces regulares (no sociales, no embeds)
                 regularLinks.push({
                     id: link.id,
                     title: link.label,
@@ -155,6 +195,7 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             }
+            // Los embeds se ignoran aquí ya que se manejan por separado
         });
 
         return {
@@ -250,8 +291,6 @@ const PublicBiositeView = () => {
                     regularLinks,
                     appLinks
                 });
-
-
 
             } catch (error: any) {
                 const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
@@ -352,7 +391,7 @@ const PublicBiositeView = () => {
     };
 
     const themeConfig = getThemeConfig();
-    const isExposedRoute =  location.pathname === '/expoced' || '/sections';
+    const isExposedRoute = location.pathname === '/expoced' || location.pathname.includes('/sections');
     const validBackgroundImage = isValidImageUrl(biositeData.biosite?.backgroundImage) ? biositeData.biosite?.backgroundImage : null;
     const validAvatarImage = isValidImageUrl(biositeData.biosite?.avatarImage) ? biositeData.biosite?.avatarImage : null;
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
@@ -363,31 +402,22 @@ const PublicBiositeView = () => {
         currentTemplate.name?.toLowerCase().includes('square') ||
         currentTemplate.name?.toLowerCase().includes('dos');
 
-    const getSocialLinks = () => {
-        if (!socialLinks || socialLinks.length === 0) return [];
-        return socialLinks.filter(link => {
-            if (!link.isActive) return false;
+    // Función para encontrar la plataforma de un enlace social
+    const findPlatformForLink = (link: SocialLink) => {
+        return socialMediaPlatforms.find(platform => {
+            const linkLabelLower = link.label.toLowerCase();
+            const platformNameLower = platform.name.toLowerCase();
+            const platformIdLower = platform.id.toLowerCase();
 
-            // Filtrar solo enlaces sociales reales
-            const platform = findPlatformForLink(link);
-            return platform !== undefined && platform !== null;
+            return (
+                linkLabelLower === platformNameLower ||
+                linkLabelLower.includes(platformIdLower) ||
+                link.icon === platform.icon ||
+                linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '')
+            );
         });
     };
-    const getRegularLinks = () => {
-        if (!regularLinks || regularLinks.length === 0) return [];
-        return regularLinks.filter(link => {
-            if (!link.isActive) return false;
 
-            // Asegurar que no sean enlaces sociales
-            const socialPlatforms = ['instagram', 'facebook', 'twitter', 'tiktok', 'youtube'];
-            const labelLower = link.title.toLowerCase();
-            const urlLower = link.url.toLowerCase();
-
-            return !socialPlatforms.some(platform =>
-                labelLower.includes(platform) || urlLower.includes(platform)
-            );
-        }).sort((a, b) => a.orderIndex - b.orderIndex);
-    };
     const getSpotifyEmbedUrl = (url: string) => {
         const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
         if (trackMatch) {
@@ -411,54 +441,19 @@ const PublicBiositeView = () => {
         }
         return null;
     };
-    // Filtrar links reales (excluir embeds)
-    const filterRealSocialLinks = (links: SocialLink[]) => {
-        return links.filter(link => {
-            if (!link.isActive) return false;
 
-            const excludedKeywords = [
-                'spotify', 'music', 'apple music', 'soundcloud', 'audio',
-                'youtube', 'video', 'vimeo', 'tiktok video',
-                'post', 'publicacion', 'contenido',
-                'music embed', 'video embed', 'social post',
-                'embed', 'player'
-            ];
-
-            const labelLower = link.label.toLowerCase();
-            const urlLower = link.url.toLowerCase();
-
-            const isExcluded = excludedKeywords.some(keyword =>
-                labelLower.includes(keyword) || urlLower.includes(keyword)
-            );
-
-            return !isExcluded;
-        });
-    };
-
-    const findPlatformForLink = (link: SocialLink) => {
-        return socialMediaPlatforms.find(platform => {
-            const linkLabelLower = link.label.toLowerCase();
-            const platformNameLower = platform.name.toLowerCase();
-            const platformIdLower = platform.id.toLowerCase();
-
-            return (
-                linkLabelLower === platformNameLower ||
-                linkLabelLower.includes(platformIdLower) ||
-                link.icon === platform.icon ||
-                linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '')
-            );
-        });
-    };
-    const regularLinksData = getRegularLinks();
-    const socialLinksData = getSocialLinks();
-    const musicEmbed = getMusicEmbed();
-    const socialPost = getSocialPost();
-    const videoEmbed = getVideoEmbed();
-    const realSocialLinks = filterRealSocialLinks(socialLinksData);
-    const description = user?.description || user?.name || biositeData.biosite.title || 'Bio Site';
     const isInstagramUrl = (url: string) => {
         return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
     };
+
+    // Obtener los datos procesados
+    const socialLinksData = biositeData.socialLinks.filter(link => link.isActive);
+    const regularLinksData = biositeData.regularLinks.filter(link => link.isActive);
+    const musicEmbed = getMusicEmbed();
+    const socialPost = getSocialPost();
+    const videoEmbed = getVideoEmbed();
+    const description = user?.description || user?.name || biositeData.biosite.title || 'Bio Site';
+
     return (
         <div className={`w-full min-h-screen flex items-center justify-center`}
              style={{
@@ -526,7 +521,7 @@ const PublicBiositeView = () => {
 
                     {/* Links sociales */}
                     <SocialLinksSection
-                        realSocialLinks={socialLinksData }
+                        realSocialLinks={socialLinksData}
                         findPlatformForLink={findPlatformForLink}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
@@ -534,7 +529,7 @@ const PublicBiositeView = () => {
 
                     {/* Links regulares */}
                     <RegularLinksSection
-                        regularLinksData={biositeData.regularLinks.filter(link => link.isActive ) }
+                        regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
                     />
@@ -544,6 +539,7 @@ const PublicBiositeView = () => {
                         themeConfig={themeConfig}
                         userId={user?.id}
                     />
+
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (
                         <div className="px-4 mb-4">
@@ -590,8 +586,6 @@ const PublicBiositeView = () => {
                                         </div>
                                     </div>
                                 )}
-
-
                             </div>
                         </div>
                     )}
@@ -602,7 +596,6 @@ const PublicBiositeView = () => {
                             <div className="relative rounded-lg shadow-md overflow-hidden"
                                  style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
 
-                                {/* Iframe siempre visible */}
                                 {getInstagramEmbedUrl(socialPost.url) ? (
                                     <div className="embed-container instagram-embed">
                                         <iframe
@@ -643,11 +636,10 @@ const PublicBiositeView = () => {
                                         </div>
                                     </div>
                                 )}
-
-
                             </div>
                         </div>
                     )}
+
                     {videoEmbed && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
