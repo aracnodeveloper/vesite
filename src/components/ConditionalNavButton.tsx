@@ -21,10 +21,10 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
     const handleClick = () => {
         if (isExposedRoute) {
             // Si está en la ruta expuesta (preview/editor), ir al editor
-            window.location.href = '/sections';
+            window.location.href = 'vesite/sections';
         } else {
             // Si está en la ruta pública, ir a visitaecuador.com/vesite
-            window.location.href = 'https://visitaecuador.com/vesite' ;
+            window.location.href = 'https://visitaecuador.com/vesite'  ;
         }
     };
 
@@ -53,8 +53,8 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
                 </div>
 
                 {/* Texto más pequeño en mobile */}
-                <span className="font-medium text-xs sm:text-sm">
-                    {isExposedRoute ? 'IR AL EDITOR' : 'CREAR UN VESITE GRATIS'}
+                <span className="font-medium text-xs sm:text-xs">
+                    {isExposedRoute ? 'IR A ACTUALIZAR MIS DATOS' : 'CREAR UN VESITE GRATIS'}
                 </span>
 
                 {/* Flecha más pequeña en mobile */}

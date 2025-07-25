@@ -25,7 +25,6 @@ export interface CreateBusinessCardDto {
 }
 
 export interface UpdateBusinessCardDto {
-    id: string;
     ownerId: string;
     data?: any;
     isActive?: boolean;

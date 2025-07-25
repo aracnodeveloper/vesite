@@ -52,7 +52,7 @@ const LivePreviewContent = () => {
     } = useLivePreviewLogic();
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
-
+    const isExposedRoutes = location.pathname === '/expoced' || '/sections';
     useEffect(() => {
         if (!loading && !userLoading && !biosite) {
             const timer = setTimeout(() => {
@@ -393,7 +393,7 @@ const LivePreviewContent = () => {
                     )}
 
                     <ConditionalNavButton
-                        isExposedRoute={isExposedRoute}
+                        isExposedRoute={isExposedRoutes}
                         themeConfig={themeConfig}
                     />
 

@@ -41,7 +41,7 @@ export const Login: FC = () => {
                 const token = Cookies.get("accessToken");
                 if (token) {
                     // Recargar la página antes de navegar
-                    window.location.href = "vesite/sections";
+                    window.location.href = "/sections";
                 } else {
                     setError("Login failed. No token found.");
                 }
