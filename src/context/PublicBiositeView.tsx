@@ -365,11 +365,28 @@ const PublicBiositeView = () => {
 
     const getSocialLinks = () => {
         if (!socialLinks || socialLinks.length === 0) return [];
-        return socialLinks.filter(link => link.isActive);
+        return socialLinks.filter(link => {
+            if (!link.isActive) return false;
+
+            // Filtrar solo enlaces sociales reales
+            const platform = findPlatformForLink(link);
+            return platform !== undefined && platform !== null;
+        });
     };
     const getRegularLinks = () => {
         if (!regularLinks || regularLinks.length === 0) return [];
-        return regularLinks.filter(link => link.isActive).sort((a, b) => a.orderIndex - b.orderIndex);
+        return regularLinks.filter(link => {
+            if (!link.isActive) return false;
+
+            // Asegurar que no sean enlaces sociales
+            const socialPlatforms = ['instagram', 'facebook', 'twitter', 'tiktok', 'youtube'];
+            const labelLower = link.title.toLowerCase();
+            const urlLower = link.url.toLowerCase();
+
+            return !socialPlatforms.some(platform =>
+                labelLower.includes(platform) || urlLower.includes(platform)
+            );
+        }).sort((a, b) => a.orderIndex - b.orderIndex);
     };
     const getSpotifyEmbedUrl = (url: string) => {
         const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
@@ -517,7 +534,7 @@ const PublicBiositeView = () => {
 
                     {/* Links regulares */}
                     <RegularLinksSection
-                        regularLinksData={biositeData.regularLinks.filter(link => link.isActive ) }
+                        regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
                     />
