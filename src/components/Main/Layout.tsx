@@ -278,7 +278,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const handleExpoced = () => {
         if (biosite?.slug) {
-            const url = `/expoced`;
+            const url = `vesite/expoced`;
             window.open(url, '_blank');
         } else {
             console.warn("No hay slug disponible para la navegación");
