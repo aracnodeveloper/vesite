@@ -246,6 +246,7 @@ const SocialPage = () => {
             } else {
                 const newSocialLink = {
                     id: `temp-${Date.now()}`,
+                    name: editingPlatform.name,
                     label: labelInput.trim() || editingPlatform.name,
                     url: processedUrl,
                     icon: editingPlatform.icon,

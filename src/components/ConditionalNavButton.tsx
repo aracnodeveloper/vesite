@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ConditionalNavButtonProps {
-    isExposedRoute: boolean;
+    isExposedRoute: boolean|string;
     themeConfig: {
         colors: {
             background: string;

@@ -81,6 +81,7 @@ const VCardPage = () => {
         try {
 
             await updateBusinessCard(businessCard.id, {
+                id: businessCard.id,
                 ownerId: Cookies.get('userId'),
                 data: JSON.stringify(cardData),
                 isActive: true

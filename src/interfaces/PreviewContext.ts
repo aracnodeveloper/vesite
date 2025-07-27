@@ -3,6 +3,7 @@ import type {UUID} from "../types/authTypes.ts";
 
 export interface SocialLink {
     id: string;
+    name: string;
     label: string;
     url: string;
     icon: string;
