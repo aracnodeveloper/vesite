@@ -67,6 +67,16 @@ const PublicBiositeView = () => {
             '/assets/icons/googleplay.svg': 'googleplay'
         };
 
+        // Si es exactamente "link", devolver "link"
+        if (iconPath === 'link') {
+            return 'link';
+        }
+
+        // Si es exactamente "social-post", devolver "social-post"
+        if (iconPath === 'social-post') {
+            return 'social-post';
+        }
+
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
         if (fullPath) return iconMap[fullPath];
 
@@ -98,7 +108,6 @@ const PublicBiositeView = () => {
         return 'appstore';
     };
 
-    // Función para determinar si un enlace es social basado en plataforma
     const isSocialLink = (link: any): boolean => {
         const iconIdentifier = getIconIdentifier(link.icon);
         const labelLower = link.label.toLowerCase();
@@ -111,12 +120,12 @@ const PublicBiositeView = () => {
             'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
 
-        // Verificar por icono
+        // Verificar por icono (más confiable)
         if (socialPlatforms.includes(iconIdentifier)) {
             return true;
         }
 
-        // Verificar por dominio en la URL
+        // Verificar por dominio en la URL (solo dominios principales de redes sociales)
         const socialDomains = [
             'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
             'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
@@ -124,37 +133,52 @@ const PublicBiositeView = () => {
             'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com'
         ];
 
-        const hasSocialDomain = socialDomains.some(domain => urlLower.includes(domain));
+        // Solo considerar social si la URL contiene exactamente estos dominios
+        const hasSocialDomain = socialDomains.some(domain => {
+            return urlLower.includes(`://${domain}/`) || urlLower.includes(`://www.${domain}/`) ||
+                urlLower.includes(`://${domain}`) || urlLower.includes(`://www.${domain}`);
+        });
+
         if (hasSocialDomain) {
             return true;
         }
 
-        // Verificar por label
-        const socialKeywords = [
+        // Verificar por label solo si es muy específico
+        const exactSocialLabels = [
             'instagram', 'tiktok', 'twitter', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
             'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
 
-        return socialKeywords.some(keyword => labelLower.includes(keyword));
+        return exactSocialLabels.some(label => labelLower === label);
     };
 
-    // Función para verificar si es un enlace de embed (música, video, post)
     const isEmbedLink = (link: any): boolean => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
+        const iconIdentifier = getIconIdentifier(link.icon);
 
-        const embedKeywords = [
-            'spotify', 'music', 'apple music', 'soundcloud', 'audio',
-            'youtube', 'video', 'vimeo', 'tiktok video',
-            'post', 'publicacion', 'contenido',
-            'music embed', 'video embed', 'social post',
-            'embed', 'player'
+        if (iconIdentifier === 'social-post' || iconIdentifier === 'music' || iconIdentifier === 'video') {
+            return true;
+        }
+
+        const embedLabels = [
+            'music embed', 'video embed', 'social post', 'embed', 'player',
+            'spotify track', 'youtube video', 'instagram post'
         ];
 
-        return embedKeywords.some(keyword =>
-            labelLower.includes(keyword) || urlLower.includes(keyword)
-        );
+        const hasEmbedLabel = embedLabels.some(embedLabel => labelLower.includes(embedLabel));
+
+        if (hasEmbedLabel) {
+            return true;
+        }
+
+        // Verificar URLs específicas de embed
+        const isSpotifyTrack = urlLower.includes('spotify.com/track/');
+        const isYouTubeVideo = urlLower.includes('youtube.com/watch') || urlLower.includes('youtu.be/');
+        const isInstagramPost = urlLower.includes('instagram.com/p/') || urlLower.includes('instagram.com/reel/');
+
+        return isSpotifyTrack || isYouTubeVideo || isInstagramPost;
     };
 
     const processLinks = (links: any) => {
@@ -173,19 +197,22 @@ const PublicBiositeView = () => {
                     url: link.url,
                     isActive: link.isActive
                 });
-            } else if (isSocialLink(link) && !isEmbedLink(link)) {
-                // Enlaces sociales reales (no embeds)
+            } else if (isEmbedLink(link)) {
+                // Los embeds se ignoran aquí ya que se manejan por separado
+                console.log('Embed link detected, skipping:', link.label);
+            } else if (isSocialLink(link)  ) {
+
                 socialLinks.push({
                     id: link.id,
                     label: link.label,
-                    name: link.label, // Agregar la propiedad name
+                    name: link.label,
                     url: link.url,
                     icon: iconIdentifier,
                     color: link.color || '#3B82F6',
                     isActive: link.isActive
                 });
-            } else if (!isEmbedLink(link) && !isSocialLink(link)) {
-                // Enlaces regulares (no sociales, no embeds)
+            } else  {
+
                 regularLinks.push({
                     id: link.id,
                     title: link.label,
