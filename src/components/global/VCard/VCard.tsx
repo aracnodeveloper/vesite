@@ -1,3 +1,9 @@
+// PROBLEMA IDENTIFICADO:
+// El hook useBusinessCard() está haciendo una petición autenticada a:
+// GET /business-cards/user/{userId}
+// Pero en la vista pública no hay token de autenticación disponible
+
+// SOLUCIÓN 1: Modificar VCardButton para manejar vista pública
 import React, { useState, useEffect } from 'react';
 import {Phone, Mail, Globe, QrCode, Download, Share2, X } from 'lucide-react';
 import Cookies from 'js-cookie';
@@ -13,19 +19,6 @@ interface VCardData {
     phone: string;
     website: string;
 }
-
-{/*
-    interface BusinessCard {
-        id: string;
-        ownerId: string;
-        slug: string;
-        qrCodeUrl?: string;
-        data?: any;
-        isActive?: boolean;
-        createdAt: string;
-        updatedAt: string;
-    }
-*/}
 
 interface VCardButtonProps {
     themeConfig: {
@@ -43,9 +36,16 @@ interface VCardButtonProps {
         };
     };
     userId?: string;
+    isPublicView?: boolean; // Nueva prop para indicar vista pública
+    publicBiositeData?: any; // Datos del biosite público
 }
 
-const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
+const VCardButton: React.FC<VCardButtonProps> = ({
+                                                     themeConfig,
+                                                     userId,
+                                                     isPublicView = false,
+                                                     publicBiositeData
+                                                 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const { biosite } = usePreview();
@@ -67,14 +67,62 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         fetchBusinessCardByUserId
     } = useBusinessCard();
 
+    // En vista pública, usar los datos del biosite en lugar de hacer petición autenticada
     useEffect(() => {
-        if (isModalOpen && currentUserId) {
+        if (isPublicView && publicBiositeData) {
+            // Extraer información de contacto del biosite público
+            const publicCardData: VCardData = {
+                name: publicBiositeData.title || publicBiositeData.name || '',
+                title: publicBiositeData.description || '',
+                company: '', // Podrías agregarlo como campo en el biosite
+                email: extractEmailFromLinks(publicBiositeData.links || []),
+                phone: extractPhoneFromLinks(publicBiositeData.links || []),
+                website: extractWebsiteFromLinks(publicBiositeData.links || [])
+            };
+            setCardData(publicCardData);
+        } else if (isModalOpen && currentUserId && !isPublicView) {
+            // Solo hacer petición autenticada si NO es vista pública
             fetchBusinessCardByUserId(currentUserId);
         }
-    }, [isModalOpen, currentUserId]);
+    }, [isModalOpen, currentUserId, isPublicView, publicBiositeData]);
+
+    // Funciones helper para extraer información de los links del biosite
+    const extractEmailFromLinks = (links: any[]): string => {
+        const emailLink = links.find(link =>
+            link.url.includes('mailto:') ||
+            link.label.toLowerCase().includes('email') ||
+            link.icon.includes('gmail') ||
+            link.icon.includes('mail')
+        );
+        return emailLink ? emailLink.url.replace('mailto:', '') : '';
+    };
+
+    const extractPhoneFromLinks = (links: any[]): string => {
+        const phoneLink = links.find(link =>
+            link.url.includes('tel:') ||
+            link.label.toLowerCase().includes('phone') ||
+            link.label.toLowerCase().includes('teléfono') ||
+            link.icon.includes('phone')
+        );
+        return phoneLink ? phoneLink.url.replace('tel:', '') : '';
+    };
+
+    const extractWebsiteFromLinks = (links: any[]): string => {
+        const websiteLink = links.find(link =>
+            (link.url.startsWith('http') &&
+                !link.url.includes('instagram.com') &&
+                !link.url.includes('tiktok.com') &&
+                !link.url.includes('twitter.com') &&
+                !link.url.includes('facebook.com')) ||
+            link.label.toLowerCase().includes('website') ||
+            link.label.toLowerCase().includes('web') ||
+            link.icon.includes('globe')
+        );
+        return websiteLink ? websiteLink.url : '';
+    };
 
     useEffect(() => {
-        if (businessCard?.data) {
+        if (businessCard?.data && !isPublicView) {
             try {
                 const parsedData = typeof businessCard.data === 'string'
                     ? JSON.parse(businessCard.data)
@@ -92,7 +140,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                 });
             }
         }
-    }, [businessCard]);
+    }, [businessCard, isPublicView]);
 
     const generateVCardString = () => {
         const vcard = [
@@ -129,25 +177,34 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                 await navigator.share({
                     title: `Tarjeta de ${cardData.name}`,
                     text: `Conecta conmigo - ${cardData.name}`,
-                    url: `${window.location.origin}/vcard/${businessCard?.slug}`
+                    url: isPublicView ? window.location.href : `${window.location.origin}/vcard/${businessCard?.slug}`
                 });
             } catch (err) {
                 console.log('Error sharing:', err);
             }
         } else {
             // Fallback - copiar al clipboard
-            const shareUrl = `${window.location.origin}/vcard/${businessCard?.slug}`;
+            const shareUrl = isPublicView ? window.location.href : `${window.location.origin}/vcard/${businessCard?.slug}`;
             navigator.clipboard.writeText(shareUrl);
             alert('Enlace copiado al portapapeles');
         }
     };
 
-    if (!currentUserId) {
+    // No mostrar si no hay usuario ID y no es vista pública
+    if (!currentUserId && !isPublicView) {
         return null;
     }
 
+    // No mostrar si en vista pública no hay datos suficientes
+    if (isPublicView && !publicBiositeData) {
+        return null;
+    }
 
     const getAvatarImage = () => {
+        if (isPublicView && publicBiositeData?.avatarImage) {
+            return publicBiositeData.avatarImage;
+        }
+
         if (avatarError || !biosite?.avatarImage) {
             return imgP;
         }
@@ -165,25 +222,24 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         }
         return imgP;
     };
+
     const handleAvatarError = () => {
         setAvatarError(true);
     };
+
     return (
         <>
             <div className="px-4 mb-4 cursor-pointer">
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="block w-full p-2 rounded-xl text-center bg-white transition-all duration-300  shadow-md relative overflow-hidden group  cursor-pointer"
-
+                    className="block w-full p-2 rounded-xl text-center bg-white transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-3">
-
-                            <img src={getAvatarImage()}  className="rounded-lg w-10 h-10 xl:w-10 xl:h-10 object-cover" alt="perfil" onError={handleAvatarError} />
-
+                        <img src={getAvatarImage()} className="rounded-lg w-10 h-10 xl:w-10 xl:h-10 object-cover" alt="perfil" onError={handleAvatarError} />
                         <div className="text-left">
-                            <div className="text-black font-bold text-base " style={{ fontFamily: themeConfig.fonts.primary }}>
-                             VCard
+                            <div className="text-black font-bold text-base" style={{ fontFamily: themeConfig.fonts.primary }}>
+                                VCard
                             </div>
                         </div>
                         <QrCode className="w-6 h-6 text-black ml-auto" />
@@ -192,10 +248,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
             </div>
 
             {isModalOpen && (
-                <div className="fixed inset-0  bg-gray-300 flex items-center justify-center p-4 z-50">
-                    <div
-                        className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto"
-                    >
+                <div className="fixed inset-0 bg-gray-300 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-4 border-b">
                             <h2 className="text-xl font-bold" style={{ color: "black", fontFamily: themeConfig.fonts.primary }}>
                                 Mi Tarjeta Digital
@@ -208,28 +262,36 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                             </button>
                         </div>
 
-                        {loading ? (
+                        {loading && !isPublicView ? (
                             <div className="p-8 text-center">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{ borderColor: themeConfig.colors.primary }}></div>
                                 <p style={{ color: themeConfig.colors.text }}>Cargando tarjeta...</p>
                             </div>
-                        ) : error ? (
+                        ) : error && !isPublicView ? (
                             <div className="p-8 text-center">
                                 <div className="text-red-500 mb-4">⚠️</div>
                                 <p style={{ color: themeConfig.colors.text }}>{error}</p>
                             </div>
                         ) : (
                             <>
-                                {/* QR Code */}
-                                {businessCard?.qrCodeUrl && (
+                                {/* QR Code - Solo mostrar si tenemos businessCard o si es vista pública con URL */}
+                                {(businessCard?.qrCodeUrl || isPublicView) && (
                                     <div className="p-6 text-center" style={{ background: `linear-gradient(135deg, ${themeConfig.colors.primary}20 0%, ${themeConfig.colors.accent}20 100%)` }}>
-                                        <div className="bg-white p-4 rounded-xl inline-block shadow-md">
-                                            <img
-                                                src={businessCard.qrCodeUrl}
-                                                alt="QR Code"
-                                                className="w-32 h-32 mx-auto"
-                                            />
-                                        </div>
+                                        {businessCard?.qrCodeUrl ? (
+                                            <div className="bg-white p-4 rounded-xl inline-block shadow-md">
+                                                <img
+                                                    src={businessCard.qrCodeUrl}
+                                                    alt="QR Code"
+                                                    className="w-32 h-32 mx-auto"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="bg-white p-4 rounded-xl inline-block shadow-md">
+                                                <div className="w-32 h-32 mx-auto flex items-center justify-center text-gray-400">
+                                                    <QrCode size={64} />
+                                                </div>
+                                            </div>
+                                        )}
                                         <p className="text-sm mt-3" style={{ color: themeConfig.colors.text, opacity: 0.7 }}>
                                             Escanea para guardar mi contacto
                                         </p>
@@ -259,7 +321,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                     {/* Contact Details */}
                                     <div className="space-y-3">
                                         {cardData.email && (
-                                            <div className="flex items-center  space-x-3 p-3 rounded-lg" style={{ backgroundColor: themeConfig.colors.profileBackground }}>
+                                            <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: themeConfig.colors.profileBackground }}>
                                                 <Mail className="w-5 h-5" style={{ color: themeConfig.colors.primary }} />
                                                 <div>
                                                     <p className="text-xs" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>Email</p>
@@ -297,7 +359,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className=" border-t flex space-x-0">
+                                <div className="border-t flex space-x-0">
                                     <button
                                         onClick={downloadVCard}
                                         className="flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md"
