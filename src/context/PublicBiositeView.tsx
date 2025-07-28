@@ -396,13 +396,11 @@ const PublicBiositeView = () => {
     const validAvatarImage = isValidImageUrl(biositeData.biosite?.avatarImage) ? biositeData.biosite?.avatarImage : null;
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-    // Determinar si es el segundo template
     const isSecondTemplate = currentTemplate.id === 'bc1452d1-a688-4567-a424-2a0f09103499' ||
         currentTemplate.index === 1 ||
         currentTemplate.name?.toLowerCase().includes('square') ||
         currentTemplate.name?.toLowerCase().includes('dos');
 
-    // Función para encontrar la plataforma de un enlace social
     const findPlatformForLink = (link: SocialLink) => {
         return socialMediaPlatforms.find(platform => {
             const linkLabelLower = link.label.toLowerCase();
@@ -446,7 +444,6 @@ const PublicBiositeView = () => {
         return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
     };
 
-    // Obtener los datos procesados
     const socialLinksData = biositeData.socialLinks.filter(link => link.isActive);
     const regularLinksData = biositeData.regularLinks.filter(link => link.isActive);
     const musicEmbed = getMusicEmbed();
@@ -529,7 +526,7 @@ const PublicBiositeView = () => {
 
                     {/* Links regulares */}
                     <RegularLinksSection
-                        regularLinksData={regularLinksData}
+                        regularLinksData={biositeData.regularLinks.filter(link => link.isActive )}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
                     />
