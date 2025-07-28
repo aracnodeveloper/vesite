@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {Phone, Mail, Globe, QrCode, Download, Share2, X } from 'lucide-react';
-//import Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
 import {usePreview} from "../../../context/PreviewContext.tsx";
@@ -45,7 +45,7 @@ interface VCardButtonProps {
     userId?: string;
 }
 
-const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
+const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const { biosite } = usePreview();
@@ -58,7 +58,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
         website: ''
     });
 
-    const currentUserId = biosite.ownerId;
+    const currentUserId = userId || Cookies.get('userId');
 
     const {
         businessCard,
