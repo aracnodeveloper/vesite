@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type {BiositeFull, BiositeLink} from "../interfaces/Biosite";
+import type {BiositeFull} from "../interfaces/Biosite";
 import type { SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
 import apiService from "../service/apiService";
 import {
@@ -24,12 +24,9 @@ interface PublicBiositeData {
     socialLinks: SocialLink[];
     regularLinks: RegularLink[];
     appLinks: AppLink[];
-}
-
-interface PublicUser {
-    id: string;
-    name: string;
-    description?: string;
+    musicEmbed?: any;
+    socialPost?: any;
+    videoEmbed?: any;
 }
 
 const PublicBiositeView = () => {
@@ -75,6 +72,16 @@ const PublicBiositeView = () => {
         // Si es exactamente "social-post", devolver "social-post"
         if (iconPath === 'social-post') {
             return 'social-post';
+        }
+
+        // Si es exactamente "music-embed", devolver "music-embed"
+        if (iconPath === 'music-embed') {
+            return 'music-embed';
+        }
+
+        // Si es exactamente "video-embed", devolver "video-embed"
+        if (iconPath === 'video-embed') {
+            return 'video-embed';
         }
 
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
@@ -158,13 +165,14 @@ const PublicBiositeView = () => {
         const urlLower = link.url.toLowerCase();
         const iconIdentifier = getIconIdentifier(link.icon);
 
-        if (iconIdentifier === 'social-post' || iconIdentifier === 'music' || iconIdentifier === 'video') {
+        // Verificar por icono específico de embed
+        if (iconIdentifier === 'social-post' || iconIdentifier === 'music-embed' || iconIdentifier === 'video-embed') {
             return true;
         }
 
         const embedLabels = [
             'music embed', 'video embed', 'social post', 'embed', 'player',
-            'spotify track', 'youtube video', 'instagram post'
+            'spotify track', 'youtube video', 'instagram post', 'music/podcast'
         ];
 
         const hasEmbedLabel = embedLabels.some(embedLabel => labelLower.includes(embedLabel));
@@ -181,10 +189,54 @@ const PublicBiositeView = () => {
         return isSpotifyTrack || isYouTubeVideo || isInstagramPost;
     };
 
+    const getEmbedType = (link: any): 'music' | 'social-post' | 'video' | null => {
+        const iconIdentifier = getIconIdentifier(link.icon);
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        // Verificar por icono específico
+        if (iconIdentifier === 'music-embed' || iconIdentifier === 'music') {
+            return 'music';
+        }
+        if (iconIdentifier === 'social-post') {
+            return 'social-post';
+        }
+        if (iconIdentifier === 'video-embed' || iconIdentifier === 'video') {
+            return 'video';
+        }
+
+        // Verificar por label
+        if (labelLower.includes('music') || labelLower.includes('podcast')) {
+            return 'music';
+        }
+        if (labelLower.includes('social post') || labelLower.includes('post')) {
+            return 'social-post';
+        }
+        if (labelLower.includes('video')) {
+            return 'video';
+        }
+
+        // Verificar por URL
+        if (urlLower.includes('spotify.com/track/')) {
+            return 'music';
+        }
+        if (urlLower.includes('instagram.com/p/') || urlLower.includes('instagram.com/reel/')) {
+            return 'social-post';
+        }
+        if (urlLower.includes('youtube.com/watch') || urlLower.includes('youtu.be/')) {
+            return 'video';
+        }
+
+        return null;
+    };
+
     const processLinks = (links: any) => {
         const socialLinks: SocialLink[] = [];
         const regularLinks: RegularLink[] = [];
         const appLinks: AppLink[] = [];
+        let musicEmbed: any = null;
+        let socialPost: any = null;
+        let videoEmbed: any = null;
 
         links.forEach(link => {
             const iconIdentifier = getIconIdentifier(link.icon);
@@ -198,10 +250,18 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             } else if (isEmbedLink(link)) {
-                // Los embeds se ignoran aquí ya que se manejan por separado
-                console.log('Embed link detected, skipping:', link.label);
-            } else if (isSocialLink(link)  ) {
+                // Procesar embeds
+                const embedType = getEmbedType(link);
+                console.log('Embed detected:', link.label, 'Type:', embedType);
 
+                if (embedType === 'music') {
+                    musicEmbed = link;
+                } else if (embedType === 'social-post') {
+                    socialPost = link;
+                } else if (embedType === 'video') {
+                    videoEmbed = link;
+                }
+            } else if (isSocialLink(link)) {
                 socialLinks.push({
                     id: link.id,
                     label: link.label,
@@ -211,8 +271,7 @@ const PublicBiositeView = () => {
                     color: link.color || '#3B82F6',
                     isActive: link.isActive
                 });
-            } else  {
-
+            } else {
                 regularLinks.push({
                     id: link.id,
                     title: link.label,
@@ -222,13 +281,15 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             }
-            // Los embeds se ignoran aquí ya que se manejan por separado
         });
 
         return {
             socialLinks,
             regularLinks: regularLinks.sort((a, b) => a.orderIndex - b.orderIndex),
-            appLinks
+            appLinks,
+            musicEmbed,
+            socialPost,
+            videoEmbed
         };
     };
 
@@ -310,13 +371,16 @@ const PublicBiositeView = () => {
                 }
 
                 // Procesar los links
-                const { socialLinks, regularLinks, appLinks } = processLinks(biosite.links);
+                const { socialLinks, regularLinks, appLinks, musicEmbed, socialPost, videoEmbed } = processLinks(biosite.links);
 
                 setBiositeData({
                     biosite,
                     socialLinks,
                     regularLinks,
-                    appLinks
+                    appLinks,
+                    musicEmbed,
+                    socialPost,
+                    videoEmbed
                 });
 
             } catch (error: any) {
@@ -473,9 +537,12 @@ const PublicBiositeView = () => {
 
     const socialLinksData = biositeData.socialLinks.filter(link => link.isActive);
     const regularLinksData = biositeData.regularLinks.filter(link => link.isActive);
-    const musicEmbed = getMusicEmbed();
-    const socialPost = getSocialPost();
-    const videoEmbed = getVideoEmbed();
+
+    // Usar los embeds del estado local en lugar de los hooks de PreviewContext
+    const musicEmbed = biositeData.musicEmbed;
+    const socialPost = biositeData.socialPost;
+    const videoEmbed = biositeData.videoEmbed;
+
     const description = user?.description || user?.name || biositeData.biosite.title || 'Bio Site';
 
     return (
@@ -565,7 +632,7 @@ const PublicBiositeView = () => {
                     />
 
                     {/* MÚSICA EMBED */}
-                    {musicEmbed && (
+                    {musicEmbed && musicEmbed.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
                                  style={{ backgroundColor:  '#ffffff' }}>
@@ -615,12 +682,12 @@ const PublicBiositeView = () => {
                     )}
 
                     {/* SOCIAL POST EMBED */}
-                    {socialPost && (
+                    {socialPost && socialPost.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
                                  style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
 
-                                {getInstagramEmbedUrl(socialPost.url) ? (
+                                {isInstagramUrl(socialPost.url) ? (
                                     <div className="embed-container instagram-embed">
                                         <iframe
                                             src={getInstagramEmbedUrl(socialPost.url)!}
@@ -664,12 +731,12 @@ const PublicBiositeView = () => {
                         </div>
                     )}
 
-                    {videoEmbed && (
+                    {/* VIDEO EMBED */}
+                    {videoEmbed && videoEmbed.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
                                  style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
 
-                                {/* Iframe siempre visible */}
                                 {getYouTubeEmbedUrl(videoEmbed.url) ? (
                                     <div className="embed-container video-embed">
                                         <iframe
@@ -711,8 +778,6 @@ const PublicBiositeView = () => {
                                         </div>
                                     </div>
                                 )}
-
-
                             </div>
                         </div>
                     )}
