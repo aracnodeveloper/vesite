@@ -22,6 +22,7 @@ import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
 import PublicBiositeView from "./context/PublicBiositeView.tsx";
 //import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
 import VCardPage from "./components/layers/MySite/V-Card/V-CardPage.tsx";
+import WhatsAppPage from "./components/layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
 
 // Rutas protegidas
 
@@ -78,6 +79,15 @@ const App = () => {
                                 </PrivateRoute>
                             }
                         />
+                        <Route path="/whattsApp" element={
+                            <PrivateRoute>
+                                <Layout>
+                                    <WhatsAppPage />
+                                </Layout>
+                            </PrivateRoute>
+                        }
+                        />
+
                         <Route path="/links" element={
                             <PrivateRoute>
                                 <Layout>

@@ -2,7 +2,8 @@ import Links from "./Links/links.tsx";
 import Videos from "./Video/video.tsx";
 import Musics from "./Music-Posdcast/music_podcast.tsx";
 import Post from "./Socialpost/social_post.tsx";
-// import AppD from "./App/app.tsx";
+import WhatsApp from "./WhattsApp/whatsapp.tsx";
+// import AppD from "./App/whatsapp.tsx";
 //import Downloads from "./Download/download.tsx";
 
 
@@ -24,6 +25,7 @@ const Add = () => {
                     {/*
                     <AppD/>
                     */}
+                    <WhatsApp/>
                     <Links/>
                     <Videos/>
                     <Musics/>
