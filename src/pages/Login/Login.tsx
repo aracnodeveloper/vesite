@@ -72,7 +72,7 @@ export const Login: FC = () => {
                     className="text-gray-600 m-0 font-light border-b-5 border-[#E0EED5]"
                     style={{ fontSize: '25px' }}
                 >
-                    VeSites
+                    VESites
                 </Typography.Title>
 
                 <div className="flex items-center space-x-4 w-full sm:w-auto">
@@ -162,7 +162,7 @@ export const Login: FC = () => {
                                     color: '#6b7280'
                                 }}
                             >
-                                Disfruta de VisitaEcuador
+                                Disfruta de VisitaEcuador.com
                             </Typography.Title>
 
                             <Typography.Text
