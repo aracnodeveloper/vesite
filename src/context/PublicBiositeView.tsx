@@ -122,7 +122,7 @@ const PublicBiositeView = () => {
 
         // Lista de plataformas sociales conocidas
         const socialPlatforms = [
-            'instagram', 'tiktok', 'twitter/X', 'facebook', 'twitch',
+            'instagram', 'tiktok', 'x', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
             'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
@@ -148,7 +148,7 @@ const PublicBiositeView = () => {
         }
 
         const exactSocialLabels = [
-            'instagram', 'tiktok', 'twitter/X', 'facebook', 'twitch',
+            'instagram', 'tiktok',  'twitter', 'twitter/x', 'x',  'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
             'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
