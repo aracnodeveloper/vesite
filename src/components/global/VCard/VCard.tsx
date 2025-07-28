@@ -286,9 +286,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                                 </div>
                                             </div>
                                         )}
-                                        <p className="text-sm mt-3" style={{ color: themeConfig.colors.text, opacity: 0.7 }}>
-                                            Escanea para guardar mi contacto
-                                        </p>
+
                                     </div>
                                 )}
 

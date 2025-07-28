@@ -617,14 +617,14 @@ const PublicBiositeView = () => {
                         themeConfig={themeConfig}
                     />
 
-                    {/* V-Card Button */}
+                    {/* V-Card Button
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={biositeData.biosite.ownerId}
                         isPublicView={true} // Nueva prop para indicar vista pública
                         publicBiositeData={biositeData.biosite} // Pasar datos del biosite público
                     />
-
+                    */}
                     {/* MÚSICA EMBED */}
                     {musicEmbed && musicEmbed.isActive && (
                         <div className="px-4 mb-4">
