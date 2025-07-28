@@ -87,7 +87,7 @@ export const Login: FC = () => {
                             className="mb-0 w-full sm:w-auto"
                         >
                             <Input
-                                placeholder="Correo"
+                                placeholder="Correo o Cedula"
                                 className="rounded-lg border-gray-300 px-4 py-2"
                                 style={{
                                     width: '100%',
