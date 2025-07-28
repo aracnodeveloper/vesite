@@ -36,7 +36,7 @@ const PublicBiositeView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
-    const {getMusicEmbed, getSocialPost, getVideoEmbed} = usePreview()
+   // const {getMusicEmbed, getSocialPost, getVideoEmbed} = usePreview()
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
 
@@ -628,7 +628,7 @@ const PublicBiositeView = () => {
                     {/* V-Card Button */}
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={user?.id}
+                        userId={biositeData.biosite.ownerId}
                     />
 
                     {/* MÚSICA EMBED */}
