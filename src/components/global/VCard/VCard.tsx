@@ -1,9 +1,3 @@
-// PROBLEMA IDENTIFICADO:
-// El hook useBusinessCard() está haciendo una petición autenticada a:
-// GET /business-cards/user/{userId}
-// Pero en la vista pública no hay token de autenticación disponible
-
-// SOLUCIÓN 1: Modificar VCardButton para manejar vista pública
 import React, { useState, useEffect } from 'react';
 import {Phone, Mail, Globe, QrCode, Download, Share2, X } from 'lucide-react';
 import Cookies from 'js-cookie';

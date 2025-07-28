@@ -16,7 +16,7 @@ import ConditionalNavButton from "../components/ConditionalNavButton.tsx";
 import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
-import {usePreview} from "./PreviewContext.tsx";
+// import {usePreview} from "./PreviewContext.tsx";
 import {useUser} from "../hooks/useUser.ts";
 
 interface PublicBiositeData {
@@ -127,12 +127,10 @@ const PublicBiositeView = () => {
             'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
 
-        // Verificar por icono (más confiable)
         if (socialPlatforms.includes(iconIdentifier)) {
             return true;
         }
 
-        // Verificar por dominio en la URL (solo dominios principales de redes sociales)
         const socialDomains = [
             'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
             'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
@@ -140,7 +138,6 @@ const PublicBiositeView = () => {
             'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com'
         ];
 
-        // Solo considerar social si la URL contiene exactamente estos dominios
         const hasSocialDomain = socialDomains.some(domain => {
             return urlLower.includes(`://${domain}/`) || urlLower.includes(`://www.${domain}/`) ||
                 urlLower.includes(`://${domain}`) || urlLower.includes(`://www.${domain}`);
@@ -150,7 +147,6 @@ const PublicBiositeView = () => {
             return true;
         }
 
-        // Verificar por label solo si es muy específico
         const exactSocialLabels = [
             'instagram', 'tiktok', 'twitter', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
@@ -165,7 +161,6 @@ const PublicBiositeView = () => {
         const urlLower = link.url.toLowerCase();
         const iconIdentifier = getIconIdentifier(link.icon);
 
-        // Verificar por icono específico de embed
         if (iconIdentifier === 'social-post' || iconIdentifier === 'music-embed' || iconIdentifier === 'video-embed') {
             return true;
         }
@@ -181,7 +176,6 @@ const PublicBiositeView = () => {
             return true;
         }
 
-        // Verificar URLs específicas de embed
         const isSpotifyTrack = urlLower.includes('spotify.com/track/');
         const isYouTubeVideo = urlLower.includes('youtube.com/watch') || urlLower.includes('youtu.be/');
         const isInstagramPost = urlLower.includes('instagram.com/p/') || urlLower.includes('instagram.com/reel/');
@@ -194,7 +188,6 @@ const PublicBiositeView = () => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
 
-        // Verificar por icono específico
         if (iconIdentifier === 'music-embed' || iconIdentifier === 'music') {
             return 'music';
         }
@@ -205,7 +198,6 @@ const PublicBiositeView = () => {
             return 'video';
         }
 
-        // Verificar por label
         if (labelLower.includes('music') || labelLower.includes('podcast')) {
             return 'music';
         }
@@ -629,6 +621,8 @@ const PublicBiositeView = () => {
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={biositeData.biosite.ownerId}
+                        isPublicView={true} // Nueva prop para indicar vista pública
+                        publicBiositeData={biositeData.biosite} // Pasar datos del biosite público
                     />
 
                     {/* MÚSICA EMBED */}
