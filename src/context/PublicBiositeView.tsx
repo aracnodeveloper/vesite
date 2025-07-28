@@ -11,7 +11,7 @@ import {
     RegularLinksSection,
     TwoSquareImagesSection,
 } from '../components/Preview/LivePreviewComponents';
-import VCardButton from "../components/global/VCard/VCard.tsx";
+//import VCardButton from "../components/global/VCard/VCard.tsx";
 import ConditionalNavButton from "../components/ConditionalNavButton.tsx";
 import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
@@ -362,7 +362,6 @@ const PublicBiositeView = () => {
                     return;
                 }
 
-                // Procesar los links
                 const { socialLinks, regularLinks, appLinks, musicEmbed, socialPost, videoEmbed } = processLinks(biosite.links);
 
                 setBiositeData({

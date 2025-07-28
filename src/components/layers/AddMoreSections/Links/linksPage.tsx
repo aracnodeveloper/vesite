@@ -6,7 +6,6 @@ import {
     Check,
     GripVertical,
     Edit2,
-    ExternalLink,
 } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +45,45 @@ const LinksPage = () => {
 
     // Placeholders similares a ImageUploadSection
     const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
+
+    // ============== FUNCIONES DE VALIDACIÓN DE URL ==============
+    // Función para normalizar URLs añadiendo https:// cuando sea necesario
+    const normalizeUrl = (url: string): string => {
+        if (!url || typeof url !== 'string') return '';
+
+        // Limpiar espacios en blanco
+        const cleanUrl = url.trim();
+
+        if (!cleanUrl) return '';
+
+        // Si ya tiene protocolo, devolverla tal como está
+        if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+            return cleanUrl;
+        }
+
+        // Si es una URL de localhost o IP local, usar http
+        if (cleanUrl.startsWith('localhost') ||
+            cleanUrl.startsWith('127.0.0.1') ||
+            cleanUrl.match(/^192\.168\.\d+\.\d+/) ||
+            cleanUrl.match(/^10\.\d+\.\d+\.\d+/)) {
+            return `http://${cleanUrl}`;
+        }
+
+        // Para todas las demás URLs, usar https por defecto
+        return `https://${cleanUrl}`;
+    };
+
+    // Función para validar que una URL es válida
+    const isValidUrl = (url: string): boolean => {
+        try {
+            const normalizedUrl = normalizeUrl(url);
+            new URL(normalizedUrl);
+            return true;
+        } catch {
+            return false;
+        }
+    };
+    // ============================================================
 
     // Función de validación mejorada (igual que ImageUploadSection)
     const isValidImageUrl = (url: string | null | undefined): boolean => {
@@ -228,11 +266,21 @@ const LinksPage = () => {
         if (newUrl.trim()) {
             try {
                 setIsSubmitting(true);
+
+                // Normalizar la URL antes de guardar
+                const normalizedUrl = normalizeUrl(newUrl);
+
+                // Validar que la URL es correcta
+                if (!isValidUrl(normalizedUrl)) {
+                    message.error('Por favor ingresa una URL válida');
+                    return;
+                }
+
                 const maxOrderIndex = Math.max(...activeLinks.map(link => link.orderIndex), -1);
 
                 const newLink = {
-                    title: newUrl,
-                    url: newUrl,
+                    title: newUrl, // Mantener el título original (sin protocolo para mostrar)
+                    url: normalizedUrl, // Usar la URL normalizada para navegación
                     icon: undefined,
                     image: undefined,
                     orderIndex: maxOrderIndex + 1,
@@ -242,7 +290,7 @@ const LinksPage = () => {
                 await addRegularLink(newLink);
                 setNewUrl("");
                 setAdding(false);
-                console.log("Link added successfully");
+                console.log("Link added successfully with normalized URL:", normalizedUrl);
             } catch (error) {
                 console.error("Error adding link:", error);
                 message.error('Error al agregar el enlace');
@@ -280,11 +328,21 @@ const LinksPage = () => {
 
         try {
             setIsSubmitting(true);
+
+            // Normalizar la URL antes de guardar
+            const normalizedUrl = normalizeUrl(editUrl);
+
+            // Validar que la URL es correcta
+            if (!isValidUrl(normalizedUrl)) {
+                message.error('Por favor ingresa una URL válida');
+                return;
+            }
+
             const linkToUpdate = activeLinks[editingIndex];
 
             const updateData = {
                 title: editTitle,
-                url: editUrl,
+                url: normalizedUrl, // Usar la URL normalizada
                 image: editImage,
             };
 
@@ -292,7 +350,7 @@ const LinksPage = () => {
 
             await updateRegularLink(linkToUpdate.id, updateData);
 
-            console.log("Link updated successfully");
+            console.log("Link updated successfully with normalized URL:", normalizedUrl);
 
             // IMPORTANT: Refresh the biosite data to get the updated links
             await refreshBiosite();
@@ -547,7 +605,7 @@ const LinksPage = () => {
                                 <input
                                     value={newUrl}
                                     onChange={(e) => setNewUrl(e.target.value)}
-                                    placeholder="Ingresa una URL"
+                                    placeholder="Ingresa una URL (ej: visitaecuador.com)"
                                     className="flex-1 bg-transparent text-black placeholder-gray-400 focus:outline-none"
                                     autoFocus
                                     disabled={isSubmitting}
