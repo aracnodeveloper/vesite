@@ -38,7 +38,14 @@ const App = () => {
                         <Route path="/login" element={<Login />} />
 
                         {/* Ruta pública para ver biosite por slug */}
-
+                        <Route
+                            path="/Ve.site/:slug"
+                            element={
+                                <div className="min-h-screen bg-gray-100">
+                                    <PublicBiositeView />
+                                </div>
+                            }
+                        />
 
                         {/* Rutas privadas (autenticado) */}
                         <Route
@@ -191,15 +198,6 @@ const App = () => {
                             }
                         />
 
-
-                        <Route
-                            path="/:slug"
-                            element={
-                                <div className="min-h-screen bg-gray-100">
-                                    <PublicBiositeView />
-                                </div>
-                            }
-                        />
                         {/* Catch-all: redirección a inicio */}
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
