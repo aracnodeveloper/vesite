@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
 //import TemplateSelector from "./TemplateSelector.tsx";
-import { useTemplates } from "../../../../hooks/useTemplates.ts";
-import imgP from "../../../../../public/img/Banner.jpg"
+//import { useTemplates } from "../../../../hooks/useTemplates.ts";
+//import imgP from "../../../../../public/img/Banner.jpg"
 const { TextArea } = Input;
 
 const ProfilePage = () => {
@@ -20,7 +20,7 @@ const ProfilePage = () => {
     const userId = Cookies.get('userId');
     const { updateBiosite, fetchBiosite, loading: updateLoading } = useFetchBiosite(userId);
     const { user, fetchUser, updateUser, loading: userLoading } = useUser();
-    const { templates, loading: templatesLoading } = useTemplates();
+    //const { templates, loading: templatesLoading } = useTemplates();
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
@@ -57,7 +57,7 @@ const ProfilePage = () => {
             });
         }
     }, [biosite, user, form]);
-
+    {/*
     const validateTemplateExists = (templateId: string): boolean => {
         if (!templates.length) {
             console.warn('Templates not loaded yet');
@@ -79,18 +79,16 @@ const ProfilePage = () => {
             return templateId;
         }
 
-        // If not valid, try to get the first available template
         if (templates.length > 0) {
             const firstTemplate = templates[0];
             console.log('Using fallback template:', firstTemplate.id);
             return firstTemplate.id;
         }
 
-        // This should not happen if templates are properly loaded
         throw new Error('No valid templates available');
     };
 
-    {/*
+
     const handleTemplateChange = async (templateId: string) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
             message.error('Error: Información del perfil no disponible');
@@ -293,11 +291,11 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="w-full h-full mb-10 p-2 max-w-md mx-auto">
+        <div className="w-full h-full mb-10 mt-10 p-2 max-w-md mx-auto">
             <div className="px-6 py-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
-                        <ChevronLeft className="w-5 h-5 mr-1" />
+                        <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
                         <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Perfil</h1>
                     </button>
                 </div>

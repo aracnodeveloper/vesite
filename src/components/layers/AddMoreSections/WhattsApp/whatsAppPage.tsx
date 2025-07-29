@@ -1,27 +1,147 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
-import {WhatsAppOutlined} from "@ant-design/icons";
+import { WhatsAppOutlined } from "@ant-design/icons";
+import {useFetchLinks} from "../../../../hooks/useFetchLinks.ts";
 
-const whatsAppPage = () => {
+interface WhatsAppLink {
+    id?: string;
+    phone: string;
+    message: string;
+    isActive: boolean;
+}
+
+const WhatsAppPage = () => {
+    const {
+        biosite,
+    } = usePreview();
+    const {
+        links,
+        createLink,
+        updateLink,
+        deleteLink,
+        fetchLinks,
+    } = useFetchLinks();
+
     const handleBackClick = () => window.history.back();
-
 
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [saveMessage, setSaveMessage] = useState("");
 
+    // Estados para el formulario
+    const [phone, setPhone] = useState("");
+    const [message, setMessage] = useState("");
+    const [existingWhatsAppLink, setExistingWhatsAppLink] = useState<any>(null);
 
+    // Buscar enlace de WhatsApp existente
+    useEffect(() => {
+        if (links && Array.isArray(links)) {
+            const whatsappLink = links.find(link =>
+                link.icon === 'whatsapp' ||
+                link.label.toLowerCase().includes('whatsapp') ||
+                link.url.includes('api.whatsapp.com/send')
+            );
+
+            if (whatsappLink) {
+                setExistingWhatsAppLink(whatsappLink);
+                // Extraer teléfono y mensaje de la URL existente
+                const urlParams = new URLSearchParams(whatsappLink.url.split('?')[1]);
+                const phoneParam = urlParams.get('phone') || '';
+                const messageParam = urlParams.get('text') || '';
+
+                setPhone(phoneParam);
+                setMessage(decodeURIComponent(messageParam));
+            }
+        }
+    }, [links]);
+
+    // Función para generar la URL de WhatsApp
+    const generateWhatsAppUrl = (phoneNumber: string, messageText: string): string => {
+        const cleanPhone = phoneNumber.replace(/[^\d+]/g, ''); // Limpiar caracteres no numéricos excepto +
+        const encodedMessage = encodeURIComponent(messageText);
+        return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
+    };
+
+    // Función para validar número de teléfono
+    const isValidPhoneNumber = (phoneNumber: string): boolean => {
+        const cleanPhone = phoneNumber.replace(/[^\d+]/g, '');
+        // Validar que tenga al menos 10 dígitos y empiece con + o número
+        return /^(\+?\d{10,15})$/.test(cleanPhone);
+    };
 
     const handleSave = async () => {
+        if (!biosite?.id) {
+            setSaveStatus('error');
+            setSaveMessage("Error: No se encontró el biosite");
+            return;
+        }
+
+        // Validaciones
+        if (!phone.trim()) {
+            setSaveStatus('error');
+            setSaveMessage("Por favor, ingresa un número de teléfono");
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 3000);
+            return;
+        }
+
+        if (!isValidPhoneNumber(phone)) {
+            setSaveStatus('error');
+            setSaveMessage("Por favor, ingresa un número de teléfono válido (ej: +593986263432)");
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 3000);
+            return;
+        }
+
+        if (!message.trim()) {
+            setSaveStatus('error');
+            setSaveMessage("Por favor, ingresa un mensaje predeterminado");
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 3000);
+            return;
+        }
+
         setIsSaving(true);
         setSaveStatus('idle');
         setSaveMessage("");
 
         try {
+            const whatsappUrl = generateWhatsAppUrl(phone, message);
+
+            if (existingWhatsAppLink) {
+                // Actualizar enlace existente
+                await updateLink(existingWhatsAppLink.id, {
+                    label: "WhatsApp",
+                    url: whatsappUrl,
+                    isActive: true
+                });
+            } else {
+                // Crear nuevo enlace
+                const maxOrderIndex = Math.max(...(links?.map(l => l.orderIndex) || []), -1);
+                await createLink({
+                    biositeId: biosite.id,
+                    label: "WhatsApp",
+                    url: whatsappUrl,
+                    icon: "whatsapp",
+                    orderIndex: maxOrderIndex + 1,
+                    isActive: true
+                });
+            }
+
+            // Refrescar los enlaces
+            if (fetchLinks) {
+                await fetchLinks();
+            }
 
             setSaveStatus('success');
-            setSaveMessage("Enlaces actualizados correctamente");
+            setSaveMessage("Enlace de WhatsApp actualizado correctamente");
 
             // Limpiar mensaje después de 3 segundos
             setTimeout(() => {
@@ -30,9 +150,9 @@ const whatsAppPage = () => {
             }, 3000);
 
         } catch (error) {
-            console.error('Error saving app links:', error);
+            console.error('Error saving WhatsApp link:', error);
             setSaveStatus('error');
-            setSaveMessage("Error al actualizar los enlaces. Inténtalo de nuevo.");
+            setSaveMessage("Error al actualizar el enlace. Inténtalo de nuevo.");
 
             // Limpiar mensaje después de 5 segundos
             setTimeout(() => {
@@ -44,29 +164,58 @@ const whatsAppPage = () => {
         }
     };
 
-    const isValidUrl = (url: string, type: 'appstore' | 'googleplay') => {
-        if (!url) return true; // URL vacía es válida
+    // Función para eliminar el enlace de WhatsApp
+    const handleDelete = async () => {
+        if (!existingWhatsAppLink) return;
 
-        if (type === 'appstore') {
-            return url.includes('apps.apple.com') || url.includes('itunes.apple.com');
-        } else {
-            return url.includes('play.google.com');
+        setIsSaving(true);
+        try {
+            await deleteLink(existingWhatsAppLink.id);
+            setExistingWhatsAppLink(null);
+            setPhone("");
+            setMessage("");
+
+            if (fetchLinks) {
+                await fetchLinks();
+            }
+
+            setSaveStatus('success');
+            setSaveMessage("Enlace de WhatsApp eliminado correctamente");
+
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 3000);
+
+        } catch (error) {
+            console.error('Error deleting WhatsApp link:', error);
+            setSaveStatus('error');
+            setSaveMessage("Error al eliminar el enlace");
+
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 5000);
+        } finally {
+            setIsSaving(false);
         }
     };
 
+    // Función para previsualizar el enlace
+    const handlePreview = () => {
+        if (phone && message) {
+            const url = generateWhatsAppUrl(phone, message);
+            window.open(url, '_blank');
+        }
+    };
 
     return (
-        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
-            <div className="p-4">
+        <div className="w-full h-full mb-10 mt-14 max-w-md mx-auto rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleBackClick}
-                        className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400" />
-                        <h1 className="text-lg text-gray-600 font-semibold hover:text-gray-400" style={{ fontSize: "17px" }}>
-                            WhatsAppApi
-                        </h1>
+                    <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                        <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
+                        <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>WhatsApp Api</h1>
                     </button>
                 </div>
             </div>
@@ -74,14 +223,13 @@ const whatsAppPage = () => {
             <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8 w-full">
                 <div className="text-center space-y-4">
                     <div className="w-24 h-24 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                        <WhatsAppOutlined/>
+                        <WhatsAppOutlined style={{ fontSize: '48px', color: '#25D366' }} />
                     </div>
-                    <h2 className="font-bold text-black text-xl">WhatsAppeame</h2>
+                    <h2 className="font-bold text-black text-xl">WhatsApp Directo</h2>
                     <p className="text-gray-600 text-sm">
-                        Añade tu numero y el mensaje que quieres que te llegue.
+                        Añade tu número y el mensaje que quieres que te llegue cuando alguien haga clic en tu enlace.
                     </p>
                 </div>
-
 
                 {/* Mensaje de guardado */}
                 {saveMessage && (
@@ -102,43 +250,98 @@ const whatsAppPage = () => {
                 <div className="w-full max-w-md space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Numero
+                            Número de Teléfono
                         </label>
                         <input
-                            type="url"
-                            placeholder="Numero"
-                            className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "
-/>
+                            type="tel"
+                            placeholder="Ej: +593986263432"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 border border-gray-200"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Incluye el código de país (ej: +593 para Ecuador)
+                        </p>
                     </div>
 
                     <div>
-                        <label className="text-xs text-gray-600 block mb-2">
-                            Mensaje
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Mensaje Predeterminado
                         </label>
-                        <input
-                            type="text"
-                            placeholder="Mensaje predeterminado"
-                            className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "
-
+                        <textarea
+                            placeholder="Ej: Hola, quisiera más información sobre tus servicios"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            rows={3}
+                            className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 border border-gray-200 resize-none"
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Este mensaje aparecerá automáticamente cuando alguien abra WhatsApp
+                        </p>
                     </div>
-                    <button
-                        onClick={handleSave}
 
-                    >
-                        {isSaving ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin"/>
-                                Guardando...
-                            </>
-                        ) : (
-                            'Guardar cambios'
+                    {/* Vista previa del enlace generado */}
+                    {phone && message && (
+                        <div className="p-3 bg-gray-50 rounded-md border">
+                            <p className="text-xs text-gray-600 mb-1">Vista previa del enlace:</p>
+                            <p className="text-xs text-blue-600 break-all">
+                                {generateWhatsAppUrl(phone, message)}
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving || !phone || !message}
+                            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center justify-center"
+                        >
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin mr-2"/>
+                                    Guardando...
+                                </>
+                            ) : (
+                                existingWhatsAppLink ? 'Actualizar enlace' : 'Crear enlace'
+                            )}
+                        </button>
+
+                        {phone && message && (
+                            <button
+                                onClick={handlePreview}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                            >
+                                Probar
+                            </button>
                         )}
-                    </button>
+                    </div>
+
+                    {existingWhatsAppLink && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={isSaving}
+                            className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                        >
+                            Eliminar enlace de WhatsApp
+                        </button>
+                    )}
+                </div>
+
+                {/* Información adicional */}
+                <div className="w-full max-w-md">
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                        <h3 className="text-sm font-medium text-blue-800 mb-2">¿Cómo funciona?</h3>
+                        <ul className="text-xs text-blue-700 space-y-1">
+                            <li>• El enlace se agregará a tu biosite como un botón de WhatsApp</li>
+                            <li>• Cuando alguien haga clic, se abrirá WhatsApp con tu número y mensaje</li>
+                            <li>• Funciona tanto en dispositivos móviles como en computadoras</li>
+                            <li>• El mensaje aparece pre-escrito, listo para enviar</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
 
-export default whatsAppPage;
+export default WhatsAppPage;

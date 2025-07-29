@@ -70,16 +70,13 @@ const VideoPage = () => {
     }
 
     return (
-        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
+        <div className="w-full h-full mb-10 mt-20 max-w-md mx-auto rounded-lg">
             {/* Header */}
-            <div className=" py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-700 mb-10">
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleBackClick}
-                        className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5 mr-1 hover:text-gray-400" />
-                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400">Videos</h1>
+                    <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                        <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
+                        <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Videos</h1>
                     </button>
                 </div>
             </div>
@@ -87,13 +84,13 @@ const VideoPage = () => {
             <div className="space-y-4">
                 <div className="mb-6">
                     <h3 className="text-black text-sm mb-3">
-                        Feature your YouTube, Vimeo, Twitch videos or streams on your page.
+                        Incluye tus vídeos o transmisiones de YouTube, Vimeo y Twitch en tu página.
                     </h3>
                 </div>
 
                 <div>
-                    <label className="text-xs text-gray-600 mb-2 block">
-                        URL *
+                    <label className="text-sm text-gray-600 mb-2 block">
+                        URL
                     </label>
                     <input
                         type="url"
@@ -111,8 +108,8 @@ const VideoPage = () => {
                 </div>
 
                 <div>
-                    <label className="text-xs text-gray-400 mb-2 block">
-                        Title (optional)
+                    <label className="text-sm text-gray-600 mb-2 block">
+                        Title (opcional)
                     </label>
                     <input
                         type="text"
@@ -124,7 +121,7 @@ const VideoPage = () => {
                         maxLength={50}
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                        {title.length}/50 characters
+                        {title.length}/50 caracteres
                     </p>
                 </div>
 
@@ -133,7 +130,7 @@ const VideoPage = () => {
                         onClick={handleSave}
                         disabled={!canSave}
                         className={`
-                            rounded-full px-6 py-2 text-sm font-medium transition-all duration-200
+                            rounded-lg w-32 px-6 py-2 text-sm font-medium transition-all duration-200
                             ${canSave
                             ? 'bg-white text-black hover:bg-gray-200 cursor-pointer'
                             : 'bg-gray-600 text-gray-400 cursor-not-allowed'
@@ -146,7 +143,7 @@ const VideoPage = () => {
                                 Saving...
                             </div>
                         ) : (
-                            'Save Video'
+                            'Save'
                         )}
                     </button>
                 </div>

@@ -65,23 +65,20 @@ const MusicPage = () => {
     }
 
     return (
-        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
+        <div className="w-full h-full mb-10 mt-20 max-w-md mx-auto rounded-lg">
             {/* Header */}
-            <div className="py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-700 mb-10">
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleBackClick}
-                        className="flex items-center cursor-pointer text-gray-800 hover:text-gray-600 transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5 mr-1 hover:text-gray-400" />
-                        <h1 className="text-lg font-semibold text-gray-800 hover:text-gray-400">Music/Podcast</h1>
+                    <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                        <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
+                        <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Music/Podcast</h1>
                     </button>
                 </div>
             </div>
 
-            <div className="space-y-4 w-96">
+            <div className="w-full space-y-4 max-w-md mx-auto">
                 <div>
-                    <label className=" text-gray-600 block mb-2" style={{fontSize:"11px"}}>
+                    <label className=" text-gray-600 block mb-2" style={{fontSize:"14px"}}>
                         URL
                     </label>
                     <input
@@ -89,7 +86,7 @@ const MusicPage = () => {
                         placeholder="https://open.spotify.com/track/... or https://soundcloud.com/..."
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500  "
+                        className="w-full h-10 bg-[#FAFFF6] text-xs text-black px-4 py-2  rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500  "
                         disabled={isSubmitting}
                     />
                     {url && !isValidUrl(url) && (
@@ -108,7 +105,7 @@ const MusicPage = () => {
                         placeholder="Añade una nota o descripcciónb sobre este music/podcast"
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        className="w-full bg-[#FAFFF6] text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "
+                        className="w-full h-10 bg-[#FAFFF6] text-xs text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "
                         disabled={isSubmitting}
                     />
                 </div>
@@ -117,30 +114,18 @@ const MusicPage = () => {
                     <button
                         onClick={handleSave}
                         disabled={!url.trim() || !isValidUrl(url) || isSubmitting}
-                        className="w-full text-black bg-[#FAFFF6] px-4 py-2 rounded-full hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
+                        className="w-32 text-black bg-[#FAFFF6] px-4 py-2 rounded-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
                     >
                         {isSubmitting ? (
                             <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                Saving...
+                                Guardar...
                             </>
                         ) : (
                             'Save'
                         )}
                     </button>
 
-                    {url && (
-                        <button
-                            onClick={() => {
-                                setUrl('');
-                                setNote('');
-                            }}
-                            disabled={isSubmitting}
-                            className="w-full  h-4 bg-gray-600 h-10 px-4 py-2 rounded-full hover:bg-gray-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                        >
-                            Clear
-                        </button>
-                    )}
                 </div>
             </div>
         </div>

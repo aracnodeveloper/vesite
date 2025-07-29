@@ -776,7 +776,6 @@ const PublicBiositeView = () => {
                     )}
 
                     <ConditionalNavButton
-                        isExposedRoute={!isExposedRoute}
                         themeConfig={themeConfig}
                     />
 

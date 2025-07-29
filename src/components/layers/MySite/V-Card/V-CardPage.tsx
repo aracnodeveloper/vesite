@@ -168,17 +168,16 @@ const VCardPage = () => {
     }
 
     return (
-        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
+        <div className="w-full h-full mt-10 mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
             <div className="  p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3 cursor-pointer">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                    >
-                        <ChevronLeft size={20} />
-                    </button>
-                    <h1 className="text-xl font-semibold" style={{fontSize:"17px"}}>V-Card</h1>
+                <div className="px-6 py-4 border-b border-gray-700">
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => navigate(-1)} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                            <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
+                            <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>VCard</h1>
+                        </button>
+                    </div>
                 </div>
 
                 {!slug && businessCard && (
