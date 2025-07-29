@@ -352,6 +352,8 @@ const SocialPage = () => {
             }
             if (url.includes('wa.me/') ) {
                 return true;
+            }else if (url.includes('whatsapp.com')) {
+                return false;
             }
             return false;
         }
