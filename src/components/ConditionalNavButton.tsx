@@ -37,16 +37,6 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig
                     fontFamily: themeConfig.fonts.primary
                 }}
             >
-                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-lg bg-current opacity-80 flex items-center justify-center">
-                    <svg
-                        className="w-2 h-2 sm:w-3 sm:h-3"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        style={{ color: themeConfig.colors.accent || '#3B82F6' }}
-                    >
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                    </svg>
-                </div>
 
                 <span className="font-medium text-xs sm:text-xs">
                     {isAuthenticated ? 'Actualizar mis datos' : 'Únete a VisitaEcuador'}
