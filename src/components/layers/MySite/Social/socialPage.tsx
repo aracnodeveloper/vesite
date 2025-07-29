@@ -350,7 +350,7 @@ const SocialPage = () => {
             if (phoneRegex.test(url)) {
                 return true;
             }
-            if (url.includes('wa.me/') || url.includes('whatsapp.com')) {
+            if (url.includes('wa.me/') ) {
                 return true;
             }
             return false;
