@@ -15,7 +15,7 @@ interface ConditionalNavButtonProps {
 
 const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig }) => {
     const handleClick = () => {
-        window.location.href = 'https://visitaecuador.com';
+        window.location.href = 'https://visitaecuador.com/vesite';
     };
 
     return (
@@ -41,7 +41,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig
                 </div>
 
                 <span className="font-medium text-xs sm:text-xs">
-                    CREAR UN VESITE GRATIS
+                    Actualizar mis datos
                 </span>
 
                 <svg
