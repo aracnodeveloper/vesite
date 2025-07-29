@@ -57,121 +57,6 @@ const ProfilePage = () => {
             });
         }
     }, [biosite, user, form]);
-    {/*
-    const validateTemplateExists = (templateId: string): boolean => {
-        if (!templates.length) {
-            console.warn('Templates not loaded yet');
-            return false;
-        }
-
-        const templateExists = templates.some(template => template.id === templateId);
-        if (!templateExists) {
-            console.error('Template not found:', templateId);
-            console.log('Available templates:', templates.map(t => ({ id: t.id, name: t.name })));
-        }
-
-        return templateExists;
-    };
-
-    const getValidTemplateId = (templateId: string): string => {
-        // First, check if the provided template ID is valid
-        if (validateTemplateExists(templateId)) {
-            return templateId;
-        }
-
-        if (templates.length > 0) {
-            const firstTemplate = templates[0];
-            console.log('Using fallback template:', firstTemplate.id);
-            return firstTemplate.id;
-        }
-
-        throw new Error('No valid templates available');
-    };
-
-
-    const handleTemplateChange = async (templateId: string) => {
-        if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
-            message.error('Error: Información del perfil no disponible');
-            return;
-        }
-
-        if (!validateTemplateExists(templateId)) {
-            message.error('La plantilla seleccionada no es válida');
-            return;
-        }
-
-        try {
-            const loadingMessage = message.loading('Actualizando plantilla...', 0);
-
-            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
-                if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                if (typeof colors === 'string') {
-                    try {
-                        JSON.parse(colors);
-                        return colors;
-                    } catch {
-                        return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                    }
-                }
-                return JSON.stringify(colors);
-            };
-
-            const updateData: BiositeUpdateDto = {
-                themeId: templateId, // Use the validated template ID
-                ownerId: biosite.ownerId || userId,
-                title: biosite.title,
-                slug: biosite.slug,
-                colors: ensureColorsAsString(biosite.colors),
-                fonts: biosite.fonts || '',
-                avatarImage: biosite.avatarImage || '',
-                backgroundImage: biosite.backgroundImage || DEFAULT_BACKGROUND,
-                isActive: biosite.isActive ?? true
-            };
-
-            console.log('Template change request:', {
-                templateId,
-                templateExists: validateTemplateExists(templateId),
-                updateData
-            });
-
-            const updated = await updateBiosite(updateData);
-            if (updated) {
-                console.log('Successfully updated biosite template:', {
-                    oldThemeId: biosite.themeId,
-                    newThemeId: updated.themeId,
-                    requestedThemeId: templateId
-                });
-
-                updatePreview({
-                    ...updated,
-                    themeId: templateId
-                });
-
-                // Refresh biosite data
-                setTimeout(() => {
-                    fetchBiosite();
-                }, 100);
-
-                loadingMessage();
-                message.success('Plantilla actualizada exitosamente');
-            } else {
-                throw new Error('No se recibió respuesta del servidor');
-            }
-        } catch (error: any) {
-            console.error("Error al actualizar plantilla:", error);
-
-            // Handle specific database constraint error
-            if (error.response?.data?.details?.code === 'P2003') {
-                message.error('Error: La plantilla seleccionada no existe en la base de datos');
-            } else if (error.response?.data?.message?.includes('referencia')) {
-                message.error('Error: Referencia de plantilla inválida');
-            } else {
-                const errorMessage = error.response?.data?.message || error.message || 'Error desconocido';
-                message.error(`Error al actualizar la plantilla: ${errorMessage}`);
-            }
-        }
-    };
-*/}
 
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
@@ -196,18 +81,7 @@ const ProfilePage = () => {
             const getBackgroundImage = (): string => biosite.backgroundImage || DEFAULT_BACKGROUND;
 
             const loadingMessage = message.loading('Actualizando perfil...', 0);
-            {/*
-                // Validate current theme ID before using it
-                let validThemeId = biosite.themeId;
-                try {
-                    validThemeId = getValidTemplateId(biosite.themeId || '');
-                } catch (error) {
-                    console.error('Template validation error:', error);
-                    message.error('Error: No se puede validar la plantilla actual');
-                    loadingMessage();
-                    return;
-                }
-           */ }
+
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || biosite.title,
@@ -346,27 +220,35 @@ const ProfilePage = () => {
                 <div className="mb-6">
                     <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
                     <Form form={form} layout="vertical" onFinish={handleFinish}>
-                        <div className="mb-0">
+                        {/* Nombre Input */}
+                        <div className="mb-4">
+                            <label className="text-xs text-gray-400 mb-2 block" style={{ fontSize: "11px" }}>
+                                Nombre
+                            </label>
                             <Form.Item
                                 name="title"
                                 rules={[
-                                    { required: true, message: 'El título es requerido' },
-                                    { min: 2, message: 'El título debe tener al menos 2 caracteres' },
-                                    { max: 50, message: 'El título no puede tener más de 50 caracteres' }
+                                    { required: true, message: 'El nombre es requerido' },
+                                    { min: 2, message: 'El nombre debe tener al menos 2 caracteres' },
+                                    { max: 50, message: 'El nombre no puede tener más de 50 caracteres' }
                                 ]}
                                 className="mb-0"
                             >
                                 <Input
-                                    placeholder="Añade tu nombre"
+                                    placeholder="Añadir"
                                     disabled={loading}
                                     maxLength={50}
-                                    className="rounded-lg border-gray-600 bg-[#2A2A2A] text-white h-16 placeholder-gray-500"
+                                    className="rounded-lg border-gray-600 bg-[#2A2A2A] text-white h-12 placeholder-gray-500"
                                     style={{ fontSize: "12px" }}
                                 />
                             </Form.Item>
                         </div>
 
-                        <div className="mb-0">
+                        {/* Descripción Input */}
+                        <div className="mb-4">
+                            <label className="text-xs text-gray-400 mb-2 block" style={{ fontSize: "11px" }}>
+                                Descripción
+                            </label>
                             <Form.Item
                                 name="description"
                                 rules={[
@@ -375,7 +257,7 @@ const ProfilePage = () => {
                                 className="mb-0"
                             >
                                 <TextArea
-                                    placeholder="Cuéntanos acerca de ti..."
+                                    placeholder="dsfsdsdsg"
                                     disabled={loading}
                                     maxLength={250}
                                     rows={4}
@@ -386,47 +268,37 @@ const ProfilePage = () => {
                             </Form.Item>
                         </div>
 
+                        {/* URL Input */}
                         <div className="mb-6">
-                            <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
-                                SITIO
-                            </h3>
-                            <div className="mb-4">
-                                <div className="flex">
-                                    <Form.Item
-                                        name="slug"
-                                        rules={[
-                                            { required: true, message: 'El slug es requerido' },
-                                            { min: 3, message: 'El slug debe tener al menos 3 caracteres' },
-                                            { max: 30, message: 'El slug no puede tener más de 30 caracteres' },
-                                            { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }
-                                        ]}
-                                        className="flex-1 mb-0"
-                                    >
-                                        <Input
-                                            placeholder="Ve.site/"
-                                            disabled={loading}
-                                            maxLength={30}
-                                            className="rounded-l-lg border-r-0 border-gray-600 bg-[#2A2A2A] text-white h-16 placeholder-gray-500"
-                                            style={{ fontSize: "11px" }}
-                                        />
-                                    </Form.Item>
+                            <label className="text-xs text-black mb-2 block" style={{ fontSize: "11px" }}>
+                            SITIO
+                            </label>
+                            <Form.Item
+                                name="slug"
+                                rules={[
+                                    { required: true, message: 'El slug es requerido' },
+                                    { min: 3, message: 'El slug debe tener al menos 3 caracteres' },
+                                    { max: 30, message: 'El slug no puede tener más de 30 caracteres' },
+                                    { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }
+                                ]}
+                                className="mb-0 focus:border-none"
+                            >
+                                <div className="flex flex-col items-start  bg-white rounded-lg border border-gray-600 h-16">
+                                    <span className="text-gray-600 text-xs px-3 " style={{ fontSize: "12px" }}>
+                                        URL
+                                    </span>
+                                    <Input
+                                        placeholder="vesite/your-slug"
+                                        disabled={loading}
+                                        maxLength={50}
+                                        className="flex-1 border-none bg-white text-black placeholder-black shadow-none focus:shadow-none focus:border-none hover:shadow-none"
+                                        style={{ fontSize: "11px", boxShadow: "none", color:'black' }}
+                                    />
+
                                 </div>
-                            </div>
+                            </Form.Item>
                         </div>
-                        {/*
-                        <div className="mb-6">
-                            <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>
-                                DISEÑO
-                            </h3>
-                            <div className="rounded-lg p-4">
-                                <TemplateSelector
-                                    currentThemeId={biosite.themeId || ''}
-                                    onTemplateChange={handleTemplateChange}
-                                    loading={loading}
-                                />
-                            </div>
-                        </div>
-                        */}
+
                         <Form.Item className="mb-0">
                             <Button
                                 type="default"
