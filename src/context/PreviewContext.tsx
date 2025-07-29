@@ -98,6 +98,21 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         );
     }, []);
 
+    // Función mejorada para identificar enlaces de WhatsApp
+    const isWhatsAppLink = useCallback((link: any): boolean => {
+        const labelLower = link.label?.toLowerCase() || '';
+        const urlLower = link.url?.toLowerCase() || '';
+        const icon = link.icon?.toLowerCase() || '';
+
+        return (
+            icon === 'whatsapp' ||
+            labelLower.includes('whatsapp') ||
+            urlLower.includes('api.whatsapp.com') ||
+            urlLower.includes('wa.me/') ||
+            urlLower.includes('whatsapp.com')
+        );
+    }, []);
+
     // Función para determinar el tipo de store
     const getStoreType = useCallback((link: any): 'appstore' | 'googleplay' => {
         const labelLower = link.label.toLowerCase();
@@ -121,6 +136,73 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }));
     }, [links, isAppStoreLink, getStoreType]);
 
+    // Función para obtener enlaces de música
+    const getMusicEmbed = useCallback(() => {
+        if (!links || !Array.isArray(links)) return null;
+
+        const musicLink = links.find(link => {
+            if (!link.isActive) return false;
+
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return (
+                labelLower.includes('music') ||
+                labelLower.includes('spotify') ||
+                labelLower.includes('apple music') ||
+                labelLower.includes('soundcloud') ||
+                urlLower.includes('spotify.com') ||
+                urlLower.includes('music.apple.com') ||
+                urlLower.includes('soundcloud.com')
+            );
+        });
+
+        return musicLink || null;
+    }, [links]);
+
+    // Función para obtener posts sociales
+    const getSocialPost = useCallback(() => {
+        if (!links || !Array.isArray(links)) return null;
+
+        const socialPostLink = links.find(link => {
+            if (!link.isActive) return false;
+
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return (
+                labelLower.includes('post') ||
+                labelLower.includes('publicacion') ||
+                (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
+            );
+        });
+
+        return socialPostLink || null;
+    }, [links]);
+
+    // Función para obtener videos
+    const getVideoEmbed = useCallback(() => {
+        if (!links || !Array.isArray(links)) return null;
+
+        const videoLink = links.find(link => {
+            if (!link.isActive) return false;
+
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return (
+                labelLower.includes('video') ||
+                labelLower.includes('youtube') ||
+                labelLower.includes('vimeo') ||
+                urlLower.includes('youtube.com') ||
+                urlLower.includes('youtu.be') ||
+                urlLower.includes('vimeo.com')
+            );
+        });
+
+        return videoLink || null;
+    }, [links]);
+
     useEffect(() => {
         if (!biositeId) {
             setBiosite(null);
@@ -138,6 +220,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             fetchBiosite();
         }
     }, [biositeId, fetchBiosite, resetState]);
+
     // Simplificación de la inicialización - solo usar userId y biositeId
     useEffect(() => {
         const initializeBiosite = async () => {
@@ -195,9 +278,14 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     useEffect(() => {
         if (links && Array.isArray(links)) {
+            console.log('Processing links:', links.length);
+
             const socialLinksFromAPI = getSocialLinks();
+            console.log('Social links from API:', socialLinksFromAPI.length);
+
+            // Filtrar enlaces sociales excluyendo WhatsApp y app stores
             const socialLinksFormatted = socialLinksFromAPI
-                .filter(link => !isAppStoreLink(link))
+                .filter(link => !isAppStoreLink(link) && !isWhatsAppLink(link))
                 .map(link => ({
                     id: link.id,
                     label: link.label,
@@ -209,8 +297,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 }));
 
             const regularLinksFromAPI = getRegularLinks();
+
+            // Filtrar enlaces regulares excluyendo app stores y WhatsApp
             const regularLinksFormatted = regularLinksFromAPI
-                .filter(link => !isAppStoreLink(link))
+                .filter(link => !isAppStoreLink(link) && !isWhatsAppLink(link))
                 .map(link => ({
                     id: link.id,
                     title: link.label,
@@ -222,11 +312,17 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             const appLinksFromAPI = getAppLinks();
 
+            console.log('Processed links:', {
+                social: socialLinksFormatted.length,
+                regular: regularLinksFormatted.length,
+                apps: appLinksFromAPI.length
+            });
+
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
             setAppLinksState(appLinksFromAPI);
         }
-    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink, biositeData?.id]);
+    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink, isWhatsAppLink, biositeData?.id]);
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
         setBiosite(prev => prev ? { ...prev, ...data } : null);
@@ -347,6 +443,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         fontFamily,
         updatePreview,
         clearError,
+        getMusicEmbed,
+        getSocialPost,
+        getVideoEmbed,
         ...biositeOperations,
         ...linkOperations,
         setAppLinks: setAppLinksState,

@@ -77,7 +77,15 @@ export const useLivePreview = () => {
 
     const getSocialLinks = () => {
         if (!socialLinks || socialLinks.length === 0) return [];
-        return socialLinks.filter(link => link.isActive);
+
+        return socialLinks.filter(link => {
+            if (!link.isActive) return false;
+
+            const urlLower = link.url.toLowerCase();
+            if (urlLower.includes("api.whatsapp.com")) return false;
+
+            return true;
+        });
     };
 
     const findPlatformForLink = (link: SocialLink) => {

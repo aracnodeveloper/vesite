@@ -93,15 +93,17 @@ const SocialPage = () => {
     const activeSocialLinks = socialLinks.filter(link => {
         if (!link.isActive) return false;
 
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        if (urlLower.includes("api.whatsapp.com")) return false;
+
         const excludedKeywords = [
             'spotify', 'music', 'apple music', 'soundcloud', 'audio',
             'youtube', 'video', 'vimeo', 'tiktok video',
             'post', 'publicacion', 'contenido',
             'music embed', 'video embed', 'social post'
         ];
-
-        const labelLower = link.label.toLowerCase();
-        const urlLower = link.url.toLowerCase();
 
         const isExcluded = excludedKeywords.some(keyword =>
             labelLower.includes(keyword) || urlLower.includes(keyword)
@@ -350,10 +352,8 @@ const SocialPage = () => {
             if (phoneRegex.test(url)) {
                 return true;
             }
-            if (url.includes('wa.me/') ) {
+            if (url.includes('wa.me/') || url.includes('whatsapp.com')) {
                 return true;
-            }else if (url.includes('whatsapp.com')) {
-                return false;
             }
             return false;
         }

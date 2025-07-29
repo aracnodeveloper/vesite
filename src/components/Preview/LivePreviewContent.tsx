@@ -8,7 +8,7 @@ import {
     AvatarSection,
     UserInfoSection,
     SocialLinksSection,
-    RegularLinksSection, TwoSquareImagesSection,
+    RegularLinksSection, TwoSquareImagesSection, WhatsAppSection,
 } from './LivePreviewComponents';
 import VCardButton from "../global/VCard/VCard.tsx";
 
@@ -48,7 +48,9 @@ const LivePreviewContent = () => {
         handleVideoClick,
         handleSocialPostClick,
         handleLinksClick,
-        handleSocialClick
+        handleSocialClick,
+        whatsAppLink,
+        whatsAppData,
     } = useLivePreviewLogic();
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
@@ -185,6 +187,14 @@ const LivePreviewContent = () => {
                         biosite={biosite}
                         user={user}
                         description={description}
+                        themeConfig={themeConfig}
+                    />
+
+                    {/* WhatsApp Link */}
+                    <WhatsAppSection
+                        whatsAppLink={whatsAppLink}
+                        whatsAppData={whatsAppData}
+                        isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
                     />
 

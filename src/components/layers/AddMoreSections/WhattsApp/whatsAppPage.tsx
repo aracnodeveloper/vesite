@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
 import { WhatsAppOutlined } from "@ant-design/icons";
-import {useFetchLinks} from "../../../../hooks/useFetchLinks.ts";
+import { useFetchLinks } from "../../../../hooks/useFetchLinks.ts";
 
 interface WhatsAppLink {
     id?: string;
@@ -34,24 +34,55 @@ const WhatsAppPage = () => {
     const [message, setMessage] = useState("");
     const [existingWhatsAppLink, setExistingWhatsAppLink] = useState<any>(null);
 
-    // Buscar enlace de WhatsApp existente
+    // Buscar enlace de WhatsApp existente - mejorado
     useEffect(() => {
         if (links && Array.isArray(links)) {
-            const whatsappLink = links.find(link =>
-                link.icon === 'whatsapp' ||
-                link.label.toLowerCase().includes('whatsapp') ||
-                link.url.includes('api.whatsapp.com/send')
-            );
+            const whatsappLink = links.find(link => {
+                // Buscar por múltiples criterios
+                return (
+                    link.icon === 'whatsapp' ||
+                    link.label?.toLowerCase().includes('whatsapp') ||
+                    link.url?.includes('api.whatsapp.com/send') ||
+                    link.url?.includes('wa.me/') ||
+                    link.url?.includes('whatsapp.com')
+                );
+            });
 
             if (whatsappLink) {
+                console.log('WhatsApp link found:', whatsappLink);
                 setExistingWhatsAppLink(whatsappLink);
-                // Extraer teléfono y mensaje de la URL existente
-                const urlParams = new URLSearchParams(whatsappLink.url.split('?')[1]);
-                const phoneParam = urlParams.get('phone') || '';
-                const messageParam = urlParams.get('text') || '';
 
-                setPhone(phoneParam);
-                setMessage(decodeURIComponent(messageParam));
+                // Extraer teléfono y mensaje de la URL existente
+                try {
+                    let phoneParam = '';
+                    let messageParam = '';
+
+                    if (whatsappLink.url.includes('api.whatsapp.com/send')) {
+                        const urlParams = new URLSearchParams(whatsappLink.url.split('?')[1] || '');
+                        phoneParam = urlParams.get('phone') || '';
+                        messageParam = urlParams.get('text') || '';
+                    } else if (whatsappLink.url.includes('wa.me/')) {
+                        // Formato wa.me/phone?text=message
+                        const urlParts = whatsappLink.url.split('wa.me/')[1];
+                        if (urlParts) {
+                            const [phonePart, queryPart] = urlParts.split('?');
+                            phoneParam = phonePart || '';
+                            if (queryPart) {
+                                const urlParams = new URLSearchParams(queryPart);
+                                messageParam = urlParams.get('text') || '';
+                            }
+                        }
+                    }
+
+                    setPhone(phoneParam);
+                    setMessage(decodeURIComponent(messageParam || ''));
+                } catch (error) {
+                    console.error('Error parsing WhatsApp URL:', error);
+                }
+            } else {
+                console.log('No WhatsApp link found');
+                setExistingWhatsAppLink(null);
+                // No limpiar los campos aquí para mantener los datos del usuario
             }
         }
     }, [links]);
@@ -117,22 +148,29 @@ const WhatsAppPage = () => {
 
             if (existingWhatsAppLink) {
                 // Actualizar enlace existente
-                await updateLink(existingWhatsAppLink.id, {
+                const updateData = {
                     label: "WhatsApp",
                     url: whatsappUrl,
-                    isActive: true
-                });
+                    isActive: true,
+                    icon: "whatsapp" // Asegurar que el ícono se mantenga
+                };
+
+                console.log('Updating WhatsApp link:', existingWhatsAppLink.id, updateData);
+                await updateLink(existingWhatsAppLink.id, updateData);
             } else {
                 // Crear nuevo enlace
                 const maxOrderIndex = Math.max(...(links?.map(l => l.orderIndex) || []), -1);
-                await createLink({
+                const linkData = {
                     biositeId: biosite.id,
                     label: "WhatsApp",
                     url: whatsappUrl,
                     icon: "whatsapp",
                     orderIndex: maxOrderIndex + 1,
                     isActive: true
-                });
+                };
+
+                console.log('Creating new WhatsApp link:', linkData);
+                await createLink(linkData);
             }
 
             // Refrescar los enlaces
@@ -170,6 +208,7 @@ const WhatsAppPage = () => {
 
         setIsSaving(true);
         try {
+            console.log('Deleting WhatsApp link:', existingWhatsAppLink.id);
             await deleteLink(existingWhatsAppLink.id);
             setExistingWhatsAppLink(null);
             setPhone("");
@@ -229,6 +268,15 @@ const WhatsAppPage = () => {
                     <p className="text-gray-600 text-sm">
                         Añade tu número y el mensaje que quieres que te llegue cuando alguien haga clic en tu enlace.
                     </p>
+
+                    {/* Mostrar estado del enlace existente */}
+                    {existingWhatsAppLink && (
+                        <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                            <p className="text-green-700 text-sm font-medium">
+                                ✓ Enlace de WhatsApp activo
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Mensaje de guardado */}
@@ -339,6 +387,7 @@ const WhatsAppPage = () => {
                         </ul>
                     </div>
                 </div>
+
             </div>
         </div>
     );

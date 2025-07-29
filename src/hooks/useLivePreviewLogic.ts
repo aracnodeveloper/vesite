@@ -98,6 +98,15 @@ export const useLivePreviewLogic = () => {
 
             if (isExcluded) return false;
 
+            // Excluir enlaces de WhatsApp de los links sociales regulares
+            if (urlLower.includes("api.whatsapp.com") ||
+                urlLower.includes("wa.me/") ||
+                urlLower.includes("whatsapp.com") ||
+                labelLower.includes("whatsapp") ||
+                link.icon === 'whatsapp') {
+                return false;
+            }
+
             const platform = findPlatformForLink(link);
             return platform !== undefined && platform !== null;
         });
@@ -127,11 +136,66 @@ export const useLivePreviewLogic = () => {
         return null;
     };
 
+    // Función mejorada para obtener el enlace de WhatsApp
+    const getWhatsAppLink = () => {
+        if (!socialLinksData || socialLinksData.length === 0) return null;
+
+        // Buscar por múltiples criterios para mayor precisión
+        const whatsappLink = socialLinksData.find(link => {
+            if (!link.isActive) return false;
+
+            const urlLower = link.url.toLowerCase();
+            const labelLower = link.label.toLowerCase();
+
+            return (
+                link.icon === 'whatsapp' ||
+                labelLower.includes('whatsapp') ||
+                urlLower.includes('api.whatsapp.com/send') ||
+                urlLower.includes('wa.me/') ||
+                urlLower.includes('whatsapp.com')
+            );
+        });
+
+        console.log('WhatsApp link search result:', whatsappLink);
+        return whatsappLink || null;
+    };
+
+    // Función mejorada para parsear datos de WhatsApp
+    const parseWhatsAppData = (url: string) => {
+        try {
+            let phone = '';
+            let message = '';
+
+            if (url.includes('api.whatsapp.com/send')) {
+                // Formato: https://api.whatsapp.com/send?phone=123&text=message
+                const urlParams = new URLSearchParams(url.split('?')[1] || '');
+                phone = urlParams.get('phone') || '';
+                message = decodeURIComponent(urlParams.get('text') || '');
+            } else if (url.includes('wa.me/')) {
+                // Formato: https://wa.me/123?text=message
+                const urlParts = url.split('wa.me/')[1];
+                if (urlParts) {
+                    const [phonePart, queryPart] = urlParts.split('?');
+                    phone = phonePart || '';
+                    if (queryPart) {
+                        const urlParams = new URLSearchParams(queryPart);
+                        message = decodeURIComponent(urlParams.get('text') || '');
+                    }
+                }
+            }
+
+            console.log('Parsed WhatsApp data:', { phone, message });
+            return { phone, message };
+        } catch (error) {
+            console.error('Error parsing WhatsApp URL:', error);
+            return { phone: '', message: '' };
+        }
+    };
+
     const isInstagramUrl = (url: string) => {
         return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
     };
 
-    // Funciones para manejar la navegación
     const handleMusicClick = (e: React.MouseEvent) => {
         if (!isExposedRoute) {
             e.preventDefault();
@@ -167,16 +231,23 @@ export const useLivePreviewLogic = () => {
         }
     };
 
-
-
     const themeConfig = getThemeConfig();
     const musicEmbed = getMusicEmbed();
     const socialPost = getSocialPost();
     const videoEmbed = getVideoEmbed();
     const realSocialLinks = filterRealSocialLinks(socialLinksData);
     const description = user?.description || user?.name || 'Tu descripción aquí';
+    const whatsAppLink = getWhatsAppLink();
+    const whatsAppData = whatsAppLink ? parseWhatsAppData(whatsAppLink.url) : null;
 
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
+
+    // Debug logging
+    console.log('LivePreview WhatsApp Debug:', {
+        socialLinksCount: socialLinksData.length,
+        whatsAppLinkFound: !!whatsAppLink,
+        whatsAppData: whatsAppData
+    });
 
     return {
         biosite,
@@ -191,6 +262,9 @@ export const useLivePreviewLogic = () => {
         handleImageLoadStart,
         regularLinksData,
         realSocialLinks,
+        whatsAppLink,
+        whatsAppData,
+        parseWhatsAppData,
         validBackgroundImage,
         validAvatarImage,
         findPlatformForLink,

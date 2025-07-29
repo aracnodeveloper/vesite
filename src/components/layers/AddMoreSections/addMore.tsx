@@ -25,7 +25,7 @@ const Add = () => {
                     {/*
                     <AppD/>
                     */}
-                    <WhatsApp/>
+                    {/*<WhatsApp/>*/}
                     <Links/>
                     <Videos/>
                     <Musics/>

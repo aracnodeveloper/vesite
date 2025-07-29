@@ -39,7 +39,7 @@ const App = () => {
 
                         {/* Ruta pública para ver biosite por slug */}
                         <Route
-                            path=":slug"
+                            path="/Ve.site/:slug"
                             element={
                                 <div className="min-h-screen bg-gray-100">
                                     <PublicBiositeView />
