@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuthContext } from "../hooks/useAuthContext.ts";
+import Cookie from "js-cookie";
 
 interface ConditionalNavButtonProps {
     themeConfig: {
@@ -15,7 +16,7 @@ interface ConditionalNavButtonProps {
 }
 
 const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig }) => {
-    const { isAuthenticated } = useAuthContext();
+    const  isAuthenticated  = Cookie.get('accessToken');
 
     const handleClick = () => {
         if (isAuthenticated) {

@@ -504,7 +504,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div className="absolute inset-0" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%', opacity: 0.6 }} />
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center relative transition-transform duration-300 ease-in-out origin-center scale-[.60] md:scale-[.68] lg:scale-[.72] xl:scale-[.76] 2xl:scale-[.80]">
                                 <div onClick={handleExpoced} className="absolute cursor-pointer text-xs top-0 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50">
-                                    URL: Ve.site/{biosite?.slug || 'your-slug'}
+                                    URL: {biosite?.slug || 'your-slug'}
                                 </div>
                                 <div className="absolute top-0 right-40">
                                 <ShareButton/></div>
