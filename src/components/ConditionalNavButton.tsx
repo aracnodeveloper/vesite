@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuthContext } from "../hooks/useAuthContext.ts";
 
 interface ConditionalNavButtonProps {
     themeConfig: {
@@ -14,15 +15,21 @@ interface ConditionalNavButtonProps {
 }
 
 const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig }) => {
+    const { isAuthenticated } = useAuthContext();
+
     const handleClick = () => {
-        window.location.href = 'https://visitaecuador.com/vesite';
+        if (isAuthenticated) {
+            window.location.href = 'https://visitaecuador.com/vesite';
+        } else {
+            window.location.href = 'https://visitaecuador.com';
+        }
     };
 
     return (
-        <div className="px-3  sm:px-4 ">
+        <div className="px-3 sm:px-4">
             <button
                 onClick={handleClick}
-                className="w-full flex items-center cursor-pointer justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-full  transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                className="w-full flex items-center cursor-pointer justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-full transition-all duration-200 hover:scale-105 hover:shadow-lg"
                 style={{
                     backgroundColor: 'transparent',
                     color: themeConfig.colors.text,
@@ -41,7 +48,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig
                 </div>
 
                 <span className="font-medium text-xs sm:text-xs">
-                    Actualizar mis datos
+                    {isAuthenticated ? 'Actualizar mis datos' : 'Únete a VisitaEcuador'}
                 </span>
 
                 <svg
