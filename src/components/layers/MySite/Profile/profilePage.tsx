@@ -165,7 +165,7 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="w-full h-full mb-10 mt-10 p-2 max-w-md mx-auto">
+        <div className="w-full h-full mb-10 mt-20 p-2 max-w-md mx-auto">
             <div className="px-6 py-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
@@ -270,29 +270,34 @@ const ProfilePage = () => {
 
                         {/* URL Input */}
                         <div className="mb-6">
-                            <label className="text-xs text-black mb-2 block" style={{ fontSize: "11px" }}>
-                            SITIO
+                            <label className="text-xs font-medium text-gray-800  mb-2 block" style={{fontSize: "11px"}}>
+                                SITIO
                             </label>
+                            <span className="text-gray-400 text-xs  " style={{fontSize: "11px"}}>
+                                        URL
+                                    </span>
                             <Form.Item
                                 name="slug"
                                 rules={[
-                                    { required: true, message: 'El slug es requerido' },
-                                    { min: 3, message: 'El slug debe tener al menos 3 caracteres' },
-                                    { max: 30, message: 'El slug no puede tener más de 30 caracteres' },
-                                    { pattern: /^[a-z0-9-]+$/, message: 'Solo se permiten letras minúsculas, números y guiones' }
+                                    {required: true, message: 'El slug es requerido'},
+                                    {min: 3, message: 'El slug debe tener al menos 3 caracteres'},
+                                    {max: 30, message: 'El slug no puede tener más de 30 caracteres'},
+                                    {
+                                        pattern: /^[a-z0-9-]+$/,
+                                        message: 'Solo se permiten letras minúsculas, números y guiones'
+                                    }
                                 ]}
                                 className="mb-0 focus:border-none"
                             >
-                                <div className="flex flex-col items-start  bg-white rounded-lg border border-gray-600 h-16">
-                                    <span className="text-gray-600 text-xs px-3 " style={{ fontSize: "12px" }}>
-                                        URL
-                                    </span>
+                                <div
+                                    className="flex flex-col items-start  bg-white rounded-lg  h-16">
+
                                     <Input
                                         placeholder="vesite/your-slug"
                                         disabled={loading}
                                         maxLength={50}
                                         className="flex-1 border-none bg-white text-black placeholder-black shadow-none focus:shadow-none focus:border-none hover:shadow-none"
-                                        style={{ fontSize: "11px", boxShadow: "none", color:'black' }}
+                                        style={{fontSize: "11px", boxShadow: "none", color: 'black'}}
                                     />
 
                                 </div>

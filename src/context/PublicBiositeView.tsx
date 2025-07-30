@@ -11,7 +11,7 @@ import {
     RegularLinksSection,
     TwoSquareImagesSection,
 } from '../components/Preview/LivePreviewComponents';
-//import VCardButton from "../components/global/VCard/VCard.tsx";
+import VCardButton from "../components/global/VCard/VCard.tsx";
 import ConditionalNavButton from "../components/ConditionalNavButton.tsx";
 import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
@@ -616,14 +616,12 @@ const PublicBiositeView = () => {
                         themeConfig={themeConfig}
                     />
 
-                    {/* V-Card Button
+
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={biositeData.biosite.ownerId}
-                        isPublicView={true} // Nueva prop para indicar vista pública
-                        publicBiositeData={biositeData.biosite} // Pasar datos del biosite público
+                        userId={biositeData.biosite.ownerId}  // ✅ Este es el propietario del biosite público
                     />
-                    */}
+
                     {/* MÚSICA EMBED */}
                     {musicEmbed && musicEmbed.isActive && (
                         <div className="px-4 mb-4">

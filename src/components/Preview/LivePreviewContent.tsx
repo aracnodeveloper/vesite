@@ -337,7 +337,6 @@ const LivePreviewContent = () => {
                     {/* V-Card Button */}
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={user?.id || Cookie.get('userId')}
                     />
 
                     {/* VIDEO EMBED */}

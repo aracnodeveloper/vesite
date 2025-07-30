@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {Phone, Mail, Globe, QrCode, Download, Share2, X } from 'lucide-react';
+import {Phone, Mail, Globe, QrCode, Download, Share2, X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
 import {usePreview} from "../../../context/PreviewContext.tsx";
-
+import {useParams} from "react-router-dom";
+import {useUser} from "../../../hooks/useUser.ts";
 interface VCardData {
     name: string;
     title: string;
@@ -13,6 +14,8 @@ interface VCardData {
     phone: string;
     website: string;
 }
+
+
 
 interface VCardButtonProps {
     themeConfig: {
@@ -30,19 +33,13 @@ interface VCardButtonProps {
         };
     };
     userId?: string;
-    isPublicView?: boolean; // Nueva prop para indicar vista pública
-    publicBiositeData?: any; // Datos del biosite público
 }
 
-const VCardButton: React.FC<VCardButtonProps> = ({
-                                                     themeConfig,
-                                                     userId,
-                                                     isPublicView = false,
-                                                     publicBiositeData
-                                                 }) => {
+const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const { biosite } = usePreview();
+    const { slug } = useParams<{ slug?: string }>();
     const [cardData, setCardData] = useState<VCardData>({
         name: '',
         title: '',
@@ -52,79 +49,46 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         website: ''
     });
 
-    const currentUserId = userId || Cookies.get('userId');
+    const currentUserId = Cookies.get('userId');
 
     const {
         businessCard,
         loading,
         error,
-        fetchBusinessCardByUserId
+        regenerateQRCode,
+        fetchBusinessCardByUserId, fetchBusinessCardBySlug
     } = useBusinessCard();
+    const {
+        fetchUser,
+    } = useUser();
 
-    // En vista pública, usar los datos del biosite en lugar de hacer petición autenticada
     useEffect(() => {
-        if (isPublicView && publicBiositeData) {
-            // Extraer información de contacto del biosite público
-            const publicCardData: VCardData = {
-                name: publicBiositeData.title || publicBiositeData.name || '',
-                title: publicBiositeData.description || '',
-                company: '', // Podrías agregarlo como campo en el biosite
-                email: extractEmailFromLinks(publicBiositeData.links || []),
-                phone: extractPhoneFromLinks(publicBiositeData.links || []),
-                website: extractWebsiteFromLinks(publicBiositeData.links || [])
-            };
-            setCardData(publicCardData);
-        } else if (isModalOpen && currentUserId && !isPublicView) {
-            // Solo hacer petición autenticada si NO es vista pública
+        if (isModalOpen && slug) {
+            fetchBusinessCardBySlug(slug);
+        }else {
             fetchBusinessCardByUserId(currentUserId);
+
+            if (currentUserId) {
+                fetchUser(currentUserId);
+            }
         }
-    }, [isModalOpen, currentUserId, isPublicView, publicBiositeData]);
-
-    // Funciones helper para extraer información de los links del biosite
-    const extractEmailFromLinks = (links: any[]): string => {
-        const emailLink = links.find(link =>
-            link.url.includes('mailto:') ||
-            link.label.toLowerCase().includes('email') ||
-            link.icon.includes('gmail') ||
-            link.icon.includes('mail')
-        );
-        return emailLink ? emailLink.url.replace('mailto:', '') : '';
-    };
-
-    const extractPhoneFromLinks = (links: any[]): string => {
-        const phoneLink = links.find(link =>
-            link.url.includes('tel:') ||
-            link.label.toLowerCase().includes('phone') ||
-            link.label.toLowerCase().includes('teléfono') ||
-            link.icon.includes('phone')
-        );
-        return phoneLink ? phoneLink.url.replace('tel:', '') : '';
-    };
-
-    const extractWebsiteFromLinks = (links: any[]): string => {
-        const websiteLink = links.find(link =>
-            (link.url.startsWith('http') &&
-                !link.url.includes('instagram.com') &&
-                !link.url.includes('tiktok.com') &&
-                !link.url.includes('twitter.com') &&
-                !link.url.includes('facebook.com')) ||
-            link.label.toLowerCase().includes('website') ||
-            link.label.toLowerCase().includes('web') ||
-            link.icon.includes('globe')
-        );
-        return websiteLink ? websiteLink.url : '';
-    };
+    }, [isModalOpen, currentUserId, slug]);
 
     useEffect(() => {
-        if (businessCard?.data && !isPublicView) {
+        if (businessCard?.data) {
             try {
+                console.log('Raw businessCard.data:', businessCard.data);
+
                 const parsedData = typeof businessCard.data === 'string'
                     ? JSON.parse(businessCard.data)
                     : businessCard.data;
                 setCardData(parsedData);
+
+                console.log('Parsed data:', parsedData);
+
             } catch (error) {
                 console.error('Error parsing business card data:', error);
-                setCardData({
+                setCardData(businessCard.data ||{
                     name: '',
                     title: '',
                     company: '',
@@ -133,19 +97,21 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                     website: ''
                 });
             }
+        } else {
+            console.log('No businessCard.data available');
         }
-    }, [businessCard, isPublicView]);
+    }, [businessCard]);
 
     const generateVCardString = () => {
         const vcard = [
             'BEGIN:VCARD',
             'VERSION:3.0',
-            `FN:${cardData.name}`,
-            `TITLE:${cardData.title}`,
-            `ORG:${cardData.company}`,
-            `EMAIL:${cardData.email}`,
-            `TEL:${cardData.phone}`,
-            `URL:${cardData.website}`,
+            `FN:${cardData.name || 'Sin nombre'}`,
+            `TITLE:${cardData.title || ''}`,
+            `ORG:${cardData.company || ''}`,
+            `EMAIL:${cardData.email || ''}`,
+            `TEL:${cardData.phone || ''}`,
+            `URL:${cardData.website || ''}`,
             'END:VCARD'
         ].join('\n');
 
@@ -158,7 +124,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${cardData.name.replace(/\s+/g, '_')}.vcf`;
+        a.download = `${(cardData.name || 'contacto').replace(/\s+/g, '_')}.vcf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -166,39 +132,31 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     };
 
     const shareVCard = async () => {
-        if (navigator.share) {
+        if (navigator.share && businessCard?.slug) {
             try {
                 await navigator.share({
-                    title: `Tarjeta de ${cardData.name}`,
-                    text: `Conecta conmigo - ${cardData.name}`,
-                    url: isPublicView ? window.location.href : `${window.location.origin}/vcard/${businessCard?.slug}`
+                    title: `Tarjeta de ${cardData.name || 'Contacto'}`,
+                    text: `Conecta conmigo - ${cardData.name || 'Mi contacto'}`,
+                    url: `${window.location.origin}/vcard/${businessCard.slug}`
                 });
             } catch (err) {
                 console.log('Error sharing:', err);
             }
         } else {
             // Fallback - copiar al clipboard
-            const shareUrl = isPublicView ? window.location.href : `${window.location.origin}/vcard/${businessCard?.slug}`;
+            const shareUrl = businessCard?.slug
+                ? `${window.location.origin}/vcard/${businessCard.slug}`
+                : window.location.href;
             navigator.clipboard.writeText(shareUrl);
             alert('Enlace copiado al portapapeles');
         }
     };
 
-    // No mostrar si no hay usuario ID y no es vista pública
-    if (!currentUserId && !isPublicView) {
-        return null;
-    }
-
-    // No mostrar si en vista pública no hay datos suficientes
-    if (isPublicView && !publicBiositeData) {
+    if (!currentUserId) {
         return null;
     }
 
     const getAvatarImage = () => {
-        if (isPublicView && publicBiositeData?.avatarImage) {
-            return publicBiositeData.avatarImage;
-        }
-
         if (avatarError || !biosite?.avatarImage) {
             return imgP;
         }
@@ -221,6 +179,13 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         setAvatarError(true);
     };
 
+    const handleRegenerateQR = async () => {
+        try {
+            await regenerateQRCode(currentUserId) ;
+        } catch (error) {
+            console.error('Error regenerating QR code:', error);
+        }
+    };
     return (
         <>
             <div className="px-4 mb-4 cursor-pointer">
@@ -230,7 +195,12 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-3">
-                        <img src={getAvatarImage()} className="rounded-lg w-10 h-10 xl:w-10 xl:h-10 object-cover" alt="perfil" onError={handleAvatarError} />
+                        <img
+                            src={getAvatarImage()}
+                            className="rounded-lg w-10 h-10 xl:w-10 xl:h-10 object-cover"
+                            alt="perfil"
+                            onError={handleAvatarError}
+                        />
                         <div className="text-left">
                             <div className="text-black font-bold text-base" style={{ fontFamily: themeConfig.fonts.primary }}>
                                 VCard
@@ -242,82 +212,107 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             </div>
 
             {isModalOpen && (
-                <div className="fixed inset-0 bg-gray-300 flex items-center justify-center p-4 z-50">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-4 border-b">
-                            <h2 className="text-xl font-bold" style={{ color: "black", fontFamily: themeConfig.fonts.primary }}>
+                            <h2 className="text-xl font-bold text-black" style={{ fontFamily: themeConfig.fonts.primary }}>
                                 Mi Tarjeta Digital
                             </h2>
                             <button
                                 onClick={() => setIsModalOpen(false)}
                                 className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                             >
-                                <X size={20} style={{ color: themeConfig.colors.text }} />
+                                <X size={20} className="text-gray-600" />
                             </button>
                         </div>
 
-                        {loading && !isPublicView ? (
+                        {loading ? (
                             <div className="p-8 text-center">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-4" style={{ borderColor: themeConfig.colors.primary }}></div>
-                                <p style={{ color: themeConfig.colors.text }}>Cargando tarjeta...</p>
+                                <p className="text-gray-600">Cargando tarjeta...</p>
                             </div>
-                        ) : error && !isPublicView ? (
+                        ) : error ? (
                             <div className="p-8 text-center">
-                                <div className="text-red-500 mb-4">⚠️</div>
-                                <p style={{ color: themeConfig.colors.text }}>{error}</p>
+                                <div className="text-red-500 mb-4 text-2xl">⚠️</div>
+                                <p className="text-gray-600 mb-4">{error}</p>
+                                <p className="text-sm text-gray-500">No tienes una VCard creada aún</p>
                             </div>
                         ) : (
                             <>
-                                {/* QR Code - Solo mostrar si tenemos businessCard o si es vista pública con URL */}
-                                {(businessCard?.qrCodeUrl || isPublicView) && (
-                                    <div className="p-6 text-center" style={{ background: `linear-gradient(135deg, ${themeConfig.colors.primary}20 0%, ${themeConfig.colors.accent}20 100%)` }}>
-                                        {businessCard?.qrCodeUrl ? (
-                                            <div className="bg-white p-4 rounded-xl inline-block shadow-md">
-                                                <img
-                                                    src={businessCard.qrCodeUrl}
-                                                    alt="QR Code"
-                                                    className="w-32 h-32 mx-auto"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="bg-white p-4 rounded-xl inline-block shadow-md">
-                                                <div className="w-32 h-32 mx-auto flex items-center justify-center text-gray-400">
-                                                    <QrCode size={64} />
-                                                </div>
-                                            </div>
-                                        )}
-
+                                {/* QR Code */}
+                                {businessCard?.qrCodeUrl && (
+                                    <div className="p-6 text-center bg-gradient-to-br from-gray-50 to-gray-100">
+                                        <div className="bg-white p-4 rounded-xl inline-block shadow-md">
+                                            <img
+                                                src={businessCard.qrCodeUrl}
+                                                alt="QR Code"
+                                                className="w-32 h-32 mx-auto"
+                                            />
+                                        </div>
+                                        <p className="text-sm mt-3 text-gray-600">
+                                            Escanea para guardar mi contacto
+                                        </p>
                                     </div>
                                 )}
 
                                 {/* Contact Info */}
                                 <div className="p-6 space-y-4">
+                                    {/* Header con nombre */}
+                                    <div className="text-center flex flex-col justify-center">
+
+
+                                        <button
+                                            onClick={handleRegenerateQR}
+                                            className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer mt-4"
+                                            title="Generar código QR"
+                                        > Mostrar QR
+                                            <QrCode size={20} className="ml-2"/>
+                                        </button>
+                                    </div>
                                     {cardData.name && (
                                         <div className="text-center mb-6">
-                                            <h3 className="text-2xl text-black font-bold" style={{ color: themeConfig.colors.text, fontFamily: themeConfig.fonts.primary }}>
+                                            <h3 className="text-2xl font-bold text-gray-800"
+                                                style={{fontFamily: themeConfig.fonts.primary}}>
                                                 {cardData.name}
                                             </h3>
                                             {cardData.title && (
-                                                <p className="text-sm mt-1" style={{ color: themeConfig.colors.text, opacity: 0.7 }}>
+                                                <p className="text-gray-600 mt-1">
                                                     {cardData.title}
                                                 </p>
                                             )}
                                             {cardData.company && (
-                                                <p className="text-sm mt-1" style={{ color: themeConfig.colors.primary, fontWeight: 'bold' }}>
+                                                <p className="text-sm mt-1 font-semibold"
+                                                   style={{color: themeConfig.colors.primary}}>
                                                     {cardData.company}
                                                 </p>
                                             )}
                                         </div>
                                     )}
 
+                                    {/* Mensaje cuando no hay datos */}
+                                    {!cardData.name && !cardData.email && !cardData.phone && !cardData.website && (
+                                        <div className="text-center py-8">
+                                            <div className="text-gray-400 mb-3">
+                                                <User size={48} className="mx-auto"/>
+                                            </div>
+                                            <p className="text-gray-500">Tu tarjeta está vacía</p>
+                                            <p className="text-sm text-gray-400 mt-1">Edita tu perfil para añadir
+                                                información</p>
+                                        </div>
+                                    )}
+
                                     {/* Contact Details */}
                                     <div className="space-y-3">
                                         {cardData.email && (
-                                            <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: themeConfig.colors.profileBackground }}>
-                                                <Mail className="w-5 h-5" style={{ color: themeConfig.colors.primary }} />
-                                                <div>
-                                                    <p className="text-xs" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>Email</p>
-                                                    <a href={`mailto:${cardData.email}`} className="text-sm font-medium" style={{ color: themeConfig.colors.text }}>
+                                            <div
+                                                className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                <Mail className="w-5 h-5 text-blue-600 flex-shrink-0"/>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-gray-500 mb-1">Email</p>
+                                                    <a
+                                                        href={`mailto:${cardData.email}`}
+                                                        className="text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors break-all"
+                                                    >
                                                         {cardData.email}
                                                     </a>
                                                 </div>
@@ -325,11 +320,15 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                         )}
 
                                         {cardData.phone && (
-                                            <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: themeConfig.colors.profileBackground }}>
-                                                <Phone className="w-5 h-5" style={{ color: themeConfig.colors.primary }} />
-                                                <div>
-                                                    <p className="text-xs" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>Teléfono</p>
-                                                    <a href={`tel:${cardData.phone}`} className="text-sm font-medium" style={{ color: themeConfig.colors.text }}>
+                                            <div
+                                                className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                <Phone className="w-5 h-5 text-green-600 flex-shrink-0"/>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-gray-500 mb-1">Teléfono</p>
+                                                    <a
+                                                        href={`tel:${cardData.phone}`}
+                                                        className="text-sm font-medium text-gray-800 hover:text-green-600 transition-colors"
+                                                    >
                                                         {cardData.phone}
                                                     </a>
                                                 </div>
@@ -337,13 +336,31 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                         )}
 
                                         {cardData.website && (
-                                            <div className="flex items-center space-x-3 p-3 rounded-lg" style={{ backgroundColor: themeConfig.colors.profileBackground }}>
-                                                <Globe className="w-5 h-5" style={{ color: themeConfig.colors.primary }} />
-                                                <div>
-                                                    <p className="text-xs" style={{ color: themeConfig.colors.text, opacity: 0.6 }}>Website</p>
-                                                    <a href={cardData.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium" style={{ color: themeConfig.colors.text }}>
+                                            <div
+                                                className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                <Globe className="w-5 h-5 text-purple-600 flex-shrink-0"/>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-gray-500 mb-1">Website</p>
+                                                    <a
+                                                        href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-sm font-medium text-gray-800 hover:text-purple-600 transition-colors break-all"
+                                                    >
                                                         {cardData.website}
                                                     </a>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {cardData.company && (
+                                            <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
+                                                <Building className="w-5 h-5 text-orange-600 flex-shrink-0"/>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-gray-500 mb-1">Empresa</p>
+                                                    <p className="text-sm font-medium text-gray-800">
+                                                        {cardData.company}
+                                                    </p>
                                                 </div>
                                             </div>
                                         )}
@@ -351,30 +368,24 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="border-t flex space-x-0">
-                                    <button
-                                        onClick={downloadVCard}
-                                        className="flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg transition-all duration-200 hover:shadow-md"
-                                        style={{
-                                            backgroundColor: themeConfig.colors.primary,
-                                            color: 'black'
-                                        }}
-                                    >
-                                        <Download size={18} />
-                                        <span className="text-sm font-medium cursor-pointer">Descargar</span>
-                                    </button>
-                                    <button
-                                        onClick={shareVCard}
-                                        className="flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md"
-                                        style={{
-                                            borderColor: themeConfig.colors.primary,
-                                            color: 'black'
-                                        }}
-                                    >
-                                        <Share2 size={18} />
-                                        <span className="text-sm font-medium cursor-pointer">Compartir</span>
-                                    </button>
-                                </div>
+                                {(cardData.name || cardData.email || cardData.phone) && (
+                                    <div className="border-t flex">
+                                        <button
+                                            onClick={downloadVCard}
+                                            className="flex-1 flex items-center justify-center space-x-2 py-4 px-4 hover:bg-gray-50 transition-colors border-r"
+                                        >
+                                            <Download size={18} className="text-gray-600" />
+                                            <span className="text-sm font-medium text-gray-700">Descargar</span>
+                                        </button>
+                                        <button
+                                            onClick={shareVCard}
+                                            className="flex-1 flex items-center justify-center space-x-2 py-4 px-4 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <Share2 size={18} className="text-gray-600" />
+                                            <span className="text-sm font-medium text-gray-700">Compartir</span>
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
