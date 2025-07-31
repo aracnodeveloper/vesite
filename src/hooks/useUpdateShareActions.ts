@@ -133,7 +133,7 @@ export const useUpdateShareActions = () => {
     // Función para obtener la URL de compartir
     const getShareUrl = () => {
         if (!canShare()) return null;
-        return `${window.location.origin}/Ve.site/${biosite!.slug}`;
+        return `${window.location.origin}/${biosite!.slug}`;
     };
 
     return {
