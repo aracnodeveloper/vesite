@@ -50,22 +50,20 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         website: ''
     });
 
-    // Obtener userId de múltiples fuentes con prioridad
+
     const getCurrentUserId = useCallback(() => {
-        // 1. Prioridad: userId pasado como prop
+
         if (userId && userId !== 'undefined' && userId.trim() !== '') {
             console.log('Using prop userId:', userId);
             return userId;
         }
 
-        // 2. Fallback: userId de cookies
         const cookieUserId = Cookies.get('userId');
         if (cookieUserId && cookieUserId !== 'undefined' && cookieUserId.trim() !== '') {
             console.log('Using cookie userId:', cookieUserId);
             return cookieUserId;
         }
 
-        // 3. Fallback: userId del contexto biosite
         if (biosite?.ownerId && biosite.ownerId.trim() !== 'undefined' && biosite.ownerId.trim() !== '') {
             console.log('Using biosite ownerId:', biosite.ownerId);
             return biosite.ownerId;

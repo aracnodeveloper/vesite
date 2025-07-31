@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useBusinessCard } from '../../../../hooks/useVCard.ts';
 import { useUser } from '../../../../hooks/useUser.ts';
 import { ChevronLeft, QrCode, Edit, Save, X } from 'lucide-react';
@@ -10,7 +10,8 @@ const VCardPage = () => {
     const { slug } = useParams<{ slug?: string }>();
     const [isEditing, setIsEditing] = useState(false);
     const [cardData, setCardData] = useState({
-        name: '',   title: '',
+        name: '',
+        title: '',
         company: '',
         email: '',
         phone: '',
@@ -79,14 +80,14 @@ const VCardPage = () => {
         if (!businessCard || !currentUserId) return;
 
         try {
-
+            // El ID se pasa como parámetro de URL, no en el payload
             await updateBusinessCard(businessCard.id, {
-                id: businessCard.id,
-                ownerId: Cookies.get('userId'),
+                ownerId: currentUserId,
                 data: JSON.stringify(cardData),
                 isActive: true
             });
 
+            // Actualizar datos del usuario si es necesario
             const userUpdateData: any = {};
             if (cardData.phone) {
                 userUpdateData.phone = cardData.phone;
@@ -112,6 +113,7 @@ const VCardPage = () => {
         try {
             await handleSave();
             await handleGenerate();
+            setIsEditing(false);
         } catch (error) {
             console.error('Error en handleSaveAndGenerate:', error);
         }
@@ -119,15 +121,15 @@ const VCardPage = () => {
 
     const handleGenerate = async () => {
         try {
-            await generarBusinessQR(currentUserId) ;
-        }catch (error) {
+            await generarBusinessQR(currentUserId);
+        } catch (error) {
             console.error('Error de capa 8', error);
         }
     };
 
     const handleRegenerateQR = async () => {
         try {
-            await regenerateQRCode(currentUserId) ;
+            await regenerateQRCode(currentUserId);
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
@@ -137,7 +139,6 @@ const VCardPage = () => {
         setCardData(prev => ({ ...prev, [field]: value }));
     };
 
-    // Combinar loading states
     const isLoading = loading || userLoading;
 
     if (isLoading) {
@@ -170,7 +171,7 @@ const VCardPage = () => {
     return (
         <div className="w-full h-full mt-10 mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
-            <div className="  p-4 flex items-center justify-between">
+            <div className="p-4 flex items-center justify-between">
                 <div className="px-6 py-4 border-b border-gray-700">
                     <div className="flex items-center gap-3">
                         <button onClick={() => navigate(-1)} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
@@ -198,7 +199,7 @@ const VCardPage = () => {
                                     disabled={isLoading}
                                 >
                                     <Save size={18} />
-                                    <a className="text-xs">GUARDAR</a>
+                                    <span className="text-xs">GUARDAR</span>
                                 </button>
                                 <button
                                     onClick={() => setIsEditing(false)}
@@ -206,7 +207,7 @@ const VCardPage = () => {
                                     className="flex flex-wrap items-center gap-1 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 cursor-pointer"
                                 >
                                     <X size={20} />
-                                    <a className="text-xs">CERRAR</a>
+                                    <span className="text-xs">CERRAR</span>
                                 </button>
                             </>
                         ) : (
@@ -216,7 +217,7 @@ const VCardPage = () => {
                                 className="flex flex-wrap items-center gap-1 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                             >
                                 <Edit size={20} />
-                                <a className="text-xs">EDIT</a>
+                                <span className="text-xs">EDIT</span>
                             </button>
                         )}
                     </div>
@@ -290,13 +291,12 @@ const VCardPage = () => {
                         ) : (
                             <>
                                 <div className="text-center flex flex-col justify-center">
-
-
                                     <button
                                         onClick={handleRegenerateQR}
-                                        className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer mt-4"
+                                        className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
                                         title="Generar código QR"
-                                    >         Mostrar mi QR
+                                    >
+                                        Mostrar mi QR
                                         <QrCode size={20} className="ml-2" />
                                     </button>
                                 </div>
@@ -305,9 +305,25 @@ const VCardPage = () => {
                                     {cardData.name && (
                                         <div className="flex items-center space-x-3">
                                             <span className="text-gray-500 text-sm">Name:</span>
-                                            <a href={`mailto:${cardData.name}`} className="text-blue-500">
+                                            <span className="text-blue-500">
                                                 {cardData.name}
-                                            </a>
+                                            </span>
+                                        </div>
+                                    )}
+                                    {cardData.title && (
+                                        <div className="flex items-center space-x-3">
+                                            <span className="text-gray-500 text-sm">Título:</span>
+                                            <span className="text-gray-700">
+                                                {cardData.title}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {cardData.company && (
+                                        <div className="flex items-center space-x-3">
+                                            <span className="text-gray-500 text-sm">Empresa:</span>
+                                            <span className="text-gray-700">
+                                                {cardData.company}
+                                            </span>
                                         </div>
                                     )}
                                     {cardData.email && (

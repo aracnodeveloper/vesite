@@ -292,12 +292,12 @@ const ProfilePage = () => {
 
                         {/* URL Input */}
                         <div className="mb-6">
-                            <label className="text-xs font-medium text-gray-800  mb-2 block" style={{fontSize: "11px"}}>
+                            <label className="text-xs font-medium text-gray-800 mb-2 block" style={{fontSize: "11px"}}>
                                 SITIO
                             </label>
-                            <span className="text-gray-600 text-xs  " style={{fontSize: "11px"}}>
-                                        URL
-                                    </span>
+                            <span className="text-gray-600 text-xs" style={{fontSize: "11px"}}>
+        URL
+    </span>
                             <Form.Item
                                 name="slug"
                                 rules={[
@@ -309,22 +309,28 @@ const ProfilePage = () => {
                                         message: 'Solo se permiten letras minúsculas, números y guiones'
                                     }
                                 ]}
-                                className="mb-0 focus:border-none"
+                                className="mb-0"
                             >
-                                <div
-                                    className="flex flex-col items-start  bg-white rounded-lg  h-16">
-
+                                <div className="flex items-center bg-white rounded-lg border border-gray-300 h-12 px-3">
+            <span className="text-gray-500 text-sm mr-1" style={{fontSize: "11px"}}>
+                vesite/
+            </span>
                                     <Input
-                                        placeholder={displaySlug}
+                                        placeholder="tu-url-personalizada"
                                         disabled={loading}
-                                        maxLength={50}
-                                        className="flex-1 border-none bg-white text-black placeholder-black shadow-none focus:shadow-none focus:border-none hover:shadow-none"
-                                        style={{fontSize: "11px", boxShadow: "none", color: 'black'}}
-                                        showCount
+                                        maxLength={30}
+                                        className="flex-1 border-none bg-transparent text-black placeholder-gray-400 shadow-none focus:shadow-none focus:border-none hover:shadow-none p-0"
+                                        style={{fontSize: "11px", boxShadow: "none"}}
                                     />
-
                                 </div>
                             </Form.Item>
+
+                            {/* Mostrar la URL completa como preview */}
+                            {form.getFieldValue('slug') && (
+                                <div className="mt-2 text-xs text-gray-600" style={{fontSize: "10px"}}>
+                                    URL completa: <span className="text-blue-600">vesite/{form.getFieldValue('slug')}</span>
+                                </div>
+                            )}
                         </div>
 
                         <Form.Item className="mb-0">
