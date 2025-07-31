@@ -133,7 +133,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
 
 
-    if (!currentUserId) {
+    if (!currentUserId || !slug) {
         return null;
     }
 
