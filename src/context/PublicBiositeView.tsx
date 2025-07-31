@@ -619,7 +619,7 @@ const PublicBiositeView = () => {
 
                     <VCardButton
                         themeConfig={themeConfig}
-                        userId={biositeData.biosite.userId}// ✅ Este es el propietario del biosite público
+                        userId={biositeData.biosite.ownerId}// ✅ Este es el propietario del biosite público
                     />
 
                     {/* MÚSICA EMBED */}
