@@ -37,7 +37,7 @@ interface VCardButtonProps {
 const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
-    const [isDataLoaded, setIsDataLoaded] = useState(false); // Flag para evitar múltiples llamadas
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
     const { biosite } = usePreview();
     const { slug } = useParams<{ slug?: string }>();
 
@@ -50,7 +50,32 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         website: ''
     });
 
-    const currentUserId = Cookies.get('userId');
+    // Obtener userId de múltiples fuentes con prioridad
+    const getCurrentUserId = useCallback(() => {
+        // 1. Prioridad: userId pasado como prop
+        if (userId && userId !== 'undefined' && userId.trim() !== '') {
+            console.log('Using prop userId:', userId);
+            return userId;
+        }
+
+        // 2. Fallback: userId de cookies
+        const cookieUserId = Cookies.get('userId');
+        if (cookieUserId && cookieUserId !== 'undefined' && cookieUserId.trim() !== '') {
+            console.log('Using cookie userId:', cookieUserId);
+            return cookieUserId;
+        }
+
+        // 3. Fallback: userId del contexto biosite
+        if (biosite?.ownerId && biosite.ownerId.trim() !== 'undefined' && biosite.ownerId.trim() !== '') {
+            console.log('Using biosite ownerId:', biosite.ownerId);
+            return biosite.ownerId;
+        }
+
+        console.warn('No valid userId found');
+        return null;
+    }, [userId, biosite?.ownerId]);
+
+    const currentUserId = getCurrentUserId();
 
     const {
         businessCard,
@@ -60,36 +85,45 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         fetchBusinessCardByUserId,
         fetchBusinessCardBySlug
     } = useBusinessCard();
+
     const {
         fetchUser,
-        user
     } = useUser();
 
     // Función memoizada para cargar datos
     const loadUserData = useCallback(async () => {
-        if (!userId || isDataLoaded) return;
+        const validUserId = getCurrentUserId();
+
+        if (!validUserId || isDataLoaded) {
+            console.log('Skipping load - userId:', validUserId, 'isDataLoaded:', isDataLoaded);
+            return;
+        }
 
         try {
+            console.log('Loading data for userId:', validUserId);
             setIsDataLoaded(true);
-            await fetchBusinessCardByUserId(userId);
-            await fetchUser(userId);
+
+            await fetchBusinessCardByUserId(validUserId);
+            await fetchUser(validUserId);
         } catch (error) {
             console.error('Error loading user data:', error);
             setIsDataLoaded(false); // Reset en caso de error
         }
-    }, [userId, fetchBusinessCardByUserId, fetchUser, isDataLoaded]);
+    }, [getCurrentUserId, fetchBusinessCardByUserId, fetchUser, isDataLoaded]);
 
     // Effect para cargar datos solo cuando se abre el modal
     useEffect(() => {
-        if (isModalOpen && slug && userId && !isDataLoaded) {
+        if (isModalOpen && !isDataLoaded) {
+            console.log('Modal opened, loading data...');
             loadUserData();
         }
-    }, [isModalOpen, slug, userId, isDataLoaded, loadUserData]);
+    }, [isModalOpen, isDataLoaded, loadUserData]);
 
     // Reset del flag cuando cambia el userId
     useEffect(() => {
         setIsDataLoaded(false);
-    }, [userId]);
+        console.log('UserId changed, resetting data loaded flag');
+    }, [currentUserId]);
 
     useEffect(() => {
         if (businessCard?.data) {
@@ -105,7 +139,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
             } catch (error) {
                 console.error('Error parsing business card data:', error);
-                setCardData(businessCard.data ||{
+                setCardData(businessCard.data || {
                     name: '',
                     title: '',
                     company: '',
@@ -148,7 +182,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         URL.revokeObjectURL(url);
     };
 
-    if (!userId && !slug) {
+    // No mostrar el botón si no hay userId válido
+    if (!currentUserId) {
+        console.log('VCardButton: No valid userId, not rendering');
         return null;
     }
 
@@ -176,8 +212,15 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     };
 
     const handleRegenerateQR = async () => {
+        const validUserId = getCurrentUserId();
+        if (!validUserId) {
+            console.error('No valid userId for QR regeneration');
+            return;
+        }
+
         try {
-            await regenerateQRCode(currentUserId);
+            console.log('Regenerating QR for userId:', validUserId);
+            await regenerateQRCode(validUserId);
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
