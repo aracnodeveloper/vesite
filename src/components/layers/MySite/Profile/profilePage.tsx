@@ -74,6 +74,10 @@ const ProfilePage = () => {
         }
     }, [biosite, user, form, initialValuesSet]);
 
+    useEffect(() => {
+        setInitialValuesSet(false);
+    }, [biosite?.id, user?.id]);
+
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
             message.error('Error: Información del perfil no disponible');
@@ -101,7 +105,7 @@ const ProfilePage = () => {
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || user?.name || biosite.title,
-                slug: values.slug || user?.cedula || biosite.slug,
+                slug: values.slug || biosite.slug || user?.cedula,
                 themeId: biosite.themeId,
                 colors: ensureColorsAsString(biosite.colors),
                 fonts: biosite.fonts || '',
@@ -125,7 +129,8 @@ const ProfilePage = () => {
                 updatePreview(updated);
                 console.log("Profile updated successfully:", {
                     themeId: updated.themeId,
-                    backgroundImage: updated.backgroundImage
+                    backgroundImage: updated.backgroundImage,
+                    slug: updated.slug
                 });
             }
 
@@ -179,7 +184,8 @@ const ProfilePage = () => {
             </div>
         );
     }
-
+    const currentSlug = biosite?.slug || user?.cedula || '';
+    const displaySlug = currentSlug ? `vesite/${currentSlug}` : "vesite/your-slug";
     return (
         <div className="w-full h-full mb-10 mt-20 p-2 max-w-md mx-auto">
             <div className="px-6 py-4 border-b border-gray-700">
@@ -218,7 +224,7 @@ const ProfilePage = () => {
                                 </svg>
                             </div>
                             {showWarning && (
-                                <div className="h-20 lg:h-10">
+                                <div className="h-20 lg:h-20 md:h-20 sm:h-20">
                                     <h4 className="text-sm font-medium text-blue-800 mb-1" style={{fontSize:"11px"}}>Imagen de fondo</h4>
                                     <p className="text-sm text-blue-700" style={{fontSize:"11px"}}>
                                         {biosite.backgroundImage
@@ -295,9 +301,9 @@ const ProfilePage = () => {
                             <Form.Item
                                 name="slug"
                                 rules={[
-                                    {required: true, message: 'El slug es requerido'},
-                                    {min: 3, message: 'El slug debe tener al menos 3 caracteres'},
-                                    {max: 30, message: 'El slug no puede tener más de 30 caracteres'},
+                                    {required: true, message: 'La url es requerido'},
+                                    {min: 3, message: 'La url debe tener al menos 3 caracteres'},
+                                    {max: 30, message: 'La url no puede tener más de 30 caracteres'},
                                     {
                                         pattern: /^[a-z0-9-]+$/,
                                         message: 'Solo se permiten letras minúsculas, números y guiones'
@@ -309,11 +315,12 @@ const ProfilePage = () => {
                                     className="flex flex-col items-start  bg-white rounded-lg  h-16">
 
                                     <Input
-                                        placeholder={ user?.cedula || "vesite/your-slug"}
+                                        placeholder={displaySlug}
                                         disabled={loading}
                                         maxLength={50}
                                         className="flex-1 border-none bg-white text-black placeholder-black shadow-none focus:shadow-none focus:border-none hover:shadow-none"
                                         style={{fontSize: "11px", boxShadow: "none", color: 'black'}}
+                                        showCount
                                     />
 
                                 </div>

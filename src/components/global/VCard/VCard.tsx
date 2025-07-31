@@ -186,11 +186,19 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
             console.error('Error regenerating QR code:', error);
         }
     };
+    const handleOpenAndGenerate = async () => {
+        try {
+            setIsModalOpen(true)
+            await handleRegenerateQR();
+        } catch (error) {
+            console.error('Error en handleSaveAndGenerate:', error);
+        }
+    };
     return (
         <>
             <div className="px-4 mb-4 cursor-pointer">
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleOpenAndGenerate}
                     className="block w-full p-2 rounded-xl text-center bg-white transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -252,6 +260,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
                                         <p className="text-sm mt-3 text-gray-600">
                                             Escanea para guardar mi contacto
                                         </p>
+                                        <p className="text-sm text-gray-600 mt-1">Presiona descargar para guardar el contacto </p>
                                     </div>
                                 )}
 
@@ -295,9 +304,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
                                             <div className="text-gray-400 mb-3">
                                                 <User size={48} className="mx-auto"/>
                                             </div>
-                                            <p className="text-gray-500">Tu tarjeta está vacía</p>
-                                            <p className="text-sm text-gray-400 mt-1">Edita tu perfil para añadir
-                                                información</p>
+                                            <p className="text-gray-500">Presiona mostrar QR para ver la informacion</p>
                                         </div>
                                     )}
 
@@ -377,13 +384,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
                                             <Download size={18} className="text-gray-600" />
                                             <span className="text-sm font-medium text-gray-700">Descargar</span>
                                         </button>
-                                        <button
-                                            onClick={shareVCard}
-                                            className="flex-1 flex items-center justify-center space-x-2 py-4 px-4 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <Share2 size={18} className="text-gray-600" />
-                                            <span className="text-sm font-medium text-gray-700">Compartir</span>
-                                        </button>
+
                                     </div>
                                 )}
                             </>
