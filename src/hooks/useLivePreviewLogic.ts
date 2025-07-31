@@ -96,15 +96,17 @@ export const useLivePreviewLogic = () => {
                 labelLower.includes(keyword) || urlLower.includes(keyword)
             );
 
+
             if (isExcluded) return false;
 
-            // Excluir enlaces de WhatsApp de los links sociales regulares
-            if (urlLower.includes("api.whatsapp.com") ||
-                urlLower.includes("wa.me/") ||
-                urlLower.includes("whatsapp.com") ||
-                labelLower.includes("whatsapp") ||
-                link.icon === 'whatsapp') {
+            // FIXED: Only exclude WhatsApp API links, not wa.me links
+            if (urlLower.includes("api.whatsapp.com")) {
                 return false;
+            }
+
+            // Allow wa.me WhatsApp links in social
+            if (urlLower.includes("wa.me/") || urlLower.includes("whatsapp.com")) {
+                return true;
             }
 
             const platform = findPlatformForLink(link);
@@ -136,25 +138,24 @@ export const useLivePreviewLogic = () => {
         return null;
     };
 
-    // Función mejorada para obtener el enlace de WhatsApp
-    const getWhatsAppLink = () => {
-        if (!socialLinksData || socialLinksData.length === 0) return null;
+    {/* // Función mejorada para obtener el enlace de WhatsApp
+        const getWhatsAppLink = () => {
+            if (!socialLinksData || socialLinksData.length === 0) return null;
 
-        // Buscar por múltiples criterios para mayor precisión
-        const whatsappLink = socialLinksData.find(link => {
-            if (!link.isActive) return false;
+            // Buscar en socialLinksData primero
+            const whatsappLink = socialLinksData.find(link => {
+                if (!link.isActive) return false;
 
-            const urlLower = link.url.toLowerCase();
-            const labelLower = link.label.toLowerCase();
+                const urlLower = link.url.toLowerCase();
+                const iconLower = (link.icon || '').toLowerCase();
 
-            return (
-                link.icon === 'whatsapp' ||
-                labelLower.includes('whatsapp') ||
-                urlLower.includes('api.whatsapp.com/send') ||
-                urlLower.includes('wa.me/') ||
-                urlLower.includes('whatsapp.com')
-            );
-        });
+                return (
+                    iconLower === 'whatsapp' ||
+                    urlLower.includes('api.whatsapp.com/send')
+                );
+            });
+
+
 
         console.log('WhatsApp link search result:', whatsappLink);
         return whatsappLink || null;
@@ -191,7 +192,7 @@ export const useLivePreviewLogic = () => {
             return { phone: '', message: '' };
         }
     };
-
+*/ }
     const isInstagramUrl = (url: string) => {
         return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
     };
@@ -237,17 +238,12 @@ export const useLivePreviewLogic = () => {
     const videoEmbed = getVideoEmbed();
     const realSocialLinks = filterRealSocialLinks(socialLinksData);
     const description = user?.description || user?.name || 'Tu descripción aquí';
-    const whatsAppLink = getWhatsAppLink();
-    const whatsAppData = whatsAppLink ? parseWhatsAppData(whatsAppLink.url) : null;
+   // const whatsAppLink = getWhatsAppLink();
+   // const whatsAppData = whatsAppLink ? parseWhatsAppData(whatsAppLink.url) : null;
 
     const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-    // Debug logging
-    console.log('LivePreview WhatsApp Debug:', {
-        socialLinksCount: socialLinksData.length,
-        whatsAppLinkFound: !!whatsAppLink,
-        whatsAppData: whatsAppData
-    });
+
 
     return {
         biosite,
@@ -262,9 +258,9 @@ export const useLivePreviewLogic = () => {
         handleImageLoadStart,
         regularLinksData,
         realSocialLinks,
-        whatsAppLink,
-        whatsAppData,
-        parseWhatsAppData,
+       // whatsAppLink,
+      //  whatsAppData,
+      //  parseWhatsAppData,
         validBackgroundImage,
         validAvatarImage,
         findPlatformForLink,

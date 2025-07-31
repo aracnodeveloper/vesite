@@ -27,6 +27,15 @@ export interface AppLink {
     isActive: boolean;
 }
 
+{/*
+    export interface WhatsAppLink {
+        id: string;
+        phone: string;
+        message: string;
+        isActive: boolean;
+    }
+*/}
+
 export interface CreateBiositeDto {
     ownerId: UUID;
     title: string;
@@ -39,6 +48,7 @@ export interface PreviewContextType {
     socialLinks: SocialLink[];
     regularLinks: RegularLink[];
     appLinks: AppLink[];
+  //  whatsAppLinks: WhatsAppLink[];
     loading: boolean;
     error: string | null;
     updatePreview: (data: Partial<BiositeFull>) => void;
@@ -72,6 +82,11 @@ export interface PreviewContextType {
     addAppLink: (link: Omit<AppLink, 'id'>) => Promise<void>;
     removeAppLink: (linkId: string) => Promise<void>;
     updateAppLink: (linkId: string, data: Partial<AppLink>) => Promise<void>;
+
+   // setWhatsAppLinks: (links: WhatsAppLink[]) => void;
+   // addWhatsAppLink: (link: Omit<WhatsAppLink, 'id'>) => Promise<void>;
+   // removeWhatsAppLink: (linkId: string) => Promise<void>;
+  //  updateWhatsAppLink: (linkId: string, data: Partial<WhatsAppLink>) => Promise<void>;
 
     getMusicEmbed: () => any;
     setMusicEmbed: (url: string, note?: string) => Promise<void>;

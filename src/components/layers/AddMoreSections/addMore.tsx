@@ -24,8 +24,8 @@ const Add = () => {
                     <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENT</h4>
                     {/*
                     <AppD/>
-                    */}
-                    {/*<WhatsApp/>*/}
+
+                    <WhatsApp/>*/}
                     <Links/>
                     <Videos/>
                     <Musics/>

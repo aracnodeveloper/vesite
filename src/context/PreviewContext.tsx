@@ -1,6 +1,6 @@
 import {createContext, useContext, useEffect, useState, useCallback, useRef} from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
-import type { PreviewContextType, SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
+import type {PreviewContextType, SocialLink, RegularLink, AppLink} from "../interfaces/PreviewContext";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import { useBiositeOperations } from "../hooks/useBiositeManagement";
@@ -44,6 +44,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [socialLinks, setSocialLinksState] = useState<SocialLink[]>([]);
     const [regularLinks, setRegularLinksState] = useState<RegularLink[]>([]);
     const [appLinks, setAppLinksState] = useState<AppLink[]>([]);
+   // const [whatsAppLinks, setWhatsAppLinksState] = useState<WhatsAppLink[]>([]);
     const [themeColor, setThemeColorState] = useState<string>('#ffffff');
     const [fontFamily, setFontFamilyState] = useState<string>('Inter');
     const [initialized, setInitialized] = useState(false);
@@ -98,22 +99,21 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         );
     }, []);
 
-    // Función mejorada para identificar enlaces de WhatsApp
-    const isWhatsAppLink = useCallback((link: any): boolean => {
-        const labelLower = link.label?.toLowerCase() || '';
-        const urlLower = link.url?.toLowerCase() || '';
-        const icon = link.icon?.toLowerCase() || '';
+    {/*
+        const isWhatsAppLink = useCallback((link: any): boolean => {
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+            const icon = link.icon?.toLowerCase() || '';
 
-        return (
-            icon === 'whatsapp' ||
-            labelLower.includes('whatsapp') ||
-            urlLower.includes('api.whatsapp.com') ||
-            urlLower.includes('wa.me/') ||
-            urlLower.includes('whatsapp.com')
-        );
-    }, []);
+            return (
+                icon === 'whatsapp' ||
+                labelLower.includes('whatsapp') ||
+                urlLower.includes('api.whatsapp.com')
+            );
+        }, [])
+    */}
 
-    // Función para determinar el tipo de store
+
     const getStoreType = useCallback((link: any): 'appstore' | 'googleplay' => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
@@ -123,6 +123,27 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
         return 'appstore';
     }, []);
+
+    {/*
+        const parseWhatsAppFromUrl = useCallback((url: string): { phone: string; message: string } => {
+            try {
+                let phone = '';
+                let message = '';
+
+                if (url.includes('api.whatsapp.com/send')) {
+                    const urlParams = new URLSearchParams(url.split('?')[1] || '');
+                    phone = urlParams.get('phone') || '';
+                    message = decodeURIComponent(urlParams.get('text') || '');
+                }
+
+
+                return {phone, message};
+            } catch (error) {
+                console.error('Error parsing WhatsApp URL:', error);
+                return {phone: '', message: ''};
+            }
+        }, []);
+   */ }
 
     // Función para obtener app links desde los links generales
     const getAppLinks = useCallback(() => {
@@ -135,6 +156,21 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 isActive: link.isActive
             }));
     }, [links, isAppStoreLink, getStoreType]);
+    {/*
+        const getWhatsAppLinks = useCallback(() => {
+            return links
+                .filter(isWhatsAppLink)
+                .map(link => {
+                    const {phone, message} = parseWhatsAppFromUrl(link.url);
+                    return {
+                        id: link.id,
+                        phone,
+                        message,
+                        isActive: link.isActive
+                    };
+                });
+        }, [links, isWhatsAppLink, parseWhatsAppFromUrl]);
+    */}
 
     // Función para obtener enlaces de música
     const getMusicEmbed = useCallback(() => {
@@ -208,6 +244,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setBiosite(null);
             setSocialLinksState([]);
             setRegularLinksState([]);
+            //setWhatsAppLinksState([]);
             setThemeColorState('#ffffff');
             setFontFamilyState('Inter');
             resetState();
@@ -285,7 +322,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             // Filtrar enlaces sociales excluyendo WhatsApp y app stores
             const socialLinksFormatted = socialLinksFromAPI
-                .filter(link => !isAppStoreLink(link) && !isWhatsAppLink(link))
+                .filter(link => !isAppStoreLink(link) )
                 .map(link => ({
                     id: link.id,
                     label: link.label,
@@ -300,7 +337,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             // Filtrar enlaces regulares excluyendo app stores y WhatsApp
             const regularLinksFormatted = regularLinksFromAPI
-                .filter(link => !isAppStoreLink(link) && !isWhatsAppLink(link))
+                .filter(link => !isAppStoreLink(link) )
                 .map(link => ({
                     id: link.id,
                     title: link.label,
@@ -311,18 +348,20 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 }));
 
             const appLinksFromAPI = getAppLinks();
-
+          //  const whatsAppLinkFromAPI = getWhatsAppLinks();
             console.log('Processed links:', {
                 social: socialLinksFormatted.length,
                 regular: regularLinksFormatted.length,
-                apps: appLinksFromAPI.length
+                apps: appLinksFromAPI.length,
+             //   whatsApp: whatsAppLinkFromAPI ? 'found' : 'not found'
             });
 
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
             setAppLinksState(appLinksFromAPI);
+          //  setWhatsAppLinksState(whatsAppLinkFromAPI);
         }
-    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink, isWhatsAppLink, biositeData?.id]);
+    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink, biositeData?.id]);
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
         setBiosite(prev => prev ? { ...prev, ...data } : null);
@@ -431,12 +470,90 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     };
+    {/*
+    const addWhatsAppLink = async (link: Omit<WhatsAppLink, 'id'>) => {
+        if (!biositeData?.id) {
+            throw new Error('Biosite ID is required');
+        }
 
+        try {
+            const cleanPhone = link.phone.replace(/[^\d+]/g, '');
+            const encodedMessage = encodeURIComponent(link.message);
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
+
+            const linkData = {
+                biositeId: biositeData.id,
+                label: 'WhatsApp',
+                url: whatsappUrl,
+                icon: 'whatsapp',
+                orderIndex: links.length,
+                isActive: link.isActive
+            };
+
+            const newLink = await createLink(linkData);
+            if (newLink) {
+                console.log('WhatsApp link created successfully:', newLink);
+            }
+        } catch (error) {
+            console.error('Error creating WhatsApp link:', error);
+            throw error;
+        }
+    };
+
+
+        const removeWhatsAppLink = async (id: string) => {
+            try {
+                const success = await deleteLink(id);
+                if (success) {
+                    console.log('WhatsApp link deleted successfully:', id);
+                }
+            } catch (error) {
+                console.error('Error deleting WhatsApp link:', error);
+                throw error;
+            }
+        };
+
+        const updateWhatsAppLink = async (id: string, data: Partial<WhatsAppLink>) => {
+            try {
+                const updateData: any = {};
+
+                if (data.phone !== undefined || data.message !== undefined) {
+                    const currentLink = links.find(link => link.id === id);
+                    if (currentLink) {
+                        const currentData = parseWhatsAppFromUrl(currentLink.url);
+
+                        const phone = data.phone !== undefined ? data.phone : currentData.phone;
+                        const message = data.message !== undefined ? data.message : currentData.message;
+
+                        const cleanPhone = phone.replace(/[^\d+]/g, '');
+                        const encodedMessage = encodeURIComponent(message);
+                        updateData.url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
+                    }
+                }
+
+                if (data.isActive !== undefined) {
+                    updateData.isActive = data.isActive;
+                }
+
+                updateData.label = 'WhatsApp';
+                updateData.icon = 'whatsapp';
+
+                const updatedLink = await updateLink(id, updateData);
+                if (updatedLink) {
+                    console.log('WhatsApp link updated successfully:', updatedLink);
+                }
+            } catch (error) {
+                console.error('Error updating WhatsApp link:', error);
+                throw error;
+            }
+        };
+    */}
     const contextValue: PreviewContextType = {
         biosite,
         socialLinks,
         regularLinks,
         appLinks,
+       // whatsAppLinks,
         loading,
         error,
         themeColor,
@@ -451,7 +568,11 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         setAppLinks: setAppLinksState,
         addAppLink,
         removeAppLink,
-        updateAppLink
+        updateAppLink,
+       // setWhatsAppLinks: setWhatsAppLinksState,
+       // addWhatsAppLink,
+      //  removeWhatsAppLink,
+      //  updateWhatsAppLink
     };
 
     return (

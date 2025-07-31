@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {Phone, Mail, Globe, QrCode, Download,  X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
@@ -6,6 +6,7 @@ import imgP from "../../../../public/img/img.png";
 import {usePreview} from "../../../context/PreviewContext.tsx";
 import {useParams} from "react-router-dom";
 import {useUser} from "../../../hooks/useUser.ts";
+
 interface VCardData {
     name: string;
     title: string;
@@ -14,8 +15,6 @@ interface VCardData {
     phone: string;
     website: string;
 }
-
-
 
 interface VCardButtonProps {
     themeConfig: {
@@ -38,6 +37,7 @@ interface VCardButtonProps {
 const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
+    const [isDataLoaded, setIsDataLoaded] = useState(false); // Flag para evitar múltiples llamadas
     const { biosite } = usePreview();
     const { slug } = useParams<{ slug?: string }>();
 
@@ -57,25 +57,39 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         loading,
         error,
         regenerateQRCode,
-        fetchBusinessCardByUserId, fetchBusinessCardBySlug
+        fetchBusinessCardByUserId,
+        fetchBusinessCardBySlug
     } = useBusinessCard();
     const {
         fetchUser,
         user
     } = useUser();
 
+    // Función memoizada para cargar datos
+    const loadUserData = useCallback(async () => {
+        if (!userId || isDataLoaded) return;
 
-
-    useEffect(() => {
-        if (isModalOpen && slug) {
-
-            fetchBusinessCardByUserId(userId);
-
-            if (userId) {
-                fetchUser(userId);
-            }
+        try {
+            setIsDataLoaded(true);
+            await fetchBusinessCardByUserId(userId);
+            await fetchUser(userId);
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            setIsDataLoaded(false); // Reset en caso de error
         }
-    }, [isModalOpen, userId, slug, fetchUser, fetchBusinessCardByUserId]);
+    }, [userId, fetchBusinessCardByUserId, fetchUser, isDataLoaded]);
+
+    // Effect para cargar datos solo cuando se abre el modal
+    useEffect(() => {
+        if (isModalOpen && slug && userId && !isDataLoaded) {
+            loadUserData();
+        }
+    }, [isModalOpen, slug, userId, isDataLoaded, loadUserData]);
+
+    // Reset del flag cuando cambia el userId
+    useEffect(() => {
+        setIsDataLoaded(false);
+    }, [userId]);
 
     useEffect(() => {
         if (businessCard?.data) {
@@ -134,8 +148,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
         URL.revokeObjectURL(url);
     };
 
-
-
     if (!userId && !slug) {
         return null;
     }
@@ -165,19 +177,31 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
     const handleRegenerateQR = async () => {
         try {
-            await regenerateQRCode(currentUserId) ;
+            await regenerateQRCode(currentUserId);
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
     };
+
     const handleOpenAndGenerate = async () => {
         try {
-            setIsModalOpen(true)
-            await handleRegenerateQR();
+            setIsModalOpen(true);
+            // Solo regenerar QR si no hay datos cargados aún
+            if (!businessCard?.qrCodeUrl) {
+                await handleRegenerateQR();
+            }
         } catch (error) {
-            console.error('Error en handleSaveAndGenerate:', error);
+            console.error('Error en handleOpenAndGenerate:', error);
         }
     };
+
+    // Reset cuando se cierra el modal
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        // Opcional: resetear isDataLoaded si quieres recargar datos cada vez
+        // setIsDataLoaded(false);
+    };
+
     return (
         <>
             <div className="px-4 mb-4 cursor-pointer">
@@ -211,7 +235,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                 Mi Tarjeta Digital
                             </h2>
                             <button
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={handleCloseModal}
                                 className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
                             >
                                 <X size={20} className="text-gray-600" />
@@ -252,8 +276,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                 <div className="p-6 space-y-4">
                                     {/* Header con nombre */}
                                     <div className="text-center flex flex-col justify-center">
-
-
                                         <button
                                             onClick={handleRegenerateQR}
                                             className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer mt-4"
@@ -368,7 +390,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
                                             <Download size={18} className="text-gray-600" />
                                             <span className="text-sm font-medium text-gray-700">Descargar</span>
                                         </button>
-
                                     </div>
                                 )}
                             </>

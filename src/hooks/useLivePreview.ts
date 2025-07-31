@@ -5,7 +5,7 @@ import { socialMediaPlatforms } from "../media/socialPlataforms.ts";
 import type {SocialLink} from "../interfaces/PreviewContext.ts";
 
 export const useLivePreview = () => {
-    const { biosite, socialLinks, regularLinks, loading, error } = usePreview();
+    const { biosite, socialLinks, regularLinks,loading, error } = usePreview();
     const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
 
@@ -87,6 +87,7 @@ export const useLivePreview = () => {
             return true;
         });
     };
+
 
     const findPlatformForLink = (link: SocialLink) => {
         return socialMediaPlatforms.find(platform => {

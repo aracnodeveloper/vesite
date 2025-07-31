@@ -8,7 +8,7 @@ import {
     AvatarSection,
     UserInfoSection,
     SocialLinksSection,
-    RegularLinksSection, TwoSquareImagesSection, WhatsAppSection,
+    RegularLinksSection, TwoSquareImagesSection,// WhatsAppSection,
 } from './LivePreviewComponents';
 import VCardButton from "../global/VCard/VCard.tsx";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
@@ -48,8 +48,8 @@ const LivePreviewContent = () => {
         handleSocialPostClick,
         handleLinksClick,
         handleSocialClick,
-        whatsAppLink,
-        whatsAppData,
+      //  whatsAppLink,
+      //  whatsAppData,
     } = useLivePreviewLogic();
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
@@ -190,12 +190,7 @@ const LivePreviewContent = () => {
                     />
 
                     {/* WhatsApp Link */}
-                    <WhatsAppSection
-                        whatsAppLink={whatsAppLink}
-                        whatsAppData={whatsAppData}
-                        isExposedRoute={isExposedRoute}
-                        themeConfig={themeConfig}
-                    />
+
 
                     {/* Links sociales */}
                     <SocialLinksSection
@@ -205,8 +200,13 @@ const LivePreviewContent = () => {
                         handleSocialClick={handleSocialClick}
                         themeConfig={themeConfig}
                     />
-
-                    {/* Links regulares */}
+                    {/*   <WhatsAppSection
+                        whatsAppLink={whatsAppLink}
+                        whatsAppData={whatsAppData}
+                        isExposedRoute={isExposedRoute}
+                        themeConfig={themeConfig}
+                    />
+                    Links regulares */}
                     <RegularLinksSection
                         regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}
@@ -217,7 +217,6 @@ const LivePreviewContent = () => {
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={user?.id || Cookie.get('userId')}
-                        // Pasar el userId del biosite público
                     />
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (

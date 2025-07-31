@@ -352,14 +352,21 @@ export const WhatsAppSection = ({
         hasWhatsAppLink: !!whatsAppLink,
         hasWhatsAppData: !!whatsAppData,
         whatsAppData: whatsAppData,
-        isExposedRoute
+        isExposedRoute,
+        whatsAppLink: whatsAppLink
     });
 
-    // Solo mostrar si hay enlace de WhatsApp y datos válidos
-    if (!whatsAppLink || !whatsAppData || (!whatsAppData.phone && !whatsAppData.message)) {
-        console.log('WhatsApp section not shown - missing data');
+    // Solo mostrar si hay enlace de WhatsApp y está activo
+    if (!whatsAppLink || !whatsAppLink.isActive) {
+        console.log('WhatsApp section not shown - no active link');
         return null;
     }
+
+    // Usar los datos del enlace directamente si no hay whatsAppData parseado
+    const displayData = whatsAppData || {
+        phone: '',
+        message: whatsAppLink.label || 'WhatsApp'
+    };
 
     return (
         <div className="px-4 mb-4">
@@ -397,17 +404,17 @@ export const WhatsAppSection = ({
                     <div className="font-medium text-sm">
                         {whatsAppLink.label || 'WhatsApp'}
                     </div>
-                    {whatsAppData.message && (
+                    {displayData.message && displayData.message !== whatsAppLink.label && (
                         <div className="text-xs opacity-90 truncate">
-                            {whatsAppData.message.length > 40
-                                ? `${whatsAppData.message.substring(0, 40)}...`
-                                : whatsAppData.message
+                            {displayData.message.length > 40
+                                ? `${displayData.message.substring(0, 40)}...`
+                                : displayData.message
                             }
                         </div>
                     )}
-                    {whatsAppData.phone && (
+                    {displayData.phone && (
                         <div className="text-xs opacity-75">
-                            {whatsAppData.phone}
+                            {displayData.phone}
                         </div>
                     )}
                 </div>
