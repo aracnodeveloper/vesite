@@ -33,7 +33,7 @@ export const useUpdateShareActions = () => {
         const baseUrl = window.location.origin;
         const isDev = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
         const shareUrl = isDev
-        ? `${baseUrl}/vesite/Ve.site/${biosite.slug}`
+        ? `${baseUrl}/vesite/${biosite.slug}`
         : `${baseUrl}/${biosite.slug}`;
 
         console.log('Sharing URL:', shareUrl); // Para debug
