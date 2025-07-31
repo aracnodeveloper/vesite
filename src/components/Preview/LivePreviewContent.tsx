@@ -11,10 +11,9 @@ import {
     RegularLinksSection, TwoSquareImagesSection, WhatsAppSection,
 } from './LivePreviewComponents';
 import VCardButton from "../global/VCard/VCard.tsx";
-
-import Cookie from "js-cookie";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
 import {useTemplates} from "../../hooks/useTemplates.ts";
+import Cookie from "js-cookie";
 
 const LivePreviewContent = () => {
     const {
@@ -214,7 +213,12 @@ const LivePreviewContent = () => {
                         handleLinksClick={handleLinksClick}
                         themeConfig={themeConfig}
                     />
-
+                    {/* V-Card Button */}
+                    <VCardButton
+                        themeConfig={themeConfig}
+                        userId={user?.id || Cookie.get('userId')}
+                        // Pasar el userId del biosite público
+                    />
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (
                         <div className="px-4 mb-4">
@@ -334,10 +338,7 @@ const LivePreviewContent = () => {
                         </div>
                     )}
 
-                    {/* V-Card Button */}
-                    <VCardButton
-                        themeConfig={themeConfig} // Pasar el userId del biosite público
-                    />
+
 
                     {/* VIDEO EMBED */}
                     {videoEmbed && (

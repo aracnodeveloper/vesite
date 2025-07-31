@@ -61,18 +61,21 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     } = useBusinessCard();
     const {
         fetchUser,
+        user
     } = useUser();
+
+
 
     useEffect(() => {
         if (isModalOpen && slug) {
 
-            fetchBusinessCardByUserId(currentUserId);
+            fetchBusinessCardByUserId(userId);
 
-            if (currentUserId) {
-                fetchUser(currentUserId);
+            if (userId) {
+                fetchUser(userId);
             }
         }
-    }, [isModalOpen, currentUserId, slug]);
+    }, [isModalOpen, userId, slug, fetchUser, fetchBusinessCardByUserId]);
 
     useEffect(() => {
         if (businessCard?.data) {
@@ -133,7 +136,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
 
 
-    if (!currentUserId && !slug) {
+    if (!userId && !slug) {
         return null;
     }
 
