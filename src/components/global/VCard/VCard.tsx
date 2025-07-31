@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Phone, Mail, Globe, QrCode, Download, X, User, Building } from 'lucide-react';
+import {Phone, Mail, Globe, QrCode, Download,  X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
@@ -40,6 +40,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     const [avatarError, setAvatarError] = useState(false);
     const { biosite } = usePreview();
     const { slug } = useParams<{ slug?: string }>();
+
     const [cardData, setCardData] = useState<VCardData>({
         name: '',
         title: '',
@@ -50,7 +51,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     });
 
     const currentUserId = Cookies.get('userId');
-    const targetUserId = userId || currentUserId;
 
     const {
         businessCard,
@@ -66,13 +66,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     useEffect(() => {
         if (isModalOpen && slug) {
             fetchBusinessCardBySlug(slug);
-        }else {
-            fetchBusinessCardByUserId(targetUserId);
-            fetchUser(targetUserId);
-            if (currentUserId) {
-                fetchUser(targetUserId);
-            }
-
         }
     }, [isModalOpen, currentUserId, slug]);
 
@@ -135,7 +128,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
 
 
-    if (!targetUserId && !slug) {
+    if (!currentUserId) {
         return null;
     }
 
