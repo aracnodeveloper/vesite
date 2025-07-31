@@ -65,7 +65,12 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
     useEffect(() => {
         if (isModalOpen && slug) {
-            fetchBusinessCardBySlug(slug);
+
+            fetchBusinessCardByUserId(currentUserId);
+
+            if (currentUserId) {
+                fetchUser(currentUserId);
+            }
         }
     }, [isModalOpen, currentUserId, slug]);
 
