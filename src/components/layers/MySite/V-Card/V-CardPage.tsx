@@ -4,6 +4,7 @@ import { useUser } from '../../../../hooks/useUser.ts';
 import { ChevronLeft, QrCode, Edit, Save, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from "js-cookie";
+import {usePreview} from "../../../../context/PreviewContext.tsx";
 
 const VCardPage = () => {
     const navigate = useNavigate();
@@ -360,15 +361,6 @@ const VCardPage = () => {
                         )}
                     </div>
 
-                    {/* Share URL */}
-                    {businessCard?.slug && !slug && (
-                        <div className="bg-gray-50 p-4 border-t">
-                            <p className="text-sm text-gray-600 mb-2">URL de tu tarjeta:</p>
-                            <div className="bg-white p-2 rounded border text-sm">
-                                {`${window.location.origin}/vcard/${businessCard.slug}`}
-                            </div>
-                        </div>
-                    )}
 
                     {/* User sync status */}
                     {userError && !slug && (
