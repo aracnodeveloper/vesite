@@ -336,7 +336,7 @@ const LivePreviewContent = () => {
 
                     {/* V-Card Button */}
                     <VCardButton
-                        themeConfig={themeConfig}
+                        themeConfig={themeConfig} // Pasar el userId del biosite público
                     />
 
                     {/* VIDEO EMBED */}

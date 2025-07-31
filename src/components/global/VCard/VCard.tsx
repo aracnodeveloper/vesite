@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Phone, Mail, Globe, QrCode, Download, Share2, X, User, Building } from 'lucide-react';
+import {Phone, Mail, Globe, QrCode, Download, X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
@@ -35,7 +35,7 @@ interface VCardButtonProps {
     userId?: string;
 }
 
-const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
+const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const { biosite } = usePreview();
@@ -50,6 +50,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
     });
 
     const currentUserId = Cookies.get('userId');
+    const targetUserId = userId || currentUserId;
 
     const {
         businessCard,
@@ -66,11 +67,12 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
         if (isModalOpen && slug) {
             fetchBusinessCardBySlug(slug);
         }else {
-            fetchBusinessCardByUserId(currentUserId);
-
+            fetchBusinessCardByUserId(targetUserId);
+            fetchUser(targetUserId);
             if (currentUserId) {
-                fetchUser(currentUserId);
+                fetchUser(targetUserId);
             }
+
         }
     }, [isModalOpen, currentUserId, slug]);
 
@@ -131,28 +133,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig }) => {
         URL.revokeObjectURL(url);
     };
 
-    const shareVCard = async () => {
-        if (navigator.share && businessCard?.slug) {
-            try {
-                await navigator.share({
-                    title: `Tarjeta de ${cardData.name || 'Contacto'}`,
-                    text: `Conecta conmigo - ${cardData.name || 'Mi contacto'}`,
-                    url: `${window.location.origin}/vcard/${businessCard.slug}`
-                });
-            } catch (err) {
-                console.log('Error sharing:', err);
-            }
-        } else {
-            // Fallback - copiar al clipboard
-            const shareUrl = businessCard?.slug
-                ? `${window.location.origin}/vcard/${businessCard.slug}`
-                : window.location.href;
-            navigator.clipboard.writeText(shareUrl);
-            alert('Enlace copiado al portapapeles');
-        }
-    };
 
-    if (!currentUserId) {
+
+    if (!targetUserId && !slug) {
         return null;
     }
 
