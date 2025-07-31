@@ -108,8 +108,8 @@ const VideoPage = () => {
                 </div>
 
                 <div>
-                    <label className="text-sm text-gray-600 mb-2 block">
-                        Title (opcional)
+                    <label className="text-xs text-gray-400 mb-2 block">
+                        Nota (optional)
                     </label>
                     <input
                         type="text"
@@ -143,7 +143,7 @@ const VideoPage = () => {
                                 Saving...
                             </div>
                         ) : (
-                            'Save'
+                            'GUARDAR'
                         )}
                     </button>
                 </div>

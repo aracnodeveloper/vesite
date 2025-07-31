@@ -1,4 +1,3 @@
-// profilePage.tsx - Fixed version with template validation
 import { Button, Form, Input, message } from "antd";
 import { usePreview } from "../../../../context/PreviewContext";
 import { useFetchBiosite } from "../../../../hooks/useFetchBiosite";
@@ -24,14 +23,13 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
-    // Estado para controlar la visibilidad de la advertencia
     const [showWarning, setShowWarning] = useState(true);
+    const [initialValuesSet, setInitialValuesSet] = useState(false);
 
     const isAdmin = role === 'admin' || role === 'ADMIN';
     const DEFAULT_BACKGROUND = 'https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
 
-    // Función para alternar la visibilidad de la advertencia
     const toggleWarning = () => {
         setShowWarning(!showWarning);
     };
@@ -49,14 +47,32 @@ const ProfilePage = () => {
     }, [userId, fetchUser]);
 
     useEffect(() => {
-        if (biosite && user) {
-            form.setFieldsValue({
-                title: biosite.title,
-                slug: biosite.slug,
-                description: user.description || ''
+        if (user && !initialValuesSet) {
+            // Determinar valores iniciales
+            const initialTitle = biosite?.title || user.name || '';
+            const initialSlug = biosite?.slug || user.cedula || '';
+            const initialDescription = user.description || '';
+
+            console.log('Setting initial form values:', {
+                title: initialTitle,
+                slug: initialSlug,
+                description: initialDescription,
+                biositeTitle: biosite?.title,
+                biositeSlug: biosite?.slug,
+                userName: user.name,
+                userCedula: user.cedula,
+                userDescription: user.description
             });
+
+            form.setFieldsValue({
+                title: initialTitle,
+                slug: initialSlug,
+                description: initialDescription
+            });
+
+            setInitialValuesSet(true);
         }
-    }, [biosite, user, form]);
+    }, [biosite, user, form, initialValuesSet]);
 
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
@@ -84,8 +100,8 @@ const ProfilePage = () => {
 
             const updateData: BiositeUpdateDto = {
                 ownerId: biosite.ownerId || userId,
-                title: values.title || biosite.title,
-                slug: values.slug || biosite.slug,
+                title: values.title || user?.name || biosite.title,
+                slug: values.slug || user?.cedula || biosite.slug,
                 themeId: biosite.themeId,
                 colors: ensureColorsAsString(biosite.colors),
                 fonts: biosite.fonts || '',
@@ -222,8 +238,8 @@ const ProfilePage = () => {
                     <Form form={form} layout="vertical" onFinish={handleFinish}>
                         {/* Nombre Input */}
                         <div className="mb-4">
-                            <label className="text-xs text-gray-400 mb-2 block" style={{ fontSize: "11px" }}>
-                                Nombre
+                            <label className="text-xs text-gray-600 mb-2 block" style={{ fontSize: "11px" }}>
+                                NOMBRE
                             </label>
                             <Form.Item
                                 name="title"
@@ -235,7 +251,7 @@ const ProfilePage = () => {
                                 className="mb-0"
                             >
                                 <Input
-                                    placeholder="Añadir"
+                                    placeholder={user?.name || "Añadir"}
                                     disabled={loading}
                                     maxLength={50}
                                     className="rounded-lg border-gray-600 bg-[#2A2A2A] text-white h-12 placeholder-gray-500"
@@ -246,8 +262,8 @@ const ProfilePage = () => {
 
                         {/* Descripción Input */}
                         <div className="mb-4">
-                            <label className="text-xs text-gray-400 mb-2 block" style={{ fontSize: "11px" }}>
-                                Descripción
+                            <label className="text-xs text-gray-600 mb-2 block" style={{ fontSize: "11px" }}>
+                                DESCRIPCIÓN
                             </label>
                             <Form.Item
                                 name="description"
@@ -257,7 +273,7 @@ const ProfilePage = () => {
                                 className="mb-0"
                             >
                                 <TextArea
-                                    placeholder="dsfsdsdsg"
+                                    placeholder={user?.description || "Añadir descripción"}
                                     disabled={loading}
                                     maxLength={250}
                                     rows={4}
@@ -273,7 +289,7 @@ const ProfilePage = () => {
                             <label className="text-xs font-medium text-gray-800  mb-2 block" style={{fontSize: "11px"}}>
                                 SITIO
                             </label>
-                            <span className="text-gray-400 text-xs  " style={{fontSize: "11px"}}>
+                            <span className="text-gray-600 text-xs  " style={{fontSize: "11px"}}>
                                         URL
                                     </span>
                             <Form.Item
@@ -293,7 +309,7 @@ const ProfilePage = () => {
                                     className="flex flex-col items-start  bg-white rounded-lg  h-16">
 
                                     <Input
-                                        placeholder="vesite/your-slug"
+                                        placeholder={ user?.cedula || "vesite/your-slug"}
                                         disabled={loading}
                                         maxLength={50}
                                         className="flex-1 border-none bg-white text-black placeholder-black shadow-none focus:shadow-none focus:border-none hover:shadow-none"

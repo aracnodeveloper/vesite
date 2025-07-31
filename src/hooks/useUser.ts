@@ -4,6 +4,7 @@ import apiService from '../service/apiService';
 interface User {
     id: string;
     email: string;
+    cedula?: string; // Añadido campo cedula como opcional
     name?: string;
     description?: string;
     avatarUrl?: string;
@@ -18,6 +19,7 @@ interface User {
 
 interface UpdateUserDto {
     name?: string;
+    cedula?: string; // Añadido cedula al DTO de actualización
     description?: string;
     avatarUrl?: string;
     site?: string;
@@ -68,7 +70,7 @@ export const useUser = () => {
         } finally {
             setLoading(false);
         }
-    }, []); // Fixed: removed the typo "updateUs" from the dependency array
+    }, []);
 
     const clearError = useCallback(() => {
         setError(null);

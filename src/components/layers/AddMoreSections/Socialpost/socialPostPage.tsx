@@ -106,7 +106,7 @@ const PostPage = () => {
 
                 <div>
                     <label className="text-xs text-gray-400 mb-2 block">
-                        Note (optional)
+                        Nota (optional)
                     </label>
                     <textarea
                         className="bg-[#FAFFF6] w-full  rounded-md px-4 py-3 text-xs text-black placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"

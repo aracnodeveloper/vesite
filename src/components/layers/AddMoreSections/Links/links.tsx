@@ -22,7 +22,7 @@ const Links = () => {
                 </div>
                 <div>
                     <div className="text-black font-medium">Links</div>
-                    <div className="text-gray-400 text-sm">Link Diversos</div>
+                    <div className="text-gray-600 text-sm">Links Diversos</div>
                 </div>
             </div>
             <div

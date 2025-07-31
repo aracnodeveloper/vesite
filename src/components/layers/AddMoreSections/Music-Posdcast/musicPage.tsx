@@ -12,7 +12,6 @@ const MusicPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        // Load existing music embed data
         const existingMusic = getMusicEmbed();
         if (existingMusic) {
             setUrl(existingMusic.url || '');
@@ -97,8 +96,8 @@ const MusicPage = () => {
                 </div>
 
                 <div>
-                    <label className="text-xs text-gray-600 block mb-2">
-                        Note
+                    <label className="text-xs text-gray-400 mb-2 block">
+                        Nota (optional)
                     </label>
                     <input
                         type="text"
@@ -122,7 +121,7 @@ const MusicPage = () => {
                                 Guardar...
                             </>
                         ) : (
-                            'Save'
+                            'Guardar'
                         )}
                     </button>
 
