@@ -2,9 +2,13 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
+import {useNavigate} from "react-router-dom";
 
 const AppPage = () => {
-    const handleBackClick = () => window.history.back();
+    const navigate = useNavigate();
+    const handleBackClick = () => {
+        navigate('/sections');
+    };
     const {
         appLinks,
         updateAppLink,
@@ -110,8 +114,8 @@ const AppPage = () => {
 
     return (
         <div className="w-full h-full mb-10 mt-20 max-w-md mx-auto rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-700">
-            <div className="flex items-center gap-3">
+            <div className="px-6 py-4 border-b border-gray-700  ">
+            <div className="flex items-center gap-3 ">
                 <button  onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
                     <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
                     <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Enlaces de Descarga</h1>

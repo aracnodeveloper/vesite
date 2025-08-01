@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
 import { WhatsAppOutlined } from "@ant-design/icons";
+import {useNavigate} from "react-router-dom";
 
 const WhatsAppPage = () => {
     const {
@@ -14,7 +15,10 @@ const WhatsAppPage = () => {
         error
     } = usePreview();
 
-    const handleBackClick = () => window.history.back();
+    const navigate = useNavigate();
+    const handleBackClick = () => {
+        navigate('/sections');
+    };
 
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');

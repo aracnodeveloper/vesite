@@ -139,7 +139,7 @@ const ProfilePage = () => {
     };
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate('/sections');
     };
 
     if (loading && !biosite) {

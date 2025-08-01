@@ -20,7 +20,7 @@ const MusicPage = () => {
     }, [getMusicEmbed]);
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate('/sections');
     };
 
     const handleSave = async () => {

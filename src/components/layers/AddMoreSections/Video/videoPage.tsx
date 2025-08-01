@@ -21,7 +21,7 @@ const VideoPage = () => {
     }, [getVideoEmbed]);
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate('/sections');
     };
 
     const handleSave = async () => {

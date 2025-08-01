@@ -259,7 +259,7 @@ const LinksPage = () => {
     }, [activeLinks]);
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate('/sections');
     };
 
     const handleConfirmAdd = async () => {

@@ -21,7 +21,7 @@ const PostPage = () => {
     }, [getSocialPost]);
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate('/sections');
     };
 
     const handleSave = async () => {

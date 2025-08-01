@@ -229,7 +229,7 @@ const VCardPage = () => {
             <div className="p-4 flex items-center justify-between">
                 <div className="px-6 py-4 border-b border-gray-700">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => navigate(-1)} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                        <button onClick={() => navigate('/sections')} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
                             <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
                             <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>VCard</h1>
                         </button>

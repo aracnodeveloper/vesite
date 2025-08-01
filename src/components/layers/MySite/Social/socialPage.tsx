@@ -125,7 +125,7 @@ const SocialPage = () => {
     }, []);
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate('/sections');
     };
 
     const handleDeleteLink = async (linkId: string, platformName: string) => {
