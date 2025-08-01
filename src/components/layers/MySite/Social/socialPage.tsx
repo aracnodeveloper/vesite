@@ -586,19 +586,19 @@ const SocialPage = () => {
                                     `}
                                 >
                                     {isActive && (
-                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                                        <div className="absolute top-2 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
                                             <X className="w-3 h-3 text-white"/>
                                         </div>
                                     )}
                                     <div className="flex flex-col items-center">
                                         <div
-                                            className="w-6 h-6 rounded-lg flex bg-gray-600 items-center justify-center"
+                                            className="w-8 h-8 rounded-lg flex bg-[#FFFFFF]  items-center justify-center"
 
                                         >
                                             <img
                                                 src={platform.icon}
                                                 alt={platform.name}
-                                                className="w-4 h-4 filter text-black  invert brightness-0 contrast-100"
+                                                className="w-4 h-4 filter     "
                                             />
                                         </div>
                                     </div>
