@@ -141,6 +141,8 @@ const VCardPage = () => {
     };
 
     const isLoading = loading || userLoading;
+    // Verificar si existe QR code para mostrar el botón de editar
+    const hasQRCode = businessCard?.qrCodeUrl;
 
     if (isLoading) {
         return (
@@ -184,6 +186,7 @@ const VCardPage = () => {
 
                 {!slug && businessCard && (
                     <div className="flex space-x-2">
+                        {/* Botón QR siempre visible si existe businessCard */}
                         <button
                             onClick={handleRegenerateQR}
                             className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
@@ -191,35 +194,41 @@ const VCardPage = () => {
                         >
                             <QrCode size={20} />
                         </button>
-                        {isEditing ? (
+
+                        {/* Botones de editar solo aparecen si ya existe QR code */}
+                        {hasQRCode && (
                             <>
-                                <button
-                                    onClick={handleSaveAndGenerate}
-                                    className="flex flex-wrap items-center gap-1 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 cursor-pointer"
-                                    title="Guardar"
-                                    disabled={isLoading}
-                                >
-                                    <Save size={18} />
-                                    <span className="text-xs">GUARDAR</span>
-                                </button>
-                                <button
-                                    onClick={() => setIsEditing(false)}
-                                    title="Salir"
-                                    className="flex flex-wrap items-center gap-1 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 cursor-pointer"
-                                >
-                                    <X size={20} />
-                                    <span className="text-xs">CERRAR</span>
-                                </button>
+                                {isEditing ? (
+                                    <>
+                                        <button
+                                            onClick={handleSaveAndGenerate}
+                                            className="flex flex-wrap items-center gap-1 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 cursor-pointer"
+                                            title="Guardar"
+                                            disabled={isLoading}
+                                        >
+                                            <Save size={18} />
+                                            <span className="text-xs">GUARDAR</span>
+                                        </button>
+                                        <button
+                                            onClick={() => setIsEditing(false)}
+                                            title="Salir"
+                                            className="flex flex-wrap items-center gap-1 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 cursor-pointer"
+                                        >
+                                            <X size={20} />
+                                            <span className="text-xs">CERRAR</span>
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        title="Editar"
+                                        className="flex flex-wrap items-center gap-1 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                                    >
+                                        <Edit size={20} />
+                                        <span className="text-xs">EDIT</span>
+                                    </button>
+                                )}
                             </>
-                        ) : (
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                title="Editar"
-                                className="flex flex-wrap items-center gap-1 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                            >
-                                <Edit size={20} />
-                                <span className="text-xs">EDIT</span>
-                            </button>
                         )}
                     </div>
                 )}
@@ -291,16 +300,19 @@ const VCardPage = () => {
                             </>
                         ) : (
                             <>
-                                <div className="text-center flex flex-col justify-center">
-                                    <button
-                                        onClick={handleRegenerateQR}
-                                        className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
-                                        title="Generar código QR"
-                                    >
-                                        Mostrar mi QR
-                                        <QrCode size={20} className="ml-2" />
-                                    </button>
-                                </div>
+                                {/* Solo mostrar botón "Mostrar mi QR" si NO hay QR code generado */}
+                                {!hasQRCode && (
+                                    <div className="text-center flex flex-col justify-center">
+                                        <button
+                                            onClick={handleRegenerateQR}
+                                            className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
+                                            title="Generar código QR"
+                                        >
+                                            Mostrar mi QR
+                                            <QrCode size={20} className="ml-2" />
+                                        </button>
+                                    </div>
+                                )}
 
                                 <div className="border-t pt-4 space-y-3">
                                     {cardData.name && (
@@ -360,7 +372,6 @@ const VCardPage = () => {
                             </>
                         )}
                     </div>
-
 
                     {/* User sync status */}
                     {userError && !slug && (
