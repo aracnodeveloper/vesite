@@ -122,7 +122,7 @@ const AppPage = () => {
             <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8 w-full">
                 <div className="text-center space-y-4">
                     <div className="w-24 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                        <img src="public/img/img_9.png" className="h-20" alt="App Logo" />
+                        <img src="./img/img_9.png" className="h-20" alt="App Logo" />
                     </div>
                     <h2 className="font-bold text-black text-lg uppercase">Apple y Google play</h2>
                     <p className="text-gray-600 text-sm">
