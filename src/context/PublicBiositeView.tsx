@@ -149,7 +149,7 @@ const PublicBiositeView = () => {
 
         const exactSocialLabels = [
             'instagram', 'tiktok',  'twitter', 'twitter/x', 'x',  'facebook', 'twitch',
-            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
+            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord', 'youtube',
             'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
 
@@ -167,7 +167,7 @@ const PublicBiositeView = () => {
 
         const embedLabels = [
             'music embed', 'video embed', 'social post', 'embed', 'player',
-            'spotify track', 'youtube video', 'instagram post', 'music/podcast'
+            'spotify track', 'youtube video','youtube.com/watch' ,'instagram post', 'music/podcast'
         ];
 
         const hasEmbedLabel = embedLabels.some(embedLabel => labelLower.includes(embedLabel));

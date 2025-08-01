@@ -16,10 +16,13 @@ import tumblrIcon from '../assets/icons/tumblr.svg';
 import twitchIcon from '../assets/icons/twitch.svg';
 import whatsappIcon from '../assets/icons/whatsapp.svg';
 import xIcon from '../assets/icons/X.svg';
+import youtubeIcon from '../assets/icons/youtube.svg';
 
 export const socialMediaPlatforms = [
     { id: 'instagram', name: 'Instagram', icon: instagramIcon, color: '#E4405F', isActive: true },
     { id: 'tiktok', name: 'TikTok', icon: tiktokIcon, color: '#000000', isActive: true },
+    { id: 'youtube', name: 'YouTube', icon: youtubeIcon, color: '#FF0000', isActive: true },
+
     { id: 'twitter', name: 'Twitter/X', icon: xIcon, color: '#000000' , isActive: true},
     { id: 'facebook', name: 'Facebook', icon: facebookIcon, color: '#1877F2',isActive: true },
     { id: 'twitch', name: 'Twitch', icon: twitchIcon, color: '#9146FF' , isActive: true},

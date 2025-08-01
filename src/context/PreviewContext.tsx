@@ -58,6 +58,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             '/assets/icons/instagram.svg': 'instagram',
             '/assets/icons/tiktok.svg': 'tiktok',
             '/assets/icons/X.svg': 'twitter',
+            '/assets/icons/youtube.svg': 'youtube',
             '/assets/icons/facebook.svg': 'facebook',
             '/assets/icons/twitch.svg': 'twitch',
             '/assets/icons/linkdl.svg': 'linkedin',
@@ -228,10 +229,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             return (
                 labelLower.includes('video') ||
-                labelLower.includes('youtube') ||
                 labelLower.includes('vimeo') ||
-                urlLower.includes('youtube.com') ||
-                urlLower.includes('youtu.be') ||
+                urlLower.includes('youtube.com/watch') ||
                 urlLower.includes('vimeo.com')
             );
         });

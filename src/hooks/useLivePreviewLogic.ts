@@ -83,7 +83,7 @@ export const useLivePreviewLogic = () => {
 
             const excludedKeywords = [
                 'spotify', 'music', 'apple music', 'soundcloud', 'audio',
-                'youtube', 'video', 'vimeo', 'tiktok video',
+                'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
                 'post', 'publicacion', 'contenido',
                 'music embed', 'video embed', 'social post',
                 'embed', 'player'

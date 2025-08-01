@@ -100,7 +100,7 @@ const SocialPage = () => {
 
         const excludedKeywords = [
             'spotify', 'music', 'apple music', 'soundcloud', 'audio',
-            'youtube', 'video', 'vimeo', 'tiktok video',
+            'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
             'post', 'publicacion', 'contenido',
             'music embed', 'video embed', 'social post'
         ];
@@ -305,6 +305,7 @@ const SocialPage = () => {
             'Email': 'your@email.com',
             'Pinterest': 'https://pinterest.com/username',
             'Spotify': 'https://open.spotify.com/user/username',
+            'YouTube': 'https://youtube.com/@username',
             'Apple Music': 'https://music.apple.com/profile/username',
             'Discord': 'https://discord.gg/servername',
             'Tumblr': 'https://username.tumblr.com',
