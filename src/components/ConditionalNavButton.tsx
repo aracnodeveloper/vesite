@@ -19,12 +19,9 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig
     const  isAuthenticated  = Cookie.get('accessToken');
 
     const handleClick = () => {
-        if (isAuthenticated) {
-            window.location.href = 'https://visitaecuador.com/vesite/login';
-        } else {
-            window.location.href = 'https://visitaecuador.com';
-        }
-    };
+    
+            window.location.href = 'https://visitaecuador.com/vesite';
+        } 
 
     return (
         <div className="px-3 sm:px-4">
@@ -39,7 +36,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig
             >
 
                 <span className="font-medium text-xs sm:text-xs">
-                    {isAuthenticated ? 'Actualizar mis datos' : 'Únete a VisitaEcuador'}
+                   { 'Actualizar mis datos'}
                 </span>
 
                 <svg
