@@ -20,7 +20,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({ themeConfig
 
     const handleClick = () => {
         if (isAuthenticated) {
-            window.location.href = 'https://visitaecuador.com/vesite';
+            window.location.href = 'https://visitaecuador.com/vesite/login';
         } else {
             window.location.href = 'https://visitaecuador.com';
         }
