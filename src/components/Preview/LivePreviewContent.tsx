@@ -8,13 +8,14 @@ import {
     AvatarSection,
     UserInfoSection,
     SocialLinksSection,
-    RegularLinksSection, TwoSquareImagesSection,// WhatsAppSection,
+    RegularLinksSection, TwoSquareImagesSection
 } from './LivePreviewComponents';
 import VCardButton from "../global/VCard/VCard.tsx";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
 import {useTemplates} from "../../hooks/useTemplates.ts";
 import Cookie from "js-cookie";
 import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
+import WhatsAppButton from "../layers/AddMoreSections/WhattsApp/whatsAppButton.tsx";
 
 const LivePreviewContent = () => {
     const {
@@ -52,9 +53,8 @@ const LivePreviewContent = () => {
         handleImageClick,
         handleUserInfoClick,
         handleAppClick,
-        handleVCardClick
-      //  whatsAppLink,
-      //  whatsAppData,
+        handleVCardClick,
+        handleWhatsAppClick
     } = useLivePreviewLogic();
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
@@ -211,13 +211,11 @@ const LivePreviewContent = () => {
                         handleSocialClick={handleSocialClick}
                         themeConfig={themeConfig}
                     />
-                    {/*   <WhatsAppSection
-                        whatsAppLink={whatsAppLink}
-                        whatsAppData={whatsAppData}
-                        isExposedRoute={isExposedRoute}
-                        themeConfig={themeConfig}
+                    <WhatsAppButton
+                        onWhatsAppClick={handleWhatsAppClick}
+                        // handleWhatsAppLinkClick se puede pasar aquí si necesitas analytics en vista pública
                     />
-                    Links regulares */}
+
                     <RegularLinksSection
                         regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}

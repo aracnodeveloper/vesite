@@ -8,7 +8,7 @@ import {
 import type { BiositeFull, BiositeUpdateDto } from "../interfaces/Biosite";
 import { useState, useCallback, useRef } from "react";
 import apiService from "../service/apiService.ts";
-import type {CreatedUser,CreateUserDto ,CreateBiositeDto} from "../interfaces/User.ts";
+import type {CreatedUser ,CreateBiositeDto} from "../interfaces/User.ts";
 
 
 export interface ChildUser extends CreatedUser {

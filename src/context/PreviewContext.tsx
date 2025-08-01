@@ -1,6 +1,6 @@
 import {createContext, useContext, useEffect, useState, useCallback, useRef} from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
-import type {PreviewContextType, SocialLink, RegularLink, AppLink} from "../interfaces/PreviewContext";
+import type {PreviewContextType, SocialLink, RegularLink, AppLink, WhatsAppLink} from "../interfaces/PreviewContext";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../hooks/useFetchLinks";
 import { useBiositeOperations } from "../hooks/useBiositeManagement";
@@ -44,7 +44,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [socialLinks, setSocialLinksState] = useState<SocialLink[]>([]);
     const [regularLinks, setRegularLinksState] = useState<RegularLink[]>([]);
     const [appLinks, setAppLinksState] = useState<AppLink[]>([]);
-   // const [whatsAppLinks, setWhatsAppLinksState] = useState<WhatsAppLink[]>([]);
+    const [whatsAppLinks, setWhatsAppLinksState] = useState<WhatsAppLink[]>([]);
     const [themeColor, setThemeColorState] = useState<string>('#ffffff');
     const [fontFamily, setFontFamilyState] = useState<string>('Inter');
     const [initialized, setInitialized] = useState(false);
@@ -85,7 +85,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         return fileName.toLowerCase();
     }, []);
 
-    // Función para identificar si un enlace es de app store
     const isAppStoreLink = useCallback((link: any): boolean => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
@@ -100,7 +99,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         );
     }, []);
 
-    {/*
+    {/* */}
         const isWhatsAppLink = useCallback((link: any): boolean => {
             const labelLower = link.label?.toLowerCase() || '';
             const urlLower = link.url?.toLowerCase() || '';
@@ -112,7 +111,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 urlLower.includes('api.whatsapp.com')
             );
         }, [])
-    */}
+
 
 
     const getStoreType = useCallback((link: any): 'appstore' | 'googleplay' => {
@@ -125,7 +124,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         return 'appstore';
     }, []);
 
-    {/*
+    {/*  */ }
         const parseWhatsAppFromUrl = useCallback((url: string): { phone: string; message: string } => {
             try {
                 let phone = '';
@@ -144,7 +143,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 return {phone: '', message: ''};
             }
         }, []);
-   */ }
+
 
     // Función para obtener app links desde los links generales
     const getAppLinks = useCallback(() => {
@@ -157,7 +156,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 isActive: link.isActive
             }));
     }, [links, isAppStoreLink, getStoreType]);
-    {/*
+    {/**/}
         const getWhatsAppLinks = useCallback(() => {
             return links
                 .filter(isWhatsAppLink)
@@ -171,7 +170,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     };
                 });
         }, [links, isWhatsAppLink, parseWhatsAppFromUrl]);
-    */}
+
 
     // Función para obtener enlaces de música
     const getMusicEmbed = useCallback(() => {
@@ -243,7 +242,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setBiosite(null);
             setSocialLinksState([]);
             setRegularLinksState([]);
-            //setWhatsAppLinksState([]);
+            setWhatsAppLinksState([]);
             setThemeColorState('#ffffff');
             setFontFamilyState('Inter');
             resetState();
@@ -347,20 +346,20 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 }));
 
             const appLinksFromAPI = getAppLinks();
-          //  const whatsAppLinkFromAPI = getWhatsAppLinks();
+          const whatsAppLinkFromAPI = getWhatsAppLinks();
             console.log('Processed links:', {
                 social: socialLinksFormatted.length,
                 regular: regularLinksFormatted.length,
                 apps: appLinksFromAPI.length,
-             //   whatsApp: whatsAppLinkFromAPI ? 'found' : 'not found'
+             whatsApp: whatsAppLinkFromAPI ? 'found' : 'not found'
             });
 
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
             setAppLinksState(appLinksFromAPI);
-          //  setWhatsAppLinksState(whatsAppLinkFromAPI);
+          setWhatsAppLinksState(whatsAppLinkFromAPI);
         }
-    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink, biositeData?.id]);
+    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink,getWhatsAppLinks,isWhatsAppLink, biositeData?.id]);
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
         setBiosite(prev => prev ? { ...prev, ...data } : null);
@@ -469,7 +468,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     };
-    {/*
+    {/*  */}
     const addWhatsAppLink = async (link: Omit<WhatsAppLink, 'id'>) => {
         if (!biositeData?.id) {
             throw new Error('Biosite ID is required');
@@ -546,13 +545,13 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 throw error;
             }
         };
-    */}
+
     const contextValue: PreviewContextType = {
         biosite,
         socialLinks,
         regularLinks,
         appLinks,
-       // whatsAppLinks,
+        whatsAppLinks,
         loading,
         error,
         themeColor,
@@ -568,10 +567,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         addAppLink,
         removeAppLink,
         updateAppLink,
-       // setWhatsAppLinks: setWhatsAppLinksState,
-       // addWhatsAppLink,
-      //  removeWhatsAppLink,
-      //  updateWhatsAppLink
+       setWhatsAppLinks: setWhatsAppLinksState,
+        addWhatsAppLink,
+       removeWhatsAppLink,
+       updateWhatsAppLink
     };
 
     return (

@@ -279,8 +279,8 @@ const LinksPage = () => {
                 const maxOrderIndex = Math.max(...activeLinks.map(link => link.orderIndex), -1);
 
                 const newLink = {
-                    title: newUrl, // Mantener el título original (sin protocolo para mostrar)
-                    url: normalizedUrl, // Usar la URL normalizada para navegación
+                    title: newUrl,
+                    url: normalizedUrl,
                     icon: undefined,
                     image: undefined,
                     orderIndex: maxOrderIndex + 1,

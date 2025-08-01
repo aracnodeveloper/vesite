@@ -2,9 +2,8 @@ import Links from "./Links/links.tsx";
 import Videos from "./Video/video.tsx";
 import Musics from "./Music-Posdcast/music_podcast.tsx";
 import Post from "./Socialpost/social_post.tsx";
-//import WhatsApp from "./WhattsApp/whatsapp.tsx";
+import WhatsApp from "./WhattsApp/whatsapp.tsx";
 import AppD from "./App/app.tsx";
-//import Downloads from "./Download/download.tsx";
 
 
 const Add = () => {
@@ -24,8 +23,8 @@ const Add = () => {
                     <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENT</h4>
 
                     <AppD/>
- {/*
-                    <WhatsApp/>*/}
+
+                    <WhatsApp/>
                     <Links/>
                     <Videos/>
                     <Musics/>

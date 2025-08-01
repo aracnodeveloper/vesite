@@ -34,7 +34,6 @@ interface VCardButtonProps {
     };
     userId?: string;
     onVcardClick?: (e: React.MouseEvent) => void;
-    // Add biosite prop for public view
     biosite?: any;
 }
 
@@ -42,13 +41,12 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                                      themeConfig,
                                                      userId,
                                                      onVcardClick,
-                                                     biosite: biositeFromProps // Rename to avoid confusion
+                                                     biosite: biositeFromProps
                                                  }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // Try to get biosite from context (for preview), fallback to props (for public view)
     const { biosite: biositeFromContext } = usePreview() || { biosite: null };
     const biosite = biositeFromContext || biositeFromProps;
 
@@ -66,13 +64,11 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
     const getCurrentUserId = useCallback(() => {
         if (userId && userId !== 'undefined' && userId.trim() !== '') {
-            console.log('Using prop userId:', userId);
             return userId;
         }
 
         const cookieUserId = Cookies.get('userId');
         if (cookieUserId && cookieUserId !== 'undefined' && cookieUserId.trim() !== '') {
-            console.log('Using cookie userId:', cookieUserId);
             return cookieUserId;
         }
 
@@ -110,7 +106,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         }
 
         try {
-            console.log('Loading data for userId:', validUserId);
             setIsDataLoaded(true);
 
             await fetchBusinessCardByUserId(validUserId);
@@ -124,7 +119,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     // Effect para cargar datos solo cuando se abre el modal
     useEffect(() => {
         if (isModalOpen && !isDataLoaded) {
-            console.log('Modal opened, loading data...');
             loadUserData();
         }
     }, [isModalOpen, isDataLoaded, loadUserData]);
@@ -145,7 +139,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                     : businessCard.data;
                 setCardData(parsedData);
 
-                console.log('Parsed data:', parsedData);
 
             } catch (error) {
                 console.error('Error parsing business card data:', error);
@@ -199,10 +192,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     }
 
     const getAvatarImage = () => {
-        console.log('Getting avatar image - biosite:', biosite);
-        console.log('Avatar image value:', biosite?.avatarImage);
-        console.log('Avatar error state:', avatarError);
-
         if (avatarError || !biosite?.avatarImage) {
             console.log('Using default avatar - error or no image');
             return imgP;
@@ -212,12 +201,10 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             if (biosite.avatarImage.startsWith('data:')) {
                 const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
                 const isValid = dataUrlRegex.test(biosite.avatarImage);
-                console.log('Data URL validation:', isValid);
                 return isValid ? biosite.avatarImage : imgP;
             }
             try {
                 new URL(biosite.avatarImage);
-                console.log('Using URL avatar:', biosite.avatarImage);
                 return biosite.avatarImage;
             } catch {
                 console.log('Invalid URL, using default');
@@ -242,7 +229,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         }
 
         try {
-            console.log('Regenerating QR for userId:', validUserId);
             await regenerateQRCode(validUserId);
         } catch (error) {
             console.error('Error regenerating QR code:', error);

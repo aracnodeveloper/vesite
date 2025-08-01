@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, X, Edit2, Check, AlertTriangle } from "lucide-react";
+import { ChevronLeft, X, Edit2, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { socialMediaPlatforms } from "../../../../media/socialPlataforms.ts";
@@ -10,14 +10,6 @@ interface SocialPlatform {
     icon: string
     color: string;
     isActive: boolean;
-}
-
-interface DeleteConfirmation {
-    isOpen: boolean;
-    linkId: string | null;
-    linkLabel: string;
-    onConfirm: () => void;
-    onCancel: () => void;
 }
 
 const SocialPage = () => {
@@ -37,20 +29,13 @@ const SocialPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingLink, setEditingLink] = useState<string | null>(null);
     const [showUrlForm, setShowUrlForm] = useState(false);
-    const [deleteConfirmation, setDeleteConfirmation] = useState<DeleteConfirmation>({
-        isOpen: false,
-        linkId: null,
-        linkLabel: '',
-        onConfirm: () => {},
-        onCancel: () => {}
-    });
 
     const navigate = useNavigate();
 
     // Función para formatear URLs de WhatsApp
     const formatWhatsAppUrl = (url: string): string => {
         // Si ya está en formato correcto, devolver como está
-        if (url.includes('wa.me/') || url.includes('api.whatsapp.com/send')) {
+        if (url.includes('wa.me/') ) {
             return url;
         }
 
@@ -101,7 +86,7 @@ const SocialPage = () => {
         const excludedKeywords = [
             'spotify', 'music', 'apple music', 'soundcloud', 'audio',
             'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
-            'post', 'publicacion', 'contenido',
+            'post', 'publicacion', 'contenido','api.whatsapp.com',
             'music embed', 'video embed', 'social post'
         ];
 
@@ -143,33 +128,21 @@ const SocialPage = () => {
         navigate(-1);
     };
 
-    const showDeleteConfirmation = (linkId: string, linkLabel: string, onConfirm: () => void) => {
-        setDeleteConfirmation({
-            isOpen: true,
-            linkId,
-            linkLabel,
-            onConfirm,
-            onCancel: () => setDeleteConfirmation({
-                isOpen: false,
-                linkId: null,
-                linkLabel: '',
-                onConfirm: () => {},
-                onCancel: () => {}
-            })
-        });
-    };
-
-    const handleConfirmDelete = async () => {
-        if (deleteConfirmation.onConfirm) {
-            await deleteConfirmation.onConfirm();
+    const handleDeleteLink = async (linkId: string, platformName: string) => {
+        try {
+            setIsSubmitting(true);
+            console.log("Attempting to remove link with ID:", linkId);
+            await removeSocialLink(linkId);
+            console.log(`Successfully removed ${platformName} link`);
+        } catch (error) {
+            console.error(`Error removing ${platformName} link:`, error);
+            const errorMessage = error instanceof Error
+                ? error.message
+                : `Error al eliminar el enlace de ${platformName}`;
+            alert(errorMessage);
+        } finally {
+            setIsSubmitting(false);
         }
-        setDeleteConfirmation({
-            isOpen: false,
-            linkId: null,
-            linkLabel: '',
-            onConfirm: () => {},
-            onCancel: () => {}
-        });
     };
 
     const handlePlatformSelect = async (platform: SocialPlatform) => {
@@ -194,26 +167,7 @@ const SocialPage = () => {
         });
 
         if (existingLink) {
-            showDeleteConfirmation(
-                existingLink.id,
-                platform.name,
-                async () => {
-                    try {
-                        setIsSubmitting(true);
-                        console.log("Attempting to remove link with ID:", existingLink.id);
-                        await removeSocialLink(existingLink.id);
-                        console.log(`Successfully removed ${platform.name} link`);
-                    } catch (error) {
-                        console.error(`Error removing ${platform.name} link:`, error);
-                        const errorMessage = error instanceof Error
-                            ? error.message
-                            : `Error al eliminar el enlace de ${platform.name}`;
-                        alert(errorMessage);
-                    } finally {
-                        setIsSubmitting(false);
-                    }
-                }
-            );
+            await handleDeleteLink(existingLink.id, platform.name);
         } else {
             setEditingPlatform(platform);
             setLabelInput(platform.name);
@@ -347,7 +301,6 @@ const SocialPage = () => {
             return emailRegex.test(url) || url.startsWith('mailto:');
         }
 
-        // Validación especial para WhatsApp
         if (editingPlatform && isWhatsAppPlatform(editingPlatform)) {
             const phoneRegex = /^[\+]?[\d\s\-\(\)]+$/;
             if (phoneRegex.test(url)) {
@@ -442,44 +395,6 @@ const SocialPage = () => {
                     </div>
                 )}
 
-                {/* Delete Confirmation Modal */}
-                {deleteConfirmation.isOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md border border-gray-600">
-                            <div className="flex items-center mb-4">
-                                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center mr-3">
-                                    <AlertTriangle className="w-5 h-5 text-red-400"/>
-                                </div>
-                                <h3 className="text-lg font-semibold text-white">
-                                    Confirmar eliminación
-                                </h3>
-                            </div>
-
-                            <p className="text-gray-300 mb-6">
-                                ¿Estás seguro de que quieres eliminar el enlace de <span
-                                className="font-medium text-white">{deleteConfirmation.linkLabel}</span>?
-                            </p>
-
-                            <div className="flex space-x-3">
-                                <button
-                                    onClick={handleConfirmDelete}
-                                    disabled={isSubmitting}
-                                    className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isSubmitting ? 'Eliminando...' : 'Sí, eliminar'}
-                                </button>
-                                <button
-                                    onClick={deleteConfirmation.onCancel}
-                                    className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-                                    disabled={isSubmitting}
-                                >
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Active Social Links */}
                 {activeSocialLinks.length > 0 && (
                     <div className="mb-6 space-y-2">
@@ -523,28 +438,7 @@ const SocialPage = () => {
                                         </button>
 
                                         <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-
-                                                showDeleteConfirmation(
-                                                    link.id,
-                                                    link.label,
-                                                    async () => {
-                                                        try {
-                                                            setIsSubmitting(true);
-                                                            await removeSocialLink(link.id);
-                                                        } catch (error) {
-                                                            const errorMessage = error instanceof Error
-                                                                ? error.message
-                                                                : "Error al eliminar el enlace";
-                                                            alert(errorMessage);
-                                                        } finally {
-                                                            setIsSubmitting(false);
-                                                        }
-                                                    }
-                                                );
-                                            }}
+                                            onClick={() => handleDeleteLink(link.id, link.label)}
                                             className="text-gray-400 hover:text-red-400 cursor-pointer transition-colors p-1"
                                             title="Eliminar"
                                             disabled={isSubmitting}

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 import { useParams } from "react-router-dom";
 import type {BiositeFull} from "../interfaces/Biosite";
-import type { SocialLink, RegularLink, AppLink } from "../interfaces/PreviewContext";
+import type {SocialLink, RegularLink, AppLink, WhatsAppLink} from "../interfaces/PreviewContext";
 import apiService from "../service/apiService";
 import {
     BackgroundSection,
@@ -16,14 +16,15 @@ import ConditionalNavButton from "../components/ConditionalNavButton.tsx";
 import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
-// import {usePreview} from "./PreviewContext.tsx";
 import {useUser} from "../hooks/useUser.ts";
+import WhatsAppButton from "../components/layers/AddMoreSections/WhattsApp/whatsAppButton.tsx";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
     socialLinks: SocialLink[];
     regularLinks: RegularLink[];
     appLinks: AppLink[];
+    whatsApplinks: WhatsAppLink[];
     musicEmbed?: any;
     socialPost?: any;
     videoEmbed?: any;
@@ -36,7 +37,6 @@ const PublicBiositeView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
-   // const {getMusicEmbed, getSocialPost, getVideoEmbed} = usePreview()
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
 
@@ -105,6 +105,23 @@ const PublicBiositeView = () => {
         );
     };
 
+    const isWhatsAppLink = useCallback((link: any): boolean => {
+        const labelLower = link.label?.toLowerCase() || '';
+        const urlLower = link.url?.toLowerCase() || '';
+        const icon = link.icon?.toLowerCase() || '';
+
+        // Debug: agregar console.log para verificar
+        console.log('Checking WhatsApp link:', { label: labelLower, url: urlLower, icon });
+
+        return (
+            icon === 'whatsapp' ||
+            icon.includes('whatsapp') ||
+            labelLower.includes('whatsapp') ||
+            urlLower.includes('api.whatsapp.com') ||
+            urlLower.includes('wa.me/')
+        );
+    }, [])
+
     const getStoreType = (link: any): 'appstore' | 'googleplay' => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
@@ -115,6 +132,32 @@ const PublicBiositeView = () => {
         return 'appstore';
     };
 
+    const parseWhatsAppFromUrl = useCallback((url: string): { phone: string; message: string } => {
+        try {
+            let phone = '';
+            let message = '';
+
+            if (url.includes('api.whatsapp.com/send')) {
+                const urlParams = new URLSearchParams(url.split('?')[1] || '');
+                phone = urlParams.get('phone') || '';
+                message = decodeURIComponent(urlParams.get('text') || '');
+            } else if (url.includes('wa.me/')) {
+                // Manejar enlaces wa.me
+                const match = url.match(/wa\.me\/(\d+)(?:\?text=(.+))?/);
+                if (match) {
+                    phone = match[1];
+                    message = match[2] ? decodeURIComponent(match[2]) : '';
+                }
+            }
+
+            console.log('Parsed WhatsApp:', { phone, message, originalUrl: url });
+            return {phone, message};
+        } catch (error) {
+            console.error('Error parsing WhatsApp URL:', error);
+            return {phone: '', message: ''};
+        }
+    }, []);
+
     const isSocialLink = (link: any): boolean => {
         const iconIdentifier = getIconIdentifier(link.icon);
         const labelLower = link.label.toLowerCase();
@@ -124,7 +167,7 @@ const PublicBiositeView = () => {
         const socialPlatforms = [
             'instagram', 'tiktok', 'x', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
-            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
+            'tumblr', 'telegram', 'onlyfans'
         ];
 
         if (socialPlatforms.includes(iconIdentifier)) {
@@ -135,7 +178,7 @@ const PublicBiositeView = () => {
             'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
             'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
             'pinterest.com', 'discord.gg', 'discord.com', 'tumblr.com',
-            'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com'
+            't.me', 'telegram.me', 'onlyfans.com'
         ];
 
         const hasSocialDomain = socialDomains.some(domain => {
@@ -150,11 +193,12 @@ const PublicBiositeView = () => {
         const exactSocialLabels = [
             'instagram', 'tiktok',  'twitter', 'twitter/x', 'x',  'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord', 'youtube',
-            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
+            'tumblr', 'telegram', 'onlyfans'
         ];
 
         return exactSocialLabels.some(label => labelLower === label);
     };
+
 
     const isEmbedLink = (link: any): boolean => {
         const labelLower = link.label.toLowerCase();
@@ -226,15 +270,25 @@ const PublicBiositeView = () => {
         const socialLinks: SocialLink[] = [];
         const regularLinks: RegularLink[] = [];
         const appLinks: AppLink[] = [];
+        const whatsApplinks: WhatsAppLink[] = [];
         let musicEmbed: any = null;
         let socialPost: any = null;
         let videoEmbed: any = null;
 
+
         links.forEach(link => {
+
             const iconIdentifier = getIconIdentifier(link.icon);
 
-            if (isAppStoreLink(link)) {
-                // Enlaces de tiendas de aplicaciones
+            if (isWhatsAppLink(link)) {
+                const {phone, message} = parseWhatsAppFromUrl(link.url);
+                whatsApplinks.push({
+                    id: link.id,
+                    phone,
+                    message,
+                    isActive: link.isActive
+                });
+            } else if (isAppStoreLink(link)) {
                 appLinks.push({
                     id: link.id,
                     store: getStoreType(link),
@@ -242,9 +296,7 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             } else if (isEmbedLink(link)) {
-                // Procesar embeds
                 const embedType = getEmbedType(link);
-                console.log('Embed detected:', link.label, 'Type:', embedType);
 
                 if (embedType === 'music') {
                     musicEmbed = link;
@@ -275,13 +327,16 @@ const PublicBiositeView = () => {
             }
         });
 
+        console.log('WhatsApp links processed:', whatsApplinks); // Debug
+
         return {
             socialLinks,
             regularLinks: regularLinks.sort((a, b) => a.orderIndex - b.orderIndex),
             appLinks,
             musicEmbed,
             socialPost,
-            videoEmbed
+            videoEmbed,
+            whatsApplinks
         };
     };
 
@@ -362,13 +417,14 @@ const PublicBiositeView = () => {
                     return;
                 }
 
-                const { socialLinks, regularLinks, appLinks, musicEmbed, socialPost, videoEmbed } = processLinks(biosite.links);
+                const { socialLinks, regularLinks, appLinks, musicEmbed, socialPost, videoEmbed,whatsApplinks } = processLinks(biosite.links);
 
                 setBiositeData({
                     biosite,
                     socialLinks,
                     regularLinks,
                     appLinks,
+                    whatsApplinks,
                     musicEmbed,
                     socialPost,
                     videoEmbed
@@ -526,8 +582,45 @@ const PublicBiositeView = () => {
         return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
     };
 
+    const filterRealSocialLinks = (links: SocialLink[]) => {
+        return links.filter(link => {
+            if (!link.isActive) return false;
+
+            const excludedKeywords = [
+                'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+                'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
+                'post', 'publicacion', 'contenido','api.whatsapp.com',
+                'music embed', 'video embed', 'social post',
+                'embed', 'player'
+            ];
+
+            const labelLower = link.label.toLowerCase();
+            const urlLower = link.url.toLowerCase();
+
+            const isExcluded = excludedKeywords.some(keyword =>
+                labelLower.includes(keyword) || urlLower.includes(keyword)
+            );
+
+            if (isExcluded) return false;
+
+            // FIXED: Only exclude WhatsApp API links, not wa.me links
+            if (urlLower.includes("api.whatsapp.com")) {
+                return false;
+            }
+
+            // Allow wa.me WhatsApp links in social
+            if (urlLower.includes("wa.me/") || urlLower.includes("whatsapp.com")) {
+                return true;
+            }
+
+            const platform = findPlatformForLink(link);
+            return platform !== undefined && platform !== null;
+        });
+    };
+
     const socialLinksData = biositeData.socialLinks.filter(link => link.isActive);
     const regularLinksData = biositeData.regularLinks.filter(link => link.isActive);
+    const realsocialLinks = filterRealSocialLinks(socialLinksData);
 
     // Usar los embeds del estado local en lugar de los hooks de PreviewContext
     const musicEmbed = biositeData.musicEmbed;
@@ -603,11 +696,13 @@ const PublicBiositeView = () => {
 
                     {/* Links sociales */}
                     <SocialLinksSection
-                        realSocialLinks={socialLinksData}
+                        realSocialLinks={realsocialLinks}
                         findPlatformForLink={findPlatformForLink}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
                     />
+
+                    <WhatsAppButton/>
 
                     {/* Links regulares */}
                     <RegularLinksSection
@@ -616,11 +711,9 @@ const PublicBiositeView = () => {
                         themeConfig={themeConfig}
                     />
 
-
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={biositeData.biosite.ownerId}
-                        biosite={biositeData.biosite}
                     />
 
                     {/* MÚSICA EMBED */}
@@ -773,9 +866,11 @@ const PublicBiositeView = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* App Download Buttons */}
                     <div className="mt-12">
                         <div className="flex flex-wrap gap-2 w-full max-w-md mx-auto">
-                            {biositeData.appLinks.map((appLink) => (
+                            {biositeData.appLinks.filter(link => link.isActive).map((appLink) => (
                                 <a
                                     key={appLink.id}
                                     href={appLink.url}

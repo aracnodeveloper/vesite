@@ -3,6 +3,7 @@ import { getBiositeAnalytics, getClicksGroupedByLabel } from "../service/apiServ
 import Cookies from 'js-cookie';
 import LivePreviewContent from "../components/Preview/LivePreviewContent.tsx";
 import PhonePreview from "../components/Preview/phonePreview.tsx";
+import { AnalyticsWrapper, useOptionalAnalytics } from "../components/global/Analytics/AnalyticsWrapper";
 
 interface DailyActivity {
   day: string;
@@ -19,16 +20,48 @@ interface ClickData {
   clicks: number;
 }
 
-const Analytics = () => {
+// Componente interno que usa el contexto de analytics
+const AnalyticsContent = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [clicksData, setClicksData] = useState<ClickData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [biositeId, setBiositeId] = useState<string | null>(null);
+
+  // Usar el contexto opcional de analytics
+  const analyticsContext = useOptionalAnalytics();
 
   // Calcular métricas totales
   const totalViews = analyticsData?.dailyActivity.reduce((sum, activity) => sum + activity.views, 0) || 0;
   const totalClicks = analyticsData?.dailyActivity.reduce((sum, activity) => sum + activity.clicks, 0) || 0;
   const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
+
+  // Obtener biositeId al cargar el componente
+  useEffect(() => {
+    const getBiositeId = () => {
+      // Intentar obtener de cookies
+      const cookieBiositeId = Cookies.get("biositeId");
+      if (cookieBiositeId) {
+        setBiositeId(cookieBiositeId);
+        return;
+      }
+
+      // Si no está en cookies, intentar obtener del token
+      const token = Cookies.get('accessToken');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          // Aquí podrías hacer una llamada adicional para obtener el biositeId
+          // basado en el userId si es necesario
+          console.log('UserId del token:', payload.id);
+        } catch (error) {
+          console.error('Error decodificando token:', error);
+        }
+      }
+    };
+
+    getBiositeId();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,15 +75,13 @@ const Analytics = () => {
           throw new Error('No se encontró el token de acceso');
         }
 
-        // Intentar obtener userId y biositeId de las cookies
+        // Intentar obtener userId de las cookies o del token
         let userId = Cookies.get("userId");
-        const biositeId = Cookies.get("biositeId");
 
-        // Si no están en cookies, intentar decodificar el token
         if (!userId) {
           try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            userId = payload.id; // Usar el id del token como userId
+            userId = payload.id;
             console.log('UserId obtenido del token:', userId);
           } catch (decodeError) {
             console.error('Error decodificando token:', decodeError);
@@ -59,12 +90,6 @@ const Analytics = () => {
 
         if (!userId) {
           throw new Error('No se pudo obtener el userId');
-        }
-
-        if (!biositeId) {
-          console.warn('biositeId no encontrado en cookies');
-          // Aquí podrías hacer una llamada adicional para obtener el biositeId basado en el userId
-          // o manejarlo de otra manera según tu lógica de aplicación
         }
 
         console.log('Datos para API:', { userId, biositeId });
@@ -84,57 +109,44 @@ const Analytics = () => {
         if (analytics.status === 'fulfilled') {
           console.log('Analytics data recibida:', analytics.value);
 
-          // Verificar si la respuesta es HTML (error) o datos válidos
           if (typeof analytics.value === 'string' && analytics.value.includes('<!doctype html>')) {
-            console.error('La API de analytics devolvió HTML en lugar de JSON - posible error 404 o de autenticación');
-            // Crear datos por defecto
+            console.error('La API de analytics devolvió HTML en lugar de JSON');
             setAnalyticsData({
-              dailyActivity: [
-                {
+              dailyActivity: [{
+                day: new Date().toISOString().split('T')[0],
+                views: 0,
+                clicks: 0
+              }]
+            });
+          } else if (analytics.value && typeof analytics.value === 'object') {
+            if (!analytics.value.dailyActivity || analytics.value.dailyActivity.length === 0) {
+              setAnalyticsData({
+                dailyActivity: [{
                   day: new Date().toISOString().split('T')[0],
                   views: 0,
                   clicks: 0
-                }
-              ]
-            });
-          } else if (analytics.value && typeof analytics.value === 'object') {
-            // Si hay datos válidos pero sin dailyActivity, crear estructura por defecto
-            if (!analytics.value.dailyActivity || analytics.value.dailyActivity.length === 0) {
-              setAnalyticsData({
-                dailyActivity: [
-                  {
-                    day: new Date().toISOString().split('T')[0],
-                    views: 0,
-                    clicks: 0
-                  }
-                ]
+                }]
               });
             } else {
               setAnalyticsData(analytics.value);
             }
           } else {
-            // Crear datos por defecto si no hay datos válidos
             setAnalyticsData({
-              dailyActivity: [
-                {
-                  day: new Date().toISOString().split('T')[0],
-                  views: 0,
-                  clicks: 0
-                }
-              ]
+              dailyActivity: [{
+                day: new Date().toISOString().split('T')[0],
+                views: 0,
+                clicks: 0
+              }]
             });
           }
         } else {
           console.error('Error fetching analytics:', analytics.reason);
-          // Crear datos por defecto en caso de error
           setAnalyticsData({
-            dailyActivity: [
-              {
-                day: new Date().toISOString().split('T')[0],
-                views: 0,
-                clicks: 0
-              }
-            ]
+            dailyActivity: [{
+              day: new Date().toISOString().split('T')[0],
+              views: 0,
+              clicks: 0
+            }]
           });
         }
 
@@ -142,9 +154,8 @@ const Analytics = () => {
         if (clicks.status === 'fulfilled') {
           console.log('Clicks data recibida:', clicks.value);
 
-          // Verificar si la respuesta es HTML (error) o datos válidos
           if (typeof clicks.value === 'string' && clicks.value.includes('<!doctype html>')) {
-            console.error('La API de clicks devolvió HTML en lugar de JSON - posible error 404 o de autenticación');
+            console.error('La API de clicks devolvió HTML en lugar de JSON');
             setClicksData([]);
           } else if (Array.isArray(clicks.value)) {
             setClicksData(clicks.value);
@@ -164,8 +175,24 @@ const Analytics = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    // Solo hacer fetch si tenemos userId
+    if (biositeId !== null) {
+      fetchData();
+    }
+  }, [biositeId]);
+
+  // Efecto para detectar cuando se trackean nuevos eventos
+  useEffect(() => {
+    if (analyticsContext?.hasTrackedVisit) {
+      console.log('Nueva visita tracked, refrescando datos...');
+      // Opcional: refrescar datos después de un delay
+      const timeout = setTimeout(() => {
+        // Refrescar datos si es necesario
+      }, 2000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [analyticsContext?.hasTrackedVisit]);
 
   if (loading) return <div className="text-white p-6">Loading metrics...</div>;
 
@@ -175,6 +202,18 @@ const Analytics = () => {
           <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
             <h3 className="text-red-400 font-semibold mb-2">Error</h3>
             <p className="text-red-300">{error}</p>
+            {analyticsContext && (
+                <div className="mt-4 text-sm">
+                  <p className="text-gray-400">Analytics Context Status:</p>
+                  <p className="text-gray-300">Has tracked visit: {analyticsContext.hasTrackedVisit ? 'Yes' : 'No'}</p>
+                  <button
+                      onClick={analyticsContext.resetTracking}
+                      className="mt-2 px-3 py-1 bg-red-600 rounded text-white text-xs"
+                  >
+                    Reset Tracking
+                  </button>
+                </div>
+            )}
           </div>
         </div>
     );
@@ -186,6 +225,12 @@ const Analytics = () => {
           <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
             <h3 className="text-yellow-400 font-semibold mb-2">Sin datos</h3>
             <p className="text-yellow-300">No se pudieron cargar los datos de analytics.</p>
+            {analyticsContext && (
+                <div className="mt-4 text-sm">
+                  <p className="text-gray-400">Analytics Context Status:</p>
+                  <p className="text-gray-300">Has tracked visit: {analyticsContext.hasTrackedVisit ? 'Yes' : 'No'}</p>
+                </div>
+            )}
           </div>
         </div>
     );
@@ -194,49 +239,59 @@ const Analytics = () => {
   return (
       <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
         <div className="max-w-7xl mx-auto">
+          {/* Debug info cuando hay contexto de analytics */}
+          {analyticsContext && (
+              <div className="mb-4 p-2 bg-blue-900/20 border border-blue-500 rounded text-xs">
+                <p className="text-blue-300">
+                  Analytics Status: Visit tracked: {analyticsContext.hasTrackedVisit ? 'Yes' : 'No'} |
+                  BiositeId: {biositeId || 'Not set'}
+                </p>
+              </div>
+          )}
+
           {/* --- VISTA MÓVIL (con lógica original) --- */}
           <div className="lg:hidden">
-              <div className="space-y-6">
-                  {/* Card de Actividad Total para móvil */}
-                  <div className="bg-[#1C1C1C] rounded-2xl p-6">
-                      <h2 className="text-lg font-medium text-white mb-4">Actividad Total</h2>
-                      <div className="bg-black/50 p-4 rounded-lg">
-                        <div className="flex justify-around items-center text-center">
-                            <div>
-                                <p className="text-2xl font-bold text-white">{totalViews}</p>
-                                <p className="text-xs text-gray-500">Vistas</p>
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold text-white">{totalClicks}</p>
-                                <p className="text-xs text-gray-500">Clics</p>
-                            </div>
-                        </div>
-                      </div>
+            <div className="space-y-6">
+              {/* Card de Actividad Total para móvil */}
+              <div className="bg-[#1C1C1C] rounded-2xl p-6">
+                <h2 className="text-lg font-medium text-white mb-4">Actividad Total</h2>
+                <div className="bg-black/50 p-4 rounded-lg">
+                  <div className="flex justify-around items-center text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-white">{totalViews}</p>
+                      <p className="text-xs text-gray-500">Vistas</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-white">{totalClicks}</p>
+                      <p className="text-xs text-gray-500">Clics</p>
+                    </div>
                   </div>
-
-                  {/* Card de Clics por enlace para móvil */}
-                  <div className="bg-[#1C1C1C] rounded-2xl p-6">
-                      <h2 className="text-lg font-medium text-white mb-4">Clics por enlace</h2>
-                      {clicksData.length > 0 ? (
-                          <div className="bg-black/50 rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                  <tbody>
-                                  {clicksData.map((click, index) => (
-                                      <tr key={click.label} className="border-b border-gray-800 last:border-b-0">
-                                          <td className="px-4 py-3 text-white text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-white font-semibold text-right">{click.clicks}</td>
-                                      </tr>
-                                  ))}
-                                  </tbody>
-                              </table>
-                          </div>
-                      ) : (
-                          <div className="bg-black/50 p-6 rounded-lg text-center">
-                              <p className="text-gray-400">No hay datos de clics disponibles.</p>
-                          </div>
-                      )}
-                  </div>
+                </div>
               </div>
+
+              {/* Card de Clics por enlace para móvil */}
+              <div className="bg-[#1C1C1C] rounded-2xl p-6">
+                <h2 className="text-lg font-medium text-white mb-4">Clics por enlace</h2>
+                {clicksData.length > 0 ? (
+                    <div className="bg-black/50 rounded-lg overflow-hidden">
+                      <table className="w-full text-left">
+                        <tbody>
+                        {clicksData.map((click, index) => (
+                            <tr key={click.label} className="border-b border-gray-800 last:border-b-0">
+                              <td className="px-4 py-3 text-white text-sm">{click.label}</td>
+                              <td className="px-4 py-3 text-white font-semibold text-right">{click.clicks}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                      </table>
+                    </div>
+                ) : (
+                    <div className="bg-black/50 p-6 rounded-lg text-center">
+                      <p className="text-gray-400">No hay datos de clics disponibles.</p>
+                    </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* --- VISTA DESKTOP --- */}
@@ -245,30 +300,30 @@ const Analytics = () => {
 
             <div className="relative flex items-center justify-center mb-16">
               <div
-                className="absolute transform  rounded-full flex flex-col items-center justify-center "
-                style={{height:"600px", width:"600px"}}
-
-              ><svg width="858" height="858" viewBox="0 0 858 858" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g filter="url(#filter0_d_2019_354)">
-                  <circle cx="429" cy="425" r="416" fill="white"/>
-                </g>
-                <defs>
-                  <filter id="filter0_d_2019_354" x="0" y="0" width="858" height="858" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-                    <feMorphology radius="3" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_2019_354"/>
-                    <feOffset dy="4"/>
-                    <feGaussianBlur stdDeviation="5"/>
-                    <feComposite in2="hardAlpha" operator="out"/>
-                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/>
-                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2019_354"/>
-                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2019_354" result="shape"/>
-                  </filter>
-                </defs>
-              </svg>
+                  className="absolute transform rounded-full flex flex-col items-center justify-center"
+                  style={{height:"600px", width:"600px"}}
+              >
+                <svg width="858" height="858" viewBox="0 0 858 858" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g filter="url(#filter0_d_2019_354)">
+                    <circle cx="429" cy="425" r="416" fill="white"/>
+                  </g>
+                  <defs>
+                    <filter id="filter0_d_2019_354" x="0" y="0" width="858" height="858" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                      <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+                      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                      <feMorphology radius="3" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_2019_354"/>
+                      <feOffset dy="4"/>
+                      <feGaussianBlur stdDeviation="5"/>
+                      <feComposite in2="hardAlpha" operator="out"/>
+                      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/>
+                      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2019_354"/>
+                      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2019_354" result="shape"/>
+                    </filter>
+                  </defs>
+                </svg>
               </div>
-              <div
-                  className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center ">
+
+              <div className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">VISTAS</div>
                 <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
@@ -277,14 +332,12 @@ const Analytics = () => {
                 <PhonePreview><LivePreviewContent/></PhonePreview>
               </div>
 
-              <div
-                  className="absolute right-20 top-82 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center ">
+              <div className="absolute right-20 top-82 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CLICS</div>
                 <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
 
-              <div
-                  className="absolute right-40 bottom-30 w-32 h-32 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center ">
+              <div className="absolute right-40 bottom-30 w-32 h-32 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CTR</div>
                 <div className="text-2xl font-bold text-black">{ctr}%</div>
               </div>
@@ -295,7 +348,7 @@ const Analytics = () => {
                 <h2 className="text-xl text-gray-600 font-semibold mb-6">Actividad diaria</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {analyticsData.dailyActivity.map((activity, index) => (
-                      <div key={index} className=" p-6 rounded-xl ">
+                      <div key={index} className="p-6 rounded-xl">
                         <p className="text-sm text-gray-400 mb-2">Día: {activity.day}</p>
                         <div className="flex justify-between items-center">
                           <div>
@@ -334,7 +387,7 @@ const Analytics = () => {
                       </table>
                     </div>
                 ) : (
-                    <div className="p-8 rounded-xl  text-center">
+                    <div className="p-8 rounded-xl text-center">
                       <p className="text-gray-400">No hay datos de clics disponibles.</p>
                     </div>
                 )}
@@ -344,7 +397,32 @@ const Analytics = () => {
         </div>
         <div className="h-10"></div>
       </div>
-  );  
+  );
+};
+
+// Componente principal con wrapper opcional
+const Analytics = () => {
+  const [biositeId, setBiositeId] = useState<string | undefined>();
+
+  useEffect(() => {
+    // Obtener biositeId de cookies
+    const cookieBiositeId = Cookies.get("biositeId");
+    if (cookieBiositeId) {
+      setBiositeId(cookieBiositeId);
+    }
+  }, []);
+
+  // Si tenemos biositeId, usar el wrapper de analytics
+  if (biositeId) {
+    return (
+        <AnalyticsWrapper biositeId={biositeId} isPublicView={false}>
+          <AnalyticsContent />
+        </AnalyticsWrapper>
+    );
+  }
+
+  // Si no tenemos biositeId, renderizar directamente
+  return <AnalyticsContent />;
 };
 
 export default Analytics;

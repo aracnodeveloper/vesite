@@ -39,3 +39,17 @@ export const deleteBusinessCardApi = "/business-cards"; // DELETE /:id
 export const getBusinessCardByUserApi = "/business-cards/user"; // GET /user/:userId
 export const getBusinessCardBySlugApi = "/business-cards/by-slug"; // GET /by-slug/:slug
 export const regenerateQRCodeApi = "/business-cards/regenerate-qr"; // POST /regenerate-qr/:userId
+
+// ANALYTICS - VISITS STATS
+export const visitsStatsApi = "/visits-stats";
+export const registerVisitApi = "/visits-stats/register-parser"; // POST
+export const getVisitsByBiositeApi = "/visits-stats/biosite"; // GET /:biositeId
+
+// ANALYTICS - LINKS CLICKS
+export const linksClicksApi = "/links-clicks";
+export const registerLinkClickApi = "/links-clicks/register-parser"; // POST
+export const getLinkClicksApi = "/links-clicks/link"; // GET /:linkId
+export const getClicksByBiositeApi = "/links-clicks/biosite"; // GET /:biositeId/links-clicks
+
+// ANALYTICS - BIOSITE ANALYTICS
+export const biositeAnalyticsApi = "/biosites/analytics"; // GET /:userId
