@@ -5,7 +5,7 @@ const WhatsApp = () => {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate('/whattsApp');
+        navigate('/whatsApp');
     };
 
     return (
