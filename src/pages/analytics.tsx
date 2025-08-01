@@ -245,13 +245,32 @@ const Analytics = () => {
 
             <div className="relative flex items-center justify-center mb-16">
               <div
-                className="absolute transform bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700"
+                className="absolute transform  rounded-full flex flex-col items-center justify-center "
                 style={{height:"600px", width:"600px"}}
-              ></div>
+
+              ><svg width="858" height="858" viewBox="0 0 858 858" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g filter="url(#filter0_d_2019_354)">
+                  <circle cx="429" cy="425" r="416" fill="white"/>
+                </g>
+                <defs>
+                  <filter id="filter0_d_2019_354" x="0" y="0" width="858" height="858" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                    <feMorphology radius="3" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_2019_354"/>
+                    <feOffset dy="4"/>
+                    <feGaussianBlur stdDeviation="5"/>
+                    <feComposite in2="hardAlpha" operator="out"/>
+                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"/>
+                    <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2019_354"/>
+                    <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2019_354" result="shape"/>
+                  </filter>
+                </defs>
+              </svg>
+              </div>
               <div
-                  className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
-                <div className="text-xs text-gray-400 mb-1">VISTAS</div>
-                <div className="text-4xl font-bold text-white">{totalViews}</div>
+                  className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center ">
+                <div className="text-xs text-black mb-1">VISTAS</div>
+                <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
 
               <div className="z-10 overflow-y-hidden">
@@ -259,32 +278,32 @@ const Analytics = () => {
               </div>
 
               <div
-                  className="absolute right-20 top-82 w-44 h-44 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
-                <div className="text-xs text-gray-400 mb-1">CLICS</div>
-                <div className="text-2xl font-bold text-white">{totalClicks}</div>
+                  className="absolute right-20 top-82 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center ">
+                <div className="text-xs text-black mb-1">CLICS</div>
+                <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
 
               <div
-                  className="absolute right-40 bottom-30 w-32 h-32 bg-gray-800 rounded-full flex flex-col items-center justify-center border border-gray-700">
-                <div className="text-xs text-gray-400 mb-1">CTR</div>
-                <div className="text-2xl font-bold text-white">{ctr}%</div>
+                  className="absolute right-40 bottom-30 w-32 h-32 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center ">
+                <div className="text-xs text-black mb-1">CTR</div>
+                <div className="text-2xl font-bold text-black">{ctr}%</div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-5">
-              <div className="bg-black rounded-3xl p-10">
-                <h2 className="text-xl text-gray-400 font-semibold mb-6">Actividad diaria</h2>
+              <div className="bg-white rounded-3xl p-10">
+                <h2 className="text-xl text-gray-600 font-semibold mb-6">Actividad diaria</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {analyticsData.dailyActivity.map((activity, index) => (
-                      <div key={index} className="bg-[#1e1e1e] p-6 rounded-xl border border-[#2a2a2a]">
+                      <div key={index} className=" p-6 rounded-xl ">
                         <p className="text-sm text-gray-400 mb-2">Día: {activity.day}</p>
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="text-lg font-semibold text-white">{activity.views}</p>
+                            <p className="text-lg font-semibold text-gray-400">{activity.views}</p>
                             <p className="text-xs text-gray-500">Vistas</p>
                           </div>
                           <div>
-                            <p className="text-lg font-semibold text-white">{activity.clicks}</p>
+                            <p className="text-lg font-semibold text-gray-400">{activity.clicks}</p>
                             <p className="text-xs text-gray-500">Clics</p>
                           </div>
                         </div>
@@ -293,8 +312,8 @@ const Analytics = () => {
                 </div>
               </div>
 
-              <div className="bg-black rounded-3xl p-10">
-                <h2 className="text-xl text-gray-400 font-semibold mb-6">Clics por enlace</h2>
+              <div className="bg-white rounded-3xl p-10">
+                <h2 className="text-xl text-gray-600 font-semibold mb-6">Clics por enlace</h2>
                 {clicksData.length > 0 ? (
                     <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] overflow-hidden">
                       <table className="w-full text-left">
@@ -315,7 +334,7 @@ const Analytics = () => {
                       </table>
                     </div>
                 ) : (
-                    <div className="bg-[#1e1e1e] p-8 rounded-xl border border-[#2a2a2a] text-center">
+                    <div className="p-8 rounded-xl  text-center">
                       <p className="text-gray-400">No hay datos de clics disponibles.</p>
                     </div>
                 )}
