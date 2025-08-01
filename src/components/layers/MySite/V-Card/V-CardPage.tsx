@@ -4,12 +4,12 @@ import { useUser } from '../../../../hooks/useUser.ts';
 import { ChevronLeft, QrCode, Edit, Save, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from "js-cookie";
-import {usePreview} from "../../../../context/PreviewContext.tsx";
 
 const VCardPage = () => {
     const navigate = useNavigate();
     const { slug } = useParams<{ slug?: string }>();
     const [isEditing, setIsEditing] = useState(false);
+    const [initialLoad, setInitialLoad] = useState(true);
     const [cardData, setCardData] = useState({
         name: '',
         title: '',
@@ -42,16 +42,44 @@ const VCardPage = () => {
     const currentUserId = Cookies.get('userId');
 
     useEffect(() => {
-        if (slug) {
-            fetchBusinessCardBySlug(slug);
-        } else {
-            fetchBusinessCardByUserId(currentUserId);
-
-            if (currentUserId) {
-                fetchUser(currentUserId);
+        const loadData = async () => {
+            if (slug) {
+                await fetchBusinessCardBySlug(slug);
+            } else if (currentUserId) {
+                await fetchBusinessCardByUserId(currentUserId);
+                await fetchUser(currentUserId);
             }
-        }
+            setInitialLoad(false);
+        };
+
+        loadData();
     }, [slug, currentUserId]);
+
+    // Efecto mejorado para generar QR automáticamente
+    useEffect(() => {
+        const autoGenerateQR = async () => {
+            // Solo ejecutar después de la carga inicial y si no estamos viendo un slug público
+            if (!initialLoad && !slug && currentUserId && businessCard && !loading) {
+                // Si no tiene QR code, generarlo automáticamente
+                if (!businessCard.qrCodeUrl) {
+                    try {
+                        console.log('Auto-generando QR code...');
+                        await regenerateQRCode(currentUserId); // Cambiado a regenerateQRCode para mejor consistencia
+                    } catch (error) {
+                        console.error('Error auto-generando QR:', error);
+                        // Fallback: intentar con generarBusinessQR si regenerateQRCode falla
+                        try {
+                            await generarBusinessQR(currentUserId);
+                        } catch (fallbackError) {
+                            console.error('Error en fallback QR:', fallbackError);
+                        }
+                    }
+                }
+            }
+        };
+
+        autoGenerateQR();
+    }, [businessCard, initialLoad, slug, currentUserId, loading]);
 
     useEffect(() => {
         if (businessCard?.data) {
@@ -72,6 +100,20 @@ const VCardPage = () => {
     const handleCreateCard = async () => {
         try {
             await createBusinessCard(currentUserId);
+            // Después de crear la tarjeta, generar automáticamente el QR
+            setTimeout(async () => {
+                try {
+                    await regenerateQRCode(currentUserId); // Cambiado para consistencia
+                } catch (error) {
+                    console.error('Error generando QR después de crear tarjeta:', error);
+                    // Fallback
+                    try {
+                        await generarBusinessQR(currentUserId);
+                    } catch (fallbackError) {
+                        console.error('Error en fallback después de crear tarjeta:', fallbackError);
+                    }
+                }
+            }, 500);
         } catch (error) {
             console.error('Error creating business card:', error);
         }
@@ -81,7 +123,6 @@ const VCardPage = () => {
         if (!businessCard || !currentUserId) return;
 
         try {
-            // El ID se pasa como parámetro de URL, no en el payload
             await updateBusinessCard(businessCard.id, {
                 ownerId: currentUserId,
                 data: JSON.stringify(cardData),
@@ -136,6 +177,15 @@ const VCardPage = () => {
         }
     };
 
+    // Nuevo método para mostrar QR (wrapper del regenerateQR)
+    const handleShowQR = async () => {
+        try {
+            await regenerateQRCode(currentUserId);
+        } catch (error) {
+            console.error('Error showing QR code:', error);
+        }
+    };
+
     const handleInputChange = (field: string, value: string) => {
         setCardData(prev => ({ ...prev, [field]: value }));
     };
@@ -143,8 +193,10 @@ const VCardPage = () => {
     const isLoading = loading || userLoading;
     // Verificar si existe QR code para mostrar el botón de editar
     const hasQRCode = businessCard?.qrCodeUrl;
+    // Verificar si la tarjeta existe pero no tiene QR (para mostrar el botón de generar)
+    const hasCardButNoQR = businessCard && !businessCard.qrCodeUrl;
 
-    if (isLoading) {
+    if (isLoading && initialLoad) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-lg">Cargando...</div>
@@ -238,7 +290,7 @@ const VCardPage = () => {
             <div className="p-4 max-w-md mx-auto">
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-400">
                     {/* QR Code Section */}
-                    {businessCard?.qrCodeUrl && (
+                    {hasQRCode && (
                         <div className="bg-[#E0EED5] p-6 text-center">
                             <img
                                 src={businessCard.qrCodeUrl}
@@ -247,6 +299,18 @@ const VCardPage = () => {
                             />
                             <p className="text-white text-sm mt-2">
                                 Escanea para ver mi tarjeta
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Loading state for QR generation */}
+                    {!hasQRCode && loading && (
+                        <div className="bg-[#E0EED5] p-6 text-center">
+                            <div className="w-32 h-32 mx-auto bg-white p-2 rounded-lg flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                            </div>
+                            <p className="text-white text-sm mt-2">
+                                Generando QR...
                             </p>
                         </div>
                     )}
@@ -300,12 +364,21 @@ const VCardPage = () => {
                             </>
                         ) : (
                             <>
-                                {/* Solo mostrar botón "Mostrar mi QR" si NO hay QR code generado */}
-                                {!hasQRCode && (
+                                {/* Mensaje cuando el QR se está generando automáticamente */}
+                                {hasCardButNoQR && loading && (
+                                    <div className="text-center flex flex-col justify-center items-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                                        <p className="text-gray-600">Generando tu QR automáticamente...</p>
+                                    </div>
+                                )}
+
+                                {/* Solo mostrar botón manual si hay error o no se generó automáticamente */}
+                                {hasCardButNoQR && !loading && (
                                     <div className="text-center flex flex-col justify-center">
+                                        <p className="text-gray-600 mb-4">Tu QR se generará automáticamente, o puedes generarlo manualmente:</p>
                                         <button
-                                            onClick={handleRegenerateQR}
-                                            className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
+                                            onClick={handleShowQR}
+                                            className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-2"
                                             title="Generar código QR"
                                         >
                                             Mostrar mi QR
