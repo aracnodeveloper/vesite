@@ -17,7 +17,7 @@ import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {useUser} from "../hooks/useUser.ts";
-import WhatsAppButton from "../components/layers/AddMoreSections/WhattsApp/whatsAppButton.tsx";
+import {WhatsAppOutlined} from "@ant-design/icons";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -116,9 +116,7 @@ const PublicBiositeView = () => {
         return (
             icon === 'whatsapp' ||
             icon.includes('whatsapp') ||
-            labelLower.includes('whatsapp') ||
-            urlLower.includes('api.whatsapp.com') ||
-            urlLower.includes('wa.me/')
+            urlLower.includes('api.whatsapp.com')
         );
     }, [])
 
@@ -167,7 +165,7 @@ const PublicBiositeView = () => {
         const socialPlatforms = [
             'instagram', 'tiktok', 'x', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
-            'tumblr', 'telegram', 'onlyfans'
+            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
 
         if (socialPlatforms.includes(iconIdentifier)) {
@@ -178,7 +176,7 @@ const PublicBiositeView = () => {
             'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
             'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
             'pinterest.com', 'discord.gg', 'discord.com', 'tumblr.com',
-            't.me', 'telegram.me', 'onlyfans.com'
+            'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com'
         ];
 
         const hasSocialDomain = socialDomains.some(domain => {
@@ -193,12 +191,49 @@ const PublicBiositeView = () => {
         const exactSocialLabels = [
             'instagram', 'tiktok',  'twitter', 'twitter/x', 'x',  'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord', 'youtube',
-            'tumblr', 'telegram', 'onlyfans'
+            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
         ];
 
         return exactSocialLabels.some(label => labelLower === label);
     };
 
+    // WhatsApp Button Component integrado
+    const WhatsAppButton = ({ whatsAppLink, themeConfig }: { whatsAppLink: WhatsAppLink, themeConfig: any }) => {
+        const generateWhatsAppUrl = (phone: string, message: string): string => {
+            const cleanPhone = phone.replace(/[^\d+]/g, '');
+            const encodedMessage = encodeURIComponent(message.trim());
+            return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
+        };
+
+        const handleClick = (e: React.MouseEvent) => {
+            e.preventDefault();
+            const url = generateWhatsAppUrl(whatsAppLink.phone, whatsAppLink.message);
+            console.log('WhatsApp URL generated:', url);
+            window.open(url, '_blank');
+        };
+
+        return (
+            <div className="px-4 mb-4">
+                <button
+                    onClick={handleClick}
+                    className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
+                >
+                    {/* Icono de WhatsApp */}
+                    <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                        <WhatsAppOutlined size={18} className="text-white" style={{color:'white'}} />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-1 ml-2">
+                        <div className="flex items-center">
+                        <span className="font-medium text-xs truncate">
+                            WhatsAppéame
+                        </span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        );
+    };
 
     const isEmbedLink = (link: any): boolean => {
         const labelLower = link.label.toLowerCase();
@@ -275,12 +310,15 @@ const PublicBiositeView = () => {
         let socialPost: any = null;
         let videoEmbed: any = null;
 
+        console.log('Processing links:', links); // Debug
 
         links.forEach(link => {
+            console.log('Processing link:', link); // Debug
 
             const iconIdentifier = getIconIdentifier(link.icon);
 
             if (isWhatsAppLink(link)) {
+                console.log('WhatsApp link detected:', link); // Debug
                 const {phone, message} = parseWhatsAppFromUrl(link.url);
                 whatsApplinks.push({
                     id: link.id,
@@ -289,6 +327,7 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             } else if (isAppStoreLink(link)) {
+                // Enlaces de tiendas de aplicaciones
                 appLinks.push({
                     id: link.id,
                     store: getStoreType(link),
@@ -296,7 +335,9 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             } else if (isEmbedLink(link)) {
+                // Procesar embeds
                 const embedType = getEmbedType(link);
+                console.log('Embed detected:', link.label, 'Type:', embedType);
 
                 if (embedType === 'music') {
                     musicEmbed = link;
@@ -629,6 +670,13 @@ const PublicBiositeView = () => {
 
     const description = user?.description || user?.name || biositeData.biosite.title || 'Bio Site';
 
+    // Obtener TODOS los enlaces de WhatsApp activos
+    const activeWhatsAppLinks = biositeData.whatsApplinks.filter(link => link.isActive);
+
+    // Debug: Log WhatsApp links
+    console.log('Active WhatsApp links:', activeWhatsAppLinks);
+    console.log('All WhatsApp links:', biositeData.whatsApplinks);
+
     return (
         <div className={`w-full min-h-screen flex items-center justify-center`}
              style={{
@@ -702,7 +750,14 @@ const PublicBiositeView = () => {
                         themeConfig={themeConfig}
                     />
 
-                    <WhatsAppButton/>
+                    {/* WhatsApp Buttons - Renderizar TODOS los enlaces activos */}
+                    {activeWhatsAppLinks.length > 0 && activeWhatsAppLinks.map((whatsAppLink) => (
+                        <WhatsAppButton
+                            key={whatsAppLink.id}
+                            whatsAppLink={whatsAppLink}
+                            themeConfig={themeConfig}
+                        />
+                    ))}
 
                     {/* Links regulares */}
                     <RegularLinksSection
