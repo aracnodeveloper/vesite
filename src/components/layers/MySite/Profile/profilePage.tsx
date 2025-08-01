@@ -48,26 +48,15 @@ const ProfilePage = () => {
 
     useEffect(() => {
         if (user && !initialValuesSet) {
-            // Determinar valores iniciales
             const initialTitle = biosite?.title || user.name || '';
             const initialSlug = biosite?.slug || user.cedula || '';
             const initialDescription = user.description || '';
 
-            console.log('Setting initial form values:', {
-                title: initialTitle,
-                slug: initialSlug,
-                description: initialDescription,
-                biositeTitle: biosite?.title,
-                biositeSlug: biosite?.slug,
-                userName: user.name,
-                userCedula: user.cedula,
-                userDescription: user.description
-            });
-
             form.setFieldsValue({
                 title: initialTitle,
                 slug: initialSlug,
-                description: initialDescription
+                description: initialDescription,
+                cedula: user.cedula || '' // Agregar la cédula aquí
             });
 
             setInitialValuesSet(true);
@@ -328,7 +317,12 @@ const ProfilePage = () => {
                             {/* Mostrar la URL completa como preview */}
                             {form.getFieldValue('slug') && (
                                 <div className="mt-2 text-xs text-gray-600" style={{fontSize: "10px"}}>
-                                    URL completa: <span className="text-blue-600">vesite/{form.getFieldValue('slug')}</span>
+                                    URL completa: <span className="text-blue-600">visitaecuador.com/vesite/{form.getFieldValue('slug')}</span>
+                                </div>
+                            )}
+                            {form.getFieldValue('cedula') && (
+                                <div className="mt-2 text-xs text-gray-600" style={{fontSize: "10px"}}>
+                                    URL fija: <span className="text-blue-600">visitaecuador.com/{form.getFieldValue('cedula')}</span>
                                 </div>
                             )}
                         </div>
