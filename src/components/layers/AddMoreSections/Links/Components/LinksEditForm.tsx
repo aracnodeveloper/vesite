@@ -182,7 +182,7 @@ const LinkEditForm = ({
                             ) : (
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-full h-32 rounded-lg border-2 cursor-pointer border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 hover:bg-gray-50 transition-colors relative"
+                                    className="w-full h-32 rounded-lg border-2 cursor-pointer border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 bg-gray-50 transition-colors relative"
                                     disabled={isSubmitting || uploadingImage}
                                 >
                                     {uploadingImage ? (
