@@ -1,3 +1,4 @@
+// VCard.tsx - Fixed version
 import React, { useState, useEffect, useCallback } from 'react';
 import {Phone, Mail, Globe, QrCode, Download,  X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
@@ -33,13 +34,24 @@ interface VCardButtonProps {
     };
     userId?: string;
     onVcardClick?: (e: React.MouseEvent) => void;
+    // Add biosite prop for public view
+    biosite?: any;
 }
 
-const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId, onVcardClick },) => {
+const VCardButton: React.FC<VCardButtonProps> = ({
+                                                     themeConfig,
+                                                     userId,
+                                                     onVcardClick,
+                                                     biosite: biositeFromProps // Rename to avoid confusion
+                                                 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    const { biosite } = usePreview();
+
+    // Try to get biosite from context (for preview), fallback to props (for public view)
+    const { biosite: biositeFromContext } = usePreview() || { biosite: null };
+    const biosite = biositeFromContext || biositeFromProps;
+
     const location = useLocation();
     const isExposedRoute = location.pathname === '/expoced';
 
@@ -52,9 +64,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId, onVcardC
         website: ''
     });
 
-
     const getCurrentUserId = useCallback(() => {
-
         if (userId && userId !== 'undefined' && userId.trim() !== '') {
             console.log('Using prop userId:', userId);
             return userId;
@@ -189,25 +199,38 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId, onVcardC
     }
 
     const getAvatarImage = () => {
+        console.log('Getting avatar image - biosite:', biosite);
+        console.log('Avatar image value:', biosite?.avatarImage);
+        console.log('Avatar error state:', avatarError);
+
         if (avatarError || !biosite?.avatarImage) {
+            console.log('Using default avatar - error or no image');
             return imgP;
         }
+
         if (typeof biosite.avatarImage === 'string' && biosite.avatarImage.trim()) {
             if (biosite.avatarImage.startsWith('data:')) {
                 const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
-                return dataUrlRegex.test(biosite.avatarImage) ? biosite.avatarImage : imgP;
+                const isValid = dataUrlRegex.test(biosite.avatarImage);
+                console.log('Data URL validation:', isValid);
+                return isValid ? biosite.avatarImage : imgP;
             }
             try {
                 new URL(biosite.avatarImage);
+                console.log('Using URL avatar:', biosite.avatarImage);
                 return biosite.avatarImage;
             } catch {
+                console.log('Invalid URL, using default');
                 return imgP;
             }
         }
+
+        console.log('No valid avatar found, using default');
         return imgP;
     };
 
     const handleAvatarError = () => {
+        console.log('Avatar image failed to load');
         setAvatarError(true);
     };
 
