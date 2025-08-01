@@ -769,6 +769,7 @@ const PublicBiositeView = () => {
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={biositeData.biosite.ownerId}
+                        biosite={biositeData.biosite}
                     />
 
                     {/* MÚSICA EMBED */}
