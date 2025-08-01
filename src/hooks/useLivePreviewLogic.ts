@@ -205,7 +205,7 @@ export const useLivePreviewLogic = () => {
     const handleWhatsAppClick = (e: React.MouseEvent) => {
         if (!isExposedRoute) {
             e.preventDefault();
-            navigate('/whatsapp');
+            navigate('/whatsApp');
         }
     };
     const themeConfig = getThemeConfig();

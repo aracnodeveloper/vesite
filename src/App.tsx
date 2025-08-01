@@ -80,7 +80,7 @@ const App = () => {
                             }
                         />
                         {/**/}
-                            <Route path="/whattsApp" element={
+                            <Route path="/whatsApp" element={
                                 <PrivateRoute>
                                     <Layout>
                                         <WhatsAppPage/>
