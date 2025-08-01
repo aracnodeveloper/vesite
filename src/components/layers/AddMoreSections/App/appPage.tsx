@@ -13,6 +13,10 @@ const AppPage = () => {
         error
     } = usePreview();
 
+    // URLs por defecto
+    const DEFAULT_APP_STORE_URL = "https://apps.apple.com/us/app/visitaecuador-com/id1385161516?ls=1";
+    const DEFAULT_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es";
+
     const [appStoreUrl, setAppStoreUrl] = useState("");
     const [googlePlayUrl, setGooglePlayUrl] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -22,8 +26,10 @@ const AppPage = () => {
     useEffect(() => {
         const appStore = appLinks.find(link => link.store === "appstore");
         const googlePlay = appLinks.find(link => link.store === "googleplay");
-        if (appStore) setAppStoreUrl(appStore.url);
-        if (googlePlay) setGooglePlayUrl(googlePlay.url);
+
+        // Si existe el enlace guardado, usarlo; si no, usar el por defecto
+        setAppStoreUrl(appStore?.url || DEFAULT_APP_STORE_URL);
+        setGooglePlayUrl(googlePlay?.url || DEFAULT_GOOGLE_PLAY_URL);
     }, [appLinks]);
 
     const handleSave = async () => {
@@ -87,36 +93,38 @@ const AppPage = () => {
         const appStore = appLinks.find(link => link.store === "appstore");
         const googlePlay = appLinks.find(link => link.store === "googleplay");
 
+        // Comparar con los valores actuales guardados (no con los por defecto)
+        const currentAppStoreUrl = appStore?.url || "";
+        const currentGooglePlayUrl = googlePlay?.url || "";
+
         return (
-            (appStore?.url !== appStoreUrl) ||
-            (googlePlay?.url !== googlePlayUrl) ||
-            (!appStore && appStoreUrl) ||
-            (!googlePlay && googlePlayUrl)
+            (currentAppStoreUrl !== appStoreUrl) ||
+            (currentGooglePlayUrl !== googlePlayUrl)
         );
     };
 
+    const resetToDefault = () => {
+        setAppStoreUrl(DEFAULT_APP_STORE_URL);
+        setGooglePlayUrl(DEFAULT_GOOGLE_PLAY_URL);
+    };
+
     return (
-        <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
-            <div className="p-4">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleBackClick}
-                        className="flex items-center cursor-pointer text-gray-300 hover:text-white transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400" />
-                        <h1 className="text-lg text-gray-600 font-semibold hover:text-gray-400" style={{ fontSize: "17px" }}>
-                            Enlaces de descarga
-                        </h1>
-                    </button>
-                </div>
+        <div className="w-full h-full mb-10 mt-20 max-w-md mx-auto rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-700">
+            <div className="flex items-center gap-3">
+                <button  onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                    <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
+                    <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Enlaces de Descarga</h1>
+                </button>
             </div>
+        </div>
 
             <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8 w-full">
                 <div className="text-center space-y-4">
-                    <div className="w-24 h-24 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                        <img src="/img/img_7.png" alt="App Logo" />
+                    <div className="w-24 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                        <img src="public/img/img_9.png" className="h-20" alt="App Logo" />
                     </div>
-                    <h2 className="font-bold text-black text-xl">VisitaEcuador</h2>
+                    <h2 className="font-bold text-black text-lg uppercase">Apple y Google play</h2>
                     <p className="text-gray-600 text-sm">
                         Añade o actualiza los enlaces de tu aplicación móvil para que tus usuarios puedan descargarla fácilmente.
                     </p>
@@ -193,32 +201,43 @@ const AppPage = () => {
                         )}
                     </div>
 
-                    <button
-                        onClick={handleSave}
-                        disabled={
-                            isSaving ||
-                            loading ||
-                            !hasChanges() ||
-                            (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
-                            (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
-                        }
-                        className={`w-full py-2 px-4 rounded-md transition flex items-center justify-center gap-2 ${
-                            isSaving || loading || !hasChanges() ||
-                            (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
-                            (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        }`}
-                    >
-                        {isSaving ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Guardando...
-                            </>
-                        ) : (
-                            'Guardar cambios'
-                        )}
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSave}
+                            disabled={
+                                isSaving ||
+                                loading ||
+                                !hasChanges() ||
+                                (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
+                                (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
+                            }
+                            className={`flex-1 py-2 px-4 rounded-md transition flex items-center justify-center gap-2 ${
+                                isSaving || loading || !hasChanges() ||
+                                (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
+                                (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            }`}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Guardando...
+                                </>
+                            ) : (
+                                'Guardar cambios'
+                            )}
+                        </button>
+
+                        <button
+                            onClick={resetToDefault}
+                            disabled={isSaving || loading}
+                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Restaurar URLs por defecto"
+                        >
+                            Por defecto
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

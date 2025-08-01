@@ -18,6 +18,7 @@ import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 // import {usePreview} from "./PreviewContext.tsx";
 import {useUser} from "../hooks/useUser.ts";
+import AppDownloadButtons from "../components/layers/AddMoreSections/App/AppDownloadButtons.tsx";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -772,6 +773,9 @@ const PublicBiositeView = () => {
                             </div>
                         </div>
                     )}
+                    <div className="mt-12">
+                        <AppDownloadButtons />
+                    </div>
 
                     <ConditionalNavButton
                         themeConfig={themeConfig}

@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
 import {usePreview} from "../../../context/PreviewContext.tsx";
-import {useParams} from "react-router-dom";
+import {useLocation} from "react-router-dom";
 import {useUser} from "../../../hooks/useUser.ts";
 
 interface VCardData {
@@ -32,14 +32,16 @@ interface VCardButtonProps {
         };
     };
     userId?: string;
+    onVcardClick?: (e: React.MouseEvent) => void;
 }
 
-const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
+const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId, onVcardClick },) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const { biosite } = usePreview();
-    const { slug } = useParams<{ slug?: string }>();
+    const location = useLocation();
+    const isExposedRoute = location.pathname === '/expoced';
 
     const [cardData, setCardData] = useState<VCardData>({
         name: '',
@@ -245,7 +247,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({ themeConfig, userId }) => {
 
     return (
         <>
-            <div className="px-4 mb-4 cursor-pointer">
+            <div className="px-4 mb-4 cursor-pointer"
+                 onClick={!isExposedRoute ? onVcardClick : undefined}>
                 <button
                     onClick={handleOpenAndGenerate}
                     className="block w-full p-2 rounded-xl text-center bg-white transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"

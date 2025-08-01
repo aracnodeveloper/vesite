@@ -232,6 +232,30 @@ export const useLivePreviewLogic = () => {
         }
     };
 
+    const handleImageClick = (e: React.MouseEvent) => {
+        if (!isExposedRoute) {
+            e.preventDefault();
+            navigate('/profile');
+        }
+    };
+    const handleAppClick = (e: React.MouseEvent) => {
+        if (!isExposedRoute) {
+            e.preventDefault();
+            navigate('/app');
+        }
+    };
+    const handleUserInfoClick = (e: React.MouseEvent) => {
+        if (!isExposedRoute) {
+            e.preventDefault();
+            navigate('/profile');
+        }
+    };
+    const handleVCardClick = (e: React.MouseEvent) => {
+        if (!isExposedRoute) {
+            e.preventDefault();
+            navigate('/VCard');
+        }
+    };
     const themeConfig = getThemeConfig();
     const musicEmbed = getMusicEmbed();
     const socialPost = getSocialPost();
@@ -279,6 +303,10 @@ export const useLivePreviewLogic = () => {
         handleVideoClick,
         handleSocialPostClick,
         handleLinksClick,
-        handleSocialClick
+        handleSocialClick,
+        handleImageClick,
+        handleUserInfoClick,
+        handleAppClick,
+        handleVCardClick
     };
 };

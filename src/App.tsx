@@ -20,7 +20,7 @@ import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import {AuthProvider} from "./context/AuthContext.tsx";
 import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
 import PublicBiositeView from "./context/PublicBiositeView.tsx";
-//import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
+import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
 import VCardPage from "./components/layers/MySite/V-Card/V-CardPage.tsx";
 //import WhatsAppPage from "./components/layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
 
@@ -124,7 +124,7 @@ const App = () => {
                             </PrivateRoute>
                         }
                         />
-                        {/*
+
             <Route path="/app" element={
                 <PrivateRoute>
                     <Layout>
@@ -132,7 +132,7 @@ const App = () => {
                     </Layout>
                 </PrivateRoute>
             }
-            />*/}
+            />            {/**/}
                         <Route
                             path="/droplet"
                             element={

@@ -19,8 +19,8 @@ const AppD = () => {
                         <Download size={16} className="text-white" />
                     </div>
                     <div>
-                        <div className="text-black font-medium">Descarga Nuestra App</div>
-                        <div className="text-gray-400 text-sm">Link Inalterable</div>
+                        <div className="text-black font-medium">Link de mi App</div>
+                        <div className="text-gray-400 text-sm">Links de App</div>
                     </div>
                 </div>
                 <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-green-600 hover:border-green-600 transition-colors">

@@ -60,9 +60,11 @@ export const BackgroundSection = ({
                                       handleImageLoad,
                                       handleImageError,
                                       biosite,
-                                      themeConfig
+                                      themeConfig,
+                                      handleImageClick
                                   }: any) => (
-    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-96' : 'h-48'}`}>
+    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-96' : 'h-48'} ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+         onClick={handleImageClick}>
         {validBackgroundImage ? (
             <>
                 {imageLoadStates.background === 'loading' && (
@@ -124,9 +126,12 @@ export const AvatarSection = ({
                                   handleImageError,
                                   biosite,
                                   themeConfig,
-                                  defaultAvatar
+                                  defaultAvatar,
+                                  handleImageClick
                               }: any) => (
-    <div className={`flex justify-center ${isExposedRoute ? '-mt-44' : '-mt-24'} relative z-10 mb-4`}>
+
+    <div className={`flex justify-center ${isExposedRoute ? '-mt-44' : '-mt-24'} relative z-10 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+         onClick={handleImageClick}>
         {validAvatarImage ? (
             <div className="relative">
                 {imageLoadStates.avatar === 'loading' && (
@@ -162,6 +167,7 @@ export const AvatarSection = ({
                 className="w-20 h-20 rounded-full border-3 border-white object-cover shadow-lg mt-5"
             />
         )}
+
     </div>
 );
 
@@ -176,11 +182,13 @@ export const TwoSquareImagesSection = ({
                                            handleImageError,
                                            biosite,
                                            themeConfig,
-                                           defaultAvatar
+                                           defaultAvatar,
+                                           handleImageClick
                                        }: any) => (
     <div className="flex justify-center items-center gap-4 px-4 mb-6 mt-6">
         {/* Primera imagen cuadrada (Avatar) */}
-        <div className="relative">
+        <div className={`relative ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+             onClick={handleImageClick}>
             {validAvatarImage ? (
                 <>
                     {imageLoadStates.avatar === 'loading' && (
@@ -215,6 +223,7 @@ export const TwoSquareImagesSection = ({
                     className="w-32 h-32 rounded-lg object-cover shadow-lg"
                 />
             )}
+
         </div>
 
         {/* Segunda imagen cuadrada (Background) */}
@@ -275,8 +284,9 @@ export const TwoSquareImagesSection = ({
     </div>
 );
 
-export const UserInfoSection = ({ biosite, user, description, themeConfig }: any) => (
-    <div className="text-center px-4 mb-4">
+export const UserInfoSection = ({ biosite, user, description, themeConfig,isExposedRoute,handleUserInfoClick }: any) => (
+    <div className={`text-center px-4 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+         onClick={handleUserInfoClick}>
         <h1 className="text-lg font-bold leading-tight"
             style={{
                 color: themeConfig.colors.text,

@@ -1,19 +1,29 @@
 import { usePreview } from "../../../../context/PreviewContext";
+import { useLocation } from "react-router-dom";
 
-const AppDownloadButtons = () => {
+interface AppDownloadButtonsProps {
+    onAppClick?: (e: React.MouseEvent) => void;
+}
+
+const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
     const { appLinks } = usePreview();
+    const location = useLocation();
+
+    const isExposedRoute = location.pathname === '/expoced';
 
     const appStoreLink = appLinks.find(link => link.store === 'appstore' && link.isActive);
     const googlePlayLink = appLinks.find(link => link.store === 'googleplay' && link.isActive);
 
     return (
-        <div className="flex flex-wrap gap-2 w-full max-w-md mx-auto">
+        <div className="flex flex-wrap gap-2 w-full max-w-md mx-auto"
+        >
             {appStoreLink && (
                 <a
-                    href={appStoreLink.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-black hover:bg-gray-800 ml-2 transition-colors flex-col rounded-lg p-0 flex items-center space-x-1 border border-gray-600"
+                    href={isExposedRoute ? appStoreLink.url : undefined}
+                    target={isExposedRoute ? "_blank" : undefined}
+                    rel={isExposedRoute ? "noopener noreferrer" : undefined}
+                    onClick={!isExposedRoute ? onAppClick : undefined}
+                    className={`flex-1 bg-black hover:bg-gray-800 ml-2 transition-colors flex-col rounded-lg p-0 flex items-center space-x-1 border border-gray-600$ ${isExposedRoute ? 'cursor-pointer' : 'cursor-pointer'}`}
                 >
                     <div className="flex-shrink-0">
                         <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -28,10 +38,11 @@ const AppDownloadButtons = () => {
 
             {googlePlayLink && (
                 <a
-                    href={googlePlayLink.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-black hover:bg-gray-800 transition-colors mr-2 rounded-lg p-0 flex flex-col items-center space-x-1 border border-gray-600"
+                    href={isExposedRoute ? googlePlayLink.url : undefined}
+                    target={isExposedRoute ? "_blank" : undefined}
+                    rel={isExposedRoute ? "noopener noreferrer" : undefined}
+                    onClick={!isExposedRoute ? onAppClick : undefined}
+                    className={`flex-1 bg-black hover:bg-gray-800 transition-colors mr-2 rounded-lg p-0 flex flex-col items-center space-x-1 border border-gray-600 ${isExposedRoute ? 'cursor-pointer' : 'cursor-pointer'}`}
                 >
                     <div className="flex-shrink-0">
                         <svg className="w-8 h-8" viewBox="0 0 24 24">
@@ -64,7 +75,9 @@ const AppDownloadButtons = () => {
                     </div>
                 </a>
             )}
+
         </div>
+
     );
 };
 
