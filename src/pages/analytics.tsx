@@ -240,14 +240,7 @@ const AnalyticsContent = () => {
       <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
         <div className="max-w-7xl mx-auto">
           {/* Debug info cuando hay contexto de analytics */}
-          {analyticsContext && (
-              <div className="mb-4 p-2 bg-blue-900/20 border border-blue-500 rounded text-xs">
-                <p className="text-blue-300">
-                  Analytics Status: Visit tracked: {analyticsContext.hasTrackedVisit ? 'Yes' : 'No'} |
-                  BiositeId: {biositeId || 'Not set'}
-                </p>
-              </div>
-          )}
+
 
           {/* --- VISTA MÓVIL (con lógica original) --- */}
           <div className="lg:hidden">
@@ -323,23 +316,30 @@ const AnalyticsContent = () => {
                 </svg>
               </div>
 
-              <div className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
+              <div className="absolute left-10 top-1/3 transform -translate-y-1/2 w-40 h-40 border border-gray-400  bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">VISTAS</div>
                 <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
 
-              <div className="z-10 overflow-y-hidden">
+              <div className="z-10 overflow-y-visible">
                 <PhonePreview><LivePreviewContent/></PhonePreview>
               </div>
 
-              <div className="absolute right-20 top-82 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
+              <div className="absolute right-10 top-96 w-36 h-36 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CLICS</div>
                 <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
 
-              <div className="absolute right-40 bottom-30 w-32 h-32 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
+              <div className="absolute right-20 bottom-55 w-32 h-32 bg-[#E8FAD5] border border-gray-400  rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CTR</div>
                 <div className="text-2xl font-bold text-black">{ctr}%</div>
+              </div>
+              <div className="absolute left-30 top-36 w-10 h-10 bg-[#BAD789] border border-gray-600 rounded-full flex flex-col items-center justify-center">
+
+              </div>
+
+              <div className="absolute left-40 bottom-70 w-5 h-5 bg-[#BAD789] border border-gray-600  rounded-full flex flex-col items-center justify-center">
+
               </div>
             </div>
 
