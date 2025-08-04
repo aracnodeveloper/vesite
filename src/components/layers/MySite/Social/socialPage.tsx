@@ -260,7 +260,6 @@ const SocialPage = () => {
             'Pinterest': 'https://pinterest.com/username',
             'Spotify': 'https://open.spotify.com/user/username',
             'YouTube': 'https://youtube.com/@username',
-            'Apple Music': 'https://music.apple.com/profile/username',
             'Discord': 'https://discord.gg/servername',
             'Tumblr': 'https://username.tumblr.com',
             'WhatsApp': '+593987654321 o 0987654321',

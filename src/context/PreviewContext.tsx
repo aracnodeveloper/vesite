@@ -67,7 +67,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             '/assets/icons/gmail.svg': 'email',
             '/assets/icons/pinterest.svg': 'pinterest',
             '/assets/icons/spottufy.svg': 'spotify',
-            '/assets/icons/music.svg': 'apple-music',
             '/assets/icons/discord.svg': 'discord',
             '/assets/icons/tumblr.svg': 'tumblr',
             '/assets/icons/whatsapp.svg': 'whatsapp',
