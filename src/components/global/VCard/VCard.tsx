@@ -375,6 +375,16 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                                 <User size={48} className="mx-auto"/>
                                             </div>
                                             <p className="text-gray-500">Presiona mostrar QR para ver la informacion</p>
+                                            <div className="text-center flex flex-col justify-center">
+                                                <button
+                                                    onClick={handleRegenerateQR}
+                                                    className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
+                                                    title="Generar código QR"
+                                                > Mostrar QR
+                                                    <QrCode size={20} className="ml-2"/>
+                                                </button>
+                                                <p className="text-gray-500">Presiona mostrar QR para escanear o Presiona descarga para guardar el contacto</p>
+                                            </div>
                                         </div>
                                     )}
 
