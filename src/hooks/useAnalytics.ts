@@ -44,6 +44,13 @@ export const useAnalytics = ({
             await analyticsService.trackVisit(biositeId);
             hasTrackedVisit.current = true;
             log('Visit tracked successfully', { biositeId });
+
+            // NUEVO: Emitir evento personalizado para notificar que se registró una visita
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('visitTracked', {
+                    detail: { biositeId }
+                }));
+            }
         } catch (error) {
             console.error('Failed to track visit:', error);
             log('Failed to track visit', { error, biositeId });
@@ -70,6 +77,13 @@ export const useAnalytics = ({
             await analyticsService.trackLinkClick(linkId);
             linkClickTimestamps.current.set(linkId, now);
             log('Link click tracked successfully', { linkId });
+
+            // NUEVO: Emitir evento personalizado para notificar que se registró un clic
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('linkClickTracked', {
+                    detail: { linkId }
+                }));
+            }
         } catch (error) {
             console.error('Failed to track link click:', error);
             log('Failed to track link click', { error, linkId });
