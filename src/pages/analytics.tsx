@@ -325,7 +325,7 @@ const AnalyticsContent = () => {
                 <PhonePreview><LivePreviewContent/></PhonePreview>
               </div>
 
-              <div className="absolute right-10 top-96 w-36 h-36 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+              <div className="absolute right-10 top-80 w-36 h-36 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CLICS</div>
                 <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
@@ -334,11 +334,11 @@ const AnalyticsContent = () => {
                 <div className="text-xs text-black mb-1">CTR</div>
                 <div className="text-2xl font-bold text-black">{ctr}%</div>
               </div>
-              <div className="absolute left-30 top-36 w-10 h-10 bg-[#BAD789] border border-gray-600 rounded-full flex flex-col items-center justify-center">
+              <div className="absolute left-30 top-30 w-10 h-10 bg-[#BAD789] border border-gray-600 rounded-full flex flex-col items-center justify-center">
 
               </div>
 
-              <div className="absolute left-40 bottom-70 w-5 h-5 bg-[#BAD789] border border-gray-600  rounded-full flex flex-col items-center justify-center">
+              <div className="absolute left-40 bottom-60 w-5 h-5 bg-[#BAD789] border border-gray-600  rounded-full flex flex-col items-center justify-center">
 
               </div>
             </div>
