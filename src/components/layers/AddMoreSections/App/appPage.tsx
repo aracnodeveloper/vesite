@@ -113,15 +113,15 @@ const AppPage = () => {
     };
 
     return (
-        <div className="w-full h-full mb-10 mt-20 max-w-md mx-auto rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-700  ">
-            <div className="flex items-center gap-3 ">
-                <button  onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
-                    <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
-                    <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Enlaces de Descarga</h1>
-                </button>
+        <div className="w-full h-full mb-10 mt-0 lg:mt-20 max-w-md mx-auto rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-700 sr-only sm:not-sr-only ">
+                <div className="flex items-center gap-3 ">
+                    <button  onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
+                        <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
+                        <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Enlaces de Descarga</h1>
+                    </button>
+                </div>
             </div>
-        </div>
 
             <div className="flex flex-col items-center justify-center px-6 py-12 space-y-8 w-full">
                 <div className="text-center space-y-4">

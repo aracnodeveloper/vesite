@@ -11,7 +11,7 @@ const Add = () => {
         <>
 
             <div className="mb-6 mt-10">
-                <h3 className="text-gray-600 text-lg font-medium mb-8">Add more sections</h3>
+
 
                 {/* SELL Section */}
                 <div className="mb-6">
@@ -20,7 +20,7 @@ const Add = () => {
 
 
                     <Downloads/>*/}
-                    <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENT</h4>
+                    <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENIDO</h4>
 
                     <AppD/>
 

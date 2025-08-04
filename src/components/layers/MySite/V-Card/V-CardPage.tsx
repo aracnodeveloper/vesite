@@ -226,8 +226,8 @@ const VCardPage = () => {
     return (
         <div className="w-full h-full mt-10 mb-10 max-w-md mx-auto rounded-lg">
             {/* Header */}
-            <div className="p-4 flex items-center justify-between">
-                <div className="px-6 py-4 border-b border-gray-700">
+            <div className="p-4 flex items-center justify-end lg:justify-between">
+                <div className="px-6 py-4 border-b border-gray-700 sr-only sm:not-sr-only">
                     <div className="flex items-center gap-3">
                         <button onClick={() => navigate('/sections')} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
                             <ChevronLeft className="w-5 h-5 mr-1 mt-1" />

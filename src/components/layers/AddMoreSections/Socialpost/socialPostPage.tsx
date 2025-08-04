@@ -73,9 +73,9 @@ const PostPage = () => {
     }
 
     return (
-        <div className="w-full h-full mb-10 mt-20 max-w-md mx-auto rounded-lg">
+        <div className="w-full h-full mb-10 mt-0 lg:mt-20 max-w-md mx-auto rounded-lg">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-700 mb-10">
+            <div className="px-6 py-4 border-b border-gray-700 mb-10 sr-only sm:not-sr-only">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
                         <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
@@ -86,6 +86,11 @@ const PostPage = () => {
 
             <div className="space-y-4 w-full max-w-md mx-auto">
                 <div>
+                    <div className="mb-6 mt-5">
+                        <h3 className="text-black text-sm mb-3">
+                            Incluye tus links a publicaciones de Instagram en tu página.
+                        </h3>
+                    </div>
                     <label className="text-xs text-gray-400 mb-2 block">
                         URL
                     </label>
