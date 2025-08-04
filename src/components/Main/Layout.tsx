@@ -5,21 +5,11 @@ import {
     Droplet,
     BarChart3,
     RefreshCw,
-    //   Share2,
     ArrowLeft,
-    Edit3,
     BarChartHorizontalBig,
     Palette,
     GanttChart,
-    User, // Added for Profile icon
-    Share, // Added for Social icon
-    CreditCard, // Added for V-Card icon
-    Link,
-    Music,
-    MessageSquare,
-    Video,
-    Smartphone,
-    MessageCircle, Download, Instagram
+    Music, Instagram
 } from "lucide-react";
 
 import imgP from "../../../public/img/img.png";
@@ -45,7 +35,7 @@ import PostPage from "../layers/AddMoreSections/Socialpost/socialPostPage.tsx";
 import AppPage from "../layers/AddMoreSections/App/appPage.tsx";
 import WhatsAppPage from "../layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
 import ShareButton from "../ShareButton.tsx";
-import {WhatsAppOutlined} from "@ant-design/icons";
+import {VideoCameraOutlined, WhatsAppOutlined} from "@ant-design/icons";
 
 
 interface LayoutProps {
@@ -141,7 +131,7 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                         >
                             <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                                    <Download size={16} className="text-white" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 14"><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5h-1a1 1 0 0 1-1-1v-8h13v8a1 1 0 0 1-1 1h-1"/><path d="M4.5 11L7 13.5L9.5 11M7 13.5v-6M11.29 1a1 1 0 0 0-.84-.5h-6.9a1 1 0 0 0-.84.5L.5 4.5h13zM7 .5v4"/></g></svg>
                                 </div>
                                 <div>
                                     <div className="text-black font-medium">Link de mi App</div>
@@ -194,7 +184,7 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                         >
                             <div className="flex items-center space-x-3">
                                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <Video size={16} className="text-white" />
+                                    <VideoCameraOutlined  style={{color:'white'}}/>
                                 </div>
                                 <div>
                                     <div className="text-black font-medium">Video</div>
@@ -626,7 +616,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div className="absolute inset-0" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%', opacity: 0.6 }} />
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center relative transition-transform duration-300 ease-in-out origin-center scale-[.60] md:scale-[.68] lg:scale-[.72] xl:scale-[.76] 2xl:scale-[.80]">
                                 <div onClick={handleExpoced} title='Mi URL' className="absolute cursor-pointer text-xs top-0 bg-[#464C3666] rounded-full p-2 left-20 text-white mb-4 text-center z-50">
-                                    URL: {biosite?.slug || 'your-slug'}
+                                    URL: vesite/{biosite?.slug || 'your-slug'}
                                 </div>
                                 <div className="absolute top-0 right-40">
                                     <ShareButton/></div>

@@ -205,7 +205,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                     )}
                 </div>
                 <div className="text-xs text-gray-400">
-                    bio.site/{biositeData.slug}
+                    visitaecuador.com/vesite/{biositeData.slug}
                 </div>
             </div>
 
