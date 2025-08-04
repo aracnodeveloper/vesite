@@ -18,6 +18,7 @@ import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {useUser} from "../hooks/useUser.ts";
 import {WhatsAppOutlined} from "@ant-design/icons";
+import { useAnalytics } from "../hooks/useAnalytics.ts"; // Importar el hook de analytics
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -39,6 +40,13 @@ const PublicBiositeView = () => {
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
+
+    // Inicializar analytics hook cuando tengamos el biositeId
+    const analytics = useAnalytics({
+        biositeId: biositeData?.biosite?.id,
+        isPublicView: true,
+        debug: true // Cambiar a false en producción
+    });
 
     const getIconIdentifier = (iconPath: string): string => {
         const iconMap: { [key: string]: string } = {
@@ -64,25 +72,10 @@ const PublicBiositeView = () => {
             '/assets/icons/googleplay.svg': 'googleplay'
         };
 
-        // Si es exactamente "link", devolver "link"
-        if (iconPath === 'link') {
-            return 'link';
-        }
-
-        // Si es exactamente "social-post", devolver "social-post"
-        if (iconPath === 'social-post') {
-            return 'social-post';
-        }
-
-        // Si es exactamente "music-embed", devolver "music-embed"
-        if (iconPath === 'music-embed') {
-            return 'music-embed';
-        }
-
-        // Si es exactamente "video-embed", devolver "video-embed"
-        if (iconPath === 'video-embed') {
-            return 'video-embed';
-        }
+        if (iconPath === 'link') return 'link';
+        if (iconPath === 'social-post') return 'social-post';
+        if (iconPath === 'music-embed') return 'music-embed';
+        if (iconPath === 'video-embed') return 'video-embed';
 
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
         if (fullPath) return iconMap[fullPath];
@@ -110,7 +103,6 @@ const PublicBiositeView = () => {
         const urlLower = link.url?.toLowerCase() || '';
         const icon = link.icon?.toLowerCase() || '';
 
-        // Debug: agregar console.log para verificar
         console.log('Checking WhatsApp link:', { label: labelLower, url: urlLower, icon });
 
         return (
@@ -140,7 +132,6 @@ const PublicBiositeView = () => {
                 phone = urlParams.get('phone') || '';
                 message = decodeURIComponent(urlParams.get('text') || '');
             } else if (url.includes('wa.me/')) {
-                // Manejar enlaces wa.me
                 const match = url.match(/wa\.me\/(\d+)(?:\?text=(.+))?/);
                 if (match) {
                     phone = match[1];
@@ -161,7 +152,6 @@ const PublicBiositeView = () => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
 
-        // Lista de plataformas sociales conocidas
         const socialPlatforms = [
             'instagram', 'tiktok', 'x', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
@@ -197,7 +187,7 @@ const PublicBiositeView = () => {
         return exactSocialLabels.some(label => labelLower === label);
     };
 
-    // WhatsApp Button Component integrado
+    // WhatsApp Button Component integrado con analytics
     const WhatsAppButton = ({ whatsAppLink, themeConfig }: { whatsAppLink: WhatsAppLink, themeConfig: any }) => {
         const generateWhatsAppUrl = (phone: string, message: string): string => {
             const cleanPhone = phone.replace(/[^\d+]/g, '');
@@ -205,10 +195,14 @@ const PublicBiositeView = () => {
             return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
         };
 
-        const handleClick = (e: React.MouseEvent) => {
+        const handleClick = async (e: React.MouseEvent) => {
             e.preventDefault();
             const url = generateWhatsAppUrl(whatsAppLink.phone, whatsAppLink.message);
             console.log('WhatsApp URL generated:', url);
+
+            // Trackear el clic de WhatsApp
+            await analytics.trackLinkClick(whatsAppLink.id);
+
             window.open(url, '_blank');
         };
 
@@ -218,11 +212,9 @@ const PublicBiositeView = () => {
                     onClick={handleClick}
                     className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
                 >
-                    {/* Icono de WhatsApp */}
                     <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
                         <WhatsAppOutlined size={18} className="text-white" style={{color:'white'}} />
                     </div>
-
                     <div className="grid grid-cols-1 gap-1 ml-2">
                         <div className="flex items-center">
                         <span className="font-medium text-xs truncate">
@@ -287,7 +279,6 @@ const PublicBiositeView = () => {
             return 'video';
         }
 
-        // Verificar por URL
         if (urlLower.includes('spotify.com/track/')) {
             return 'music';
         }
@@ -310,15 +301,15 @@ const PublicBiositeView = () => {
         let socialPost: any = null;
         let videoEmbed: any = null;
 
-        console.log('Processing links:', links); // Debug
+        console.log('Processing links:', links);
 
         links.forEach(link => {
-            console.log('Processing link:', link); // Debug
+            console.log('Processing link:', link);
 
             const iconIdentifier = getIconIdentifier(link.icon);
 
             if (isWhatsAppLink(link)) {
-                console.log('WhatsApp link detected:', link); // Debug
+                console.log('WhatsApp link detected:', link);
                 const {phone, message} = parseWhatsAppFromUrl(link.url);
                 whatsApplinks.push({
                     id: link.id,
@@ -327,7 +318,6 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             } else if (isAppStoreLink(link)) {
-                // Enlaces de tiendas de aplicaciones
                 appLinks.push({
                     id: link.id,
                     store: getStoreType(link),
@@ -335,7 +325,6 @@ const PublicBiositeView = () => {
                     isActive: link.isActive
                 });
             } else if (isEmbedLink(link)) {
-                // Procesar embeds
                 const embedType = getEmbedType(link);
                 console.log('Embed detected:', link.label, 'Type:', embedType);
 
@@ -368,7 +357,7 @@ const PublicBiositeView = () => {
             }
         });
 
-        console.log('WhatsApp links processed:', whatsApplinks); // Debug
+        console.log('WhatsApp links processed:', whatsApplinks);
 
         return {
             socialLinks,
@@ -543,7 +532,6 @@ const PublicBiositeView = () => {
             };
         }
 
-        // Fallback a colores básicos
         const defaultColors = { primary: '#3B82F6', secondary: '#1F2937' };
         const parsedColors = biositeData.biosite.colors
             ? (typeof biositeData.biosite.colors === 'string'
@@ -644,12 +632,10 @@ const PublicBiositeView = () => {
 
             if (isExcluded) return false;
 
-            // FIXED: Only exclude WhatsApp API links, not wa.me links
             if (urlLower.includes("api.whatsapp.com")) {
                 return false;
             }
 
-            // Allow wa.me WhatsApp links in social
             if (urlLower.includes("wa.me/") || urlLower.includes("whatsapp.com")) {
                 return true;
             }
@@ -663,17 +649,13 @@ const PublicBiositeView = () => {
     const regularLinksData = biositeData.regularLinks.filter(link => link.isActive);
     const realsocialLinks = filterRealSocialLinks(socialLinksData);
 
-    // Usar los embeds del estado local en lugar de los hooks de PreviewContext
     const musicEmbed = biositeData.musicEmbed;
     const socialPost = biositeData.socialPost;
     const videoEmbed = biositeData.videoEmbed;
 
     const description = user?.description || user?.name || biositeData.biosite.title || 'Bio Site';
-
-    // Obtener TODOS los enlaces de WhatsApp activos
     const activeWhatsAppLinks = biositeData.whatsApplinks.filter(link => link.isActive);
 
-    // Debug: Log WhatsApp links
     console.log('Active WhatsApp links:', activeWhatsAppLinks);
     console.log('All WhatsApp links:', biositeData.whatsApplinks);
 
@@ -686,9 +668,7 @@ const PublicBiositeView = () => {
              }}>
 
             <div className={`w-full max-w-full min-h-screen mx-auto`}>
-                {/* Layout condicional basado en la plantilla */}
                 {isSecondTemplate ? (
-                    // Template 2: Dos imágenes cuadradas
                     <>
                         <div className="w-full h-24" style={{ backgroundColor: themeConfig.colors.background }}></div>
                         <TwoSquareImagesSection
@@ -705,7 +685,6 @@ const PublicBiositeView = () => {
                         />
                     </>
                 ) : (
-                    // Template 1: Layout por defecto
                     <>
                         <BackgroundSection
                             isExposedRoute={isExposedRoute}
@@ -742,12 +721,13 @@ const PublicBiositeView = () => {
                         themeConfig={themeConfig}
                     />
 
-                    {/* Links sociales */}
+                    {/* Links sociales con analytics */}
                     <SocialLinksSection
                         realSocialLinks={realsocialLinks}
                         findPlatformForLink={findPlatformForLink}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
+                        handleSocialLinkClick={analytics.handleSocialLinkClick} // Usar el handler con analytics
                     />
 
                     {/* WhatsApp Buttons - Renderizar TODOS los enlaces activos */}
@@ -759,11 +739,12 @@ const PublicBiositeView = () => {
                         />
                     ))}
 
-                    {/* Links regulares */}
+                    {/* Links regulares con analytics */}
                     <RegularLinksSection
                         regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
+                        handleLinkClick={analytics.handleLinkClick} // Usar el handler con analytics
                     />
 
                     <VCardButton
@@ -923,7 +904,7 @@ const PublicBiositeView = () => {
                         </div>
                     )}
 
-                    {/* App Download Buttons */}
+                    {/* App Download Buttons con analytics */}
                     <div className="mt-12">
                         <div className="flex flex-wrap gap-2 w-full max-w-md mx-auto">
                             {biositeData.appLinks.filter(link => link.isActive).map((appLink) => (
@@ -932,6 +913,7 @@ const PublicBiositeView = () => {
                                     href={appLink.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={() => analytics.trackLinkClick(appLink.id)}
                                     className={`flex-1 bg-black hover:bg-gray-800 transition-colors rounded-lg p-0 flex flex-col items-center space-x-3 border border-gray-600 ${
                                         appLink.store === 'appstore' ? 'ml-2' : 'mr-2'
                                     }`}

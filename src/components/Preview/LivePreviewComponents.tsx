@@ -370,8 +370,6 @@ export const SocialLinksSection = ({
 
 const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-
-
 export const RegularLinksSection = ({
                                         regularLinksData,
                                         isExposedRoute,
@@ -383,24 +381,12 @@ export const RegularLinksSection = ({
         <div className="px-4 pb-8 space-y-2">
             {regularLinksData.map((link: any) => {
 
-                const handleClick = (e: React.MouseEvent) => {
-                    e.preventDefault();
-                    if (isExposedRoute && handleLinkClick) {
-                        // En vista pública con analytics
-                        handleLinkClick(link.id, link.url);
-                    } else if (isExposedRoute) {
-                        // En vista pública sin analytics
-                        window.open(link.url, '_blank');
-                    } else {
-                        // En modo preview
-                        handleLinksClick && handleLinksClick();
-                    }
-                };
+
 
                 return isExposedRoute ? (
                     <button
                         key={link.id}
-                        onClick={handleClick}
+                        onClick={() => handleLinkClick ? handleLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
                         className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
                         style={{
                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
