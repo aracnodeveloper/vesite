@@ -383,7 +383,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                                 > Mostrar QR
                                                     <QrCode size={20} className="ml-2"/>
                                                 </button>
-                                                <p className="text-gray-500">Presiona mostrar QR para escanear o Presiona descarga para guardar el contacto</p>
+                                                <p className="text-gray-500">Presiona mostrar QR para escanear</p>
                                             </div>
                                         </div>
                                     )}
