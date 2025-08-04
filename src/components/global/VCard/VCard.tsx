@@ -46,6 +46,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    const [showQR, setShowQR] = useState(false); // Nuevo estado para controlar la visibilidad del QR
 
     const { biosite: biositeFromContext } = usePreview() || { biosite: null };
     const biosite = biositeFromContext || biositeFromProps;
@@ -230,6 +231,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
         try {
             await regenerateQRCode(validUserId);
+            setShowQR(true); // Mostrar el QR después de regenerarlo
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
@@ -241,6 +243,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             // Solo regenerar QR si no hay datos cargados aún
             if (!businessCard?.qrCodeUrl) {
                 await handleRegenerateQR();
+            } else {
+                // Si ya hay QR, mostrarlo automáticamente
+                setShowQR(true);
             }
         } catch (error) {
             console.error('Error en handleOpenAndGenerate:', error);
@@ -250,6 +255,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     // Reset cuando se cierra el modal
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        setShowQR(false); // Reset del estado del QR
         // Opcional: resetear isDataLoaded si quieres recargar datos cada vez
         // setIsDataLoaded(false);
     };
@@ -308,8 +314,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                             </div>
                         ) : (
                             <>
-                                {/* QR Code */}
-                                {businessCard?.qrCodeUrl && (
+                                {/* QR Code - Solo se muestra si showQR es true */}
+                                {showQR && businessCard?.qrCodeUrl && (
                                     <div className="p-6 text-center bg-gradient-to-br from-gray-50 to-gray-100">
                                         <div className="bg-white p-4 rounded-xl inline-block shadow-md">
                                             <img
@@ -328,16 +334,20 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                 {/* Contact Info */}
                                 <div className="p-6 space-y-4">
                                     {/* Header con nombre */}
-                                    <div className="text-center flex flex-col justify-center">
-                                        <button
-                                            onClick={handleRegenerateQR}
-                                            className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap  justify-center items-center cursor-pointer mt-4"
-                                            title="Generar código QR"
-                                        > Mostrar QR
-                                            <QrCode size={20} className="ml-2"/>
-                                        </button>
-                                        <p className="text-gray-500">Presiona mostrar QR para escanear o Presiona descarga para guardar el contacto</p>
-                                    </div>
+                                    {/* Solo mostrar el botón "Mostrar QR" si el QR no se está mostrando */}
+                                    {!showQR && (
+                                        <div className="text-center flex flex-col justify-center">
+                                            <button
+                                                onClick={handleRegenerateQR}
+                                                className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
+                                                title="Generar código QR"
+                                            > Mostrar QR
+                                                <QrCode size={20} className="ml-2"/>
+                                            </button>
+                                            <p className="text-gray-500">Presiona mostrar QR para escanear o Presiona descarga para guardar el contacto</p>
+                                        </div>
+                                    )}
+
                                     {cardData.name && (
                                         <div className="text-center mb-6">
                                             <h3 className="text-2xl font-bold text-gray-800"
