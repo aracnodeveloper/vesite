@@ -1,6 +1,6 @@
 // === AppPage.tsx ===
 import { useState, useEffect } from "react";
-import { ChevronLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { ChevronLeft, Loader2, CheckCircle, AlertCircle, X } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
 import {useNavigate} from "react-router-dom";
 
@@ -13,6 +13,7 @@ const AppPage = () => {
         appLinks,
         updateAppLink,
         addAppLink,
+        removeAppLink,
         loading,
         error
     } = usePreview();
@@ -80,6 +81,46 @@ const AppPage = () => {
             }, 5000);
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleDeleteLink = async (store: 'appstore' | 'googleplay') => {
+        try {
+            const link = appLinks.find(link => link.store === store);
+            if (link) {
+                await removeAppLink(link.id);
+                setSaveStatus('success');
+                setSaveMessage(`Enlace de ${store === 'appstore' ? 'App Store' : 'Google Play'} eliminado`);
+
+                // Limpiar el input correspondiente
+                if (store === 'appstore') {
+                    setAppStoreUrl("");
+                } else {
+                    setGooglePlayUrl("");
+                }
+
+                // Limpiar mensaje después de 3 segundos
+                setTimeout(() => {
+                    setSaveStatus('idle');
+                    setSaveMessage("");
+                }, 3000);
+            } else {
+                // Si no existe en la base de datos, solo limpiar el input
+                if (store === 'appstore') {
+                    setAppStoreUrl("");
+                } else {
+                    setGooglePlayUrl("");
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting app link:', error);
+            setSaveStatus('error');
+            setSaveMessage("Error al eliminar el enlace. Inténtalo de nuevo.");
+
+            setTimeout(() => {
+                setSaveStatus('idle');
+                setSaveMessage("");
+            }, 5000);
         }
     };
 
@@ -163,18 +204,30 @@ const AppPage = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             App Store URL
                         </label>
-                        <input
-                            type="url"
-                            className={`w-full px-4 py-2 border rounded-md text-sm transition-colors ${
-                                appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')
-                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                            }`}
-                            placeholder="https://apps.apple.com/..."
-                            value={appStoreUrl}
-                            onChange={(e) => setAppStoreUrl(e.target.value)}
-                            disabled={isSaving || loading}
-                        />
+                        <div className="relative">
+                            <input
+                                type="url"
+                                className={`w-full px-4 py-2 pr-10 border rounded-md text-sm transition-colors ${
+                                    appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')
+                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                                }`}
+                                placeholder="https://apps.apple.com/..."
+                                value={appStoreUrl}
+                                onChange={(e) => setAppStoreUrl(e.target.value)}
+                                disabled={isSaving || loading}
+                            />
+                            {appStoreUrl && (
+                                <button
+                                    onClick={() => handleDeleteLink('appstore')}
+                                    disabled={isSaving || loading}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Eliminar enlace de App Store"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
                         {appStoreUrl && !isValidUrl(appStoreUrl, 'appstore') && (
                             <p className="mt-1 text-sm text-red-600">
                                 La URL debe ser de la App Store (apps.apple.com)
@@ -186,18 +239,30 @@ const AppPage = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Google Play URL
                         </label>
-                        <input
-                            type="url"
-                            className={`w-full px-4 py-2 border rounded-md text-sm transition-colors ${
-                                googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay')
-                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                            }`}
-                            placeholder="https://play.google.com/store/apps/..."
-                            value={googlePlayUrl}
-                            onChange={(e) => setGooglePlayUrl(e.target.value)}
-                            disabled={isSaving || loading}
-                        />
+                        <div className="relative">
+                            <input
+                                type="url"
+                                className={`w-full px-4 py-2 pr-10 border rounded-md text-sm transition-colors ${
+                                    googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay')
+                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                                }`}
+                                placeholder="https://play.google.com/store/apps/..."
+                                value={googlePlayUrl}
+                                onChange={(e) => setGooglePlayUrl(e.target.value)}
+                                disabled={isSaving || loading}
+                            />
+                            {googlePlayUrl && (
+                                <button
+                                    onClick={() => handleDeleteLink('googleplay')}
+                                    disabled={isSaving || loading}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Eliminar enlace de Google Play"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
                         {googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay') && (
                             <p className="mt-1 text-sm text-red-600">
                                 La URL debe ser de Google Play (play.google.com)

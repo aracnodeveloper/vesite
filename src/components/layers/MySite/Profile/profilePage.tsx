@@ -125,6 +125,12 @@ const ProfilePage = () => {
 
             loadingMessage();
             message.success('Perfil actualizado exitosamente');
+
+            // Recargar la página después de un breve delay para que el usuario vea el mensaje de éxito
+            setTimeout(() => {
+                window.location.reload();
+            }, 50);
+
         } catch (error: any) {
             console.error("Error al actualizar perfil:", error);
 

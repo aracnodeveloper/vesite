@@ -336,6 +336,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                         > Mostrar QR
                                             <QrCode size={20} className="ml-2"/>
                                         </button>
+                                        <p className="text-gray-500">Presiona mostrar QR para escanear o Presiona descarga para guardar el contacto</p>
                                     </div>
                                     {cardData.name && (
                                         <div className="text-center mb-6">
@@ -358,7 +359,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                     )}
 
                                     {/* Mensaje cuando no hay datos */}
-                                    {!cardData.name && !cardData.email && !cardData.phone && !cardData.website && (
+                                    {!cardData.name && !cardData.email && !cardData.phone && !cardData.website && !cardData.title && (
                                         <div className="text-center py-8">
                                             <div className="text-gray-400 mb-3">
                                                 <User size={48} className="mx-auto"/>
@@ -438,10 +439,11 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                     <div className="border-t flex">
                                         <button
                                             onClick={downloadVCard}
-                                            className="flex-1 flex items-center justify-center space-x-2 py-4 px-4 hover:bg-gray-50 transition-colors border-r"
+                                            className="flex-1 flex items-center justify-center py-4 px-4 gap-2 hover:bg-gray-50 transition-colors border-r cursor-pointer"
                                         >
-                                            <Download size={18} className="text-gray-600" />
-                                            <span className="text-sm font-medium text-gray-700">Descargar</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 14"><g fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5h-1a1 1 0 0 1-1-1v-8h13v8a1 1 0 0 1-1 1h-1"/><path d="M4.5 11L7 13.5L9.5 11M7 13.5v-6M11.29 1a1 1 0 0 0-.84-.5h-6.9a1 1 0 0 0-.84.5L.5 4.5h13zM7 .5v4"/></g></svg>
+
+                                            <span className="text-md font-medium text-gray-700">Descargar</span>
                                         </button>
                                     </div>
                                 )}
