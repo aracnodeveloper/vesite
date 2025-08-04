@@ -29,11 +29,19 @@ export interface BiositeTheme {
 }
 
 export interface BiositeOwner {
-    id: string; // Fixed: Made id required (not optional)
+    id: string;
     email: string;
+    cedula?: string; // Añadido campo cedula como opcional
     name?: string;
-    avatar?: string;
-    parentId: string;
+    description?: string;
+    avatarUrl?: string;
+    site?: string;
+    phone?: string;
+    isActive?: boolean;
+    role?: string;
+    parentId?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface BiositeLink {
@@ -65,6 +73,7 @@ export interface BiositeFull {
     createdAt: string;
     updatedAt: string;
     links?: BiositeLink[];
+    owner?: BiositeOwner;
 }
 
 export interface BiositeUpdateDto {

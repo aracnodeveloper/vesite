@@ -18,8 +18,7 @@ import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {useUser} from "../hooks/useUser.ts";
 import {WhatsAppOutlined} from "@ant-design/icons";
-import { useAnalytics } from "../hooks/useAnalytics.ts";
-import {useLivePreviewLogic} from "../hooks/useLivePreviewLogic.ts"; // Importar el hook de analytics
+import { useAnalytics } from "../hooks/useAnalytics.ts"; // Importar el hook de analytics
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -39,7 +38,6 @@ const PublicBiositeView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
-    const {description} = useLivePreviewLogic()
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
 
@@ -655,7 +653,7 @@ const PublicBiositeView = () => {
     const socialPost = biositeData.socialPost;
     const videoEmbed = biositeData.videoEmbed;
 
-
+    const description = biositeData.biosite.owner.description || user?.description ;
     const activeWhatsAppLinks = biositeData.whatsApplinks.filter(link => link.isActive);
 
     console.log('Active WhatsApp links:', activeWhatsAppLinks);
