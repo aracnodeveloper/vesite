@@ -274,7 +274,7 @@ const AnalyticsContent = () => {
             <h1 className="text-lg text-gray-600 font-semibold">Estadistícas</h1>
             <button
                 onClick={handleManualRefresh}
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors flex items-center"
+                className="px-3 py-1 bg-[#98C022] hover:bg-[#86A81E] rounded text-white text-sm transition-colors flex items-center cursor-pointer"
                 disabled={loading}
             >
               {loading ? (
@@ -284,7 +284,7 @@ const AnalyticsContent = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
               )}
-              Refresh
+              Actualizar
             </button>
           </div>
 
@@ -343,16 +343,18 @@ const AnalyticsContent = () => {
             <div className="relative flex items-center justify-center mb-16">
               <div
                   className="absolute transform rounded-full flex flex-col items-center justify-center"
-                  style={{height:"600px", width:"600px"}}
+                  style={{height: "600px", width: "600px"}}
               >
                 <svg width="858" height="858" viewBox="0 0 858 858" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g filter="url(#filter0_d_2019_354)">
                     <circle cx="429" cy="425" r="416" fill="white"/>
                   </g>
                   <defs>
-                    <filter id="filter0_d_2019_354" x="0" y="0" width="858" height="858" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                    <filter id="filter0_d_2019_354" x="0" y="0" width="858" height="858" filterUnits="userSpaceOnUse"
+                            colorInterpolationFilters="sRGB">
                       <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-                      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                                     result="hardAlpha"/>
                       <feMorphology radius="3" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_2019_354"/>
                       <feOffset dy="4"/>
                       <feGaussianBlur stdDeviation="5"/>
@@ -365,7 +367,8 @@ const AnalyticsContent = () => {
                 </svg>
               </div>
 
-              <div className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
+              <div
+                  className="absolute left-44 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">VISTAS</div>
                 <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
@@ -374,14 +377,25 @@ const AnalyticsContent = () => {
                 <PhonePreview><LivePreviewContent/></PhonePreview>
               </div>
 
-              <div className="absolute right-20 top-82 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
+              <div
+                  className="absolute right-40 top-82 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CLICKS</div>
                 <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
 
-              <div className="absolute right-40 bottom-30 w-32 h-32 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
+              <div
+                  className="absolute right-56 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CTR</div>
                 <div className="text-2xl font-bold text-black">{ctr}%</div>
+              </div>
+              <div
+                  className="absolute left-60 top-22 w-13 h-13 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+
+              </div>
+
+              <div
+                  className="absolute left-64 bottom-48 w-10 h-10 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+
               </div>
             </div>
 
