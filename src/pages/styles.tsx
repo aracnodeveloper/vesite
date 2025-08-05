@@ -63,7 +63,7 @@ const StylesPage = () => {
     }
 
     return (
-        <div className="p-6 space-y-8 max-w-100 mx-auto h-full  ">
+        <div className="p-6 space-y-8 max-w-130 mx-auto h-full mt-20 ">
             {/* Información del biosite */}
             {biosite && (
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -155,6 +155,7 @@ const StylesPage = () => {
                     </div>
                 </div>
             </div>
+            <div className="h-20"></div>
         </div>
     );
 };
