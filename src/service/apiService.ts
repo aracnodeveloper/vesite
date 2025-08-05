@@ -79,7 +79,7 @@ export const trackVisit = async (data: {
     }
 };
 
-// Link click tracking function
+// Link click tracking function (incluye embeds)
 export const trackLinkClick = async (data: {
     linkId: string;
     ipAddress?: string;
@@ -95,7 +95,7 @@ export const trackLinkClick = async (data: {
     }
 };
 
-// Get visit stats by biosite
+// Get visit stats by biosite - NUEVA FUNCIÓN
 export const getVisitStats = async (biositeId: string, dateFilter?: {
     day?: number;
     month?: number;
@@ -123,6 +123,63 @@ export const getVisitStats = async (biositeId: string, dateFilter?: {
     }
 };
 
+// Get all visit stats for a biosite with better filtering - NUEVA FUNCIÓN
+export const getDetailedVisitStats = async (
+    biositeId: string,
+    options?: {
+        startDate?: string;
+        endDate?: string;
+        groupBy?: 'day' | 'week' | 'month';
+        includeMetadata?: boolean;
+    }
+) => {
+    try {
+        const params = new URLSearchParams();
+        if (options?.startDate) params.append('startDate', options.startDate);
+        if (options?.endDate) params.append('endDate', options.endDate);
+        if (options?.groupBy) params.append('groupBy', options.groupBy);
+        if (options?.includeMetadata) params.append('includeMetadata', 'true');
+
+        let url = `/visits-stats/biosite/${biositeId}/detailed`;
+        if (params.toString()) {
+            url += `?${params.toString()}`;
+        }
+
+        const response = await api.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching detailed visit stats:', error);
+        throw error;
+    }
+};
+
+// Get link clicks by biosite (incluye embeds) - MEJORADA
+export const getLinkClicksByBiosite = async (biositeId: string, options?: {
+    includeEmbeds?: boolean;
+    startDate?: string;
+    endDate?: string;
+    groupBy?: 'link' | 'date' | 'type';
+}) => {
+    try {
+        const params = new URLSearchParams();
+        if (options?.includeEmbeds) params.append('includeEmbeds', 'true');
+        if (options?.startDate) params.append('startDate', options.startDate);
+        if (options?.endDate) params.append('endDate', options.endDate);
+        if (options?.groupBy) params.append('groupBy', options.groupBy);
+
+        let url = `/links-clicks/biosite/${biositeId}/links-clicks`;
+        if (params.toString()) {
+            url += `?${params.toString()}`;
+        }
+
+        const response = await api.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching clicks by biosite:', error);
+        throw error;
+    }
+};
+
 // Get link clicks by link ID
 export const getLinkClicks = async (linkId: string) => {
     try {
@@ -130,6 +187,52 @@ export const getLinkClicks = async (linkId: string) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching link clicks:', error);
+        throw error;
+    }
+};
+
+// Get embed clicks specifically - NUEVA FUNCIÓN
+export const getEmbedClicks = async (biositeId: string, embedType?: 'music' | 'video' | 'social-post') => {
+    try {
+        const params = new URLSearchParams();
+        params.append('type', 'embed');
+        if (embedType) params.append('embedType', embedType);
+
+        const url = `/links-clicks/biosite/${biositeId}/embeds?${params.toString()}`;
+        const response = await api.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching embed clicks:', error);
+        throw error;
+    }
+};
+
+// Comprehensive analytics function - NUEVA FUNCIÓN
+export const getComprehensiveAnalytics = async (
+    biositeId: string,
+    options?: {
+        timeRange?: 'last7' | 'last30' | 'lastYear';
+        includeVisitStats?: boolean;
+        includeLinkClicks?: boolean;
+        includeEmbedClicks?: boolean;
+    }
+) => {
+    try {
+        const params = new URLSearchParams();
+        if (options?.timeRange) params.append('timeRange', options.timeRange);
+        if (options?.includeVisitStats) params.append('includeVisitStats', 'true');
+        if (options?.includeLinkClicks) params.append('includeLinkClicks', 'true');
+        if (options?.includeEmbedClicks) params.append('includeEmbedClicks', 'true');
+
+        let url = `/analytics/biosite/${biositeId}/comprehensive`;
+        if (params.toString()) {
+            url += `?${params.toString()}`;
+        }
+
+        const response = await api.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching comprehensive analytics:', error);
         throw error;
     }
 };

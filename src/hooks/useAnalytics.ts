@@ -28,7 +28,7 @@ export const useAnalytics = ({
             log('Auto-tracking visit on mount', { biositeId, isPublicView });
             trackVisit();
         }
-    }, [biositeId, isPublicView]);
+    }, [biositeId, isPublicView]); // Removido log de las dependencias
 
     const trackVisit = useCallback(async () => {
         if (!biositeId || hasTrackedVisit.current) {
@@ -45,7 +45,7 @@ export const useAnalytics = ({
             hasTrackedVisit.current = true;
             log('Visit tracked successfully', { biositeId });
 
-            // NUEVO: Emitir evento personalizado para notificar que se registró una visita
+            // Emitir evento personalizado para notificar que se registró una visita
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('visitTracked', {
                     detail: { biositeId }
@@ -78,7 +78,7 @@ export const useAnalytics = ({
             linkClickTimestamps.current.set(linkId, now);
             log('Link click tracked successfully', { linkId });
 
-            // NUEVO: Emitir evento personalizado para notificar que se registró un clic
+            // Emitir evento personalizado para notificar que se registró un clic
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('linkClickTracked', {
                     detail: { linkId }
@@ -96,11 +96,12 @@ export const useAnalytics = ({
         if (isPublicView) {
             // Trackear el clic
             await trackLinkClick(linkId);
+            await trackVisit();
         }
 
         // Abrir el enlace
         window.open(url, '_blank', 'noopener,noreferrer');
-    }, [trackLinkClick, isPublicView, log]);
+    }, [trackLinkClick, isPublicView, log,trackVisit]);
 
     const handleSocialLinkClick = useCallback(async (linkId: string, url: string) => {
         log('Handling social link click', { linkId, url, isPublicView });
@@ -108,11 +109,12 @@ export const useAnalytics = ({
         if (isPublicView) {
             // Trackear el clic
             await trackLinkClick(linkId);
+            await trackVisit();
         }
 
         // Abrir el enlace
         window.open(url, '_blank', 'noopener,noreferrer');
-    }, [trackLinkClick, isPublicView, log]);
+    }, [trackLinkClick, isPublicView, log,trackVisit]);
 
     const resetTracking = useCallback(() => {
         log('Resetting tracking');
@@ -124,7 +126,7 @@ export const useAnalytics = ({
 
     return {
         trackVisit,
-        trackLinkClick,
+            trackLinkClick,
         handleLinkClick,
         handleSocialLinkClick,
         resetTracking,

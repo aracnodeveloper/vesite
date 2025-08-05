@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from "react";
 import { useParams } from "react-router-dom";
 import type {BiositeFull} from "../interfaces/Biosite";
 import type {SocialLink, RegularLink, AppLink, WhatsAppLink} from "../interfaces/PreviewContext";
-import apiService from "../service/apiService";
+import apiService, {trackVisit} from "../service/apiService";
 import {
     BackgroundSection,
     AvatarSection,
@@ -18,7 +18,7 @@ import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {useUser} from "../hooks/useUser.ts";
 import {WhatsAppOutlined} from "@ant-design/icons";
-import { useAnalytics } from "../hooks/useAnalytics.ts"; // Importar el hook de analytics
+import { useAnalytics } from "../hooks/useAnalytics.ts";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -38,15 +38,32 @@ const PublicBiositeView = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
-
+    const isPublicView = true
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
 
-    // Inicializar analytics hook cuando tengamos el biositeId
+    // Inicializar analytics DESPUÉS de tener biositeData
     const analytics = useAnalytics({
         biositeId: biositeData?.biosite?.id,
         isPublicView: true,
-        debug: true // Cambiar a false en producción
+        debug: true // Activar debug para ver los logs
     });
+
+    const handleEmbedClick = useCallback(async (embedId: string, embedType: 'music' | 'video' | 'social-post') => {
+        console.log('Handling embed click', { embedId, embedType, isPublicView });
+
+        if (isPublicView) {
+
+            await analytics.trackLinkClick(embedId);
+            await analytics.trackVisit();
+        }
+    }, [analytics.trackLinkClick, isPublicView,trackVisit]);
+
+    const handleTrackVist= useCallback(async () =>{
+        if (isPublicView) {
+
+            await analytics.trackVisit();
+        }
+    }, [analytics,isPublicView, trackVisit]);
 
     const getIconIdentifier = (iconPath: string): string => {
         const iconMap: { [key: string]: string } = {
@@ -439,6 +456,7 @@ const PublicBiositeView = () => {
                 setLoading(true);
                 setError(null);
 
+                console.log('🔍 Fetching biosite by slug:', slug);
                 const biosite = await apiService.getById<BiositeFull>('/biosites/slug', slug);
 
                 if (!biosite) {
@@ -447,6 +465,7 @@ const PublicBiositeView = () => {
                     return;
                 }
 
+                console.log('✅ Biosite loaded:', biosite);
                 const { socialLinks, regularLinks, appLinks, musicEmbed, socialPost, videoEmbed,whatsApplinks } = processLinks(biosite.links);
 
                 setBiositeData({
@@ -463,7 +482,7 @@ const PublicBiositeView = () => {
             } catch (error: any) {
                 const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
                 setError(errorMessage);
-                console.error('Error fetching biosite by slug:', error);
+                console.error('❌ Error fetching biosite by slug:', error);
             } finally {
                 setLoading(false);
             }
@@ -471,6 +490,16 @@ const PublicBiositeView = () => {
 
         fetchBiositeBySlug();
     }, [slug]);
+
+    // Log cuando se actualiza biositeData para debugging
+    useEffect(() => {
+        if (biositeData) {
+            console.log('📊 Biosite data updated, analytics will be initialized:', {
+                biositeId: biositeData.biosite.id,
+                slug: biositeData.biosite.slug
+            });
+        }
+    }, [biositeData]);
 
     if (loading || !isTemplatesLoaded) {
         return (
@@ -753,11 +782,10 @@ const PublicBiositeView = () => {
                         biosite={biositeData.biosite}
                     />
 
-                    {/* MÚSICA EMBED */}
                     {musicEmbed && musicEmbed.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
-                                 style={{ backgroundColor:  '#ffffff' }}>
+                                 style={{ backgroundColor: '#ffffff' }}>
 
                                 {getSpotifyEmbedUrl(musicEmbed.url) ? (
                                     <div className="embed-container spotify-embed">
@@ -769,10 +797,17 @@ const PublicBiositeView = () => {
                                             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                             loading="lazy"
                                             title={musicEmbed.label}
+                                            onLoad={() => handleEmbedClick(musicEmbed.id, 'music')}
                                         ></iframe>
                                     </div>
                                 ) : (
-                                    <div className="p-4 flex items-center space-x-3">
+                                    <div
+                                        className="p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                        onClick={() => {
+                                            handleEmbedClick(musicEmbed.id, 'music');
+                                            window.open(musicEmbed.url, '_blank');
+                                        }}
+                                    >
                                         <div className="flex-shrink-0">
                                             <div className="w-12 h-12 rounded-full flex items-center justify-center"
                                                  style={{ backgroundColor: themeConfig.colors.accent || '#10b981' }}>
@@ -803,7 +838,6 @@ const PublicBiositeView = () => {
                         </div>
                     )}
 
-                    {/* SOCIAL POST EMBED */}
                     {socialPost && socialPost.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
@@ -819,10 +853,17 @@ const PublicBiositeView = () => {
                                             scrolling="no"
                                             loading="lazy"
                                             title={socialPost.label}
+                                            onLoad={() => handleEmbedClick(socialPost.id, 'social-post')}
                                         ></iframe>
                                     </div>
                                 ) : (
-                                    <div className="p-4 flex items-center space-x-3">
+                                    <div
+                                        className="p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                        onClick={() => {
+                                            handleEmbedClick(socialPost.id, 'social-post');
+                                            window.open(socialPost.url, '_blank');
+                                        }}
+                                    >
                                         <div className="flex-shrink-0">
                                             <div className="w-12 h-12 rounded-full flex items-center justify-center"
                                                  style={{ backgroundColor: themeConfig.colors.accent || '#8b5cf6' }}>
@@ -853,7 +894,6 @@ const PublicBiositeView = () => {
                         </div>
                     )}
 
-                    {/* VIDEO EMBED */}
                     {videoEmbed && videoEmbed.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
@@ -870,10 +910,17 @@ const PublicBiositeView = () => {
                                             allowFullScreen
                                             loading="lazy"
                                             title={videoEmbed.label}
+                                            onLoad={() => handleEmbedClick(videoEmbed.id, 'video')}
                                         ></iframe>
                                     </div>
                                 ) : (
-                                    <div className="p-4 flex items-center space-x-3">
+                                    <div
+                                        className="p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                        onClick={() => {
+                                            handleEmbedClick(videoEmbed.id, 'video');
+                                            window.open(videoEmbed.url, '_blank');
+                                        }}
+                                    >
                                         <div className="flex-shrink-0">
                                             <div className="w-12 h-12 rounded-full flex items-center justify-center"
                                                  style={{ backgroundColor: themeConfig.colors.accent || '#ef4444' }}>
@@ -903,7 +950,6 @@ const PublicBiositeView = () => {
                             </div>
                         </div>
                     )}
-
                     {/* App Download Buttons con analytics */}
                     <div className="mt-12">
                         <div className="flex flex-wrap gap-2 w-full max-w-md mx-auto">
