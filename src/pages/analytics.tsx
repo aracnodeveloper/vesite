@@ -24,7 +24,6 @@ interface AnalyticsData {
   clicks: number;
 }
 
-// Componente interno que usa el contexto de analytics
 const AnalyticsContent = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,21 +32,17 @@ const AnalyticsContent = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  // Usar el contexto opcional de analytics
   const analyticsContext = useOptionalAnalytics();
 
-  // Función para refrescar datos con debounce
   const triggerRefresh = useCallback(() => {
     const now = new Date();
     setLastRefresh(now);
 
-    // Usar un timeout para evitar múltiples refreshes muy seguidos
     setTimeout(() => {
       setRefreshTrigger(prev => prev + 1);
-    }, 1000); // Esperar 1 segundo antes de refrescar
+    }, 1000);
   }, []);
 
-  // Escuchar eventos de tracking mejorado
   useEffect(() => {
     const unsubscribeVisit = analyticsEventManager.onVisitTracked((biositeId) => {
       console.log('📊 Visit tracked for biosite:', biositeId);
@@ -65,7 +60,6 @@ const AnalyticsContent = () => {
     };
   }, [triggerRefresh]);
 
-  // Obtener biositeId al cargar el componente
   useEffect(() => {
     const getBiositeId = () => {
       const cookieBiositeId = Cookies.get("biositeId");
@@ -89,7 +83,6 @@ const AnalyticsContent = () => {
     getBiositeId();
   }, []);
 
-  // Función mejorada para fetch de datos
   const fetchAnalyticsData = useCallback(async () => {
     if (!biositeId) {
       console.log('⏳ Waiting for biositeId...');
@@ -143,7 +136,7 @@ const AnalyticsContent = () => {
           clicks: 0
         });
       } else if (analyticsResult && typeof analyticsResult === 'object') {
-        // Procesar datos válidos
+
         const processedData = {
           dailyActivity: analyticsResult.dailyActivity && analyticsResult.dailyActivity.length > 0
               ? analyticsResult.dailyActivity
@@ -182,19 +175,16 @@ const AnalyticsContent = () => {
     }
   }, [biositeId, refreshTrigger, lastRefresh]);
 
-  // Effect para fetch de datos
   useEffect(() => {
     fetchAnalyticsData();
   }, [fetchAnalyticsData]);
 
-  // Función manual de refresh
   const handleManualRefresh = useCallback(() => {
     console.log('🔄 Manual refresh triggered');
     setLoading(true);
     triggerRefresh();
   }, [triggerRefresh]);
 
-  // Calcular métricas totales
   const totalViews = analyticsData?.views || 0;
   const totalClicks = analyticsData?.clicks || 0;
   const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
@@ -298,34 +288,6 @@ const AnalyticsContent = () => {
             </button>
           </div>
 
-          {/* Debug info mejorado */}
-          {analyticsContext && (
-              <div className="mb-4 p-3 bg-blue-900/20 border border-blue-500 rounded text-sm">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <span className="text-blue-300 font-medium">Status:</span>
-                    <p className="text-blue-100">
-                      {analyticsContext.hasTrackedVisit ? '✅ Tracking Active' : '⏸️ Not Tracking'}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-blue-300 font-medium">BiositeId:</span>
-                    <p className="text-blue-100 truncate">{biositeId || 'Not set'}</p>
-                  </div>
-                  <div>
-                    <span className="text-blue-300 font-medium">Total Views:</span>
-                    <p className="text-blue-100 font-bold">{totalViews}</p>
-                  </div>
-                  <div>
-                    <span className="text-blue-300 font-medium">Total Clicks:</span>
-                    <p className="text-blue-100 font-bold">{totalClicks}</p>
-                  </div>
-                </div>
-                <div className="mt-2 text-xs text-blue-200">
-                  Last refresh: {lastRefresh.toLocaleString()} | Refresh trigger: {refreshTrigger}
-                </div>
-              </div>
-          )}
 
           {/* VISTA MÓVIL */}
           <div className="lg:hidden">
