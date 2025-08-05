@@ -123,7 +123,7 @@ const LivePreviewContent = () => {
 
 
     return (
-        <div className={`w-full ${isExposedRoute ? 'min-h-screen flex items-center justify-center' : 'min-h-screen flex items-center justify-center'} `}
+        <div className={`w-full  min-h-screen flex items-center justify-center `}
              style={{
                  backgroundColor: themeConfig.colors.background,
                  fontFamily: themeConfig.fonts.primary,

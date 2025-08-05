@@ -10,25 +10,55 @@ export const useLivePreview = () => {
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
 
     const parseColors = (colors: string | BiositeColors | null | undefined): BiositeColors => {
-        const defaultColors: BiositeColors = { primary: '#3B82F6', secondary: '#1F2937' };
+        const defaultColors: BiositeColors = {
+            primary: '#3B82F6',
+            secondary: '#1F2937',
+            background: '#ffffff'  // Agregar background por defecto
+        };
 
         if (!colors) return defaultColors;
 
         if (typeof colors === 'string') {
             try {
                 const parsed = JSON.parse(colors);
-                return { ...defaultColors, ...parsed };
+                return {
+                    ...defaultColors,
+                    ...parsed,
+                    // Asegurar que background existe
+                    background: parsed.background || defaultColors.background
+                };
             } catch (e) {
                 console.warn('Error parsing colors:', e);
-                return defaultColors;
+                // Si es un string simple, asumir que es el color de fondo
+                return {
+                    ...defaultColors,
+                    background: colors
+                };
             }
         } else if (colors && typeof colors === 'object') {
-            return { ...defaultColors, ...colors };
+            return {
+                ...defaultColors,
+                ...colors,
+                background: colors.background || defaultColors.background
+            };
         }
 
         return defaultColors;
     };
+    const parseFont = (fonts: string | null | undefined): string => {
+        const defaultFont = 'Inter';
 
+        if (!fonts) return defaultFont;
+
+        if (typeof fonts === 'string') {
+            // Si es un string válido, usarlo directamente
+            if (fonts.trim().length > 0) {
+                return fonts.trim();
+            }
+        }
+
+        return defaultFont;
+    };
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
 
@@ -138,6 +168,8 @@ export const useLivePreview = () => {
         socialLinksData,
         validBackgroundImage,
         validAvatarImage,
+        parseColors,
+        parseFont,
 
         // Utilidades
         findPlatformForLink

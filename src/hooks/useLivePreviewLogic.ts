@@ -15,7 +15,8 @@ export const useLivePreviewLogic = () => {
         handleImageLoad,
         handleImageError,
         handleImageLoadStart,
-        parsedColors,
+        parseColors,
+        parseFont,
         regularLinksData,
         socialLinksData,
         validBackgroundImage,
@@ -51,26 +52,30 @@ export const useLivePreviewLogic = () => {
                     profileBackground: biosite.theme.config.colors.profileBackground || themeColor || '#ffffff'
                 },
                 fonts: {
-                    primary: biosite.theme.config.fonts.primary || fontFamily || 'Inter',
-                    secondary: biosite.theme.config.fonts.secondary || fontFamily || 'Lato'
+                    // ✅ PRIORIZAR la fuente de la BD sobre el estado local
+                    primary: biosite.theme.config.fonts.primary || biosite?.fonts || fontFamily || 'Inter',
+                    secondary: biosite.theme.config.fonts.secondary || biosite?.fonts || fontFamily || 'Lato'
                 },
                 isDark: biosite.theme.config.isDark || false,
                 isAnimated: biosite.theme.config.isAnimated || false
             };
         }
 
+        const colors = parseColors(biosite?.colors);
+
         return {
             colors: {
-                primary: parsedColors.primary,
-                secondary: parsedColors.secondary,
-                accent: parsedColors.accent || parsedColors.primary,
-                background: themeColor || '#ffffff',
-                text: parsedColors.text || '#000000',
-                profileBackground: parsedColors.profileBackground || themeColor || '#ffffff'
+                primary: colors.primary,
+                secondary: colors.secondary,
+                accent: colors.accent || colors.primary,
+                background: colors.background || themeColor || '#ffffff',
+                text: colors.text || '#000000',
+                profileBackground: colors.profileBackground || colors.background || themeColor || '#ffffff'
             },
             fonts: {
-                primary: fontFamily || 'Inter',
-                secondary: fontFamily || 'Lato'
+                // ✅ CRITICAL: Usar siempre la fuente de la BD primero
+                primary: parseFont(biosite?.fonts) || fontFamily || 'Inter',
+                secondary: parseFont(biosite?.fonts) || 'Lato'
             },
             isDark: false,
             isAnimated: false

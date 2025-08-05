@@ -101,6 +101,7 @@ export const useBiositeOperations = ({
         }
 
         try {
+            // ✅ Actualizar estado inmediatamente para UI responsiva
             setFontFamilyState(font);
 
             let colorsString: string;
@@ -109,25 +110,34 @@ export const useBiositeOperations = ({
             } else {
                 colorsString = JSON.stringify(biositeData.colors);
             }
+
             const updateData: BiositeUpdateDto = {
                 ownerId: biositeData.ownerId,
                 title: biositeData.title,
                 slug: biositeData.slug,
                 themeId: biositeData.themeId,
                 colors: colorsString,
-                fonts: font,
+                fonts: font, // ← La fuente nueva
                 avatarImage: biositeData.avatarImage || '',
                 backgroundImage: biositeData.backgroundImage || '',
                 isActive: biositeData.isActive
             };
 
-            await updateBiosite(updateData);
+            const updatedBiosite = await updateBiosite(updateData);
+
+            // ✅ AGREGAR: Forzar actualización del biosite local
+            if (updatedBiosite) {
+                setBiosite(updatedBiosite);
+                console.log('Font updated successfully, biosite refreshed:', font);
+            }
+
         } catch (error) {
             console.error("Error updating font family:", error);
+            // Revertir el estado en caso de error
             setFontFamilyState(biositeData.fonts || 'Inter');
             throw error;
         }
-    }, [biositeData, updateBiosite, setFontFamilyState]);
+    }, [biositeData, updateBiosite, setFontFamilyState, setBiosite]);
 
     const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
         try {

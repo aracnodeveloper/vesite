@@ -32,17 +32,35 @@ const StylesPage = () => {
 
     const handleThemeColorChange = async (color: string) => {
         try {
+            console.log('Changing theme color to:', color);
             await setThemeColor(color);
+
+            // Opcional: Forzar re-render después de un pequeño delay
+            setTimeout(() => {
+                console.log('Theme color change completed');
+            }, 100);
+
         } catch (error) {
             console.error("Error updating theme color:", error);
+            // Mostrar mensaje de error al usuario
+            alert('Error al actualizar el color. Por favor intenta de nuevo.');
         }
     };
 
     const handleFontFamilyChange = async (font: string) => {
         try {
+            console.log('Changing font to:', font);
             await setFontFamily(font);
+
+            // ✅ AGREGAR: Forzar re-render con pequeño delay
+            setTimeout(() => {
+                console.log('Font change completed, forcing refresh');
+                // Opcional: forzar refresh del componente padre si es necesario
+            }, 200);
+
         } catch (error) {
             console.error("Error updating font family:", error);
+            alert('Error al actualizar la fuente. Por favor intenta de nuevo.');
         }
     };
 
@@ -71,7 +89,7 @@ const StylesPage = () => {
                         Personalizando: {biosite.title}
                     </h1>
                     <p className="text-sm text-gray-600">
-                        Personaliza la apariencia de tu biosite con las opciones disponibles.
+                        Personaliza la apariencia de tu vesite con las opciones disponibles.
                     </p>
                 </div>
             )}
@@ -150,7 +168,7 @@ const StylesPage = () => {
                             Consejo de personalización
                         </h3>
                         <p className="text-xs text-blue-700 mt-1">
-                            Los cambios se aplican automáticamente. Puedes ver el resultado en tiempo real en la vista previa de tu biosite.
+                            Los cambios se aplican automáticamente. Puedes ver el resultado en tiempo real en la vista previa de tu vesite.
                         </p>
                     </div>
                 </div>

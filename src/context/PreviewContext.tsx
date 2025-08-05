@@ -53,6 +53,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const loading = biositeLoading || linksLoading;
     const error = biositeError || linksError;
 
+
+
     const getIconIdentifier = useCallback((iconPath: string): string => {
         const iconMap: { [key: string]: string } = {
             '/assets/icons/instagram.svg': 'instagram',
@@ -298,7 +300,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 }
             }
 
-            if (biositeData.fonts) {
+            if (biositeData.fonts && biositeData.fonts !== fontFamily) {
+                console.log('Updating font from BD:', biositeData.fonts);
                 setFontFamilyState(biositeData.fonts);
             }
         }
@@ -544,7 +547,148 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 throw error;
             }
         };
+    useEffect(() => {
+        if (biositeData && biositeData.colors) {
+            let parsedColors;
 
+            if (typeof biositeData.colors === 'string') {
+                try {
+                    parsedColors = JSON.parse(biositeData.colors);
+                } catch (e) {
+                    parsedColors = { background: biositeData.colors };
+                }
+            } else {
+                parsedColors = biositeData.colors;
+            }
+
+            // Sincronizar el themeColor con el color de fondo de la BD
+            if (parsedColors.background && parsedColors.background !== themeColor) {
+                console.log('Syncing theme color from BD:', parsedColors.background);
+                setThemeColorState(parsedColors.background);
+            }
+        }
+    }, [biositeData, themeColor]);
+    const parseFont = (fonts: string | null | undefined): string => {
+        const defaultFont = 'Inter';
+
+        if (!fonts) return defaultFont;
+
+        if (typeof fonts === 'string') {
+            // Si es un string válido, usarlo directamente
+            if (fonts.trim().length > 0) {
+                return fonts.trim();
+            }
+        }
+
+        return defaultFont;
+    };
+    useEffect(() => {
+        if (biositeData && biositeData.fonts) {
+            const parsedFont = parseFont(biositeData.fonts);
+
+            // Sincronizar el fontFamily con la fuente de la BD
+            if (parsedFont && parsedFont !== fontFamily) {
+                console.log('Syncing font family from BD:', parsedFont);
+                setFontFamilyState(parsedFont);
+            }
+        }
+    }, [biositeData, fontFamily]);
+    const setThemeColor = useCallback(async (color: string) => {
+        try {
+            setThemeColorState(color);
+
+            if (biositeData?.id) {
+                // Preparar los colores actualizados
+                let currentColors;
+                try {
+                    currentColors = typeof biositeData.colors === 'string'
+                        ? JSON.parse(biositeData.colors)
+                        : biositeData.colors || {};
+                } catch (e) {
+                    currentColors = {};
+                }
+
+                const updatedColors = {
+                    ...currentColors,
+                    background: color
+                };
+
+                // Actualizar en la base de datos
+                const updateData = {
+                    ownerId: biositeData.ownerId,
+                    title: biositeData.title,
+                    slug: biositeData.slug,
+                    themeId: biositeData.themeId,
+                    colors: JSON.stringify(updatedColors),
+                    fonts: biositeData.fonts || fontFamily,
+                    avatarImage: biositeData.avatarImage || '',
+                    backgroundImage: biositeData.backgroundImage || '',
+                    isActive: biositeData.isActive
+                };
+
+                const updatedBiosite = await updateBiositeHook(updateData);
+
+                if (updatedBiosite) {
+                    // Forzar actualización del estado local
+                    setBiosite(prev => prev ? {
+                        ...prev,
+                        colors: updatedColors
+                    } : null);
+
+                    console.log('Theme color updated successfully:', color);
+                }
+            }
+        } catch (error) {
+            console.error('Error updating theme color:', error);
+            // Revertir el estado si hay error
+            setThemeColorState(prevColor => prevColor);
+            throw error;
+        }
+    }, [biositeData, fontFamily, updateBiositeHook, setBiosite]);
+    const setFontFamily = useCallback(async (font: string) => {
+        try {
+            setFontFamilyState(font);
+
+            if (biositeData?.id) {
+                // Preparar los datos actualizados
+                let colorsString: string;
+                if (typeof biositeData.colors === 'string') {
+                    colorsString = biositeData.colors;
+                } else {
+                    colorsString = JSON.stringify(biositeData.colors);
+                }
+
+                const updateData = {
+                    ownerId: biositeData.ownerId,
+                    title: biositeData.title,
+                    slug: biositeData.slug,
+                    themeId: biositeData.themeId,
+                    colors: colorsString,
+                    fonts: font, // Asegurar que se guarde la fuente
+                    avatarImage: biositeData.avatarImage || '',
+                    backgroundImage: biositeData.backgroundImage || '',
+                    isActive: biositeData.isActive
+                };
+
+                const updatedBiosite = await updateBiositeHook(updateData);
+
+                if (updatedBiosite) {
+                    // Forzar actualización del estado local
+                    setBiosite(prev => prev ? {
+                        ...prev,
+                        fonts: font
+                    } : null);
+
+                    console.log('Font family updated successfully:', font);
+                }
+            }
+        } catch (error) {
+            console.error('Error updating font family:', error);
+            // Revertir el estado si hay error
+            setFontFamilyState(prevFont => prevFont);
+            throw error;
+        }
+    }, [biositeData, updateBiositeHook, setBiosite]);
     const contextValue: PreviewContextType = {
         biosite,
         socialLinks,
