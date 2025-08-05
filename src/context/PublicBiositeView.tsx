@@ -45,7 +45,7 @@ const PublicBiositeView = () => {
     const analytics = useAnalytics({
         biositeId: biositeData?.biosite?.id,
         isPublicView: true,
-        debug: true // Activar debug para ver los logs
+        debug: true
     });
 
     const handleEmbedClick = useCallback(async (embedId: string, embedType: 'music' | 'video' | 'social-post') => {

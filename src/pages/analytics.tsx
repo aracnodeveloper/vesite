@@ -271,7 +271,7 @@ const AnalyticsContent = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header con refresh button */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-lg text-gray-600 font-semibold">Analytics Dashboard</h1>
+            <h1 className="text-lg text-gray-600 font-semibold">Estadistícas</h1>
             <button
                 onClick={handleManualRefresh}
                 className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors flex items-center"
@@ -294,12 +294,12 @@ const AnalyticsContent = () => {
             <div className="space-y-6">
               {/* Card de Actividad Total para móvil */}
               <div className="bg-[#1C1C1C] rounded-2xl p-6">
-                <h2 className="text-lg font-medium text-white mb-4">Total Activity</h2>
+                <h2 className="text-lg font-medium text-white mb-4">Actividad Total</h2>
                 <div className="bg-black/50 p-4 rounded-lg">
                   <div className="flex justify-around items-center text-center">
                     <div>
                       <p className="text-2xl font-bold text-white">{totalViews}</p>
-                      <p className="text-xs text-gray-500">Views</p>
+                      <p className="text-xs text-gray-500">Vistas</p>
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-white">{totalClicks}</p>
@@ -315,7 +315,7 @@ const AnalyticsContent = () => {
 
               {/* Card de Clics por enlace para móvil */}
               <div className="bg-[#1C1C1C] rounded-2xl p-6">
-                <h2 className="text-lg font-medium text-white mb-4">Clicks by Link</h2>
+                <h2 className="text-lg font-medium text-white mb-4">Clicks por Link</h2>
                 {analyticsData.clickDetails && analyticsData.clickDetails.length > 0 ? (
                     <div className="bg-black/50 rounded-lg overflow-hidden">
                       <table className="w-full text-left">
@@ -366,7 +366,7 @@ const AnalyticsContent = () => {
               </div>
 
               <div className="absolute left-20 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] rounded-full flex flex-col items-center justify-center">
-                <div className="text-xs text-black mb-1">VIEWS</div>
+                <div className="text-xs text-black mb-1">VISTAS</div>
                 <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
 
@@ -387,15 +387,15 @@ const AnalyticsContent = () => {
 
             <div className="flex flex-wrap gap-5">
               <div className="bg-white rounded-3xl p-10">
-                <h2 className="text-xl text-gray-600 font-semibold mb-6">Daily Activity</h2>
+                <h2 className="text-xl text-gray-600 font-semibold mb-6">Actividad Diaria</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {analyticsData.dailyActivity.map((activity, index) => (
-                      <div key={index} className="p-6 rounded-xl border border-gray-200">
-                        <p className="text-sm text-gray-400 mb-2">Day: {activity.day}</p>
-                        <div className="flex justify-between items-center">
+                      <div key={index} className="p-6 rounded-xl border border-gray-200 bg-[#E8FAD5]">
+                        <p className="text-sm text-gray-600 mb-2 ">Dia: {activity.day}</p>
+                        <div className="flex justify-between items-center  w-full h-full gap-5">
                           <div>
                             <p className="text-lg font-semibold text-gray-600">{activity.views}</p>
-                            <p className="text-xs text-gray-500">Views</p>
+                            <p className="text-xs text-gray-500">Vistas</p>
                           </div>
                           <div>
                             <p className="text-lg font-semibold text-gray-600">{activity.clicks}</p>
@@ -408,21 +408,21 @@ const AnalyticsContent = () => {
               </div>
 
               <div className="bg-white rounded-3xl p-10">
-                <h2 className="text-xl text-gray-600 font-semibold mb-6">Clicks by Link</h2>
+                <h2 className="text-xl text-gray-600 font-semibold mb-6">Clicks por Link</h2>
                 {analyticsData.clickDetails && analyticsData.clickDetails.length > 0 ? (
-                    <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] overflow-hidden">
+                    <div className=" rounded-xl border border-[#2a2a2a] overflow-hidden">
                       <table className="w-full text-left">
-                        <thead className="bg-[#2a2a2a]">
+                        <thead className="">
                         <tr>
-                          <th className="px-6 py-4 text-gray-400 font-medium">Label</th>
+                          <th className="px-6 py-4 text-gray-400 font-medium">Link</th>
                           <th className="px-6 py-4 text-gray-400 font-medium">Clicks</th>
                         </tr>
                         </thead>
                         <tbody>
                         {analyticsData.clickDetails.map((click, index) => (
-                            <tr key={`${click.label}-${index}`} className={index % 2 === 0 ? 'bg-[#1e1e1e]' : 'bg-[#252525]'}>
-                              <td className="px-6 py-4 text-white">{click.label}</td>
-                              <td className="px-6 py-4 text-white font-semibold">{click.count}</td>
+                            <tr key={`${click.label}-${index}`} className={index % 2 === 0 ? 'bg-[#E8FAD5]' : 'bg-[#E8FAD5]'}>
+                              <td className="px-6 py-4 text-gray-600">{click.label}</td>
+                              <td className="px-6 py-4 text-gray-600 font-semibold">{click.count}</td>
                             </tr>
                         ))}
                         </tbody>
