@@ -310,7 +310,7 @@ export const SocialLinksSection = ({
                                        findPlatformForLink,
                                        handleSocialClick,
                                        themeConfig,
-                                       handleSocialLinkClick // Nueva prop para manejar clics con analytics
+                                       handleSocialLinkClick
                                    }: any) => (
     realSocialLinks.length > 0 && (
         <div className="px-4 mb-4">
@@ -319,43 +319,43 @@ export const SocialLinksSection = ({
                     const platform = findPlatformForLink(link);
 
                     return isExposedRoute ? (
-                        // En vista pública, usar handleSocialLinkClick si está disponible
                         <button
                             key={link.id}
                             onClick={() => handleSocialLinkClick ? handleSocialLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
                             className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
                             style={{
-                                transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
+
+                                color: themeConfig.colors.text,
                             }}
                         >
                             {platform?.icon ? (
                                 <img
                                     src={platform.icon}
                                     alt={link.label}
-                                    className="w-4 h-4 filter text-black"
-                                    style={{color:'black'}}
+                                    className="w-4 h-4  "
+                                    style={{ color: themeConfig.colors.text}}
                                 />
                             ) : (
                                 <span className="text-white text-sm">🔗</span>
                             )}
                         </button>
                     ) : (
-                        // En modo preview, usar el handler original
                         <a
                             key={link.id}
                             href={undefined}
                             onClick={handleSocialClick}
                             className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
                             style={{
-                                transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
-                            }}
+
+                                color: themeConfig.colors.text,
+                        }}
                         >
                             {platform?.icon ? (
                                 <img
                                     src={platform.icon}
                                     alt={link.label}
-                                    className="w-4 h-4 filter text-black"
-                                    style={{color:'black'}}
+                                    className="w-4 h-4 "
+                                    style={{  color: themeConfig.colors.text }}
                                 />
                             ) : (
                                 <span className="text-white text-sm">🔗</span>
@@ -387,13 +387,15 @@ export const RegularLinksSection = ({
                     <button
                         key={link.id}
                         onClick={() => handleLinkClick ? handleLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
-                        className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
+                        className="w-full p-2  text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
                         style={{
-                            transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
+                            transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
+                            backgroundColor: themeConfig.colors.accent,
+                            background: themeConfig.colors.accent
                         }}
                     >
                         {link.image && (
-                            <div className="w-10 h-10 rounded-lg overflow-hidden mr-2 flex-shrink-0">
+                            <div className="w-10 h-10  bg-white rounded-lg overflow-hidden mr-2 flex-shrink-0">
                                 <img
                                     src={link.image}
                                     alt={link.title}
@@ -423,13 +425,15 @@ export const RegularLinksSection = ({
                         key={link.id}
                         href={undefined}
                         onClick={handleLinksClick}
-                        className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
+                        className="w-full p-2   text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
                         style={{
-                            transform: themeConfig.isAnimated ? 'scale(1)' : 'none'
+                            transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
+                            backgroundColor: themeConfig.colors.accent,
+                            background: themeConfig.colors.accent
                         }}
                     >
                         {link.image && (
-                            <div className="w-10 h-10 rounded-lg overflow-hidden mr-2 flex-shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-white overflow-hidden mr-2 flex-shrink-0">
                                 <img
                                     key={link.id}
                                     src={link.image}
@@ -449,7 +453,7 @@ export const RegularLinksSection = ({
                         )}
                         <div className="grid grid-cols-1 gap-1">
                             <div className="flex items-center">
-                                <span className="font-medium text-xs truncate">
+                                <span className="font-medium text-md truncate">
                                     {link.title}
                                 </span>
                             </div>

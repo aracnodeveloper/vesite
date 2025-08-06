@@ -5,9 +5,23 @@ import {WhatsAppOutlined} from "@ant-design/icons";
 interface WhatsAppButtonProps {
     onWhatsAppClick?: (e: React.MouseEvent) => void;
     handleWhatsAppLinkClick?: (id: string, url: string) => void;
+    themeConfig: {
+        colors: {
+            primary: string;
+            secondary: string;
+            accent: string;
+            background: string;
+            text: string;
+            profileBackground: string;
+        };
+        fonts: {
+            primary: string;
+            secondary: string;
+        };
+    };
 }
 
-const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick }: WhatsAppButtonProps) => {
+const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig}: WhatsAppButtonProps) => {
     const { whatsAppLinks } = usePreview();
     const location = useLocation();
 
@@ -51,6 +65,8 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick }: WhatsAppBu
             <button
                 onClick={handleClick}
                 className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
+       style={{backgroundColor: themeConfig.colors.accent,
+           background: themeConfig.colors.accent}}
             >
                 {/* Imagen de WhatsApp */}
                 <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">

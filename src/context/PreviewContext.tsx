@@ -46,6 +46,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [appLinks, setAppLinksState] = useState<AppLink[]>([]);
     const [whatsAppLinks, setWhatsAppLinksState] = useState<WhatsAppLink[]>([]);
     const [themeColor, setThemeColorState] = useState<string>('#ffffff');
+    const [themeBackColor, setThemeColorBackState] = useState<string>('#ffffff');
+    const [themetextColor, setThemeColortextState] = useState<string>('#ffffff');
     const [fontFamily, setFontFamilyState] = useState<string>('Inter');
     const [initialized, setInitialized] = useState(false);
     const initializationRef = useRef<{ [key: string]: boolean }>({});
@@ -244,7 +246,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setSocialLinksState([]);
             setRegularLinksState([]);
             setWhatsAppLinksState([]);
-            setThemeColorState('#ffffff');
+            setThemeColorBackState('#ffffff');
+            setThemeColortextState('#000000');
             setFontFamilyState('Inter');
             resetState();
             initializationRef.current = {};
@@ -296,7 +299,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 if (typeof biositeData.colors === 'string') {
                     setThemeColorState(biositeData.colors);
                 } else if (biositeData.colors.background) {
-                    setThemeColorState(biositeData.colors.background);
+                    setThemeColorBackState(biositeData.colors.background);
+                    setThemeColortextState(biositeData.colors.text);
                 }
             }
 
@@ -564,38 +568,21 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             // Sincronizar el themeColor con el color de fondo de la BD
             if (parsedColors.background && parsedColors.background !== themeColor) {
                 console.log('Syncing theme color from BD:', parsedColors.background);
-                setThemeColorState(parsedColors.background);
+                setThemeColorBackState(parsedColors.background);
+            }
+            if (parsedColors.text && parsedColors.text !== themeColor) {
+                console.log('Syncing theme color from BD:', parsedColors.text);
+                setThemeColortextState(parsedColors.text);
             }
         }
-    }, [biositeData, themeColor]);
-    const parseFont = (fonts: string | null | undefined): string => {
-        const defaultFont = 'Inter';
+    }, [biositeData, themeColor, themetextColor,themeBackColor]);
 
-        if (!fonts) return defaultFont;
 
-        if (typeof fonts === 'string') {
-            // Si es un string válido, usarlo directamente
-            if (fonts.trim().length > 0) {
-                return fonts.trim();
-            }
-        }
-
-        return defaultFont;
-    };
-    useEffect(() => {
-        if (biositeData && biositeData.fonts) {
-            const parsedFont = parseFont(biositeData.fonts);
-
-            // Sincronizar el fontFamily con la fuente de la BD
-            if (parsedFont && parsedFont !== fontFamily) {
-                console.log('Syncing font family from BD:', parsedFont);
-                setFontFamilyState(parsedFont);
-            }
-        }
-    }, [biositeData, fontFamily]);
-    const setThemeColor = useCallback(async (color: string) => {
+    const setThemeColor = useCallback(async (color: string,textColor:string, accentColor: string) => {
         try {
             setThemeColorState(color);
+            setThemeColortextState(textColor)
+            setThemeColorBackState(color)
 
             if (biositeData?.id) {
                 // Preparar los colores actualizados
@@ -610,7 +597,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
                 const updatedColors = {
                     ...currentColors,
-                    background: color
+                    background: color,
+                    text: textColor,
+                    accent: accentColor
                 };
 
                 // Actualizar en la base de datos
@@ -642,29 +631,37 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             console.error('Error updating theme color:', error);
             // Revertir el estado si hay error
             setThemeColorState(prevColor => prevColor);
+            setThemeColorBackState(prevColor => prevColor);
+            setThemeColortextState(prevColor => prevColor);
             throw error;
         }
     }, [biositeData, fontFamily, updateBiositeHook, setBiosite]);
+
+    // FIXED: Implementar setFontFamily correctamente
     const setFontFamily = useCallback(async (font: string) => {
         try {
+            console.log('Setting font family to:', font);
             setFontFamilyState(font);
 
             if (biositeData?.id) {
-                // Preparar los datos actualizados
-                let colorsString: string;
-                if (typeof biositeData.colors === 'string') {
-                    colorsString = biositeData.colors;
-                } else {
-                    colorsString = JSON.stringify(biositeData.colors);
+                // Preparar los colores actuales
+                let currentColors;
+                try {
+                    currentColors = typeof biositeData.colors === 'string'
+                        ? JSON.parse(biositeData.colors)
+                        : biositeData.colors || {};
+                } catch (e) {
+                    currentColors = {};
                 }
+
 
                 const updateData = {
                     ownerId: biositeData.ownerId,
                     title: biositeData.title,
                     slug: biositeData.slug,
                     themeId: biositeData.themeId,
-                    colors: colorsString,
-                    fonts: font, // Asegurar que se guarde la fuente
+                    colors: JSON.stringify(currentColors),
+                    fonts: font,
                     avatarImage: biositeData.avatarImage || '',
                     backgroundImage: biositeData.backgroundImage || '',
                     isActive: biositeData.isActive
@@ -689,6 +686,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [biositeData, updateBiositeHook, setBiosite]);
+
     const contextValue: PreviewContextType = {
         biosite,
         socialLinks,
@@ -699,6 +697,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         error,
         themeColor,
         fontFamily,
+        setFontFamily,
+        setThemeColor,
         updatePreview,
         clearError,
         getMusicEmbed,

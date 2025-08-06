@@ -56,7 +56,7 @@ export interface PreviewContextType {
     refreshBiosite: () => Promise<void>;
 
     themeColor: string;
-    setThemeColor: (color: string) => Promise<void>;
+    setThemeColor: (color: string, textColor: string, accentColor: string) => Promise<void>;
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
 

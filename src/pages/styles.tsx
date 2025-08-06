@@ -10,14 +10,26 @@ const fontOptions = [
 ];
 
 const colorOptions = [
-    { name: "Blanco", value: "#ffffff" },
-    { name: "Amarillo Claro", value: "#fef3c7" },
-    { name: "Verde Agua", value: "#f0fdfa" },
-    { name: "Verde Claro", value: "#ecfdf5" },
-    { name: "Gris Claro", value: "#f3f4f6" },
-    { name: "Azul Claro", value: "#eff6ff" },
-    { name: "Rosa Claro", value: "#fdf2f8" },
-    { name: "Púrpura Claro", value: "#faf5ff" }
+    //Light
+    { name: "Blanco", value: "#ffffff", textColor: "#000000", accentColor: "#f3f4f6" },
+    { name: "Lavanda Suave", value: "#EAE2F2", textColor: "#15074D", accentColor: "#DDD6FE" },
+    { name: "Amarillo ", value: "#FDF46B", textColor: "#92400E", accentColor: "#FEF3C7" },
+    { name: "Verde Lima", value: "#F1FEDD", textColor: "#1A4442", accentColor: "#D1FAE5" },
+    { name: "Azul Jeans", value: "#E2EEEE", textColor: "#061861", accentColor: "#DBEAFE" },
+    { name: "Beige Cálido", value: "#F3F0E7", textColor: "#92400E", accentColor: "#FEF7CD" },
+    { name: "Rosa Pálido", value: "#EFDBDB", textColor: "#272727", accentColor: "#FECACA" },
+    { name: "Gradiente Seoul", value: "linear-gradient(180deg, #A7F3D0 0%, #F3E8FF 100%)", textColor: "#4D1A81", accentColor: "#E9D5FF" },
+    { name: "Rosa Berlin", value: "linear-gradient(135deg, #E8D3C1 0%, #EC9FE4 100%)", textColor: "#000000", accentColor: "#F3E8FF" },
+
+    //Dark
+    { name: "Negro", value: "#000000", textColor: "#B1B1B1", accentColor: "#374151" },
+    { name: "Naranja", value: "#EB8201", textColor: "#FFFFFF", accentColor: "#FB923C" },
+    { name: "Azul Marino", value: "#110054", textColor: "#A884F3", accentColor: "#3730A3" },
+    {name: 'Verde militar', value: '#373E24', textColor: '#E3DFF3', accentColor: '#6B7280'},
+    { name: "Sao Paulo", value: "#1C2928", textColor: "#B0FF2E", accentColor: "#374151" },
+    { name: "Azul Nocturno", value: "#080221", textColor: "#79FBF7", accentColor: "#1E1B4B" },
+    { name: "Azul Acero", value: "#4A7BA8", textColor: "#FDFFB0", accentColor: "#60A5FA" },
+    { name: "Marrón Canela", value: "#BF6737", textColor: "#FFFFFF", accentColor: "#F59E0B" },
 ];
 
 const StylesPage = () => {
@@ -30,10 +42,10 @@ const StylesPage = () => {
         loading
     } = usePreview();
 
-    const handleThemeColorChange = async (color: string) => {
+    const handleThemeColorChange = async (color: string, textColor: string, accentColor: string) => {
         try {
-            console.log('Changing theme color to:', color);
-            await setThemeColor(color);
+            console.log('Changing theme color to:', { color, textColor, accentColor });
+            await setThemeColor(color, textColor, accentColor);
 
             // Opcional: Forzar re-render después de un pequeño delay
             setTimeout(() => {
@@ -94,7 +106,7 @@ const StylesPage = () => {
                 </div>
             )}
 
-            {/* Selector de fuente */}
+            {/* Selector de fuente
             <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h2 className="text-xl font-semibold mb-4 text-gray-900">
                     Tipografía
@@ -122,31 +134,57 @@ const StylesPage = () => {
                     ))}
                 </div>
             </div>
-
+            */}
             {/* Selector de color de tema */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className=" rounded-lg border border-gray-200 p-6">
                 <h2 className="text-xl font-semibold mb-4 text-gray-900">
                     Color de Fondo
                 </h2>
                 <p className="text-sm text-gray-600 mb-4">
-                    Elige el color de fondo que mejor complemente tu contenido
+                    Elige el color de fondo que mejor complemente tu contenido. Incluye color de fondo y color para los enlaces.
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {colorOptions.map((color) => (
                         <button
                             key={color.value}
-                            onClick={() => handleThemeColorChange(color.value)}
-                            className={`p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md flex flex-col items-center space-y-2 ${
+                            onClick={() => handleThemeColorChange(color.value, color.textColor, color.accentColor)}
+                            className={`p-4 w-32 h-28 rounded-lg cursor-pointer border-1 border-gray-400 transition-all duration-200 hover:shadow-md flex flex-col items-center space-y-2 bg-white ${
                                 themeColor === color.value
                                     ? "border-blue-500 ring-2 ring-blue-200"
                                     : "border-gray-200 hover:border-gray-300"
                             }`}
+                            style={{
+                                background: color.value.startsWith('linear-gradient') ? color.value : color.value,
+                                backgroundColor: color.value.startsWith('linear-gradient') ? undefined : color.value
+                            }}
                         >
                             <div
                                 className="w-8 h-8 rounded-full border border-gray-300"
-                                style={{ backgroundColor: color.value }}
-                            />
-                            <div className="text-xs font-medium text-gray-700 text-center">
+                                style={{
+                                    backgroundColor: 'white',
+                                    color: color.textColor,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Aa
+                            </div>
+                            {/* Preview del color de accent para links */}
+                            <div
+                                className="w-12 h-3 rounded text-xs flex items-center justify-center"
+                                style={{
+                                    backgroundColor: color.accentColor,
+                                    color: color.textColor,
+                                    fontSize: '8px'
+                                }}
+                            >
+                                Link
+                            </div>
+                            <div className="text-xs font-medium text-center"
+                                 style={{ color: color.textColor,}}>
                                 {color.name}
                             </div>
                         </button>
@@ -168,7 +206,7 @@ const StylesPage = () => {
                             Consejo de personalización
                         </h3>
                         <p className="text-xs text-blue-700 mt-1">
-                            Los cambios se aplican automáticamente. Puedes ver el resultado en tiempo real en la vista previa de tu vesite.
+                            Los cambios se aplican automáticamente. Puedes ver el resultado en tiempo real en la vista previa de tu vesite. El color de fondo incluye también el color para los enlaces.
                         </p>
                     </div>
                 </div>

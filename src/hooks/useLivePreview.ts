@@ -5,7 +5,7 @@ import { socialMediaPlatforms } from "../media/socialPlataforms.ts";
 import type {SocialLink} from "../interfaces/PreviewContext.ts";
 
 export const useLivePreview = () => {
-    const { biosite, socialLinks, regularLinks,loading, error } = usePreview();
+    const { biosite, socialLinks, regularLinks, loading, error } = usePreview();
     const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
     const [imageLoadStates, setImageLoadStates] = useState<{[key: string]: 'loading' | 'loaded' | 'error'}>({});
 
@@ -13,7 +13,8 @@ export const useLivePreview = () => {
         const defaultColors: BiositeColors = {
             primary: '#3B82F6',
             secondary: '#1F2937',
-            background: '#ffffff'  // Agregar background por defecto
+            background: '#ffffff',
+            text: '#000000'
         };
 
         if (!colors) return defaultColors;
@@ -24,27 +25,31 @@ export const useLivePreview = () => {
                 return {
                     ...defaultColors,
                     ...parsed,
-                    // Asegurar que background existe
-                    background: parsed.background || defaultColors.background
+                    // Asegurar que background y text existen
+                    background: parsed.background || defaultColors.background,
+                    text: parsed.text || defaultColors.text
                 };
             } catch (e) {
                 console.warn('Error parsing colors:', e);
                 // Si es un string simple, asumir que es el color de fondo
                 return {
                     ...defaultColors,
-                    background: colors
+                    background: colors,
+                    text: defaultColors.text,
                 };
             }
         } else if (colors && typeof colors === 'object') {
             return {
                 ...defaultColors,
                 ...colors,
-                background: colors.background || defaultColors.background
+                background: colors.background || defaultColors.background,
+                text: colors.text || defaultColors.text
             };
         }
 
         return defaultColors;
     };
+
     const parseFont = (fonts: string | null | undefined): string => {
         const defaultFont = 'Inter';
 
@@ -59,6 +64,7 @@ export const useLivePreview = () => {
 
         return defaultFont;
     };
+
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
 
@@ -76,7 +82,6 @@ export const useLivePreview = () => {
         try {
             const urlObj = new URL(url);
             const isHttps = ['http:', 'https:'].includes(urlObj.protocol);
-
 
             return isHttps ;
         } catch {
@@ -117,7 +122,6 @@ export const useLivePreview = () => {
             return true;
         });
     };
-
 
     const findPlatformForLink = (link: SocialLink) => {
         return socialMediaPlatforms.find(platform => {

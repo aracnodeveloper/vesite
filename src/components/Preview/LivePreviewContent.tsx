@@ -125,7 +125,8 @@ const LivePreviewContent = () => {
     return (
         <div className={`w-full  min-h-screen flex items-center justify-center `}
              style={{
-                 backgroundColor: themeConfig.colors.background,
+                 background: themeConfig.colors.background.startsWith('linear-gradient') ? themeConfig.colors.background : themeConfig.colors.background,
+                 backgroundColor: themeConfig.colors.background.startsWith('linear-gradient') ? undefined: themeConfig.colors.background,
                  fontFamily: themeConfig.fonts.primary,
                  color: themeConfig.colors.text
              }}>
@@ -213,6 +214,7 @@ const LivePreviewContent = () => {
                     />
                     <WhatsAppButton
                         onWhatsAppClick={handleWhatsAppClick}
+                        themeConfig={themeConfig}
                         // handleWhatsAppLinkClick se puede pasar aquí si necesitas analytics en vista pública
                     />
 
@@ -233,7 +235,7 @@ const LivePreviewContent = () => {
                     {musicEmbed && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
-                                 style={{ backgroundColor:  '#ffffff' }}>
+                                >
 
                                 {getSpotifyEmbedUrl(musicEmbed.url) ? (
                                     <div className="embed-container spotify-embed">

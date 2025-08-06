@@ -16,7 +16,6 @@ export const useLivePreviewLogic = () => {
         handleImageError,
         handleImageLoadStart,
         parseColors,
-        parseFont,
         regularLinksData,
         socialLinksData,
         validBackgroundImage,
@@ -52,7 +51,6 @@ export const useLivePreviewLogic = () => {
                     profileBackground: biosite.theme.config.colors.profileBackground || themeColor || '#ffffff'
                 },
                 fonts: {
-                    // ✅ PRIORIZAR la fuente de la BD sobre el estado local
                     primary: biosite.theme.config.fonts.primary || biosite?.fonts || fontFamily || 'Inter',
                     secondary: biosite.theme.config.fonts.secondary || biosite?.fonts || fontFamily || 'Lato'
                 },
@@ -69,13 +67,12 @@ export const useLivePreviewLogic = () => {
                 secondary: colors.secondary,
                 accent: colors.accent || colors.primary,
                 background: colors.background || themeColor || '#ffffff',
-                text: colors.text || '#000000',
+                text: colors.text || themeColor || '#000000',
                 profileBackground: colors.profileBackground || colors.background || themeColor || '#ffffff'
             },
             fonts: {
-                // ✅ CRITICAL: Usar siempre la fuente de la BD primero
-                primary: parseFont(biosite?.fonts) || fontFamily || 'Inter',
-                secondary: parseFont(biosite?.fonts) || 'Lato'
+                primary: biosite?.fonts || fontFamily || 'Inter',
+                secondary: biosite?.fonts || fontFamily ||'Lato'
             },
             isDark: false,
             isAnimated: false

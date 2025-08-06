@@ -263,10 +263,13 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     return (
         <>
             <div className="px-4 mb-4 cursor-pointer"
-                 onClick={!isExposedRoute ? onVcardClick : undefined}>
+                 onClick={!isExposedRoute ? onVcardClick : undefined}
+           >
                 <button
                     onClick={handleOpenAndGenerate}
-                    className="block w-full p-2 rounded-xl text-center bg-white transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
+                    className="block w-full p-2 rounded-xl text-center  transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
+                    style={{     backgroundColor: themeConfig.colors.accent,
+                        background: themeConfig.colors.accent}}
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-3">
@@ -277,7 +280,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                             onError={handleAvatarError}
                         />
                         <div className="text-left">
-                            <div className="text-black font-bold text-base" style={{ fontFamily: themeConfig.fonts.primary }}>
+                            <div className="text-black font-bold text-base" style={{ fontFamily: themeConfig.fonts.primary, color: themeConfig.colors.text }}>
                                 VCard
                             </div>
                         </div>

@@ -55,7 +55,7 @@ export const useBiositeOperations = ({
         }
     }, [biositeData, setBiosite]);
 
-    const setThemeColor = useCallback(async (color: string) => {
+    const setThemeColor = useCallback(async (color: string, textColor:string, accentColor: string) => {
         if (!biositeData?.id) {
             throw new Error("No biosite available");
         }
@@ -66,8 +66,8 @@ export const useBiositeOperations = ({
                 primary: color,
                 secondary: color,
                 background: color,
-                text: '#000000',
-                accent: color,
+                text: textColor,
+                accent: accentColor,
                 profileBackground: color
             };
             const updateData: BiositeUpdateDto = {

@@ -41,7 +41,6 @@ const PublicBiositeView = () => {
     const isPublicView = true
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
 
-    // Inicializar analytics DESPUÉS de tener biositeData
     const analytics = useAnalytics({
         biositeId: biositeData?.biosite?.id,
         isPublicView: true,
@@ -204,7 +203,7 @@ const PublicBiositeView = () => {
         return exactSocialLabels.some(label => labelLower === label);
     };
 
-    // WhatsApp Button Component integrado con analytics
+
     const WhatsAppButton = ({ whatsAppLink, themeConfig }: { whatsAppLink: WhatsAppLink, themeConfig: any }) => {
         const generateWhatsAppUrl = (phone: string, message: string): string => {
             const cleanPhone = phone.replace(/[^\d+]/g, '');
@@ -227,7 +226,9 @@ const PublicBiositeView = () => {
             <div className="px-4 mb-4">
                 <button
                     onClick={handleClick}
-                    className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
+                    className="w-full p-2 rounded-lg  text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
+                    style={{   backgroundColor: themeConfig.colors.accent,
+                        background: themeConfig.colors.accent}}
                 >
                     <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
                         <WhatsAppOutlined size={18} className="text-white" style={{color:'white'}} />
@@ -387,7 +388,7 @@ const PublicBiositeView = () => {
         };
     };
 
-    // Handlers de imágenes para la vista pública
+
     const handleImageLoad = (imageType: string) => {
         setImageLoadStates(prev => ({ ...prev, [imageType]: 'loaded' }));
     };
@@ -491,7 +492,7 @@ const PublicBiositeView = () => {
         fetchBiositeBySlug();
     }, [slug]);
 
-    // Log cuando se actualiza biositeData para debugging
+
     useEffect(() => {
         if (biositeData) {
             console.log('📊 Biosite data updated, analytics will be initialized:', {
@@ -540,7 +541,6 @@ const PublicBiositeView = () => {
         );
     }
 
-    // Configuración de tema para vista pública
     const getThemeConfig = () => {
         if (biositeData.biosite?.theme?.config) {
             return {
@@ -553,8 +553,8 @@ const PublicBiositeView = () => {
                     profileBackground: biositeData.biosite.theme.config.colors.profileBackground || '#ffffff'
                 },
                 fonts: {
-                    primary: biositeData.biosite.theme.config.fonts.primary || 'Inter',
-                    secondary: biositeData.biosite.theme.config.fonts.secondary || 'Lato'
+                    primary: biositeData.biosite?.fonts || biositeData.biosite.theme.config.fonts.primary || 'Inter',
+                    secondary: biositeData.biosite?.fonts || biositeData.biosite.theme.config.fonts.secondary || 'Lato'
                 },
                 isDark: biositeData.biosite.theme.config.isDark || false,
                 isAnimated: biositeData.biosite.theme.config.isAnimated || false
@@ -578,8 +578,8 @@ const PublicBiositeView = () => {
                 profileBackground: parsedColors.profileBackground || '#ffffff'
             },
             fonts: {
-                primary: biositeData.biosite.fonts || 'Inter',
-                secondary: 'Lato'
+                primary: biositeData.biosite?.fonts || 'Inter',
+                secondary: biositeData.biosite?.fonts || 'Lato'
             },
             isDark: false,
             isAnimated: false
@@ -691,7 +691,8 @@ const PublicBiositeView = () => {
     return (
         <div className={`w-full min-h-screen flex items-center justify-center`}
              style={{
-                 backgroundColor: themeConfig.colors.background,
+                 background: themeConfig.colors.background.startsWith('linear-gradient') ? themeConfig.colors.background : themeConfig.colors.background,
+                 backgroundColor: themeConfig.colors.background.startsWith('linear-gradient') ? undefined: themeConfig.colors.background,
                  fontFamily: themeConfig.fonts.primary,
                  color: themeConfig.colors.text
              }}>
@@ -740,9 +741,7 @@ const PublicBiositeView = () => {
                     </>
                 )}
 
-                {/* Contenido principal */}
                 <div className={`w-full max-w-md mx-auto`}>
-                    {/* Información del usuario */}
                     <UserInfoSection
                         biosite={biositeData.biosite}
                         user={user}
@@ -785,7 +784,7 @@ const PublicBiositeView = () => {
                     {musicEmbed && musicEmbed.isActive && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
-                                 style={{ backgroundColor: '#ffffff' }}>
+                               >
 
                                 {getSpotifyEmbedUrl(musicEmbed.url) ? (
                                     <div className="embed-container spotify-embed">
