@@ -24,6 +24,8 @@ interface AnalyticsData {
   clicks: number;
 }
 
+type TimeRange = 'last7' | 'last30' | 'lastYear';
+
 const AnalyticsContent = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,7 @@ const AnalyticsContent = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isDownloading, setIsDownloading] = useState(false);
+  const [timeRange, setTimeRange] = useState<TimeRange>('last7');
 
   const analyticsContext = useOptionalAnalytics();
 
@@ -44,14 +47,31 @@ const AnalyticsContent = () => {
     }, 1000);
   }, []);
 
+  // Time range options for the selector
+  const timeRangeOptions = [
+    { value: 'last7' as TimeRange, label: 'Últimos 7 días' },
+    { value: 'last30' as TimeRange, label: 'Últimos 30 días' },
+    { value: 'lastYear' as TimeRange, label: 'Último año' }
+  ];
+
+  // Handle time range change
+  const handleTimeRangeChange = useCallback((newTimeRange: TimeRange) => {
+    setTimeRange(newTimeRange);
+    setLoading(true);
+    // Trigger refresh with new time range
+    setTimeout(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 100);
+  }, []);
+
   // Función para compartir métricas
   const handleShare = useCallback(async () => {
     if (!analyticsData) return;
 
+    const timeRangeLabel = timeRangeOptions.find(option => option.value === timeRange)?.label || 'Período seleccionado';
     const shareData = {
       title: 'Métricas de mi Biosite',
-      text: `📊 Mis estadísticas:\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR`,
-
+      text: `📊 Mis estadísticas (${timeRangeLabel}):\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR`,
     };
 
     try {
@@ -60,7 +80,7 @@ const AnalyticsContent = () => {
       } else {
         // Fallback: copiar al portapapeles
         await navigator.clipboard.writeText(
-            `📊 Métricas de mi Biosite:\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR\n\n${window.location.href}`
+            `📊 Métricas de mi Biosite (${timeRangeLabel}):\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR\n\n${window.location.href}`
         );
 
         // Mostrar notificación temporal
@@ -84,7 +104,7 @@ const AnalyticsContent = () => {
     } catch (error) {
       console.error('Error sharing:', error);
     }
-  }, [analyticsData]);
+  }, [analyticsData, timeRange, timeRangeOptions]);
 
   // Función para generar y descargar PDF
   const handleDownloadPDF = useCallback(async () => {
@@ -93,6 +113,8 @@ const AnalyticsContent = () => {
     setIsDownloading(true);
 
     try {
+      const timeRangeLabel = timeRangeOptions.find(option => option.value === timeRange)?.label || 'Período seleccionado';
+
       // Crear contenido HTML para el PDF
       const htmlContent = `
         <!DOCTYPE html>
@@ -105,6 +127,7 @@ const AnalyticsContent = () => {
             .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #98C022; padding-bottom: 20px; }
             .header h1 { color: #98C022; margin: 0; }
             .header p { color: #666; margin: 5px 0; }
+            .time-range { background: #f8f9fa; padding: 10px; border-radius: 5px; text-align: center; margin: 20px 0; }
             .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
             .metric-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid #e9ecef; }
             .metric-value { font-size: 32px; font-weight: bold; color: #98C022; margin: 10px 0; }
@@ -134,6 +157,10 @@ const AnalyticsContent = () => {
       })}</p>
           </div>
 
+          <div class="time-range">
+            <strong>Período: ${timeRangeLabel}</strong>
+          </div>
+
           <div class="metrics-grid">
             <div class="metric-card">
               <div class="metric-value">${analyticsData.views}</div>
@@ -150,7 +177,7 @@ const AnalyticsContent = () => {
           </div>
 
           <div class="section">
-            <h2>📅 Actividad Diaria</h2>
+            <h2>📅 Actividad por ${timeRange === 'lastYear' ? 'Mes' : 'Día'}</h2>
             <div class="daily-activity">
               ${analyticsData.dailyActivity.map(activity => `
                 <div class="activity-card">
@@ -199,7 +226,7 @@ const AnalyticsContent = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `biosite-metricas-${new Date().toISOString().split('T')[0]}.html`;
+      link.download = `biosite-metricas-${timeRangeLabel.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -251,7 +278,7 @@ const AnalyticsContent = () => {
     } finally {
       setIsDownloading(false);
     }
-  }, [analyticsData, isDownloading]);
+  }, [analyticsData, isDownloading, timeRange, timeRangeOptions]);
 
   useEffect(() => {
     const unsubscribeVisit = analyticsEventManager.onVisitTracked((biositeId) => {
@@ -303,6 +330,7 @@ const AnalyticsContent = () => {
       setError(null);
       console.log('🔄 Fetching analytics data...', {
         biositeId,
+        timeRange,
         refreshTrigger,
         lastRefresh: lastRefresh.toISOString()
       });
@@ -328,8 +356,8 @@ const AnalyticsContent = () => {
         throw new Error('Could not get userId');
       }
 
-      // Llamada al API de analytics
-      const analyticsResult = await getBiositeAnalytics(userId);
+      // Llamada al API de analytics con timeRange
+      const analyticsResult = await getBiositeAnalytics(userId, timeRange);
       console.log('📈 Analytics API result:', analyticsResult);
 
       // Validar y procesar la respuesta
@@ -383,7 +411,7 @@ const AnalyticsContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [biositeId, refreshTrigger, lastRefresh]);
+  }, [biositeId, timeRange, refreshTrigger, lastRefresh]);
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -429,6 +457,7 @@ const AnalyticsContent = () => {
                 <div className="mt-4 text-sm border-t border-red-500 pt-4">
                   <p className="text-gray-400">Debug Info:</p>
                   <p className="text-gray-300">BiositeId: {biositeId || 'Not set'}</p>
+                  <p className="text-gray-300">Time Range: {timeRange}</p>
                   <p className="text-gray-300">Has tracked visit: {analyticsContext.hasTrackedVisit ? 'Yes' : 'No'}</p>
                   <p className="text-gray-300">Refresh trigger: {refreshTrigger}</p>
                   <p className="text-gray-300">Last refresh: {lastRefresh.toLocaleTimeString()}</p>
@@ -466,6 +495,7 @@ const AnalyticsContent = () => {
                 <div className="mt-4 text-sm border-t border-yellow-500 pt-4">
                   <p className="text-gray-400">Debug Info:</p>
                   <p className="text-gray-300">BiositeId: {biositeId || 'Not set'}</p>
+                  <p className="text-gray-300">Time Range: {timeRange}</p>
                   <p className="text-gray-300">Has tracked visit: {analyticsContext.hasTrackedVisit ? 'Yes' : 'No'}</p>
                   <p className="text-gray-300">Refresh trigger: {refreshTrigger}</p>
                   <p className="text-gray-300">Last refresh: {lastRefresh.toLocaleTimeString()}</p>
@@ -479,9 +509,25 @@ const AnalyticsContent = () => {
   return (
       <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
         <div className="max-w-7xl mx-auto">
-          {/* Header con botones de acción */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only">Estadísticas</h1>
+          {/* Header con selector de tiempo y botones de acción */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div className="flex items-center gap-4">
+              <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only">Estadísticas</h1>
+
+              {/* Selector de rango de tiempo */}
+              <select
+                  value={timeRange}
+                  onChange={(e) => handleTimeRangeChange(e.target.value as TimeRange)}
+                  className="px-3 py-2 bg-white border border-gray-600 rounded text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-[#98C022] transition-colors"
+              >
+                {timeRangeOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex gap-2">
               {/* Botón de compartir */}
               <button
@@ -552,6 +598,26 @@ const AnalyticsContent = () => {
                       <p className="text-xs text-gray-500">CTR</p>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Card de actividad diaria para móvil */}
+              <div className="bg-[#1C1C1C] rounded-2xl p-6">
+                <h2 className="text-lg font-medium text-white mb-4">
+                  Actividad {timeRange === 'lastYear' ? 'Mensual' : 'Diaria'}
+                </h2>
+                <div className="space-y-3">
+                  {analyticsData.dailyActivity.map((activity, index) => (
+                      <div key={index} className="bg-black/50 p-4 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <span className="text-white font-medium">{activity.day}</span>
+                          <div className="flex gap-4 text-sm">
+                            <span className="text-gray-400">👁️ {activity.views}</span>
+                            <span className="text-gray-400">👆 {activity.clicks}</span>
+                          </div>
+                        </div>
+                      </div>
+                  ))}
                 </div>
               </div>
 
@@ -643,11 +709,15 @@ const AnalyticsContent = () => {
 
             <div className="flex flex-wrap gap-5">
               <div className="bg-white rounded-3xl p-10">
-                <h2 className="text-xl text-gray-600 font-semibold mb-6">Actividad Diaria</h2>
+                <h2 className="text-xl text-gray-600 font-semibold mb-6">
+                  Actividad {timeRange === 'lastYear' ? 'Mensual' : 'Diaria'}
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {analyticsData.dailyActivity.map((activity, index) => (
                       <div key={index} className="p-6 rounded-xl border border-gray-200 bg-[#E8FAD5]">
-                        <p className="text-sm text-gray-600 mb-2 ">Dia: {activity.day}</p>
+                        <p className="text-sm text-gray-600 mb-2 ">
+                          {timeRange === 'lastYear' ? 'Mes' : 'Día'}: {activity.day}
+                        </p>
                         <div className="flex justify-between items-center  w-full h-full gap-5">
                           <div>
                             <p className="text-lg font-semibold text-gray-600">{activity.views}</p>
