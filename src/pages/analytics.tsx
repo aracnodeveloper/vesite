@@ -154,7 +154,7 @@ const AnalyticsContent = () => {
             <div class="daily-activity">
               ${analyticsData.dailyActivity.map(activity => `
                 <div class="activity-card">
-                  <div class="activity-date">${new Date(activity.day).toLocaleDateString('es-ES')}</div>
+                  <div class="activity-date">${activity.day}</div>
                   <div class="activity-stats">
                     <span>👁️ ${activity.views} vistas</span>
                     <span>👆 ${activity.clicks} clicks</span>
