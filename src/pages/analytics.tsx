@@ -51,7 +51,7 @@ const AnalyticsContent = () => {
     const shareData = {
       title: 'Métricas de mi Biosite',
       text: `📊 Mis estadísticas:\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR`,
-      url: window.location.href,
+
     };
 
     try {
@@ -481,7 +481,7 @@ const AnalyticsContent = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header con botones de acción */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only ">Estadísticas</h1>
+            <h1 className="text-lg text-gray-600 font-semibold">Estadísticas</h1>
             <div className="flex gap-2">
               {/* Botón de compartir */}
               <button
