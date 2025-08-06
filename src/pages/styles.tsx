@@ -159,12 +159,12 @@ const StylesPage = () => {
     }
 
     return (
-        <div className="p-6 space-y-8 max-w-150 mx-auto h-full mt-20 ">
+        <div className="p-6 space-y-8 max-w-150 mx-auto h-full mt-0 lg:mt-20 ">
             {/* Información del biosite */}
             {biosite && (
                 <div className=" rounded-lg p-4 mb-0">
 
-                    <h1 className="text-lg text-gray-600 font-semibold"> Estilos</h1>
+                    <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only"> Estilos</h1>
                     <p className="text-sm text-gray-600">
                         {biosite.title} Personaliza la apariencia de tu vesite con las opciones disponibles.
                     </p>

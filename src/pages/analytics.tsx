@@ -481,7 +481,7 @@ const AnalyticsContent = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header con botones de acción */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-lg text-gray-600 font-semibold">Estadísticas</h1>
+            <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only ">Estadísticas</h1>
             <div className="flex gap-2">
               {/* Botón de compartir */}
               <button

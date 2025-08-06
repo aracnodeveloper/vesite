@@ -365,10 +365,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         if (!selectedSection) return "My Site";
 
         const titles: { [key: string]: string } = {
-            'sections': 'Sections',
-            'style': 'Style',
-            'analytics': 'Analytics',
-            'profile': 'Profile',
+            'sections': 'Secciones',
+            'style': 'Estilos',
+            'analytics': 'Estadistícas',
+            'profile': 'Perfil',
             'social': 'Social',
             'VCard': 'V-Card',
             'links': 'Links',
@@ -406,9 +406,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }, [biosite?.id]);
 
     const sidebarItems = [
-        { icon: Layers, label: "Sections", id: "sections", to: "/sections", color: "green" },
-        { icon: Droplet, label: "Style", id: "style", to: "/droplet", color: "orange" },
-        { icon: BarChart3, label: "Analytics", id: "analytics", to: "/analytics", color: "blue" },
+        { icon: GanttChart, label: "Secciones", id: "sections", to: "/sections", color: "green" },
+        { icon: Palette, label: "Estilos", id: "style", to: "/droplet", color: "orange" },
+        { icon: BarChartHorizontalBig, label: "Estadistícas", id: "analytics", to: "/analytics", color: "blue" },
     ];
 
     const getAvatarImage = () => {
