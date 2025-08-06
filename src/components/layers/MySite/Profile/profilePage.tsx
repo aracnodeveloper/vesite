@@ -26,7 +26,7 @@ const ProfilePage = () => {
     const [showWarning, setShowWarning] = useState(true);
     const [initialValuesSet, setInitialValuesSet] = useState(false);
 
-    const isAdmin = role === 'admin' || role === 'ADMIN';
+    const isAdmin = role === 'SUPER_ADMIN' || role === 'ADMIN';
     const DEFAULT_BACKGROUND = 'https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
 
