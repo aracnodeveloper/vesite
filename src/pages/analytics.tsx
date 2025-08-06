@@ -31,6 +31,7 @@ const AnalyticsContent = () => {
   const [biositeId, setBiositeId] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const analyticsContext = useOptionalAnalytics();
 
@@ -42,6 +43,215 @@ const AnalyticsContent = () => {
       setRefreshTrigger(prev => prev + 1);
     }, 1000);
   }, []);
+
+  // Función para compartir métricas
+  const handleShare = useCallback(async () => {
+    if (!analyticsData) return;
+
+    const shareData = {
+      title: 'Métricas de mi Biosite',
+      text: `📊 Mis estadísticas:\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copiar al portapapeles
+        await navigator.clipboard.writeText(
+            `📊 Métricas de mi Biosite:\n🔍 ${analyticsData.views} vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}% CTR\n\n${window.location.href}`
+        );
+
+        // Mostrar notificación temporal
+        const notification = document.createElement('div');
+        notification.textContent = '✅ Métricas copiadas al portapapeles';
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #98C022;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          z-index: 1000;
+          font-size: 14px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  }, [analyticsData]);
+
+  // Función para generar y descargar PDF
+  const handleDownloadPDF = useCallback(async () => {
+    if (!analyticsData || isDownloading) return;
+
+    setIsDownloading(true);
+
+    try {
+      // Crear contenido HTML para el PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Reporte de Métricas - Biosite</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+            .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #98C022; padding-bottom: 20px; }
+            .header h1 { color: #98C022; margin: 0; }
+            .header p { color: #666; margin: 5px 0; }
+            .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
+            .metric-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid #e9ecef; }
+            .metric-value { font-size: 32px; font-weight: bold; color: #98C022; margin: 10px 0; }
+            .metric-label { color: #666; font-size: 14px; text-transform: uppercase; }
+            .section { margin: 40px 0; }
+            .section h2 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background: #f8f9fa; font-weight: bold; }
+            .daily-activity { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+            .activity-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; }
+            .activity-date { font-weight: bold; margin-bottom: 10px; color: #98C022; }
+            .activity-stats { display: flex; justify-content: space-between; }
+            .footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>📊 Reporte de Métricas</h1>
+            <p>Biosite Analytics Dashboard</p>
+            <p>Generado el ${new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-value">${analyticsData.views}</div>
+              <div class="metric-label">Total Vistas</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">${analyticsData.clicks}</div>
+              <div class="metric-label">Total Clicks</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">${analyticsData.views > 0 ? Math.round((analyticsData.clicks / analyticsData.views) * 100) : 0}%</div>
+              <div class="metric-label">CTR (Click Through Rate)</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h2>📅 Actividad Diaria</h2>
+            <div class="daily-activity">
+              ${analyticsData.dailyActivity.map(activity => `
+                <div class="activity-card">
+                  <div class="activity-date">${new Date(activity.day).toLocaleDateString('es-ES')}</div>
+                  <div class="activity-stats">
+                    <span>👁️ ${activity.views} vistas</span>
+                    <span>👆 ${activity.clicks} clicks</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          ${analyticsData.clickDetails.length > 0 ? `
+          <div class="section">
+            <h2>🔗 Clicks por Link</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Link</th>
+                  <th style="text-align: right;">Número de Clicks</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${analyticsData.clickDetails.map(click => `
+                  <tr>
+                    <td>${click.label}</td>
+                    <td style="text-align: right; font-weight: bold;">${click.count}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : '<div class="section"><h2>🔗 Clicks por Link</h2><p>No hay datos de clicks disponibles aún.</p></div>'}
+
+          <div class="footer">
+            <p>Este reporte fue generado automáticamente por Biosite Analytics</p>
+            <p>Para más información, visita tu dashboard de analytics</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Crear y descargar el archivo HTML (que se puede imprimir como PDF)
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `biosite-metricas-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Mostrar instrucciones para PDF
+      const notification = document.createElement('div');
+      notification.innerHTML = `
+        <div style="max-width: 300px;">
+          <strong>📄 Archivo descargado</strong><br>
+          <small>Abre el archivo HTML y usa Ctrl+P (Cmd+P en Mac) para guardar como PDF</small>
+        </div>
+      `;
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #98C022;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        max-width: 320px;
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 5000);
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+
+      const errorNotification = document.createElement('div');
+      errorNotification.textContent = '❌ Error al generar el reporte';
+      errorNotification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #dc3545;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `;
+      document.body.appendChild(errorNotification);
+      setTimeout(() => errorNotification.remove(), 3000);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [analyticsData, isDownloading]);
 
   useEffect(() => {
     const unsubscribeVisit = analyticsEventManager.onVisitTracked((biositeId) => {
@@ -269,25 +479,57 @@ const AnalyticsContent = () => {
   return (
       <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
         <div className="max-w-7xl mx-auto">
-          {/* Header con refresh button */}
+          {/* Header con botones de acción */}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-lg text-gray-600 font-semibold">Estadistícas</h1>
-            <button
-                onClick={handleManualRefresh}
-                className="px-3 py-1 bg-[#98C022] hover:bg-[#86A81E] rounded text-white text-sm transition-colors flex items-center cursor-pointer"
-                disabled={loading}
-            >
-              {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              ) : (
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-              )}
-              Actualizar
-            </button>
-          </div>
+            <h1 className="text-lg text-gray-600 font-semibold">Estadísticas</h1>
+            <div className="flex gap-2">
+              {/* Botón de compartir */}
+              <button
+                  onClick={handleShare}
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors flex items-center cursor-pointer"
+                  title="Compartir métricas"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+                Compartir
+              </button>
 
+              {/* Botón de descarga PDF */}
+              <button
+                  onClick={handleDownloadPDF}
+                  disabled={isDownloading}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Descargar reporte PDF"
+              >
+                {isDownloading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                )}
+                {isDownloading ? 'Generando...' : 'PDF'}
+              </button>
+
+              {/* Botón de actualizar */}
+              <button
+                  onClick={handleManualRefresh}
+                  className="px-3 py-1 bg-[#98C022] hover:bg-[#86A81E] rounded text-white text-sm transition-colors flex items-center cursor-pointer"
+                  disabled={loading}
+                  title="Actualizar datos"
+              >
+                {loading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                ) : (
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                )}
+                Actualizar
+              </button>
+            </div>
+          </div>
 
           {/* VISTA MÓVIL */}
           <div className="lg:hidden">

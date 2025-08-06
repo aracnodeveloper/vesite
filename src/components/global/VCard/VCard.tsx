@@ -240,13 +240,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     const handleOpenAndGenerate = async () => {
         try {
             setIsModalOpen(true);
-            // Solo regenerar QR si no hay datos cargados aún
-            if (!businessCard?.qrCodeUrl) {
+
                 await handleRegenerateQR();
-            } else {
-                // Si ya hay QR, mostrarlo automáticamente
-                setShowQR(true);
-            }
+
         } catch (error) {
             console.error('Error en handleOpenAndGenerate:', error);
         }
