@@ -313,8 +313,12 @@ export const SocialLinksSection = ({
                                        handleSocialLinkClick
                                    }: any) => (
     realSocialLinks.length > 0 && (
-        <div className="px-4 mb-4">
-            <div className="flex justify-center items-center gap-3 flex-wrap">
+        <div className="px-4 mb-4 "
+
+        >
+            <div className="flex justify-center items-center gap-3 flex-wrap "
+                 style={{  backgroundColor: themeConfig.colors.accent,
+                     background: themeConfig.colors.accent}}>
                 {realSocialLinks.map((link: any) => {
                     const platform = findPlatformForLink(link);
 
