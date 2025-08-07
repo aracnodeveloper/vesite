@@ -181,7 +181,7 @@ const StylesPage = () => {
                         <button
                             key={font.value}
                             onClick={() => handleFontFamilyChange(font.value)}
-                            className={`p-3 rounded-lg border-2 bg-white transition-all duration-200 hover:shadow-md text-left ${
+                            className={`p-3 rounded-lg cursor-pointer border-2 bg-white transition-all duration-200 hover:shadow-md text-left ${
                                 fontFamily === font.value
                                     ? "border-blue-500 bg-blue-50 text-blue-700"
                                     : "border-gray-200 text-gray-700 hover:border-gray-300"
