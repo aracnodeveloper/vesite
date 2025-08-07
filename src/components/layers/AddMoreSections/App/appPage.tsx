@@ -134,19 +134,7 @@ const AppPage = () => {
         }
     };
 
-    const hasChanges = () => {
-        const appStore = appLinks.find(link => link.store === "appstore");
-        const googlePlay = appLinks.find(link => link.store === "googleplay");
 
-        // Comparar con los valores actuales guardados (no con los por defecto)
-        const currentAppStoreUrl = appStore?.url || "";
-        const currentGooglePlayUrl = googlePlay?.url || "";
-
-        return (
-            (currentAppStoreUrl !== appStoreUrl) ||
-            (currentGooglePlayUrl !== googlePlayUrl)
-        );
-    };
 
     const resetToDefault = () => {
         setAppStoreUrl(DEFAULT_APP_STORE_URL);
@@ -276,12 +264,11 @@ const AppPage = () => {
                             disabled={
                                 isSaving ||
                                 loading ||
-                                !hasChanges() ||
                                 (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
                                 (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
                             }
                             className={`flex-1 py-2 px-4 rounded-md transition flex items-center justify-center gap-2 ${
-                                isSaving || loading || !hasChanges() ||
+                                isSaving || loading  ||
                                 (appStoreUrl && !isValidUrl(appStoreUrl, 'appstore')) ||
                                 (googlePlayUrl && !isValidUrl(googlePlayUrl, 'googleplay'))
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
