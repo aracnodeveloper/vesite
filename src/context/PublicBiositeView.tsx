@@ -970,7 +970,7 @@ const PublicBiositeView = () => {
                     )}
 
                     <div className="mt-12">
-                        <div className="flex flex-wrap gap-2 w-full max-w-md mx-auto">
+                        <div className="flex flex-wrap gap-0 w-full max-w-md mx-auto">
                             {biositeData.appLinks.filter(link => link.isActive).map((appLink) => (
                                 <a
                                     key={appLink.id}
@@ -978,11 +978,11 @@ const PublicBiositeView = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={() => analytics.trackLinkClick(appLink.id)}
-                                    className={`flex-1 h-16 bg-white hover:bg-gray-800 transition-colors rounded-lg p-0 flex flex-col items-center space-x-3 border border-gray-600 ${
+                                    className={`flex-1 h-16  bg-white hover:bg-gray-800 transition-colors rounded-lg p-0 flex flex-col items-center space-x-3 border border-gray-600 ${
                                         appLink.store === 'appstore' ? 'ml-2' : 'mr-2'
                                     }`}
                                 >
-                                    <div className="flex-shrink-0">
+                                    <div className="flex-shrink-0 gap-1">
                                         {appLink.store === 'appstore' ? (
                                             <svg width="20" height="20" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M6.71454 7.34639C6.36912 7.86677 6.00189 8.37485 5.44363 8.38364C4.88537 8.39595 4.70655 8.05225 4.07327 8.05225C3.43563 8.05225 3.24024 8.37573 2.71077 8.39682C2.16472 8.41792 1.753 7.84304 1.40234 7.33497C0.689685 6.29772 0.144508 4.38848 0.877226 3.10335C1.23922 2.46518 1.88907 2.06258 2.59388 2.0494C3.12684 2.04061 3.63538 2.41419 3.96424 2.41419C4.28872 2.41419 4.90543 1.96501 5.55092 2.03182C5.82133 2.04413 6.58021 2.14082 7.06695 2.86337C7.02944 2.88887 6.16326 3.40046 6.17111 4.46232C6.18332 5.72987 7.27542 6.15444 7.28763 6.15795C7.27542 6.18696 7.11231 6.76272 6.7128 7.34551M4.33583 0.629777C4.64026 0.281684 5.14356 0.0170982 5.56051 0.000396729C5.6146 0.491771 5.4192 0.986661 5.12699 1.33915C4.83914 1.69603 4.36461 1.97292 3.89794 1.93513C3.83514 1.45254 4.06891 0.948863 4.33496 0.629777H4.33583Z" fill="black"/>
