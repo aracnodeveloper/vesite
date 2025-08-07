@@ -187,10 +187,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             return (
                 labelLower.includes('music') ||
-                labelLower.includes('spotify') ||
-                labelLower.includes('apple music') ||
                 labelLower.includes('soundcloud') ||
-                urlLower.includes('spotify.com') ||
+                urlLower.includes('open.spotify.com') ||
                 urlLower.includes('music.apple.com') ||
                 urlLower.includes('soundcloud.com')
             );

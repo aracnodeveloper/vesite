@@ -10,6 +10,8 @@ const VideoPage = () => {
     const [url, setUrl] = useState('');
     const [title, setTitle] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [hasExistingVideo, setHasExistingVideo] = useState(false);
 
     useEffect(() => {
         // Load existing video data
@@ -17,6 +19,9 @@ const VideoPage = () => {
         if (existingVideo) {
             setUrl(existingVideo.url || '');
             setTitle(existingVideo.label || '');
+            setHasExistingVideo(true);
+        } else {
+            setHasExistingVideo(false);
         }
     }, [getVideoEmbed]);
 
@@ -35,6 +40,21 @@ const VideoPage = () => {
             alert('Error al guardar el video');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            setIsDeleting(true);
+            // Eliminar pasando una URL vacía para desactivar el video
+            await setVideoEmbed('', '');
+            console.log('Video embed deleted successfully');
+            navigate(-1);
+        } catch (error) {
+            console.error('Error deleting video embed:', error);
+            alert('Error al eliminar el video');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -59,7 +79,8 @@ const VideoPage = () => {
         }
     };
 
-    const canSave = url.trim() !== '' && !isSubmitting;
+    const canSave = url.trim() !== '' && !isSubmitting && !isDeleting;
+    const canDelete = hasExistingVideo && !isSubmitting && !isDeleting;
 
     if (loading) {
         return (
@@ -98,7 +119,7 @@ const VideoPage = () => {
                         onChange={(e) => setUrl(e.target.value)}
                         className="bg-[#FAFFF6] w-full rounded-md px-4 py-3 text-sm text-black placeholder:text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="https://www.youtube.com/watch?v=..."
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isDeleting}
                     />
                     {url.trim() && !isValidVideoUrl(url) && (
                         <p className="text-xs text-red-400 mt-1">
@@ -117,7 +138,7 @@ const VideoPage = () => {
                         onChange={(e) => setTitle(e.target.value)}
                         className="bg-[#FAFFF6] w-full rounded-md px-4 py-3 text-sm text-black placeholder:text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Añade un titulo para el video"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isDeleting}
                         maxLength={50}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -125,7 +146,7 @@ const VideoPage = () => {
                     </p>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 flex gap-3">
                     <button
                         onClick={handleSave}
                         disabled={!canSave}
@@ -146,6 +167,29 @@ const VideoPage = () => {
                             'GUARDAR'
                         )}
                     </button>
+
+                    {canDelete && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={!canDelete}
+                            className={`
+                                rounded-lg w-32 px-6 py-2 text-sm font-medium transition-all duration-200
+                                ${canDelete
+                                ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer'
+                                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                            }
+                            `}
+                        >
+                            {isDeleting ? (
+                                <div className="flex items-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                    Eliminando...
+                                </div>
+                            ) : (
+                                'ELIMINAR'
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

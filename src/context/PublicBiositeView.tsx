@@ -171,7 +171,7 @@ const PublicBiositeView = () => {
         const socialPlatforms = [
             'instagram', 'tiktok', 'x', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
-            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
+            'tumblr', 'whatsapp', 'telegram', 'onlyfans','amazon','gmail','spotify'
         ];
 
         if (socialPlatforms.includes(iconIdentifier)) {
@@ -182,7 +182,7 @@ const PublicBiositeView = () => {
             'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
             'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
             'pinterest.com', 'discord.gg', 'discord.com', 'tumblr.com',
-            'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com'
+            'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com','amazon.com','gmail.com','spotify.com'
         ];
 
         const hasSocialDomain = socialDomains.some(domain => {
@@ -197,7 +197,7 @@ const PublicBiositeView = () => {
         const exactSocialLabels = [
             'instagram', 'tiktok',  'twitter', 'twitter/x', 'x',  'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord', 'youtube',
-            'tumblr', 'whatsapp', 'telegram', 'onlyfans'
+            'tumblr', 'whatsapp', 'telegram', 'onlyfans','amazon','gmail', 'spotify'
         ];
 
         return exactSocialLabels.some(label => labelLower === label);
@@ -256,7 +256,7 @@ const PublicBiositeView = () => {
 
         const embedLabels = [
             'music embed', 'video embed', 'social post', 'embed', 'player',
-            'spotify track', 'youtube video','youtube.com/watch' ,'instagram post', 'music/podcast'
+            'spotify track', 'youtube video','youtube.com/watch' ,'instagram post', 'music/podcast','open.spotify.com/embed'
         ];
 
         const hasEmbedLabel = embedLabels.some(embedLabel => labelLower.includes(embedLabel));
@@ -645,7 +645,7 @@ const PublicBiositeView = () => {
             if (!link.isActive) return false;
 
             const excludedKeywords = [
-                'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+                'open.spotify.com/embed', 'music', 'apple music', 'soundcloud', 'audio',
                 'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
                 'post', 'publicacion', 'contenido','api.whatsapp.com',
                 'music embed', 'video embed', 'social post',

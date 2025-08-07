@@ -84,7 +84,7 @@ const SocialPage = () => {
         if (urlLower.includes("api.whatsapp.com")) return false;
 
         const excludedKeywords = [
-            'spotify', 'music', 'apple music', 'soundcloud', 'audio',
+            'open.spotify.com/embed', 'music', 'apple music', 'soundcloud', 'audio',
             'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
             'post', 'publicacion', 'contenido','api.whatsapp.com',
             'music embed', 'video embed', 'social post'

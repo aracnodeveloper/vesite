@@ -10,6 +10,8 @@ const PostPage = () => {
     const [url, setUrl] = useState('');
     const [note, setNote] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [hasExistingPost, setHasExistingPost] = useState(false);
 
     useEffect(() => {
         // Load existing social post data
@@ -17,6 +19,9 @@ const PostPage = () => {
         if (existingPost) {
             setUrl(existingPost.url || '');
             setNote(existingPost.label || '');
+            setHasExistingPost(true);
+        } else {
+            setHasExistingPost(false);
         }
     }, [getSocialPost]);
 
@@ -35,6 +40,21 @@ const PostPage = () => {
             alert('Error al guardar el post social');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            setIsDeleting(true);
+            // Eliminar pasando una URL vacía para desactivar el post
+            await setSocialPost('', '');
+            console.log('Social post deleted successfully');
+            navigate(-1);
+        } catch (error) {
+            console.error('Error deleting social post:', error);
+            alert('Error al eliminar el post social');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -62,7 +82,8 @@ const PostPage = () => {
         }
     };
 
-    const canSave = url.trim() !== '' && !isSubmitting;
+    const canSave = url.trim() !== '' && !isSubmitting && !isDeleting;
+    const canDelete = hasExistingPost && !isSubmitting && !isDeleting;
 
     if (loading) {
         return (
@@ -100,7 +121,7 @@ const PostPage = () => {
                         placeholder="https://instagram.com/p/... or https://twitter.com/..."
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isDeleting}
                     />
                     {url.trim() && !isValidUrl(url) && (
                         <p className="text-xs text-red-400 mt-1">
@@ -119,7 +140,7 @@ const PostPage = () => {
                         rows={3}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isDeleting}
                         maxLength={100}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -127,7 +148,7 @@ const PostPage = () => {
                     </p>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 flex gap-3">
                     <button
                         onClick={handleSave}
                         disabled={!canSave}
@@ -148,6 +169,29 @@ const PostPage = () => {
                             'Guardar'
                         )}
                     </button>
+
+                    {canDelete && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={!canDelete}
+                            className={`
+                                rounded-lg w-32 px-6 py-2 text-sm transition-all duration-200
+                                ${canDelete
+                                ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer'
+                                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                            }
+                            `}
+                        >
+                            {isDeleting ? (
+                                <div className="flex items-center">
+                                    <div className="animate-spin rounded-lg h-4 w-4 border-b-2 border-current mr-2"></div>
+                                    Eliminando...
+                                </div>
+                            ) : (
+                                'Eliminar'
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
