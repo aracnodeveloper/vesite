@@ -165,7 +165,6 @@ export const Login: FC = () => {
                     {/* Left Side - Video/Image with enhanced styling */}
                     <div className="flex-1 w-full lg:mr-12 order-2 lg:order-1">
                         <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
                             <img
                                 className="relative w-full h-64 sm:h-80 lg:h-96 rounded-3xl shadow-2xl object-cover transition-transform duration-500 group-hover:scale-105"
                                 src='./Video/TARJETA_NFC.gif'
@@ -174,8 +173,7 @@ export const Login: FC = () => {
                                 }}
                                 alt="VESites Demo"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl"></div>
-                        </div>
+                         </div>
                     </div>
 
                     {/* Right Side - Enhanced text content */}
