@@ -336,7 +336,7 @@ export const SocialLinksSection = ({
                                 <img
                                     src={platform.icon}
                                     alt={link.label}
-                                    className="w-4 h-4  "
+                                    className="w-6 h-6  "
                                     style={{ color: themeConfig.colors.text}}
                                 />
                             ) : (
@@ -358,7 +358,7 @@ export const SocialLinksSection = ({
                                 <img
                                     src={platform.icon}
                                     alt={link.label}
-                                    className="w-4 h-4 "
+                                    className="w-6 h-6 "
                                     style={{  color: themeConfig.colors.text }}
                                 />
                             ) : (
