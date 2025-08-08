@@ -311,66 +311,91 @@ export const SocialLinksSection = ({
                                        handleSocialClick,
                                        themeConfig,
                                        handleSocialLinkClick
-                                   }: any) => (
-    realSocialLinks.length > 0 && (
-        <div className="px-4 mb-4 "
+                                   }: any) => {
 
-        >
-            <div className="flex justify-center items-center gap-3 flex-wrap "
-                 style={{  backgroundColor: themeConfig.colors.accent,
-                     background: themeConfig.colors.accent}}>
-                {realSocialLinks.map((link: any) => {
-                    const platform = findPlatformForLink(link);
+    // Determine if the theme is dark based on background color
+    const isDarkTheme = () => {
+        const backgroundColor = themeConfig.colors.background;
 
-                    return isExposedRoute ? (
-                        <button
-                            key={link.id}
-                            onClick={() => handleSocialLinkClick ? handleSocialLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
-                            className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                            style={{
+        // Handle gradient backgrounds
+        if (backgroundColor.includes('gradient')) {
+            return false; // Treat gradients as light theme for now
+        }
 
-                                color: themeConfig.colors.text,
-                            }}
-                        >
-                            {platform?.icon ? (
-                                <img
-                                    src={platform.icon}
-                                    alt={link.label}
-                                    className="w-6 h-6  "
-                                    style={{ color: themeConfig.colors.text}}
-                                />
-                            ) : (
-                                <span className="text-white text-sm">🔗</span>
-                            )}
-                        </button>
-                    ) : (
-                        <a
-                            key={link.id}
-                            href={undefined}
-                            onClick={handleSocialClick}
-                            className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                            style={{
+        // Convert hex to RGB and calculate luminance
+        const hex = backgroundColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
 
-                                color: themeConfig.colors.text,
-                        }}
-                        >
-                            {platform?.icon ? (
-                                <img
-                                    src={platform.icon}
-                                    alt={link.label}
-                                    className="w-6 h-6 "
-                                    style={{  color: themeConfig.colors.text }}
-                                />
-                            ) : (
-                                <span className="text-white text-sm">🔗</span>
-                            )}
-                        </a>
-                    );
-                })}
+        // Calculate relative luminance using WCAG formula
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+        // If luminance is less than 0.5, it's a dark theme
+        return luminance < 0.5;
+    };
+
+    const getIconClassName = () => {
+        return isDarkTheme()
+            ? "w-6 h-6 invert brightness-0 contrast-100"
+            : "w-6 h-6";
+    };
+
+    return (
+        realSocialLinks.length > 0 && (
+            <div className="px-4 mb-4">
+                <div className="flex justify-center items-center gap-4 flex-wrap">
+                    {realSocialLinks.map((link: any) => {
+                        const platform = findPlatformForLink(link);
+
+                        return isExposedRoute ? (
+                            <button
+                                key={link.id}
+                                onClick={() => handleSocialLinkClick ? handleSocialLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
+                                className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                style={{
+                                    color: themeConfig.colors.text,
+                                }}
+                            >
+                                {platform?.icon ? (
+                                    <img
+                                        src={platform.icon}
+                                        alt={link.label}
+                                        className={getIconClassName()}
+                                        style={{ color: themeConfig.colors.text }}
+                                    />
+                                ) : (
+                                    <span className="text-white text-sm">🔗</span>
+                                )}
+                            </button>
+                        ) : (
+                            <a
+                                key={link.id}
+                                href={undefined}
+                                onClick={handleSocialClick}
+                                className="w-5 h-5 gap-3 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                style={{
+                                    color: themeConfig.colors.text,
+                                }}
+                            >
+                                {platform?.icon ? (
+                                    <img
+                                        src={platform.icon}
+                                        alt={link.label}
+                                        className={getIconClassName()}
+                                        style={{ color: themeConfig.colors.text }}
+                                    />
+                                ) : (
+                                    <span className="text-white text-sm">🔗</span>
+                                )}
+                            </a>
+                        );
+                    })}
+                </div>
             </div>
-        </div>
-    )
-);
+        )
+    );
+};
 
 const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
 
