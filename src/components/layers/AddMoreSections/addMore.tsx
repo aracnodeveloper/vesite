@@ -21,12 +21,10 @@ const Add = () => {
 
                     <Downloads/>*/}
                     <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENIDO</h4>
-
-                    <AppD/>
-
-                    <WhatsApp/>
                     <Links/>
+                    <WhatsApp/>
                     <Videos/>
+                    <AppD/>
                     <Musics/>
                     <Post/>
                 </div>
