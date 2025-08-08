@@ -302,15 +302,6 @@ const WhatsAppPage = () => {
                         </p>
                     </div>
 
-                    {/* Vista previa del enlace generado */}
-                    {phone && message && isValidPhoneNumber(phone) && (
-                        <div className="p-3 bg-gray-50 rounded-md border">
-                            <p className="text-xs text-gray-600 mb-1">Vista previa del enlace:</p>
-                            <p className="text-xs text-blue-600 break-all">
-                                {generateWhatsAppUrl(phone, message)}
-                            </p>
-                        </div>
-                    )}
 
                     {/* Botones de acción */}
                     <div className="space-y-2">
@@ -337,15 +328,6 @@ const WhatsAppPage = () => {
                                 )}
                             </button>
 
-                            {phone && message && isValidPhoneNumber(phone) && (
-                                <button
-                                    onClick={handlePreview}
-                                    disabled={isSaving || loading}
-                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                                >
-                                    Probar
-                                </button>
-                            )}
                         </div>
 
                         {/* Botón de eliminar para enlaces existentes */}
