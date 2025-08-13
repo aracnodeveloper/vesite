@@ -315,7 +315,6 @@ const AnalyticsContent = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      // Mostrar notificación
       const notification = document.createElement('div');
       notification.innerHTML = `
       <div style="max-width: 300px;">

@@ -79,23 +79,9 @@ export const Login: FC = () => {
                      border: '1px solid rgba(255, 255, 255, 0.2)',
                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                  }}>
-                <Typography.Title
-                    level={3}
-                    className="m-0 font-semibold bg-gradient-to-r fa  from-green-600 to-blue-600 bg-clip-text text-transparent"
-                    style={{
-                        fontSize: '28px',
-                        letterSpacing: '0.5px',
-                        fontFamily: "'Inknut Antiqua', serif",
-                    }}
-                >
-                    VeSites
-                    <div className="flex justify-center lg:justify-center pt-4">
-                    <div className="w-6 h-2 bg-[#BAD789] opacity-60"></div>
-                    <div className="w-6 h-2 bg-[#D3E7C0]  opacity-60"></div>
-                    <div className="w-6 h-2 bg-[#E0EED5]  opacity-60"></div>
-                </div>
-                </Typography.Title>
-
+                <div className="w-30 h-20">
+                <img src='./img/veosite.png' className="w-30 h-20"/>
+            </div>
                 <div className="flex items-center space-x-4 w-full sm:w-auto">
                     <Form
                         layout="inline"
@@ -207,7 +193,7 @@ export const Login: FC = () => {
                                 }}
                             >
                                 Crea tu marca con nuestros{' '}
-                                <span className="font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                                <span className="font-semibold bg-gradient-to-r from-[#718C5B] to-[#718C5B] bg-clip-text text-transparent">
                                     VeSites
                                 </span>
                             </Typography.Text>

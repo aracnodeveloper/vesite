@@ -30,6 +30,23 @@ const ProfilePage = () => {
     const DEFAULT_BACKGROUND = 'https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
 
+    const isValidAvatar = (avatarUrl: string | null | undefined): boolean => {
+        if (!avatarUrl || typeof avatarUrl !== 'string') return false;
+
+        if (avatarUrl.startsWith('data:image/svg+xml')) {
+            return false;
+        }
+
+        try {
+            const url = new URL(avatarUrl);
+            return ['http:', 'https:'].includes(url.protocol);
+        } catch {
+            return false;
+        }
+    };
+
+    const hasValidAvatar = isValidAvatar(biosite?.avatarImage);
+
     const toggleWarning = () => {
         setShowWarning(!showWarning);
     };
@@ -56,7 +73,7 @@ const ProfilePage = () => {
                 title: initialTitle,
                 slug: initialSlug,
                 description: initialDescription,
-                cedula: user.cedula || '' // Agregar la cédula aquí
+                cedula: user.cedula || ''
             });
 
             setInitialValuesSet(true);
@@ -68,6 +85,12 @@ const ProfilePage = () => {
     }, [biosite?.id, user?.id]);
 
     const handleFinish = async (values: any) => {
+
+        if (!hasValidAvatar) {
+            message.error('Debes subir una imagen de avatar antes de actualizar el perfil');
+            return;
+        }
+
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
             message.error('Error: Información del perfil no disponible');
             return;
@@ -126,7 +149,6 @@ const ProfilePage = () => {
             loadingMessage();
             message.success('Perfil actualizado exitosamente');
 
-            // Recargar la página después de un breve delay para que el usuario vea el mensaje de éxito
             setTimeout(() => {
                 window.location.reload();
             }, 50);
@@ -134,7 +156,6 @@ const ProfilePage = () => {
         } catch (error: any) {
             console.error("Error al actualizar perfil:", error);
 
-            // Handle specific database constraint errors
             if (error.response?.data?.details?.code === 'P2003') {
                 message.error('Error: Referencia de base de datos inválida');
             } else {
@@ -202,6 +223,19 @@ const ProfilePage = () => {
                         updatePreview={updatePreview}
                         role={role}
                     />
+
+                    {!hasValidAvatar && (
+                        <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                            <div className="flex items-start gap-2">
+                                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                                <p className="text-xs text-red-700" style={{fontSize: "10px"}}>
+                                    Es necesario subir una imagen de avatar para poder actualizar el perfil
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {!isAdmin && (
@@ -219,11 +253,11 @@ const ProfilePage = () => {
                             </div>
                             {showWarning && (
                                 <div className="h-20 lg:h-20 md:h-20 sm:h-20">
-                                    <h4 className="text-sm font-medium text-blue-800 mb-1" style={{fontSize:"11px"}}>Imagen de fondo</h4>
+                                    <h4 className="text-sm font-medium text-blue-800 mb-1" style={{fontSize:"11px"}}>Importante</h4>
                                     <p className="text-sm text-blue-700" style={{fontSize:"11px"}}>
                                         {biosite.backgroundImage
                                             ? 'Tienes una imagen de fondo personalizada ya previa configurada             Al configurar debes llenar todos los campos y añadir una imagen '
-                                            : 'Se aplicará una imagen de fondo por defecto a el perfil VeSite...  Al configurar debes llenar todos los campos y añadir una imagen'
+                                            : ' Al configurar debes llenar todos los campos y añadir una imagen. Se aplicará una imagen de fondo por defecto a el perfil VeSite... '
                                         }
                                     </p>
                                 </div>
@@ -336,11 +370,17 @@ const ProfilePage = () => {
                             <Button
                                 type="default"
                                 htmlType="submit"
-                                className="w-full bg-blue-600 text-white hover:bg-blue-700 border-none rounded-lg py-2 h-auto"
+                                className={`w-full border-none rounded-lg py-2 h-auto ${
+                                    hasValidAvatar && !loading
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                        : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                }`}
                                 loading={loading}
-                                disabled={!biosite.id}
+                                disabled={!biosite.id || !hasValidAvatar || loading}
                             >
-                                {loading ? 'Actualizando...' : 'Actualizar Perfil'}
+                                {loading ? 'Actualizando...' :
+                                    !hasValidAvatar ? 'Sube una imagen de avatar para continuar' :
+                                        'Actualizar Perfil'}
                             </Button>
                         </Form.Item>
                     </Form>
