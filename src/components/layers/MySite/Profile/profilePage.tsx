@@ -326,28 +326,25 @@ const ProfilePage = () => {
                                 ]}
                                 className="mb-0"
                             >
-                                <div className="flex items-center bg-white rounded-lg border border-gray-300 h-12 px-3">
-            <span className="text-gray-500 text-sm mr-1" style={{fontSize: "11px"}}>
-                vesite/
-            </span>
                                     <Input
                                         placeholder="tu-url-personalizada"
                                         disabled={loading}
+                                        height={20}
+                                        addonBefore='vesite/'
                                         maxLength={30}
-                                        className="flex-1 border-none bg-transparent text-black placeholder-gray-400 shadow-none focus:shadow-none focus:border-none hover:shadow-none p-0"
-                                        style={{fontSize: "11px", boxShadow: "none"}}
+                                        className="flex-1 h-12 border-none bg-transparent text-black placeholder-gray-400 shadow-none focus:shadow-none focus:border-none hover:shadow-none p-0"
+                                        style={{fontSize: "12px", boxShadow: "none"}}
                                     />
-                                </div>
                             </Form.Item>
 
                             {/* Mostrar la URL completa como preview */}
                             {form.getFieldValue('slug') && (
-                                <div className="mt-2 text-xs text-gray-600" style={{fontSize: "10px"}}>
+                                <div className="mt-2 text-sm text-gray-600" style={{fontSize: "12px"}}>
                                     URL completa: <span className="text-blue-600">visitaecuador.com/vesite/{form.getFieldValue('slug')}</span>
                                 </div>
                             )}
                             {form.getFieldValue('cedula') && (
-                                <div className="mt-2 text-xs text-gray-600" style={{fontSize: "10px"}}>
+                                <div className="mt-2 text-sm text-gray-600" style={{fontSize: "12px"}}>
                                     URL fija: <span className="text-blue-600">visitaecuador.com/{form.getFieldValue('cedula')}</span>
                                 </div>
                             )}

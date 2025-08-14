@@ -775,7 +775,7 @@ const PublicBiositeView = () => {
                     />
 
                     {musicEmbed && musicEmbed.isActive && (
-                        <div className="px-4 mb-4">
+                        <div className="px-4 mb-5">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
                                >
 
