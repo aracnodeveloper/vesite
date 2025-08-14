@@ -578,7 +578,7 @@ const AnalyticsContent = () => {
 
   const totalViews = analyticsData?.views || 0;
   const totalClicks = analyticsData?.clicks || 0;
-  const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
+  const ctr = totalViews > 0 ? Math.round(( totalViews/ totalClicks) * 100) : 0;
 
   if (loading) {
     return (
@@ -829,7 +829,7 @@ const AnalyticsContent = () => {
               </div>
 
               <div
-                  className="absolute left-44 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+                  className="absolute left-24 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">VISTAS</div>
                 <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
@@ -839,13 +839,13 @@ const AnalyticsContent = () => {
               </div>
 
               <div
-                  className="absolute right-40 top-82 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+                  className="absolute right-30 top-82 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CLICKS</div>
                 <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
 
               <div
-                  className="absolute right-56 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+                  className="absolute right-36 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CTR</div>
                 <div className="text-2xl font-bold text-black">{ctr}%</div>
               </div>

@@ -9,7 +9,9 @@ import {
     BarChartHorizontalBig,
     Palette,
     GanttChart,
-    Music, Instagram
+    Music,
+    Instagram,
+    Shield
 } from "lucide-react";
 
 import imgP from "../../../public/img/img.png";
@@ -19,6 +21,7 @@ import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
 import { useUpdateShareActions } from "../../hooks/useUpdateShareActions.ts";
+import { useUser } from "../../hooks/useUser.ts";
 
 import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 import PhonePreview from "../Preview/phonePreview.tsx";
@@ -36,6 +39,7 @@ import AppPage from "../layers/AddMoreSections/App/appPage.tsx";
 import WhatsAppPage from "../layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
 import ShareButton from "../ShareButton.tsx";
 import {VideoCameraOutlined, WhatsAppOutlined} from "@ant-design/icons";
+import Cookie from "js-cookie";
 
 
 interface LayoutProps {
@@ -234,13 +238,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuthContext();
-
+    const role = Cookie.get('roleName');
     const { biosite } = usePreview();
     const { hasChanges, markAsSaved, resetChangeDetection } = useChangeDetection();
     const { isUpdating, handleUpdate, handleShare } = useUpdateShareActions();
 
     const [activeItem, setActiveItem] = useState<string>("layers");
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // This state seems unused for the mobile drawer
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showPreview, setShowPreview] = useState(true);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
@@ -259,11 +263,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     // Control del scroll del body cuando el drawer está abierto
     useEffect(() => {
         if (isDrawerOpen) {
-            // Prevenir scroll del body cuando el drawer está abierto
             document.body.style.overflow = 'hidden';
             document.documentElement.style.overflow = 'hidden';
 
-            // También prevenir el scroll en dispositivos iOS
             const preventDefault = (e: TouchEvent) => {
                 if (e.target && drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
                     e.preventDefault();
@@ -276,12 +278,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 document.removeEventListener('touchmove', preventDefault);
             };
         } else {
-            // Restaurar scroll del body cuando el drawer se cierra
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
         }
 
-        // Cleanup al desmontar el componente
         return () => {
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
@@ -315,7 +315,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             closeDrawer();
         }
     };
-
 
     const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
         setIsDragging(true);
@@ -367,7 +366,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         const titles: { [key: string]: string } = {
             'sections': 'Secciones',
             'style': 'Estilos',
-            'analytics': 'Estadistícas',
+            'analytics': 'Estadísticas',
+            'admin': 'Administración',
             'profile': 'Perfil',
             'social': 'Social',
             'VCard': 'V-Card',
@@ -381,7 +381,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         return titles[selectedSection] || selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1);
     }
-
 
     const handleExpoced = () => {
         if (biosite?.slug) {
@@ -405,11 +404,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }
     }, [biosite?.id]);
 
-    const sidebarItems = [
+    // Sidebar items con condición para SUPER_ADMIN
+    const baseSidebarItems = [
         { icon: GanttChart, label: "Secciones", id: "sections", to: "/sections", color: "green" },
         { icon: Palette, label: "Estilos", id: "style", to: "/droplet", color: "orange" },
-        { icon: BarChartHorizontalBig, label: "Estadistícas", id: "analytics", to: "/analytics", color: "blue" },
+        { icon: BarChartHorizontalBig, label: "Estadísticas", id: "analytics", to: "/analytics", color: "blue" },
     ];
+
+    // Agregar item de administración solo para SUPER_ADMIN
+    const sidebarItems = role === 'SUPER_ADMIN'
+        ? [
+            ...baseSidebarItems,
+            { icon: Shield, label: "Administración", id: "admin", to: "/admin", color: "red" }
+        ]
+        : baseSidebarItems;
 
     const getAvatarImage = () => {
         if (avatarError || !biosite?.avatarImage) {
@@ -471,7 +479,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const isAnalyticsRoute = location.pathname === '/analytics';
+    const isAnalyticsRoute = location.pathname === '/analytics' ;
+    const isAdminRoute = location.pathname === '/admin' ;
 
     useEffect(() => {
         setAvatarError(false); // Reset avatar error when biosite avatar image changes
@@ -611,7 +620,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         {children}
                     </main>
 
-                    {!isAnalyticsRoute && showPreview && (
+                    {!isAnalyticsRoute && !isAdminRoute && showPreview && (
                         <div className="w-full md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[750px] mt-0 lg:mt-0 p-0 md:p-0 flex justify-center items-center relative">
                             <div className="absolute inset-0" style={{ background: `url(${imgP2}) no-repeat center center`, backgroundSize: 'cover', height: '100%', width: '100%', opacity: 0.6 }} />
                             <div className="w-full max-w-[350px] lg:max-w-none flex justify-center items-center relative transition-transform duration-300 ease-in-out origin-center scale-[.60] md:scale-[.68] lg:scale-[.72] xl:scale-[.76] 2xl:scale-[.80]">

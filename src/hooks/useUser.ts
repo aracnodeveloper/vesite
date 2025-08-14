@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import apiService from '../service/apiService';
+import { getALLUsersApi } from '../constants/EndpointsRoutes';
 
 interface User {
     id: string;
@@ -31,6 +32,24 @@ export const useUser = () => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // NUEVO: Obtener todos los usuarios
+    const fetchAllUsers = useCallback(async (): Promise<User[]> => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const users = await apiService.getAll<User[]>(getALLUsersApi);
+            return Array.isArray(users) ? users : [];
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Error fetching all users';
+            setError(errorMessage);
+            console.error('Error fetching all users:', err);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const fetchUser = useCallback(async (userId: string): Promise<User | null> => {
         if (!userId) return null;
@@ -86,6 +105,7 @@ export const useUser = () => {
         loading,
         error,
         fetchUser,
+        fetchAllUsers,
         updateUser,
         clearError,
         resetUser

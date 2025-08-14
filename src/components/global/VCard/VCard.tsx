@@ -256,6 +256,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
         try {
             await regenerateQRCode(validUserId);
+
             setShowQR(true);
         } catch (error) {
             console.error('Error regenerating QR code:', error);
@@ -275,12 +276,9 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         }
     };
 
-    // Reset cuando se cierra el modal
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setShowQR(false); // Reset del estado del QR
-        // Opcional: resetear isDataLoaded si quieres recargar datos cada vez
-        // setIsDataLoaded(false);
+        setShowQR(false);
     };
 
     return (

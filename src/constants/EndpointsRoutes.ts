@@ -18,6 +18,7 @@ export const updateStaticApi = "/biosites/static";
 export const getBiositeAdminApi = "/biosites/admin";
 export const getBiositeApi = "/biosites/user";
 export const getBiositesApi = "/biosites"
+export const getALLBiositesApi = "/biosites"
 
 //Links
 export const LinksApi = "/links"
@@ -29,6 +30,11 @@ export const deleteImageApi: string = "/upload/image"; // DELETE /{filename}
 export const uploadUserAvatarApi: string = "/upload/user-avatar"; // POST /{userId}
 export const uploadBiositeAvatarApi: string = "/upload/biosite-avatar"; // POST /{biositeId}
 export const uploadBiositeBackgroundApi: string = "/upload/biosite-background";
+
+//User
+
+export const getALLUsersApi = "/users"
+
 
 // BUSINESS CARDS (V-Card.ts)
 export const businessCardsApi = "/business-cards";

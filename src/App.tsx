@@ -23,6 +23,7 @@ import PublicBiositeView from "./context/PublicBiositeView.tsx";
 import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
 import VCardPage from "./components/layers/MySite/V-Card/V-CardPage.tsx";
 import WhatsAppPage from "./components/layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
+import AdminPanel from "./pages/SuperAdmin.tsx";
 
 // Rutas protegidas
 
@@ -47,6 +48,16 @@ const App = () => {
                             }
                         />
 
+                        <Route
+                            path="/admin"
+                            element={
+                                <PrivateRoute>
+                                    <Layout>
+                                        <AdminPanel />
+                                    </Layout>
+                                </PrivateRoute>
+                            }
+                        />
                         {/* Rutas privadas (autenticado) */}
                         <Route
                             path="/sections"

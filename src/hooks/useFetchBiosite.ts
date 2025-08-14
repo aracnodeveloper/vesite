@@ -3,7 +3,9 @@ import {
     updateBiositeApi,
     registerStudentApi,
     getBiositesApi,
-    getBiositeAdminApi
+    getBiositeAdminApi,
+    getALLBiositesApi,
+    getALLUsersApi
 } from "../constants/EndpointsRoutes";
 import type { BiositeFull, BiositeUpdateDto } from "../interfaces/Biosite";
 import { useState, useCallback, useRef } from "react";
@@ -21,6 +23,40 @@ export const useFetchBiosite = (userId?: string) => {
     const [error, setError] = useState<string | null>(null);
     const isInitializedRef = useRef<boolean>(false);
     const currentUserIdRef = useRef<string | undefined>(undefined);
+
+    // Nuevo método para obtener todos los usuarios
+    const fetchAllUsers = useCallback(async (): Promise<ChildUser[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const allUsers = await apiService.getAll<ChildUser[]>(getALLUsersApi);
+            return Array.isArray(allUsers) ? allUsers : [allUsers];
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar todos los usuarios";
+            setError(errorMessage);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Nuevo método para obtener todos los biosites
+    const fetchAllBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const allBiosites = await apiService.getAll<BiositeFull[]>(getALLBiositesApi);
+            return Array.isArray(allBiosites) ? allBiosites : [allBiosites];
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar todos los biosites";
+            setError(errorMessage);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const fetchUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {
         if (!userId) {
@@ -440,6 +476,10 @@ export const useFetchBiosite = (userId?: string) => {
         fetchAdminBiosites,
         fetchChildBiosites,
         fetchCompleteBiositeStructure,
+
+        // Nuevos métodos para obtener todos los datos
+        fetchAllUsers,
+        fetchAllBiosites,
 
         // Utilidades
         clearError,
