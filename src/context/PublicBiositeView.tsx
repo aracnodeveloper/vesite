@@ -336,7 +336,7 @@ const PublicBiositeView = () => {
                     name: link.label,
                     url: link.url,
                     icon: iconIdentifier,
-                    color: link.color || '#3B82F6',
+                    color: link.color || '#f3f4f6',
                     isActive: link.isActive
                 });
             } else {
@@ -523,7 +523,7 @@ const PublicBiositeView = () => {
                 colors: {
                     primary: biositeData.biosite.theme.config.colors.primary,
                     secondary: biositeData.biosite.theme.config.colors.secondary,
-                    accent: biositeData.biosite.theme.config.colors.accent || biositeData.biosite.theme.config.colors.primary,
+                    accent: biositeData.biosite.theme.config.colors.accent ,
                     background: biositeData.biosite.theme.config.colors.background || '#ffffff',
                     text: biositeData.biosite.theme.config.colors.text || '#000000',
                     profileBackground: biositeData.biosite.theme.config.colors.profileBackground || '#ffffff'
@@ -537,7 +537,7 @@ const PublicBiositeView = () => {
             };
         }
 
-        const defaultColors = { primary: '#f3f4f6', secondary: '#1F2937' };
+        const defaultColors = { primary: '#f3f4f6', secondary: '#f3f4f6' };
         const parsedColors = biositeData.biosite.colors
             ? (typeof biositeData.biosite.colors === 'string'
                 ? JSON.parse(biositeData.biosite.colors)
@@ -548,7 +548,7 @@ const PublicBiositeView = () => {
             colors: {
                 primary: parsedColors.primary || defaultColors.primary,
                 secondary: parsedColors.secondary || defaultColors.secondary,
-                accent: parsedColors.accent || parsedColors.primary || defaultColors.primary,
+                accent: parsedColors.accent,
                 background: parsedColors.background || '#ffffff',
                 text: parsedColors.text || '#000000',
                 profileBackground: parsedColors.profileBackground || '#ffffff'
@@ -660,9 +660,6 @@ const PublicBiositeView = () => {
 
     const description = biositeData.biosite.owner.description || user?.description ;
     const activeWhatsAppLinks = biositeData.whatsApplinks.filter(link => link.isActive);
-
-    console.log('Active WhatsApp links:', activeWhatsAppLinks);
-    console.log('All WhatsApp links:', biositeData.whatsApplinks);
 
     const DEFAULT_APP_STORE_URL = "https://apps.apple.com/us/app/visitaecuador-com/id1385161516?ls=1";
     const DEFAULT_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es";

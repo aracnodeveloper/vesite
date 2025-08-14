@@ -55,11 +55,10 @@ const VCardPage = () => {
         loadData();
     }, [slug, currentUserId]);
 
-    // Nuevo efecto para sincronizar datos del usuario con la VCard
+    // Nuevo efecto para sincronizar datos del usuario con la VCard y actualizar automáticamente
     useEffect(() => {
-        if (user && businessCard && !slug) {
-            // Solo actualizar si no estamos en modo de edición y si los datos del usuario existen
-            if (!isEditing) {
+        const syncAndUpdateCard = async () => {
+            if (user && businessCard && !slug && businessCard.id && !isEditing && !loading) {
                 try {
                     const parsedData = typeof businessCard.data === 'string'
                         ? JSON.parse(businessCard.data)
@@ -73,13 +72,35 @@ const VCardPage = () => {
                         website: parsedData.website || user.site || ''
                     };
 
-                    setCardData(syncedData);
+                    // Verificar si realmente hay cambios antes de actualizar
+                    const hasChanges = JSON.stringify(parsedData) !== JSON.stringify(syncedData);
+
+                    if (hasChanges) {
+                        setCardData(syncedData);
+
+                        // Actualizar automáticamente la business card con los datos sincronizados
+                        try {
+                            await updateBusinessCard(businessCard.id, {
+                                ownerId: currentUserId,
+                                data: JSON.stringify(syncedData),
+                                isActive: true
+                            });
+                            console.log('Business card actualizada automáticamente con datos del usuario');
+                        } catch (updateError) {
+                            console.error('Error actualizando business card automáticamente:', updateError);
+                        }
+                    } else {
+                        // Solo actualizar el estado local si no hay cambios en los datos
+                        setCardData(syncedData);
+                    }
                 } catch (error) {
                     console.error('Error syncing user data with VCard:', error);
                 }
             }
-        }
-    }, [user, businessCard, slug, isEditing]);
+        };
+
+        syncAndUpdateCard();
+    }, [user?.phone, user?.name, user?.site, businessCard?.id, slug, isEditing, currentUserId, initialLoad]);
 
     // Efecto mejorado para generar QR automáticamente
     useEffect(() => {
@@ -475,6 +496,7 @@ const VCardPage = () => {
                         )}
                     </div>
 
+                    {/* User sync status */}
                     {userError && !slug && (
                         <div className="bg-yellow-50 p-4 border-t">
                             <p className="text-sm text-yellow-800">
