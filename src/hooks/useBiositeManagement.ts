@@ -77,7 +77,6 @@ export const useBiositeOperations = ({
                 themeId: biositeData.themeId,
                 colors: JSON.stringify(colorsObject),
                 fonts: biositeData.fonts || fontFamily,
-                avatarImage: biositeData.avatarImage || '',
                 backgroundImage: biositeData.backgroundImage || '',
                 isActive: biositeData.isActive
             };
@@ -118,7 +117,6 @@ export const useBiositeOperations = ({
                 themeId: biositeData.themeId,
                 colors: colorsString,
                 fonts: font, // ← La fuente nueva
-                avatarImage: biositeData.avatarImage || '',
                 backgroundImage: biositeData.backgroundImage || '',
                 isActive: biositeData.isActive
             };

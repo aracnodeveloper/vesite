@@ -20,7 +20,7 @@ const WhatsApp = () => {
                     </div>
                     <div>
                         <div className="text-black font-medium">Contactame</div>
-                        <div className="text-gray-400 text-sm">WhatsAppeame</div>
+                        <div className="text-gray-400 text-sm">WhatsApp</div>
                     </div>
                 </div>
                 <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-green-600 hover:border-green-600 transition-colors">

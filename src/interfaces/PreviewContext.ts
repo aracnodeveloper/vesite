@@ -31,6 +31,7 @@ export interface AppLink {
     export interface WhatsAppLink {
         id: string;
         phone: string;
+        description?: string;
         message: string;
         isActive: boolean;
     }

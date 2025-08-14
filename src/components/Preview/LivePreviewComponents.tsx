@@ -407,7 +407,7 @@ export const RegularLinksSection = ({
                                         handleLinkClick // Nueva prop para manejar clics con analytics
                                     }: any) => (
     regularLinksData.length > 0 && (
-        <div className="px-4 pb-8 space-y-2">
+        <div className="px-4 pb-2 space-y-2">
             {regularLinksData.map((link: any) => {
 
 

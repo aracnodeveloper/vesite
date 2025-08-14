@@ -76,14 +76,14 @@ export interface BiositeFull {
     owner?: BiositeOwner;
 }
 
-export interface BiositeUpdateDto {
+export interface    BiositeUpdateDto {
     ownerId: string;
     title: string;
     slug: string;
     themeId: string;
     colors: string | BiositeColors;
     fonts: string;
-    avatarImage: string;
+    avatarImage?: string;
     backgroundImage: string;
     isActive: boolean;
 }

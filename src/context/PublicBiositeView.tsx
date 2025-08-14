@@ -19,6 +19,7 @@ import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {useUser} from "../hooks/useUser.ts";
 import {WhatsAppOutlined} from "@ant-design/icons";
 import { useAnalytics } from "../hooks/useAnalytics.ts";
+import PublicWhatsAppButton from "../components/layers/AddMoreSections/WhattsApp/PublicWhatsAppButton.tsx";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -115,15 +116,11 @@ const PublicBiositeView = () => {
     };
 
     const isWhatsAppLink = useCallback((link: any): boolean => {
-        const labelLower = link.label?.toLowerCase() || '';
         const urlLower = link.url?.toLowerCase() || '';
         const icon = link.icon?.toLowerCase() || '';
 
-        console.log('Checking WhatsApp link:', { label: labelLower, url: urlLower, icon });
-
         return (
             icon === 'whatsapp' ||
-            icon.includes('whatsapp') ||
             urlLower.includes('api.whatsapp.com')
         );
     }, [])
@@ -138,28 +135,47 @@ const PublicBiositeView = () => {
         return 'appstore';
     };
 
-    const parseWhatsAppFromUrl = useCallback((url: string): { phone: string; message: string } => {
+    const parseWhatsAppFromUrl = useCallback((url: string, label?:string): { phone: string; message: string; description?:string; } => {
         try {
             let phone = '';
             let message = '';
+            let description = label || 'WhatsApp';
 
             if (url.includes('api.whatsapp.com/send')) {
+                // Extraer parámetros de la URL de WhatsApp API
                 const urlParams = new URLSearchParams(url.split('?')[1] || '');
                 phone = urlParams.get('phone') || '';
                 message = decodeURIComponent(urlParams.get('text') || '');
-            } else if (url.includes('wa.me/')) {
-                const match = url.match(/wa\.me\/(\d+)(?:\?text=(.+))?/);
-                if (match) {
-                    phone = match[1];
-                    message = match[2] ? decodeURIComponent(match[2]) : '';
+                description = label || 'WhatsApp';
+
+            }
+
+            phone = phone.replace(/[^\d+]/g, '');
+
+            if (message) {
+                try {
+                    let decodedMessage = message;
+                    let previousMessage = '';
+
+                    while (decodedMessage !== previousMessage) {
+                        previousMessage = decodedMessage;
+                        decodedMessage = decodeURIComponent(decodedMessage);
+                    }
+
+                    message = decodedMessage;
+                } catch (decodeError) {
+                    console.warn('Error decoding message:', decodeError);
                 }
             }
 
-            console.log('Parsed WhatsApp:', { phone, message, originalUrl: url });
-            return {phone, message};
+            return { phone, message, description };
         } catch (error) {
             console.error('Error parsing WhatsApp URL:', error);
-            return {phone: '', message: ''};
+            return {
+                phone: '',
+                message: '',
+                description: label || 'WhatsApp'
+            };
         }
     }, []);
 
@@ -204,46 +220,6 @@ const PublicBiositeView = () => {
     };
 
 
-    const WhatsAppButton = ({ whatsAppLink, themeConfig }: { whatsAppLink: WhatsAppLink, themeConfig: any }) => {
-        const generateWhatsAppUrl = (phone: string, message: string): string => {
-            const cleanPhone = phone.replace(/[^\d+]/g, '');
-            const encodedMessage = encodeURIComponent(message.trim());
-            return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
-        };
-
-        const handleClick = async (e: React.MouseEvent) => {
-            e.preventDefault();
-            const url = generateWhatsAppUrl(whatsAppLink.phone, whatsAppLink.message);
-            console.log('WhatsApp URL generated:', url);
-
-            // Trackear el clic de WhatsApp
-            await analytics.trackLinkClick(whatsAppLink.id);
-
-            window.open(url, '_blank');
-        };
-
-        return (
-            <div className="px-4 mb-4">
-                <button
-                    onClick={handleClick}
-                    className="w-full p-2 rounded-lg  text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
-                    style={{   backgroundColor: themeConfig.colors.accent,
-                        background: themeConfig.colors.accent}}
-                >
-                    <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                        <WhatsAppOutlined size={18} className="text-white" style={{color:'white'}} />
-                    </div>
-                    <div className="grid grid-cols-1 gap-1 ml-2">
-                        <div className="flex items-center">
-                        <span className="font-medium text-xs truncate">
-                            WhatsAppéame
-                        </span>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        );
-    };
 
     const isEmbedLink = (link: any): boolean => {
         const labelLower = link.label.toLowerCase();
@@ -561,7 +537,7 @@ const PublicBiositeView = () => {
             };
         }
 
-        const defaultColors = { primary: '#3B82F6', secondary: '#1F2937' };
+        const defaultColors = { primary: '#f3f4f6', secondary: '#1F2937' };
         const parsedColors = biositeData.biosite.colors
             ? (typeof biositeData.biosite.colors === 'string'
                 ? JSON.parse(biositeData.biosite.colors)
@@ -777,27 +753,25 @@ const PublicBiositeView = () => {
                         handleSocialLinkClick={analytics.handleSocialLinkClick} // Usar el handler con analytics
                     />
 
-                    {/* WhatsApp Buttons - Renderizar TODOS los enlaces activos */}
-                    {activeWhatsAppLinks.length > 0 && activeWhatsAppLinks.map((whatsAppLink) => (
-                        <WhatsAppButton
-                            key={whatsAppLink.id}
-                            whatsAppLink={whatsAppLink}
-                            themeConfig={themeConfig}
-                        />
-                    ))}
+                    <PublicWhatsAppButton
+                        whatsAppLinks={biositeData.whatsApplinks}
+                        themeConfig={themeConfig}
+                        onLinkClick={analytics.trackLinkClick}
+                    />
 
                     {/* Links regulares con analytics */}
                     <RegularLinksSection
                         regularLinksData={regularLinksData}
                         isExposedRoute={isExposedRoute}
                         themeConfig={themeConfig}
-                        handleLinkClick={analytics.handleLinkClick} // Usar el handler con analytics
+                        handleLinkClick={analytics.handleLinkClick}
                     />
 
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={biositeData.biosite.ownerId}
                         biosite={biositeData.biosite}
+                        isExposedRoute={isExposedRoute}
                     />
 
                     {musicEmbed && musicEmbed.isActive && (

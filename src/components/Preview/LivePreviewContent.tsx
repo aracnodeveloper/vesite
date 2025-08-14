@@ -224,13 +224,13 @@ const LivePreviewContent = () => {
                         handleLinksClick={handleLinksClick}
                         themeConfig={themeConfig}
                     />
-                    <div className="mt-12">
+
                         <VCardButton
                             themeConfig={themeConfig}
                             userId={user?.id || Cookie.get('userId')}
                             onVcardClick={handleVCardClick}  // ✅ Pasar como prop
                         />
-                    </div>
+
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (
                         <div className="px-4 mb-4">

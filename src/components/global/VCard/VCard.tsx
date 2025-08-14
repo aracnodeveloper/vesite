@@ -1,11 +1,10 @@
-// VCard.tsx - Fixed version
 import React, { useState, useEffect, useCallback } from 'react';
 import {Phone, Mail, Globe, QrCode, Download,  X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
 import {usePreview} from "../../../context/PreviewContext.tsx";
-import {useLocation} from "react-router-dom";
+import {useLocation, useParams} from "react-router-dom";
 import {useUser} from "../../../hooks/useUser.ts";
 
 interface VCardData {
@@ -35,24 +34,25 @@ interface VCardButtonProps {
     userId?: string;
     onVcardClick?: (e: React.MouseEvent) => void;
     biosite?: any;
+    isExposedRoute?: boolean;
 }
 
 const VCardButton: React.FC<VCardButtonProps> = ({
                                                      themeConfig,
                                                      userId,
                                                      onVcardClick,
+                                                     isExposedRoute,
                                                      biosite: biositeFromProps
                                                  }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    const [showQR, setShowQR] = useState(false); // Nuevo estado para controlar la visibilidad del QR
-
+    const [showQR, setShowQR] = useState(false);
+    const [initialLoad, setInitialLoad] = useState(true);
+    const { slug } = useParams<{ slug?: string }>();
     const { biosite: biositeFromContext } = usePreview() || { biosite: null };
     const biosite = biositeFromContext || biositeFromProps;
 
-    const location = useLocation();
-    const isExposedRoute = location.pathname === '/expoced';
 
     const [cardData, setCardData] = useState<VCardData>({
         name: '',
@@ -90,14 +90,14 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         error,
         regenerateQRCode,
         fetchBusinessCardByUserId,
-        fetchBusinessCardBySlug
+        fetchBusinessCardBySlug,
+        generarBusinessQR
     } = useBusinessCard();
 
     const {
         fetchUser,
     } = useUser();
 
-    // Función memoizada para cargar datos
     const loadUserData = useCallback(async () => {
         const validUserId = getCurrentUserId();
 
@@ -113,7 +113,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             await fetchUser(validUserId);
         } catch (error) {
             console.error('Error loading user data:', error);
-            setIsDataLoaded(false); // Reset en caso de error
+            setIsDataLoaded(false);
+            setInitialLoad(false);
         }
     }, [getCurrentUserId, fetchBusinessCardByUserId, fetchUser, isDataLoaded]);
 
@@ -124,7 +125,31 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         }
     }, [isModalOpen, isDataLoaded, loadUserData]);
 
-    // Reset del flag cuando cambia el userId
+    useEffect(() => {
+        const autoGenerateQR = async () => {
+
+            if (!initialLoad && !slug && currentUserId && businessCard && !loading) {
+
+                if (!businessCard.qrCodeUrl) {
+                    try {
+                        console.log('Auto-generando QR code...');
+                        await regenerateQRCode(currentUserId);
+                    } catch (error) {
+                        console.error('Error auto-generando QR:', error);
+
+                        try {
+                            await generarBusinessQR(currentUserId);
+                        } catch (fallbackError) {
+                            console.error('Error en fallback QR:', fallbackError);
+                        }
+                    }
+                }
+            }
+        };
+
+        autoGenerateQR();
+    }, [businessCard, initialLoad, slug, currentUserId, loading]);
+
     useEffect(() => {
         setIsDataLoaded(false);
         console.log('UserId changed, resetting data loaded flag');
@@ -231,20 +256,22 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
         try {
             await regenerateQRCode(validUserId);
-            setShowQR(true); // Mostrar el QR después de regenerarlo
+            setShowQR(true);
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
     };
 
-    const handleOpenAndGenerate = async () => {
-        try {
+    const handleButtonClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+
+        if (isExposedRoute) {
             setIsModalOpen(true);
-
-                await handleRegenerateQR();
-
-        } catch (error) {
-            console.error('Error en handleOpenAndGenerate:', error);
+            handleRegenerateQR();
+        } else {
+            if (onVcardClick) {
+                onVcardClick(e);
+            }
         }
     };
 
@@ -258,14 +285,14 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
     return (
         <>
-            <div className="px-4 mb-4 cursor-pointer"
-                 onClick={!isExposedRoute ? onVcardClick : undefined}
-           >
+            <div className="px-4 mb-4">
                 <button
-                    onClick={handleOpenAndGenerate}
-                    className="block w-full p-2 rounded-xl text-center  transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
-                    style={{     backgroundColor: themeConfig.colors.accent,
-                        background: themeConfig.colors.accent}}
+                    onClick={handleButtonClick}
+                    className="block w-full p-2  text-center transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
+                    style={{
+                        backgroundColor: themeConfig.colors.accent,
+                        background: themeConfig.colors.accent
+                    }}
                 >
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-3">
@@ -285,7 +312,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                 </button>
             </div>
 
-            {isModalOpen && (
+            {/* Modal solo se muestra si isModalOpen es true Y estamos en ruta expuesta */}
+            {isModalOpen && isExposedRoute && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-4 border-b">
@@ -460,7 +488,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                             onClick={downloadVCard}
                                             className="flex-1 flex items-center justify-center py-4 px-4 gap-2 hover:bg-gray-50 transition-colors border-r cursor-pointer"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 14"><g fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5h-1a1 1 0 0 1-1-1v-8h13v8a1 1 0 0 1-1 1h-1"/><path d="M4.5 11L7 13.5L9.5 11M7 13.5v-6M11.29 1a1 1 0 0 0-.84-.5h-6.9a1 1 0 0 0-.84.5L.5 4.5h13zM7 .5v4"/></g></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 14"><g fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 13.5h-1a1 1 0 0 1-1-1v-8h13v8a1 1 0 0 1-1 1h-1"/><path d="M4.5 11L7 13.5L9.5 11M7 13.5v-6M11.29 1a1 1 0 0 0-.84-.5h-6.9a1 1 0 0 0-.84.5L.5 4.5h13zM7 .5v4"/></g></svg>
 
                                             <span className="text-md font-medium text-gray-700">Agregar a contactos</span>
                                         </button>

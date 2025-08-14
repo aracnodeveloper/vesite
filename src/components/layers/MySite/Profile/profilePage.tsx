@@ -85,12 +85,6 @@ const ProfilePage = () => {
     }, [biosite?.id, user?.id]);
 
     const handleFinish = async (values: any) => {
-
-        if (!hasValidAvatar) {
-            message.error('Debes subir una imagen de avatar antes de actualizar el perfil');
-            return;
-        }
-
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
             message.error('Error: Información del perfil no disponible');
             return;
@@ -114,17 +108,22 @@ const ProfilePage = () => {
 
             const loadingMessage = message.loading('Actualizando perfil...', 0);
 
-            const updateData: BiositeUpdateDto = {
+            // Crear el objeto base sin avatarImage
+            const baseUpdateData = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || user?.name || biosite.title,
                 slug: values.slug || biosite.slug || user?.cedula,
                 themeId: biosite.themeId,
                 colors: ensureColorsAsString(biosite.colors),
                 fonts: biosite.fonts || '',
-                avatarImage: biosite.avatarImage || '',
                 backgroundImage: getBackgroundImage(),
                 isActive: biosite.isActive ?? true
             };
+
+            // Solo incluir avatarImage si es una URL válida
+            const updateData: BiositeUpdateDto = hasValidAvatar
+                ? { ...baseUpdateData, avatarImage: biosite.avatarImage! }
+                : baseUpdateData;
 
             // Update user description if changed
             if (values.description !== user?.description) {
@@ -224,18 +223,6 @@ const ProfilePage = () => {
                         role={role}
                     />
 
-                    {!hasValidAvatar && (
-                        <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                            <div className="flex items-start gap-2">
-                                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                </svg>
-                                <p className="text-xs text-red-700" style={{fontSize: "10px"}}>
-                                    Es necesario subir una imagen de avatar para poder actualizar el perfil
-                                </p>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {!isAdmin && (
@@ -371,16 +358,14 @@ const ProfilePage = () => {
                                 type="default"
                                 htmlType="submit"
                                 className={`w-full border-none rounded-lg py-2 h-auto ${
-                                    hasValidAvatar && !loading
+                                    !loading
                                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                                         : 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                 }`}
                                 loading={loading}
-                                disabled={!biosite.id || !hasValidAvatar || loading}
+                                disabled={!biosite.id || loading}
                             >
-                                {loading ? 'Actualizando...' :
-                                    !hasValidAvatar ? 'Sube una imagen de avatar para continuar' :
-                                        'Actualizar Perfil'}
+                                {loading ? 'Actualizando...' : 'Actualizar Perfil'}
                             </Button>
                         </Form.Item>
                     </Form>

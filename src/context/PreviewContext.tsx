@@ -104,13 +104,11 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     {/* */}
         const isWhatsAppLink = useCallback((link: any): boolean => {
-            const labelLower = link.label?.toLowerCase() || '';
             const urlLower = link.url?.toLowerCase() || '';
             const icon = link.icon?.toLowerCase() || '';
 
             return (
                 icon === 'whatsapp' ||
-                labelLower.includes('whatsapp') ||
                 urlLower.includes('api.whatsapp.com')
             );
         }, [])
@@ -128,24 +126,51 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     }, []);
 
     {/*  */ }
-        const parseWhatsAppFromUrl = useCallback((url: string): { phone: string; message: string } => {
-            try {
-                let phone = '';
-                let message = '';
+    const parseWhatsAppFromUrl = useCallback((url: string, label?: string): { phone: string; message: string; description: string } => {
+        try {
+            let phone = '';
+            let message = '';
+            let description = label || 'WhatsApp';
 
-                if (url.includes('api.whatsapp.com/send')) {
-                    const urlParams = new URLSearchParams(url.split('?')[1] || '');
-                    phone = urlParams.get('phone') || '';
-                    message = decodeURIComponent(urlParams.get('text') || '');
-                }
+            if (url.includes('api.whatsapp.com/send')) {
+                // Extraer parámetros de la URL de WhatsApp API
+                const urlParams = new URLSearchParams(url.split('?')[1] || '');
+                phone = urlParams.get('phone') || '';
+                message = decodeURIComponent(urlParams.get('text') || '');
 
+                // Si hay label, usarlo como descripción, sino usar WhatsApp por defecto
+                description = label || 'WhatsApp';
 
-                return {phone, message};
-            } catch (error) {
-                console.error('Error parsing WhatsApp URL:', error);
-                return {phone: '', message: ''};
             }
-        }, []);
+
+            phone = phone.replace(/[^\d+]/g, '');
+
+            if (message) {
+                try {
+                    let decodedMessage = message;
+                    let previousMessage = '';
+
+                    while (decodedMessage !== previousMessage) {
+                        previousMessage = decodedMessage;
+                        decodedMessage = decodeURIComponent(decodedMessage);
+                    }
+
+                    message = decodedMessage;
+                } catch (decodeError) {
+                    console.warn('Error decoding message:', decodeError);
+                }
+            }
+
+            return { phone, message, description };
+        } catch (error) {
+            console.error('Error parsing WhatsApp URL:', error);
+            return {
+                phone: '',
+                message: '',
+                description: label || 'WhatsApp'
+            };
+        }
+    }, []);
 
 
     // Función para obtener app links desde los links generales
@@ -160,18 +185,19 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }));
     }, [links, isAppStoreLink, getStoreType]);
     {/**/}
-        const getWhatsAppLinks = useCallback(() => {
-            return links
-                .filter(isWhatsAppLink)
-                .map(link => {
-                    const {phone, message} = parseWhatsAppFromUrl(link.url);
-                    return {
-                        id: link.id,
-                        phone,
-                        message,
-                        isActive: link.isActive
-                    };
-                });
+    const getWhatsAppLinks = useCallback(() => {
+        return links
+            .filter(isWhatsAppLink)
+            .map(link => {
+                const { phone, message, description } = parseWhatsAppFromUrl(link.url, link.label);
+                return {
+                    id: link.id,
+                    phone,
+                    message,
+                    description, // Ahora incluye la descripción
+                    isActive: link.isActive
+                };
+            });
         }, [links, isWhatsAppLink, parseWhatsAppFromUrl]);
 
 
@@ -485,7 +511,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             const linkData = {
                 biositeId: biositeData.id,
-                label: 'WhatsApp',
+                label: link.description || 'WhatsApp', // Usar la descripción proporcionada
                 url: whatsappUrl,
                 icon: 'whatsapp',
                 orderIndex: links.length,
@@ -515,40 +541,50 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }
         };
 
-        const updateWhatsAppLink = async (id: string, data: Partial<WhatsAppLink>) => {
-            try {
-                const updateData: any = {};
+    const updateWhatsAppLink = async (id: string, data: Partial<WhatsAppLink>) => {
+        try {
+            const updateData: any = {};
 
-                if (data.phone !== undefined || data.message !== undefined) {
-                    const currentLink = links.find(link => link.id === id);
-                    if (currentLink) {
-                        const currentData = parseWhatsAppFromUrl(currentLink.url);
+            if (data.phone !== undefined || data.message !== undefined) {
+                const currentLink = links.find(link => link.id === id);
+                if (currentLink) {
+                    const currentData = parseWhatsAppFromUrl(currentLink.url, currentLink.label);
 
-                        const phone = data.phone !== undefined ? data.phone : currentData.phone;
-                        const message = data.message !== undefined ? data.message : currentData.message;
+                    const phone = data.phone !== undefined ? data.phone : currentData.phone;
+                    const message = data.message !== undefined ? data.message : currentData.message;
 
-                        const cleanPhone = phone.replace(/[^\d+]/g, '');
-                        const encodedMessage = encodeURIComponent(message);
-                        updateData.url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
-                    }
+                    const cleanPhone = phone.replace(/[^\d+]/g, '');
+                    const encodedMessage = encodeURIComponent(message);
+                    updateData.url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
                 }
-
-                if (data.isActive !== undefined) {
-                    updateData.isActive = data.isActive;
-                }
-
-                updateData.label = 'WhatsApp';
-                updateData.icon = 'whatsapp';
-
-                const updatedLink = await updateLink(id, updateData);
-                if (updatedLink) {
-                    console.log('WhatsApp link updated successfully:', updatedLink);
-                }
-            } catch (error) {
-                console.error('Error updating WhatsApp link:', error);
-                throw error;
             }
-        };
+
+            if (data.isActive !== undefined) {
+                updateData.isActive = data.isActive;
+            }
+
+            // Actualizar la descripción si se proporciona
+            if (data.description !== undefined) {
+                updateData.label = data.description;
+            }
+
+            // Si no hay descripción específica, mantener 'WhatsApp' como default
+            if (!updateData.label) {
+                updateData.label = 'WhatsApp';
+            }
+
+            updateData.icon = 'whatsapp';
+
+            const updatedLink = await updateLink(id, updateData);
+            if (updatedLink) {
+                console.log('WhatsApp link updated successfully:', updatedLink);
+            }
+        } catch (error) {
+            console.error('Error updating WhatsApp link:', error);
+            throw error;
+        }
+    };
+
     useEffect(() => {
         if (biositeData && biositeData.colors) {
             let parsedColors;
@@ -608,7 +644,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     themeId: biositeData.themeId,
                     colors: JSON.stringify(updatedColors),
                     fonts: biositeData.fonts || fontFamily,
-                    avatarImage: biositeData.avatarImage || '',
                     backgroundImage: biositeData.backgroundImage || '',
                     isActive: biositeData.isActive
                 };
@@ -660,7 +695,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     themeId: biositeData.themeId,
                     colors: JSON.stringify(currentColors),
                     fonts: font,
-                    avatarImage: biositeData.avatarImage || '',
                     backgroundImage: biositeData.backgroundImage || '',
                     isActive: biositeData.isActive
                 };

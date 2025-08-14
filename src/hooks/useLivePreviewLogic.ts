@@ -63,7 +63,7 @@ export const useLivePreviewLogic = () => {
 
         return {
             colors: {
-                primary: colors.primary,
+                primary: colors.primary || '#f3f4f6',
                 secondary: colors.secondary,
                 accent: colors.accent || colors.primary,
                 background: colors.background || themeColor || '#ffffff',
