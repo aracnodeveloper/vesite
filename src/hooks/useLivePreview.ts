@@ -12,7 +12,7 @@ export const useLivePreview = () => {
     const parseColors = (colors: string | BiositeColors | null | undefined): BiositeColors => {
         const defaultColors: BiositeColors = {
             primary: '#f3f4f6',
-            secondary: '#1F2937',
+            secondary: '#f3f4f6',
             background: '#ffffff',
             text: '#000000'
         };

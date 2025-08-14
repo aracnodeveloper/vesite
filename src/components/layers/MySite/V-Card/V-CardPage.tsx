@@ -55,6 +55,32 @@ const VCardPage = () => {
         loadData();
     }, [slug, currentUserId]);
 
+    // Nuevo efecto para sincronizar datos del usuario con la VCard
+    useEffect(() => {
+        if (user && businessCard && !slug) {
+            // Solo actualizar si no estamos en modo de edición y si los datos del usuario existen
+            if (!isEditing) {
+                try {
+                    const parsedData = typeof businessCard.data === 'string'
+                        ? JSON.parse(businessCard.data)
+                        : businessCard.data || {};
+
+                    // Sincronizar campos desde el usuario
+                    const syncedData = {
+                        ...parsedData,
+                        name: parsedData.name || user.name || '',
+                        phone: user.phone || parsedData.phone || '', // Priorizar phone del usuario
+                        website: parsedData.website || user.site || ''
+                    };
+
+                    setCardData(syncedData);
+                } catch (error) {
+                    console.error('Error syncing user data with VCard:', error);
+                }
+            }
+        }
+    }, [user, businessCard, slug, isEditing]);
+
     // Efecto mejorado para generar QR automáticamente
     useEffect(() => {
         const autoGenerateQR = async () => {
@@ -64,7 +90,7 @@ const VCardPage = () => {
                 if (!businessCard.qrCodeUrl) {
                     try {
                         console.log('Auto-generando QR code...');
-                        await regenerateQRCode(currentUserId); // Cambiado a regenerateQRCode para mejor consistencia
+                        await regenerateQRCode(currentUserId);
                     } catch (error) {
                         console.error('Error auto-generando QR:', error);
                         // Fallback: intentar con generarBusinessQR si regenerateQRCode falla
@@ -82,7 +108,8 @@ const VCardPage = () => {
     }, [businessCard, initialLoad, slug, currentUserId, loading]);
 
     useEffect(() => {
-        if (businessCard?.data) {
+        if (businessCard?.data && !user) {
+            // Solo usar datos de businessCard si no hay datos de usuario disponibles
             try {
                 const parsedData = typeof businessCard.data === 'string'
                     ? JSON.parse(businessCard.data)
@@ -95,7 +122,7 @@ const VCardPage = () => {
                 });
             }
         }
-    }, [businessCard]);
+    }, [businessCard, user]);
 
     const handleCreateCard = async () => {
         try {
@@ -103,7 +130,7 @@ const VCardPage = () => {
             // Después de crear la tarjeta, generar automáticamente el QR
             setTimeout(async () => {
                 try {
-                    await regenerateQRCode(currentUserId); // Cambiado para consistencia
+                    await regenerateQRCode(currentUserId);
                 } catch (error) {
                     console.error('Error generando QR después de crear tarjeta:', error);
                     // Fallback
@@ -131,13 +158,15 @@ const VCardPage = () => {
 
             // Actualizar datos del usuario si es necesario
             const userUpdateData: any = {};
-            if (cardData.phone) {
+
+            // Sincronizar phone del VCard al usuario si cambió
+            if (cardData.phone && cardData.phone !== user?.phone) {
                 userUpdateData.phone = cardData.phone;
             }
-            if (cardData.name) {
+            if (cardData.name && cardData.name !== user?.name) {
                 userUpdateData.name = cardData.name;
             }
-            if (cardData.website) {
+            if (cardData.website && cardData.website !== user?.site) {
                 userUpdateData.site = cardData.website;
             }
 
@@ -446,7 +475,6 @@ const VCardPage = () => {
                         )}
                     </div>
 
-                    {/* User sync status */}
                     {userError && !slug && (
                         <div className="bg-yellow-50 p-4 border-t">
                             <p className="text-sm text-yellow-800">

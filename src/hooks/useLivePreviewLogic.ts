@@ -45,7 +45,7 @@ export const useLivePreviewLogic = () => {
                 colors: {
                     primary: biosite.theme.config.colors.primary,
                     secondary: biosite.theme.config.colors.secondary,
-                    accent: biosite.theme.config.colors.accent || biosite.theme.config.colors.primary,
+                    accent: biosite.theme.config.colors.accent,
                     background: biosite.theme.config.colors.background || themeColor || '#ffffff',
                     text: biosite.theme.config.colors.text || '#000000',
                     profileBackground: biosite.theme.config.colors.profileBackground || themeColor || '#ffffff'

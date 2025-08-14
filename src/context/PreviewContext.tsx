@@ -357,7 +357,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     name: link.label,
                     url: link.url,
                     icon: link.icon,
-                    color: link.color || '#3B82F6',
+                    color: link.color,
                     isActive: link.isActive
                 }));
 
