@@ -63,7 +63,7 @@ export interface BiositeFull {
     title: string;
     slug: string;
     themeId: string;
-    theme?: BiositeTheme; // Optional theme object with full config
+    theme?: BiositeTheme;
     colors: string | BiositeColors;
     fonts?: string;
     avatarImage?: string;

@@ -1,5 +1,5 @@
 import { useLivePreviewLogic } from '../../hooks/useLivePreviewLogic.ts';
-import { useEffect, useMemo } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {
     LoadingComponent,
     ErrorComponent,
@@ -16,8 +16,14 @@ import {useTemplates} from "../../hooks/useTemplates.ts";
 import Cookie from "js-cookie";
 import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons.tsx";
 import WhatsAppButton from "../layers/AddMoreSections/WhattsApp/whatsAppButton.tsx";
+import {useNavigate} from "react-router-dom";
 
 const LivePreviewContent = () => {
+    const navigate = useNavigate(); // para navegación
+    const maxReloadAttempts = 2; // máximo de intentos permitidos
+    const storageKey = 'biositeReloadAttempts'; // clave para localStorage
+    const [canStartChecking, setCanStartChecking] = useState(false);
+
     const {
         biosite,
         loading,
@@ -58,15 +64,43 @@ const LivePreviewContent = () => {
     } = useLivePreviewLogic();
 
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
+
     useEffect(() => {
+        const timer = setTimeout(() => {
+            setCanStartChecking(true);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        if (!canStartChecking) return;
+
         if (!loading && !userLoading && !biosite) {
+            const currentAttempts = parseInt(localStorage.getItem(storageKey) || '0', 10);
+
+            if (currentAttempts >= maxReloadAttempts) {
+                console.log('Máximo de recargas alcanzado, navegando a /login');
+                localStorage.removeItem(storageKey);
+                navigate('/login');
+                return;
+            }
+
+            // Incrementar el contador y guardarlo
+            const newAttempts = currentAttempts + 1;
+            localStorage.setItem(storageKey, newAttempts.toString());
+            console.log(`Intento de recarga ${newAttempts} de ${maxReloadAttempts}`);
+
             const timer = setTimeout(() => {
                 window.location.reload();
-            }, 500);
+            }, 100);
 
             return () => clearTimeout(timer);
+        } else if (biosite) {
+            localStorage.removeItem(storageKey);
         }
-    }, [loading, userLoading, biosite]);
+    }, [loading, userLoading, biosite, navigate, canStartChecking]);
+
 
 
     const currentTemplate = useMemo(() => {
@@ -225,17 +259,17 @@ const LivePreviewContent = () => {
                         themeConfig={themeConfig}
                     />
 
-                        <VCardButton
-                            themeConfig={themeConfig}
-                            userId={user?.id || Cookie.get('userId')}
-                            onVcardClick={handleVCardClick}  // ✅ Pasar como prop
-                        />
+                    <VCardButton
+                        themeConfig={themeConfig}
+                        userId={user?.id || Cookie.get('userId')}
+                        onVcardClick={handleVCardClick}  // ✅ Pasar como prop
+                    />
 
                     {/* MÚSICA EMBED */}
                     {musicEmbed && (
                         <div className="px-4 mb-4">
                             <div className="relative rounded-lg shadow-md overflow-hidden"
-                                >
+                            >
 
                                 {getSpotifyEmbedUrl(musicEmbed.url) ? (
                                     <div className="embed-container spotify-embed">

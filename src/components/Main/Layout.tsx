@@ -498,6 +498,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 green: "text-[#98C022] border-l-4 border-[#98C022] lg:border-l-4",
                 orange: "text-orange-600 border-l-4 border-orange-300 lg:border-l-4",
                 blue: "text-blue-600 border-l-4 border-blue-300 lg:border-l-4",
+                red: "text-red-600 border-l-4 border-red-300 lg:border-l-4"
             };
             return colorClasses[item.color as keyof typeof colorClasses] + " ";
         }

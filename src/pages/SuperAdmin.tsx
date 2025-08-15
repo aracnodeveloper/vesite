@@ -91,8 +91,7 @@ interface BiositeFull {
 const AdminPanel: React.FC = () => {
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
-    const { fetchAllUsers, fetchAllBiosites } = useFetchBiosite();
-    const { fetchAllUsers: fetchAllUsersHook } = useUser();
+    const { fetchAllBiosites } = useFetchBiosite();
 
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -180,26 +179,34 @@ const AdminPanel: React.FC = () => {
         }
     }, []);
 
-    // NUEVA FUNCIÓN: Cargar todos los datos usando los nuevos métodos
+    // FUNCIÓN OPTIMIZADA: Cargar todos los datos usando biosites y sus owners
     const fetchAllData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Obtener todos los usuarios
-            const users = await fetchAllUsers();
-            setAllUsers(users);
-
-            // Obtener todos los biosites
+            // Obtener todos los biosites (que incluyen la información del owner)
             const biosites = await fetchAllBiosites();
             setAllBiosites(biosites);
+
+            // Extraer usuarios únicos de los biosites
+            const usersMap = new Map<string, User>();
+
+            biosites.forEach(biosite => {
+                if (biosite.owner && biosite.owner.id) {
+                    usersMap.set(biosite.owner.id, biosite.owner);
+                }
+            });
+
+            const uniqueUsers = Array.from(usersMap.values());
+            setAllUsers(uniqueUsers);
 
             // Procesar datos para el panel de administración
             const processedUsers: UserData[] = [];
 
-            for (const user of users) {
+            for (const user of uniqueUsers) {
                 try {
-                    // Obtener biosites del usuario
+                    // Obtener biosites del usuario desde los datos ya cargados
                     const userBiosites = biosites.filter(
                         biosite => biosite.ownerId === user.id
                     );
@@ -260,7 +267,7 @@ const AdminPanel: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [fetchAllUsers, fetchAllBiosites, categorizeLinks, fetchBiositeLinks, fetchUserVCard]);
+    }, [fetchAllBiosites, categorizeLinks, fetchBiositeLinks, fetchUserVCard]);
 
     // useEffect principal que maneja la carga inicial
     useEffect(() => {
@@ -310,6 +317,7 @@ const AdminPanel: React.FC = () => {
             day: 'numeric'
         });
     };
+
 
     const renderAllUsersTable = () => (
         <div className="overflow-x-auto">
@@ -421,69 +429,67 @@ const AdminPanel: React.FC = () => {
                 </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                {allBiosites.map((biosite) => {
-                    const owner = allUsers.find(user => user.id === biosite.ownerId);
-                    return (
-                        <tr key={biosite.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <Globe className="w-5 h-5 text-blue-500 mr-3" />
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {biosite.title}
-                                        </div>
-                                        <div className="text-xs text-gray-500">ID: {biosite.id.slice(0, 8)}...</div>
+                {allBiosites.map((biosite) => (
+                    <tr key={biosite.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                                <Globe className="w-5 h-5 text-blue-500 mr-3" />
+                                <div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                        {biosite.title}
                                     </div>
+                                    <div className="text-xs text-gray-500">ID: {biosite.id.slice(0, 8)}...</div>
                                 </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                                    <div>
-                                        <div className="text-sm text-gray-900">
-                                            {owner?.name || owner?.email || 'Usuario no encontrado'}
-                                        </div>
-                                        {owner?.email && owner?.name && (
-                                            <div className="text-xs text-gray-500">{owner.email}</div>
-                                        )}
+                            </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                                <Mail className="w-4 h-4 text-gray-400 mr-2" />
+                                <div>
+                                    <div className="text-sm text-gray-900">
+                                        {biosite.owner?.name || biosite.owner?.email || 'Usuario no encontrado'}
                                     </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm font-mono text-gray-600">/{biosite.slug}</span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    biosite.isActive
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                }`}>
-                                    {biosite.isActive ? (
-                                        <>
-                                            <Eye className="w-3 h-3 mr-1" />
-                                            Activo
-                                        </>
-                                    ) : (
-                                        <>
-                                            <EyeOff className="w-3 h-3 mr-1" />
-                                            Inactivo
-                                        </>
+                                    {biosite.owner?.email && biosite.owner?.name && (
+                                        <div className="text-xs text-gray-500">{biosite.owner.email}</div>
                                     )}
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div className="flex items-center">
-                                    <Calendar className="w-4 h-4 mr-1" />
-                                    {formatDate(biosite.createdAt)}
                                 </div>
-                            </td>
-                        </tr>
-                    );
-                })}
+                            </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-mono text-gray-600">/{biosite.slug}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                biosite.isActive
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                            }`}>
+                                {biosite.isActive ? (
+                                    <>
+                                        <Eye className="w-3 h-3 mr-1" />
+                                        Activo
+                                    </>
+                                ) : (
+                                    <>
+                                        <EyeOff className="w-3 h-3 mr-1" />
+                                        Inactivo
+                                    </>
+                                )}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-1" />
+                                {formatDate(biosite.createdAt)}
+                            </div>
+                        </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
         </div>
     );
+
 
     const renderOverviewTable = () => (
         <div className="overflow-x-auto">
