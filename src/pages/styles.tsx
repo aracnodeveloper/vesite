@@ -164,7 +164,7 @@ const StylesPage = () => {
             {biosite && (
                 <div className=" rounded-lg p-4 mb-0">
 
-                    <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only"> Estilos</h1>
+                    <h1 className="text-medium font-bold text-gray-800 mb-5 uppercase tracking-wide text-start sr-only sm:not-sr-only"> Estilos</h1>
                     <p className="text-sm text-gray-600">
                         {biosite.title} Personaliza la apariencia de tu vesite con las opciones disponibles.
                     </p>
@@ -172,7 +172,7 @@ const StylesPage = () => {
             )}
             {/* Selector de fuente    */}
             <div className=" rounded-lg border border-gray-200 p-3">
-                <h3 className="text-sm font-semibold mb-4 text-gray-500">
+                <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">
                 Tipografía
             </h3>
 
@@ -200,7 +200,7 @@ const StylesPage = () => {
 
             {/* Selector de color de tema */}
             <div className="rounded-lg border border-gray-200 p-3">
-                <h3 className="text-sm font-semibold mb-4 text-gray-500">
+                <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">
                     Themas
                 </h3>
 

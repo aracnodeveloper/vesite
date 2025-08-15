@@ -662,10 +662,9 @@ const AnalyticsContent = () => {
   return (
       <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
         <div className="max-w-7xl mx-auto">
-          {/* Header con selector de tiempo y botones de acción */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-lg text-gray-600 font-semibold sr-only sm:not-sr-only">Estadísticas</h1>
+              <h1 className="text-medium font-bold text-gray-800 mb-5 uppercase tracking-wide text-start sr-only sm:not-sr-only">Estadísticas</h1>
 
               {/* Selector de rango de tiempo */}
               <select

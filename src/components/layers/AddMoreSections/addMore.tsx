@@ -20,7 +20,7 @@ const Add = () => {
 
 
                     <Downloads/>*/}
-                    <h4 className="text-gray-400 text-xs font-medium mb-3 uppercase tracking-wider">CONTENIDO</h4>
+                    <h4 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">CONTENIDO</h4>
                     <Links/>
                     <WhatsApp/>
                     <Videos/>

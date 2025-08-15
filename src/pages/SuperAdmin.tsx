@@ -102,7 +102,6 @@ const AdminPanel: React.FC = () => {
     const [expandedUser, setExpandedUser] = useState<string | null>(null);
     const [selectedView, setSelectedView] = useState<'overview' | 'users' | 'biosites'>('overview');
 
-    // Función para obtener el usuario actual directamente
     const fetchCurrentUser = useCallback(async (userIdFromCookie: string) => {
         try {
             const userData = await apiService.getById<User>('/users', userIdFromCookie);

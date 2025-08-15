@@ -206,14 +206,14 @@ const ProfilePage = () => {
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">
                         <ChevronLeft className="w-5 h-5 mr-1 mt-1" />
-                        <h1 className="text-lg font-semibold" style={{ fontSize: "17px" }}>Perfil</h1>
+                        <h1 className="text-md font-bold text-gray-800  uppercase tracking-wide text-start hover:text-white ">Perfil</h1>
                     </button>
                 </div>
             </div>
 
             <div className="p-6">
                 <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>IMÁGENES</h3>
+                    <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">IMÁGENES</h3>
                     <ImageUploadSection
                         biosite={biosite}
                         loading={loading}
@@ -255,11 +255,11 @@ const ProfilePage = () => {
 
                 {/* About Section */}
                 <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide" style={{ fontSize: "11px" }}>ACERCA DE</h3>
+                    <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">ACERCA DE</h3>
                     <Form form={form} layout="vertical" onFinish={handleFinish}>
                         {/* Nombre Input */}
                         <div className="mb-4">
-                            <label className="text-xs text-gray-600 mb-2 block" style={{ fontSize: "11px" }}>
+                            <label className="text-xs font-ligth text-gray-500 mb-4 uppercase tracking-wide text-start">
                                 NOMBRE
                             </label>
                             <Form.Item
@@ -283,7 +283,7 @@ const ProfilePage = () => {
 
                         {/* Descripción Input */}
                         <div className="mb-4">
-                            <label className="text-xs text-gray-600 mb-2 block" style={{ fontSize: "11px" }}>
+                            <label className="text-xs font-ligth text-gray-500 mb-4 uppercase tracking-wide text-start">
                                 DESCRIPCIÓN
                             </label>
                             <Form.Item
@@ -307,10 +307,10 @@ const ProfilePage = () => {
 
                         {/* URL Input */}
                         <div className="mb-6">
-                            <label className="text-xs font-medium text-gray-800 mb-2 block" style={{fontSize: "11px"}}>
+                            <label className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start block">
                                 SITIO
                             </label>
-                            <span className="text-gray-600 text-xs" style={{fontSize: "11px"}}>
+                            <span className="text-xs font-ligth text-gray-500 mb-4 uppercase tracking-wide text-start">
         URL
     </span>
                             <Form.Item
