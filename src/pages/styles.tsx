@@ -16,7 +16,7 @@ const fontOptions = [
     { name: "Bahnschrift", value: "Bahnschrift" }
 ];
 
-// Colores organizados por categorías (manteniendo tus colores originales)
+
 const colorCategories = {
     light: [
         { name: "Blanco", value: "#ffffff", textColor: "#000000", accentColor: "#f3f4f6" },
@@ -33,9 +33,9 @@ const colorCategories = {
         { name: "Negro", value: "#000000", textColor: "#B1B1B1", accentColor: "#374151" },
         { name: "Naranja", value: "#EB8201", textColor: "#FFFFFF", accentColor: "#FB923C" },
         { name: "Azul Marino", value: "#110054", textColor: "#A884F3", accentColor: "#3730A3" },
-        {name: 'Verde militar', value: '#373E24', textColor: '#E3DFF3', accentColor: '#6B7280'},
-        { name: "Sao Paulo", value: "#1C2928", textColor: "#B0FF2E", accentColor: "#374151" },
-        { name: "Azul Nocturno", value: "#080221", textColor: "#79FBF7", accentColor: "#1E1B4B" },
+        {name: 'Verde militar', value: '#373E24', textColor: '#E3DFF3', accentColor: '#6B728049'},
+        { name: "Sao Paulo", value: "#1C2928", textColor: "#B0FF2E", accentColor: "#6B728049" },
+        { name: "Azul Nocturno", value: "#080221", textColor: "#FFFFFF", accentColor: "rgba(30,27,75,0.51)" },
         { name: "Azul Acero", value: "#4A7BA8", textColor: "#FFFFFF", accentColor: "#60A5FA" },
         { name: "Marrón Canela", value: "#BF6737", textColor: "#FFFFFF", accentColor: "#F59E0B" },
     ]
