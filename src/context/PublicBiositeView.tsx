@@ -772,12 +772,12 @@ const PublicBiositeView = () => {
                     />
 
                     {musicEmbed && musicEmbed.isActive && (
-                        <div className="px-4 mb-5">
+                        <div className="px-4 mb-5"  >
                             <div className="relative rounded-lg shadow-md overflow-hidden"
-                               >
+                                  >
 
                                 {getSpotifyEmbedUrl(musicEmbed.url) ? (
-                                    <div className="embed-container spotify-embed">
+                                    <div className="embed-container spotify-embed"  >
                                         <iframe
                                             src={getSpotifyEmbedUrl(musicEmbed.url)!}
                                             width="100%"
@@ -786,7 +786,9 @@ const PublicBiositeView = () => {
                                             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                             loading="lazy"
                                             title={musicEmbed.label}
-                                            onLoad={() => handleEmbedClick(musicEmbed.id, 'music')}
+                                            onClick={() => {
+                                                handleEmbedClick(musicEmbed.id, 'music');
+                                            }}
                                         ></iframe>
                                     </div>
                                 ) : (
@@ -828,7 +830,7 @@ const PublicBiositeView = () => {
                     )}
 
                     {socialPost && socialPost.isActive && (
-                        <div className="px-4 mb-4">
+                        <div className="px-4 mb-4" onClick={() => handleEmbedClick(socialPost.id, 'social-post')}>
                             <div className="relative rounded-lg shadow-md overflow-hidden"
                                  style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
 
@@ -842,7 +844,6 @@ const PublicBiositeView = () => {
                                             scrolling="no"
                                             loading="lazy"
                                             title={socialPost.label}
-                                            onLoad={() => handleEmbedClick(socialPost.id, 'social-post')}
                                         ></iframe>
                                     </div>
                                 ) : (
