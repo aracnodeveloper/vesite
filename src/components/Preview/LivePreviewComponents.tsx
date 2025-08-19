@@ -62,7 +62,7 @@ export const BackgroundSection = ({
                                       themeConfig,
                                       handleImageClick
                                   }: any) => (
-    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-96' : 'h-48'} ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-64' : 'h-48'} ${!isExposedRoute ? 'cursor-pointer' : ''}`}
          onClick={handleImageClick}>
         {validBackgroundImage ? (
             <>
@@ -138,7 +138,7 @@ export const AvatarSection = ({
                                   handleImageClick
                               }: any) => (
 
-    <div className={`flex justify-center ${isExposedRoute ? '-mt-44' : '-mt-24'} relative z-10 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+    <div className={`flex justify-center ${isExposedRoute ? '-mt-24' : '-mt-24'} relative z-10 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
          onClick={handleImageClick}>
         {validAvatarImage ? (
             <div className="relative">
@@ -152,7 +152,7 @@ export const AvatarSection = ({
                 <img
                     src={validAvatarImage }
                     alt="Avatar"
-                    className={`${isExposedRoute ? 'w-44 h-44' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
+                    className={`${isExposedRoute ? 'w-30 h-30' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
                     onLoadStart={() => handleImageLoadStart('avatar')}
                     onLoad={() => handleImageLoad('avatar')}
                     onError={() => handleImageError('avatar', biosite.avatarImage)}
