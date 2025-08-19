@@ -71,7 +71,7 @@ export const BackgroundSection = ({
                         <img
                             src={imgPng5}
                             alt="vector"
-                            className="absolute top-1 left-1 w-[200px] sm:w-[250px] md:w-[280px] lg:w-[200px] xl:w-[70px] max-w-none"
+                            className="absolute top-1 left-1 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none"
                         />
                     </div>
                 </div>
