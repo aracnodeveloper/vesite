@@ -1,4 +1,5 @@
 import type {BiositeThemeConfig} from "../../interfaces/Biosite.ts";
+import imgPng5 from "../../assets/img/vesite.svg";
 
 export const LoadingComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
     <div className="w-full h-full p-5 flex items-center justify-center"
@@ -65,6 +66,15 @@ export const BackgroundSection = ({
          onClick={handleImageClick}>
         {validBackgroundImage ? (
             <>
+                <div className="relative z-50">
+                    <div className="relative">
+                        <img
+                            src={imgPng5}
+                            alt="vector"
+                            className="absolute top-1 left-1 w-[200px] sm:w-[250px] md:w-[280px] lg:w-[200px] xl:w-[70px] max-w-none"
+                        />
+                    </div>
+                </div>
                 {imageLoadStates.background === 'loading' && (
                     <div className="absolute inset-0 flex items-center justify-center"
                          style={{ backgroundColor: themeConfig.colors.profileBackground }}>
