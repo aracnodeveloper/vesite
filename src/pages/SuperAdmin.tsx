@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFetchBiosite } from '../hooks/useFetchBiosite';
-import { useUser } from '../hooks/useUser';
+//import { useUser } from '../hooks/useUser';
 import {
     Users,
     Globe,
@@ -437,7 +437,7 @@ const AdminPanel: React.FC = () => {
                                     <div className="text-sm font-medium text-gray-900">
                                         {biosite.title}
                                     </div>
-                                    <div className="text-xs text-gray-500">ID: {biosite.id.slice(0, 8)}...</div>
+                                    <div className="text-xs text-gray-500">ID: {biosite.id}</div>
                                 </div>
                             </div>
                         </td>

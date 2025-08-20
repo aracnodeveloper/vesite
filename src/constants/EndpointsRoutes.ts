@@ -18,7 +18,7 @@ export const updateStaticApi = "/biosites/static";
 export const getBiositeAdminApi = "/biosites/admin";
 export const getBiositeApi = "/biosites/user";
 export const getBiositesApi = "/biosites"
-export const getALLBiositesApi = "/biosites"
+export const getALLBiositesApi = "/biosites?page=10&size=10"
 
 //Links
 export const LinksApi = "/links"
