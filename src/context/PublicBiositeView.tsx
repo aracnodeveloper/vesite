@@ -529,8 +529,8 @@ const PublicBiositeView = () => {
                     profileBackground: biositeData.biosite.theme.config.colors.profileBackground || '#ffffff'
                 },
                 fonts: {
-                    primary: biositeData.biosite?.fonts || biositeData.biosite.theme.config.fonts.primary || 'Inter',
-                    secondary: biositeData.biosite?.fonts || biositeData.biosite.theme.config.fonts.secondary || 'Lato'
+                    primary: biositeData.biosite.theme.config.fonts.primary  || biositeData.biosite?.fonts|| 'Inter',
+                    secondary: biositeData.biosite.theme.config.fonts.secondary || biositeData.biosite?.fonts || 'Lato'
                 },
                 isDark: biositeData.biosite.theme.config.isDark || false,
                 isAnimated: biositeData.biosite.theme.config.isAnimated || false

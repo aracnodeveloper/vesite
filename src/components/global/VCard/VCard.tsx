@@ -443,7 +443,18 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                             </div>
                                         </div>
                                     )}
+                                    {(cardData.name || cardData.email || cardData.phone) && (
+                                        <div className="border-t flex w-full justify-center">
+                                            <button
+                                                onClick={downloadVCard}
+                                                className="flex items-center justify-center py-4 px-4 gap-2 hover:bg-gray-50 transition-colors  cursor-pointer"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 14"><g fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 13.5h-1a1 1 0 0 1-1-1v-8h13v8a1 1 0 0 1-1 1h-1"/><path d="M4.5 11L7 13.5L9.5 11M7 13.5v-6M11.29 1a1 1 0 0 0-.84-.5h-6.9a1 1 0 0 0-.84.5L.5 4.5h13zM7 .5v4"/></g></svg>
 
+                                                <span className="text-md font-medium text-gray-700">Agregar a contactos</span>
+                                            </button>
+                                        </div>
+                                    )}
                                     {/* Contact Details */}
                                     <div className="space-y-3">
                                         {cardData.email && (
@@ -511,18 +522,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                 </div>
 
                                 {/* Action Buttons */}
-                                {(cardData.name || cardData.email || cardData.phone) && (
-                                    <div className="border-t flex">
-                                        <button
-                                            onClick={downloadVCard}
-                                            className="flex-1 flex items-center justify-center py-4 px-4 gap-2 hover:bg-gray-50 transition-colors border-r cursor-pointer"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 14"><g fill="none" stroke="black" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 13.5h-1a1 1 0 0 1-1-1v-8h13v8a1 1 0 0 1-1 1h-1"/><path d="M4.5 11L7 13.5L9.5 11M7 13.5v-6M11.29 1a1 1 0 0 0-.84-.5h-6.9a1 1 0 0 0-.84.5L.5 4.5h13zM7 .5v4"/></g></svg>
 
-                                            <span className="text-md font-medium text-gray-700">Agregar a contactos</span>
-                                        </button>
-                                    </div>
-                                )}
                             </>
                         )}
                     </div>
