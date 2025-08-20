@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-    Layers,
-    Droplet,
-    BarChart3,
     RefreshCw,
     ArrowLeft,
     BarChartHorizontalBig,
@@ -21,7 +18,7 @@ import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
 import { useUpdateShareActions } from "../../hooks/useUpdateShareActions.ts";
-import { useUser } from "../../hooks/useUser.ts";
+//import { useUser } from "../../hooks/useUser.ts";
 
 import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 import PhonePreview from "../Preview/phonePreview.tsx";
@@ -249,7 +246,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
 
-    // --- State para el nuevo Mobile Drawer ---
+
     const [selectedSection, setSelectedSection] = useState<string | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -260,7 +257,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const [isInSubsection, setIsInSubsection] = useState(false);
 
-    // Control del scroll del body cuando el drawer está abierto
+
     useEffect(() => {
         if (isDrawerOpen) {
             document.body.style.overflow = 'hidden';
@@ -404,14 +401,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }
     }, [biosite?.id]);
 
-    // Sidebar items con condición para SUPER_ADMIN
+
     const baseSidebarItems = [
         { icon: GanttChart, label: "Secciones", id: "sections", to: "/sections", color: "green" },
         { icon: Palette, label: "Estilos", id: "style", to: "/droplet", color: "orange" },
         { icon: BarChartHorizontalBig, label: "Estadísticas", id: "analytics", to: "/analytics", color: "blue" },
     ];
 
-    // Agregar item de administración solo para SUPER_ADMIN
+
     const sidebarItems = role === 'SUPER_ADMIN'
         ? [
             ...baseSidebarItems,
@@ -470,8 +467,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 1024) {
-                setIsMobileMenuOpen(false); // Ensure mobile menu is closed on desktop
-                setShowPreview(true); // Ensure preview is shown on desktop
+                setIsMobileMenuOpen(false);
+                setShowPreview(true);
             }
         };
         handleResize();
@@ -483,13 +480,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const isAdminRoute = location.pathname === '/admin' ;
 
     useEffect(() => {
-        setAvatarError(false); // Reset avatar error when biosite avatar image changes
+        setAvatarError(false);
     }, [biosite?.avatarImage]);
 
     const handleItemClick = (item: any) => {
         setActiveItem(item.id);
         navigate(item.to);
-        setIsMobileMenuOpen(false); // Close mobile menu if open
+        setIsMobileMenuOpen(false);
     };
 
     const getItemStyles = (item: any) => {
@@ -513,11 +510,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const buttonContent = getButtonContent();
 
-    // -- RENDERIZADO CONDICIONAL PARA EL DRAWER --
     const renderDrawerContent = () => {
         switch (selectedSection) {
             case 'sections':
-                // Pass the handler to the Sections component
+
                 return (
                     <div className="p-4">
                         <SectionsWithDrawerInteraction onSubsectionClick={handleMySiteSubsectionClick} />
