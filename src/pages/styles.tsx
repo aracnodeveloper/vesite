@@ -2,7 +2,7 @@ import { usePreview } from "../context/PreviewContext";
 import React, { useState } from "react";
 
 const fontOptions = [
-    { name: "Arial", value: "arial" },
+    { name: "Arial", value: "CINZEL" },
     { name: "MV Boli", value: "MV Boli" },
     { name: "Courier New", value: "Courier New" },
     { name: "Times New Roman", value: "Times New Roman" },

@@ -1,9 +1,45 @@
 import api from "./api";
 import type { AxiosRequestConfig } from "axios";
 
+export interface PaginationParams {
+    page?: number;
+    size?: number;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    total: number;
+    page: number;
+    size: number;
+    totalPages: number;
+}
+
 const apiService = {
     getAll: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
         const response = await api.get<T>(url, config);
+        return response.data;
+    },
+
+    // Nuevo método específico para obtener datos con paginación
+    getAllPaginated: async <T>(
+        baseUrl: string,
+        params?: PaginationParams,
+        config?: AxiosRequestConfig
+    ): Promise<T[] | PaginatedResponse<T>> => {
+        let url = baseUrl;
+
+        if (params?.page && params?.size) {
+            const searchParams = new URLSearchParams({
+                page: params.page.toString(),
+                size: params.size.toString()
+            });
+
+            // Si la URL ya tiene parámetros, usar & para agregar más
+            const separator = url.includes('?') ? '&' : '?';
+            url += `${separator}${searchParams.toString()}`;
+        }
+
+        const response = await api.get<T[] | PaginatedResponse<T>>(url, config);
         return response.data;
     },
 
@@ -37,6 +73,21 @@ const apiService = {
     ): Promise<D> => {
         const response = await api.post<D>(endpoint, data);
         return response.data;
+    },
+
+    // Método para construir URLs con parámetros de paginación
+    buildPaginatedUrl: (baseUrl: string, params?: PaginationParams): string => {
+        if (!params?.page || !params?.size) {
+            return baseUrl;
+        }
+
+        const searchParams = new URLSearchParams({
+            page: params.page.toString(),
+            size: params.size.toString()
+        });
+
+        const separator = baseUrl.includes('?') ? '&' : '?';
+        return `${baseUrl}${separator}${searchParams.toString()}`;
     },
 };
 

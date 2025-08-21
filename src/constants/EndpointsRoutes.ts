@@ -33,7 +33,7 @@ export const uploadBiositeBackgroundApi: string = "/upload/biosite-background";
 
 //User
 
-export const getALLUsersApi = "/users"
+export const getALLUsersApi = "/users?page=10&size=10"
 
 
 // BUSINESS CARDS (V-Card.ts)

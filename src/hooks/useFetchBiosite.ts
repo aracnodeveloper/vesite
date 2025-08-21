@@ -17,6 +17,19 @@ export interface ChildUser extends CreatedUser {
     biosites?: BiositeFull[];
 }
 
+export interface PaginationParams {
+    page?: number;
+    size?: number;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    total: number;
+    page: number;
+    size: number;
+    totalPages: number;
+}
+
 export const useFetchBiosite = (userId?: string) => {
     const [biositeData, setBiositeData] = useState<BiositeFull | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -24,34 +37,93 @@ export const useFetchBiosite = (userId?: string) => {
     const isInitializedRef = useRef<boolean>(false);
     const currentUserIdRef = useRef<string | undefined>(undefined);
 
-    // Nuevo método para obtener todos los usuarios
-    const fetchAllUsers = useCallback(async (): Promise<ChildUser[]> => {
+    // Nuevo método para obtener todos los usuarios con paginación
+    const fetchAllUsers = useCallback(async (params?: PaginationParams): Promise<ChildUser[] | PaginatedResponse<ChildUser>> => {
         try {
             setLoading(true);
             setError(null);
 
-            const allUsers = await apiService.getAll<ChildUser[]>(getALLUsersApi);
-            return Array.isArray(allUsers) ? allUsers : [allUsers];
+            let url = getALLUsersApi;
+
+            // Agregar parámetros de paginación si se proporcionan
+            if (params?.page && params?.size) {
+                const searchParams = new URLSearchParams({
+                    page: params.page.toString(),
+                    size: params.size.toString()
+                });
+                url += `?${searchParams.toString()}`;
+            }
+
+            const response = await apiService.getAll<ChildUser[] | PaginatedResponse<ChildUser>>(url);
+
+            // Si es array, significa que no hay paginación
+            if (Array.isArray(response)) {
+                return response;
+            }
+
+            // Si es objeto, significa que hay paginación
+            return response as PaginatedResponse<ChildUser>;
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar todos los usuarios";
             setError(errorMessage);
+
+            // Retornar estructura vacía según el tipo esperado
+            if (params?.page && params?.size) {
+                return {
+                    data: [],
+                    total: 0,
+                    page: params.page,
+                    size: params.size,
+                    totalPages: 0
+                };
+            }
             return [];
         } finally {
             setLoading(false);
         }
     }, []);
 
-    // Nuevo método para obtener todos los biosites
-    const fetchAllBiosites = useCallback(async (): Promise<BiositeFull[]> => {
+    // Nuevo método para obtener todos los biosites con paginación
+    const fetchAllBiosites = useCallback(async (params?: PaginationParams): Promise<BiositeFull[] | PaginatedResponse<BiositeFull>> => {
         try {
             setLoading(true);
             setError(null);
 
-            const allBiosites = await apiService.getAll<BiositeFull[]>(getALLBiositesApi);
-            return Array.isArray(allBiosites) ? allBiosites : [allBiosites];
+            let url = getALLBiositesApi;
+
+            // Si no se especifican parámetros, usar la URL original que ya tiene page=10&size=10
+            if (params?.page && params?.size) {
+                url = getBiositesApi; // URL base sin parámetros predeterminados
+                const searchParams = new URLSearchParams({
+                    page: params.page.toString(),
+                    size: params.size.toString()
+                });
+                url += `?${searchParams.toString()}`;
+            }
+
+            const response = await apiService.getAll<BiositeFull[] | PaginatedResponse<BiositeFull>>(url);
+
+            // Si es array, significa que no hay paginación
+            if (Array.isArray(response)) {
+                return response;
+            }
+
+            // Si es objeto, significa que hay paginación
+            return response as PaginatedResponse<BiositeFull>;
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar todos los biosites";
             setError(errorMessage);
+
+            // Retornar estructura vacía según el tipo esperado
+            if (params?.page && params?.size) {
+                return {
+                    data: [],
+                    total: 0,
+                    page: params.page,
+                    size: params.size,
+                    totalPages: 0
+                };
+            }
             return [];
         } finally {
             setLoading(false);

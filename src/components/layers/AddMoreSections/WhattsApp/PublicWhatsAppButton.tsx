@@ -70,7 +70,7 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                     onClick={handleClick(link)}
                     className="w-full p-3 rounded-lg text-center shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center"
                     style={{
-                        backgroundColor: themeConfig.colors.accent || '#25D366',
+                        backgroundColor: themeConfig.colors.accent || '#ffffff',
                         border: 'none'
                     }}
                 >
@@ -93,7 +93,7 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                                 fontFamily: themeConfig.fonts.primary || 'Inter'
                             }}
                         >
-                            {link.description || 'WhatsApp'}
+                            {link.description }
                         </span>
                         <div className='flex flex-wrap gap-3 items-center'>
                         {/* Mensaje preview */}

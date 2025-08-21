@@ -805,12 +805,12 @@ const AnalyticsContent = () => {
                   className="absolute transform rounded-full flex flex-col items-center justify-center"
                   style={{height: "600px", width: "600px"}}
               >
-                <svg width="858" height="858" viewBox="0 0 858 858" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="900" height="900" viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g filter="url(#filter0_d_2019_354)">
                     <circle cx="429" cy="425" r="416" fill="white"/>
                   </g>
                   <defs>
-                    <filter id="filter0_d_2019_354" x="0" y="0" width="858" height="858" filterUnits="userSpaceOnUse"
+                    <filter id="filter0_d_2019_354" x="0" y="0" width="900" height="900" filterUnits="userSpaceOnUse"
                             colorInterpolationFilters="sRGB">
                       <feFlood floodOpacity="0" result="BackgroundImageFix"/>
                       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
@@ -828,7 +828,7 @@ const AnalyticsContent = () => {
               </div>
 
               <div
-                  className="absolute left-24 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+                  className="absolute left-14 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">VISTAS</div>
                 <div className="text-4xl font-bold text-black">{totalViews}</div>
               </div>
@@ -838,13 +838,13 @@ const AnalyticsContent = () => {
               </div>
 
               <div
-                  className="absolute right-30 top-82 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+                  className="absolute right-20 top-82 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CLICKS</div>
                 <div className="text-2xl font-bold text-black">{totalClicks}</div>
               </div>
 
               <div
-                  className="absolute right-36 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+                  className="absolute right-26 bottom-60 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
                 <div className="text-xs text-black mb-1">CTR</div>
                 <div className="text-2xl font-bold text-black">{ctr}%</div>
               </div>

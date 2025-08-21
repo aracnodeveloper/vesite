@@ -17,7 +17,7 @@ import { useTemplates } from "../hooks/useTemplates.ts";
 import { useMemo } from 'react';
 import {socialMediaPlatforms} from "../media/socialPlataforms.ts";
 import {useUser} from "../hooks/useUser.ts";
-import {WhatsAppOutlined} from "@ant-design/icons";
+//import {WhatsAppOutlined} from "@ant-design/icons";
 import { useAnalytics } from "../hooks/useAnalytics.ts";
 import PublicWhatsAppButton from "../components/layers/AddMoreSections/WhattsApp/PublicWhatsAppButton.tsx";
 
@@ -309,6 +309,7 @@ const PublicBiositeView = () => {
                     id: link.id,
                     phone,
                     message,
+                    description:link.label,
                     isActive: link.isActive
                 });
             } else if (isAppStoreLink(link)) {

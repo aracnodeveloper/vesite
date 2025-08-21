@@ -19,9 +19,9 @@ import WhatsAppButton from "../layers/AddMoreSections/WhattsApp/whatsAppButton.t
 import {useNavigate} from "react-router-dom";
 
 const LivePreviewContent = () => {
-    const navigate = useNavigate(); // para navegación
-    const maxReloadAttempts = 2; // máximo de intentos permitidos
-    const storageKey = 'biositeReloadAttempts'; // clave para localStorage
+    const navigate = useNavigate();
+    const maxReloadAttempts = 2;
+    const storageKey = 'biositeReloadAttempts';
     const [canStartChecking, setCanStartChecking] = useState(false);
 
     const {
@@ -86,7 +86,6 @@ const LivePreviewContent = () => {
                 return;
             }
 
-            // Incrementar el contador y guardarlo
             const newAttempts = currentAttempts + 1;
             localStorage.setItem(storageKey, newAttempts.toString());
             console.log(`Intento de recarga ${newAttempts} de ${maxReloadAttempts}`);
@@ -142,14 +141,11 @@ const LivePreviewContent = () => {
         return <NoBiositeComponent themeConfig={themeConfig} />;
     }
 
-    // If we still don't have a template, show loading
     if (!currentTemplate) {
         console.log('No template available, showing loading...');
         return <LoadingComponent themeConfig={themeConfig} />;
     }
 
-    // Fixed template layout determination
-    // Check by template ID or index to determine layout
     const isSecondTemplate = currentTemplate.id === 'bc1452d1-a688-4567-a424-2a0f09103499' ||
         currentTemplate.index === 1 ||
         currentTemplate.name?.toLowerCase().includes('square') ||
@@ -167,14 +163,10 @@ const LivePreviewContent = () => {
 
             <div className={`w-full ${isExposedRoute ? 'max-w-full' : 'max-w-sm'} min-h-screen mx-auto`}>
 
-                {/* Layout condicional basado en la plantilla */}
                 {isSecondTemplate ? (
-                    // Template 2: Dos imágenes cuadradas
                     <>
-                        {/* Fondo sólido para la segunda plantilla */}
                         <div className="w-full h-24" style={{ backgroundColor: themeConfig.colors.background }}></div>
 
-                        {/* Dos imágenes cuadradas */}
                         <TwoSquareImagesSection
                             isExposedRoute={isExposedRoute}
                             validBackgroundImage={validBackgroundImage}
@@ -190,7 +182,6 @@ const LivePreviewContent = () => {
                         />
                     </>
                 ) : (
-                    // Template 1: Layout por defecto
                     <>
                         {/* Sección de fondo */}
                         <BackgroundSection
@@ -249,7 +240,6 @@ const LivePreviewContent = () => {
                     <WhatsAppButton
                         onWhatsAppClick={handleWhatsAppClick}
                         themeConfig={themeConfig}
-                        // handleWhatsAppLinkClick se puede pasar aquí si necesitas analytics en vista pública
                     />
 
                     <RegularLinksSection
@@ -262,7 +252,7 @@ const LivePreviewContent = () => {
                     <VCardButton
                         themeConfig={themeConfig}
                         userId={user?.id || Cookie.get('userId')}
-                        onVcardClick={handleVCardClick}  // ✅ Pasar como prop
+                        onVcardClick={handleVCardClick}
                     />
 
                     {/* MÚSICA EMBED */}
