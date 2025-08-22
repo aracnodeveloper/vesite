@@ -15,7 +15,6 @@ import {businessCardService} from "../service/VCardService.ts";
 import { getBiositeAnalytics } from '../service/apiService';
 import apiService from '../service/apiService';
 import { BiositesTable } from '../components/global/Super_admin/BiositesTable.tsx';
-import { UsersTable } from '../components/global/Super_admin/UsersTable.tsx';
 
 // Types
 interface LinkData {
@@ -88,7 +87,7 @@ type TimeRange = 'last7' | 'last30' | 'lastYear';
 const AdminPanel: React.FC = () => {
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
-    const { fetchAllBiosites, fetchAllUsers } = useFetchBiosite();
+    const { fetchAllBiosites } = useFetchBiosite();
     const [businessCards, setBusinessCards] = useState<{[key: string]: BusinessCard}>({});
     const [loadingCards, setLoadingCards] = useState<{[key: string]: boolean}>({});
 
@@ -102,7 +101,6 @@ const AdminPanel: React.FC = () => {
 
     const [error, setError] = useState<string | null>(null);
     const [expandedBiosite, setExpandedBiosite] = useState<string | null>(null);
-    const [expandedUser, setExpandedUser] = useState<string | null>(null);
     const [selectedView, setSelectedView] = useState<'biosites' | 'users'>('biosites');
     const [initialized, setInitialized] = useState(false);
 
@@ -260,32 +258,13 @@ const AdminPanel: React.FC = () => {
         }
     }, [fetchAllBiosites, biositesPagination]);
 
-    const loadUsers = useCallback(async () => {
-        try {
-            usersPagination.setLoading(true);
-            usersPagination.setError(null);
 
-            const params = usersPagination.getPaginationParams();
-            const response = await fetchAllUsers(params);
-
-            console.log('Users loaded:', response);
-            usersPagination.setPaginatedData(response);
-        } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar usuarios";
-            usersPagination.setError(errorMessage);
-            setError(errorMessage);
-        } finally {
-            usersPagination.setLoading(false);
-        }
-    }, [fetchAllUsers, usersPagination]);
 
     const handleRefreshData = useCallback(async () => {
         if (selectedView === 'biosites') {
             await loadBiosites();
-        } else {
-            await loadUsers();
         }
-    }, [selectedView, loadBiosites, loadUsers]);
+    }, [selectedView, loadBiosites]);
 
     useEffect(() => {
         const initializeData = async () => {
@@ -294,8 +273,6 @@ const AdminPanel: React.FC = () => {
             try {
                 if (selectedView === 'biosites') {
                     await loadBiosites();
-                } else {
-                    await loadUsers();
                 }
                 setInitialized(true);
             } catch (error) {
@@ -313,11 +290,6 @@ const AdminPanel: React.FC = () => {
         }
     }, [biositesPagination.currentPage, biositesPagination.pageSize, initialized, selectedView]);
 
-    useEffect(() => {
-        if (initialized && selectedView === 'users') {
-            loadUsers();
-        }
-    }, [usersPagination.currentPage, usersPagination.pageSize, initialized, selectedView]);
 
     const toggleBiositeExpansion = (biositeId: string) => {
         const wasExpanded = expandedBiosite === biositeId;
@@ -332,9 +304,6 @@ const AdminPanel: React.FC = () => {
         }
     };
 
-    const toggleUserExpansion = (userId: string) => {
-        setExpandedUser(expandedUser === userId ? null : userId);
-    };
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A';
@@ -450,17 +419,7 @@ const AdminPanel: React.FC = () => {
                             <Globe className="w-4 h-4" />
                             <span>Biosites</span>
                         </button>
-                        <button
-                            onClick={() => setSelectedView('users')}
-                            className={`px-4 py-2 rounded-md transition-colors flex items-center space-x-2 ${
-                                selectedView === 'users'
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            <Users className="w-4 h-4" />
-                            <span>Usuarios</span>
-                        </button>
+
                         <button
                             onClick={handleRefreshData}
                             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2"
@@ -548,7 +507,6 @@ const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                    {selectedView === 'biosites' ? (
                         <BiositesTable
                             pagination={biositesPagination}
                             biositeLinks={biositeLinks}
@@ -570,15 +528,7 @@ const AdminPanel: React.FC = () => {
                             formatDate={formatDate}
                             parseVCardData={parseVCardData}
                         />
-                    ) : (
-                        <UsersTable
-                            pagination={usersPagination}
-                            expandedUser={expandedUser}
-                            toggleUserExpansion={toggleUserExpansion}
-                            categorizeLinks={categorizeLinks}
-                            formatDate={formatDate}
-                        />
-                    )}
+
                 </div>
             </div>
         </div>

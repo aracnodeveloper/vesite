@@ -1,13 +1,57 @@
 import {ChevronRight} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {socialMediaPlatforms} from "../../../../media/socialPlataforms.ts";
+import {usePreview} from "../../../../context/PreviewContext.tsx";
 
 const Social = () => {
-
+    const {socialLinks} = usePreview()
     const navigate = useNavigate();
 
     const handleSocialClick = () => {
         navigate("/social");
     };
+    const activeSocialLinks = socialLinks.filter(link => {
+        if (!link.isActive) return false;
+
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        if (urlLower.includes("api.whatsapp.com")) return false;
+
+        const excludedKeywords = [
+            'open.spotify.com/embed', 'music', 'apple music', 'soundcloud', 'audio',
+            'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
+            'post', 'publicacion', 'contenido','api.whatsapp.com',
+            'music embed', 'video embed', 'social post'
+        ];
+
+        const isExcluded = excludedKeywords.some(keyword =>
+            labelLower.includes(keyword) || urlLower.includes(keyword)
+        );
+
+        if (isExcluded) return false;
+
+        const platform = socialMediaPlatforms.find(p => {
+            const platformNameLower = p.name.toLowerCase();
+            const platformIdLower = p.id.toLowerCase();
+
+            return (
+                labelLower === platformNameLower ||
+                labelLower === platformIdLower ||
+                (platformIdLower.length > 2 && labelLower.includes(platformIdLower)) ||
+                link.icon === p.icon ||
+                labelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '') ||
+                (platformNameLower.includes('/') && platformNameLower.split('/').some(name =>
+                    name.trim().toLowerCase() === labelLower
+                )) ||
+                (labelLower.includes('/') && labelLower.split('/').some(name =>
+                    name.trim().toLowerCase() === platformNameLower
+                ))
+            );
+        });
+
+        return platform !== undefined;
+    });
 
     return (
         <div
@@ -36,7 +80,15 @@ const Social = () => {
                 </div>
                 <span className="text-black font-medium">Social</span>
             </div>
+
+
+
             <div className="flex items-center space-x-2">
+                <span className="text-sm text-black"
+                      style={{fontSize:"11px"}}
+                >
+                            {activeSocialLinks.length}
+                </span>
                 <ChevronRight size={16} className="text-gray-400"/>
             </div>
         </div>

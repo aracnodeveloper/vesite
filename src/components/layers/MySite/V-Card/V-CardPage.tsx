@@ -102,19 +102,18 @@ const VCardPage = () => {
         syncAndUpdateCard();
     }, [user?.phone, user?.name, user?.site, businessCard?.id, slug, isEditing, currentUserId, initialLoad]);
 
-    // Efecto mejorado para generar QR automáticamente
     useEffect(() => {
         const autoGenerateQR = async () => {
-            // Solo ejecutar después de la carga inicial y si no estamos viendo un slug público
-            if (!initialLoad && !slug && currentUserId && businessCard && !loading) {
-                // Si no tiene QR code, generarlo automáticamente
-                if (!businessCard.qrCodeUrl) {
+
+             if (!initialLoad && !slug && currentUserId && businessCard && !loading) {
+
+               if (!businessCard.qrCodeUrl) {
                     try {
                         console.log('Auto-generando QR code...');
                         await regenerateQRCode(currentUserId);
                     } catch (error) {
                         console.error('Error auto-generando QR:', error);
-                        // Fallback: intentar con generarBusinessQR si regenerateQRCode falla
+
                         try {
                             await generarBusinessQR(currentUserId);
                         } catch (fallbackError) {
@@ -227,7 +226,6 @@ const VCardPage = () => {
         }
     };
 
-    // Nuevo método para mostrar QR (wrapper del regenerateQR)
     const handleShowQR = async () => {
         try {
             await regenerateQRCode(currentUserId);
@@ -241,10 +239,10 @@ const VCardPage = () => {
     };
 
     const isLoading = loading || userLoading;
-    // Verificar si existe QR code para mostrar el botón de editar
+
     const hasQRCode = businessCard?.qrCodeUrl;
-    // Verificar si la tarjeta existe pero no tiene QR (para mostrar el botón de generar)
-    const hasCardButNoQR = businessCard && !businessCard.qrCodeUrl;
+
+     const hasCardButNoQR = businessCard && !businessCard.qrCodeUrl;
 
     if (isLoading && initialLoad) {
         return (

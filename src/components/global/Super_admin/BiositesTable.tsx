@@ -4,10 +4,6 @@ import {
     Users,
     Globe,
     Link2 as LinkIcon,
-    Share2,
-    Smartphone,
-    MessageCircle,
-    Music,
     ChevronDown,
     ChevronUp,
     Eye,
@@ -16,11 +12,58 @@ import {
     Database,
     BarChart3,
     TrendingUp,
-    MousePointer
+    MousePointer,
+    ExternalLink
 } from 'lucide-react';
 import type {BusinessCard} from "../../../types/V-Card.ts";
 
-// Types
+const iconMap: { [key: string]: string } = {
+    'instagram': '/assets/icons/instagram.svg',
+    'tiktok': '/assets/icons/tiktok.svg',
+    'twitter': '/assets/icons/X.svg',
+    'x': '/assets/icons/X.svg',
+    'youtube': '/assets/icons/youtube.svg',
+    'facebook': '/assets/icons/facebook.svg',
+    'twitch': '/assets/icons/twitch.svg',
+    'linkedin': '/assets/icons/linkdl.svg',
+    'snapchat': '/assets/icons/snapchat.svg',
+    'threads': '/assets/icons/threads.svg',
+    'pinterest': '/assets/icons/pinterest.svg',
+    'spotify': '/assets/icons/spottufy.svg',
+    'discord': '/assets/icons/discord.svg',
+    'tumblr': '/assets/icons/tumblr.svg',
+    'telegram': '/assets/icons/telegram.svg',
+    'onlyfans': '/assets/icons/onlyfans.svg',
+    'email': '/assets/icons/gmail.svg',
+    'gmail': '/assets/icons/gmail.svg',
+    'whatsapp': '/assets/icons/whatsapp.svg',
+    'amazon': '/assets/icons/amazon.svg',
+    'appstore': '/assets/icons/appstore.svg',
+    'googleplay': '/assets/icons/googleplay.svg',
+    '/assets/icons/instagram.svg': '/assets/icons/instagram.svg',
+    '/assets/icons/tiktok.svg': '/assets/icons/tiktok.svg',
+    '/assets/icons/X.svg': '/assets/icons/X.svg',
+    '/assets/icons/youtube.svg': '/assets/icons/youtube.svg',
+    '/assets/icons/facebook.svg': '/assets/icons/facebook.svg',
+    '/assets/icons/twitch.svg': '/assets/icons/twitch.svg',
+    '/assets/icons/linkdl.svg': '/assets/icons/linkdl.svg',
+    '/assets/icons/snapchat.svg': '/assets/icons/snapchat.svg',
+    '/assets/icons/threads.svg': '/assets/icons/threads.svg',
+    '/assets/icons/gmail.svg': '/assets/icons/gmail.svg',
+    '/assets/icons/pinterest.svg': '/assets/icons/pinterest.svg',
+    '/assets/icons/spottufy.svg': '/assets/icons/spottufy.svg',
+    '/assets/icons/discord.svg': '/assets/icons/discord.svg',
+    '/assets/icons/tumblr.svg': '/assets/icons/tumblr.svg',
+    '/assets/icons/whatsapp.svg': '/assets/icons/whatsapp.svg',
+    '/assets/icons/telegram.svg': '/assets/icons/telegram.svg',
+    '/assets/icons/amazon.svg': '/assets/icons/amazon.svg',
+    '/assets/icons/onlyfans.svg': '/assets/icons/onlyfans.svg',
+    '/assets/icons/appstore.svg': '/assets/icons/appstore.svg',
+    '/assets/icons/googleplay.svg': '/assets/icons/googleplay.svg'
+};
+
+const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f8fafc' rx='8' stroke='%23e2e8f0' stroke-width='1'/%3E%3Cpath d='M13 13h14v14H13z' fill='%23e2e8f0'/%3E%3Ccircle cx='18' cy='18' r='2.5' fill='%239ca3af'/%3E%3Cpath d='M15 29l6-4 6 4H15z' fill='%239ca3af'/%3E%3C/svg%3E";
+
 interface LinkData {
     id: string;
     label: string;
@@ -34,6 +77,11 @@ interface LinkData {
     biositeId?: string;
     createdAt?: string;
     updatedAt?: string;
+}
+
+interface LinkImageDisplayProps {
+    link: LinkData;
+    size?: 'sm' | 'md' | 'lg';
 }
 
 interface User {
@@ -117,6 +165,259 @@ interface BiositesTableProps {
     parseVCardData: (businessCard: BusinessCard | null) => any;
 }
 
+const LinkImageDisplay: React.FC<LinkImageDisplayProps> = ({ link, size = 'md' }) => {
+    const [imageError, setImageError] = React.useState(false);
+    const [imageLoading, setImageLoading] = React.useState(false);
+    const [iconError, setIconError] = React.useState(false);
+
+    const sizeClasses = {
+        sm: 'w-12 h-12',
+        md: 'w-14 h-14',
+        lg: 'w-18 h-18'
+    };
+
+    const handleImageError = () => {
+        setImageError(true);
+        setImageLoading(false);
+    };
+
+    const handleImageLoad = () => {
+        setImageLoading(false);
+        setImageError(false);
+    };
+
+    const handleImageLoadStart = () => {
+        setImageLoading(true);
+        setImageError(false);
+    };
+
+    const handleIconError = () => {
+        setIconError(true);
+    };
+
+    const getIconPath = (iconIdentifier: string): string | null => {
+        if (!iconIdentifier) return null;
+
+        if (iconIdentifier.startsWith('/assets/icons/') || iconIdentifier.startsWith('http')) {
+            return iconIdentifier;
+        }
+
+        const cleanIdentifier = iconIdentifier.toLowerCase().trim();
+
+        if (iconMap[cleanIdentifier]) {
+            return iconMap[cleanIdentifier];
+        }
+
+        const urlLower = link.url?.toLowerCase() || '';
+        const labelLower = link.label?.toLowerCase() || '';
+
+        if (urlLower.includes('instagram.com') || labelLower.includes('instagram')) {
+            return iconMap.instagram;
+        }
+        if (urlLower.includes('tiktok.com') || labelLower.includes('tiktok')) {
+            return iconMap.tiktok;
+        }
+        if (urlLower.includes('twitter.com') || urlLower.includes('x.com') || labelLower.includes('twitter') || labelLower.includes(' x ')) {
+            return iconMap.x;
+        }
+        if (urlLower.includes('youtube.com') || labelLower.includes('youtube')) {
+            return iconMap.youtube;
+        }
+        if (urlLower.includes('facebook.com') || labelLower.includes('facebook')) {
+            return iconMap.facebook;
+        }
+        if (urlLower.includes('twitch.tv') || labelLower.includes('twitch')) {
+            return iconMap.twitch;
+        }
+        if (urlLower.includes('linkedin.com') || labelLower.includes('linkedin')) {
+            return iconMap.linkedin;
+        }
+        if (urlLower.includes('snapchat.com') || labelLower.includes('snapchat')) {
+            return iconMap.snapchat;
+        }
+        if (urlLower.includes('spotify.com') || labelLower.includes('spotify')) {
+            return iconMap.spotify;
+        }
+        if (urlLower.includes('discord') || labelLower.includes('discord')) {
+            return iconMap.discord;
+        }
+        if (urlLower.includes('whatsapp.com') || urlLower.includes('api.whatsapp.com') || labelLower.includes('whatsapp')) {
+            return iconMap.whatsapp;
+        }
+        if (urlLower.includes('telegram') || labelLower.includes('telegram')) {
+            return iconMap.telegram;
+        }
+        if (urlLower.includes('pinterest.com') || labelLower.includes('pinterest')) {
+            return iconMap.pinterest;
+        }
+        if (urlLower.includes('apps.apple.com') || labelLower.includes('app store')) {
+            return iconMap.appstore;
+        }
+        if (urlLower.includes('play.google.com') || labelLower.includes('google play')) {
+            return iconMap.googleplay;
+        }
+        if (urlLower.includes('amazon.com') || labelLower.includes('amazon')) {
+            return iconMap.amazon;
+        }
+        if (urlLower.includes('gmail.com') || labelLower.includes('gmail') || labelLower.includes('email')) {
+            return iconMap.gmail;
+        }
+
+        return null;
+    };
+
+    // Get platform name for better accessibility
+    const getPlatformName = (iconPath: string): string => {
+        const platformMap: {[key: string]: string} = {
+            '/assets/icons/instagram.svg': 'Instagram',
+            '/assets/icons/tiktok.svg': 'TikTok',
+            '/assets/icons/X.svg': 'X (Twitter)',
+            '/assets/icons/youtube.svg': 'YouTube',
+            '/assets/icons/facebook.svg': 'Facebook',
+            '/assets/icons/twitch.svg': 'Twitch',
+            '/assets/icons/linkdl.svg': 'LinkedIn',
+            '/assets/icons/snapchat.svg': 'Snapchat',
+            '/assets/icons/threads.svg': 'Threads',
+            '/assets/icons/gmail.svg': 'Gmail',
+            '/assets/icons/pinterest.svg': 'Pinterest',
+            '/assets/icons/spottufy.svg': 'Spotify',
+            '/assets/icons/discord.svg': 'Discord',
+            '/assets/icons/tumblr.svg': 'Tumblr',
+            '/assets/icons/whatsapp.svg': 'WhatsApp',
+            '/assets/icons/telegram.svg': 'Telegram',
+            '/assets/icons/amazon.svg': 'Amazon',
+            '/assets/icons/onlyfans.svg': 'OnlyFans',
+            '/assets/icons/appstore.svg': 'App Store',
+            '/assets/icons/googleplay.svg': 'Google Play'
+        };
+        return platformMap[iconPath] || 'Platform';
+    };
+
+    if (link.image && !imageError) {
+        return (
+            <div className={`${sizeClasses[size]} rounded-lg bg-white overflow-hidden flex-shrink-0 border shadow-sm`}>
+                {imageLoading && (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    </div>
+                )}
+                <img
+                    src={link.image}
+                    alt={`${link.label || 'Link'} custom image`}
+                    className="w-full h-full object-cover"
+                    onLoadStart={handleImageLoadStart}
+                    onLoad={handleImageLoad}
+                    onError={handleImageError}
+                    style={{
+                        display: imageError ? 'none' : 'block'
+                    }}
+                />
+                {imageError && (
+                    <div className="w-full h-full">
+                        {(() => {
+                            const iconPath = getIconPath(link.icon || '');
+                            if (iconPath && !iconError) {
+                                return (
+                                    <img
+                                        src={iconPath}
+                                        alt={`${getPlatformName(iconPath)} icon`}
+                                        className="w-full h-full object-contain p-2"
+                                        onError={handleIconError}
+                                    />
+                                );
+                            }
+                            return (
+                                <img
+                                    src={placeholderLinkImage}
+                                    alt="Link placeholder"
+                                    className="w-full h-full object-cover"
+                                />
+                            );
+                        })()}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    const iconPath = getIconPath(link.icon || '');
+    if (iconPath && !iconError) {
+        return (
+            <div className={`${sizeClasses[size]} rounded-lg bg-white overflow-hidden flex-shrink-0 border shadow-sm`}>
+                <img
+                    src={iconPath}
+                    alt={`${getPlatformName(iconPath)} icon`}
+                    className="w-full h-full object-contain p-2"
+                    onError={handleIconError}
+                />
+            </div>
+        );
+    }
+
+    if (link.icon && !link.icon.includes('/') && !link.icon.includes('.')) {
+        return (
+            <div className={`${sizeClasses[size]} rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 flex items-center justify-center text-lg font-semibold text-blue-700`}>
+                {link.icon}
+            </div>
+        );
+    }
+
+    const getInitial = (label: string): string => {
+        if (!label) return 'L';
+        return label.charAt(0).toUpperCase();
+    };
+
+    const initial = getInitial(link.label || 'Link');
+    const bgColors = [
+        'bg-gradient-to-br from-red-100 to-red-200 text-red-700 border-red-200',
+        'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 border-blue-200',
+        'bg-gradient-to-br from-green-100 to-green-200 text-green-700 border-green-200',
+        'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 border-purple-200',
+        'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 border-yellow-200',
+        'bg-gradient-to-br from-pink-100 to-pink-200 text-pink-700 border-pink-200'
+    ];
+
+    const colorIndex = link.label ? link.label.charCodeAt(0) % bgColors.length : 0;
+
+    return (
+        <div className={`${sizeClasses[size]} rounded-lg border flex items-center justify-center text-lg font-semibold ${bgColors[colorIndex]}`}>
+            {initial}
+        </div>
+    );
+};
+
+const getLinkType = (link: LinkData): { type: string; color: string; icon: any } => {
+    const urlLower = link.url?.toLowerCase() || '';
+    const labelLower = link.label?.toLowerCase() || '';
+
+    const socialPlatforms = [
+        'instagram', 'tiktok', 'twitter', 'x.com', 'youtube', 'facebook',
+        'twitch', 'linkedin', 'snapchat', 'threads', 'pinterest', 'discord', 'tumblr'
+    ];
+
+    if (socialPlatforms.some(platform => urlLower.includes(platform) || labelLower.includes(platform))) {
+        return { type: 'Social', color: 'bg-blue-100 text-blue-800', icon: <Users className="w-3 h-3" /> };
+    }
+
+    if (urlLower.includes('whatsapp') || urlLower.includes('telegram') || urlLower.includes('gmail') || labelLower.includes('email')) {
+        return { type: 'Comunicación', color: 'bg-green-100 text-green-800', icon: <LinkIcon className="w-3 h-3" /> };
+    }
+
+    if (urlLower.includes('apps.apple.com') || urlLower.includes('play.google.com') || labelLower.includes('app store') || labelLower.includes('google play')) {
+        return { type: 'App Store', color: 'bg-purple-100 text-purple-800', icon: <Globe className="w-3 h-3" /> };
+    }
+
+    if (urlLower.includes('spotify') || urlLower.includes('music') || labelLower.includes('music') || labelLower.includes('audio')) {
+        return { type: 'Música', color: 'bg-pink-100 text-pink-800', icon: <BarChart3 className="w-3 h-3" /> };
+    }
+
+    if (urlLower.includes('amazon') || urlLower.includes('shop') || labelLower.includes('tienda')) {
+        return { type: 'Comercio', color: 'bg-orange-100 text-orange-800', icon: <TrendingUp className="w-3 h-3" /> };
+    }
+
+    return { type: 'Enlace', color: 'bg-gray-100 text-gray-800', icon: <ExternalLink className="w-3 h-3" /> };
+};
+
 export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                                 pagination,
                                                                 biositeLinks,
@@ -148,9 +449,6 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
 
     return (
         <div>
-            {/* Time range selector */}
-
-
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
                     <thead className="bg-gray-50">
@@ -263,7 +561,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                         ) : (
                                             <button
                                                 onClick={() => toggleAnalytics(biosite.id, biosite.ownerId)}
-                                                className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                                                className="flex items-center text-blue-600 hover:text-blue-800 text-sm cursor-pointer"
                                             >
                                                 <BarChart3 className="w-4 h-4 mr-1" />
                                                 Ver analytics
@@ -299,7 +597,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                         <div className="flex flex-col space-y-2">
                                             <button
                                                 onClick={() => toggleBiositeExpansion(biosite.id)}
-                                                className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                                                className="text-indigo-600 hover:text-indigo-900 flex items-center cursor-pointer"
                                             >
                                                 {isExpanded ? (
                                                     <>
@@ -341,23 +639,22 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                         Analytics del Biosite ({analyticsTimeRange === 'last7' ? 'Últimos 7 días' : analyticsTimeRange === 'last30' ? 'Últimos 30 días' : 'Último año'})
                                                     </h4>
                                                     <div className="mb-4 flex items-center space-x-4">
-                                                    <label className="text-sm font-medium text-gray-700">
-                                                        Rango de tiempo para analytics:
-                                                    </label>
-                                                    <select
-                                                        value={analyticsTimeRange}
-                                                        onChange={(e) => {
-                                                            setAnalyticsTimeRange(e.target.value as TimeRange);
-                                                            // Reset analytics data when time range changes
-                                                            setAnalyticsData({});
-                                                        }}
-                                                        className="px-3 py-1 border border-gray-300 rounded text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    >
-                                                        <option value="last7">Últimos 7 días</option>
-                                                        <option value="last30">Últimos 30 días</option>
-                                                        <option value="lastYear">Último año</option>
-                                                    </select>
-                                                </div>
+                                                        <label className="text-sm font-medium text-gray-700">
+                                                            Rango de tiempo para analytics:
+                                                        </label>
+                                                        <select
+                                                            value={analyticsTimeRange}
+                                                            onChange={(e) => {
+                                                                setAnalyticsTimeRange(e.target.value as TimeRange);
+                                                                setAnalyticsData({});
+                                                            }}
+                                                            className="px-3 py-1 border border-gray-300 rounded text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        >
+                                                            <option value="last7">Últimos 7 días</option>
+                                                            <option value="last30">Últimos 30 días</option>
+                                                            <option value="lastYear">Último año</option>
+                                                        </select>
+                                                    </div>
                                                     <button
                                                         onClick={() => fetchBiositeAnalytics(biosite.id, biosite.ownerId)}
                                                         className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
@@ -675,130 +972,103 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
 
                                                     return (
                                                         <div>
+                                                            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                                                <LinkIcon className="w-4 h-4 text-purple-500 mr-2" />
+                                                                Enlaces ({currentBiositeLinks.length})
+                                                                {isLoadingLinks && (
+                                                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-500 ml-2"></div>
+                                                                )}
+                                                            </h4>
 
-                                                                <div className="flex flex-col">
-                                                                    <div className="flex items-center mb-1">
-                                                                        <LinkIcon className="w-4 h-4 text-purple-500 mr-1" />
-                                                                        {loadingBiositeLinks[biosite.id] ? (
-                                                                            <div className="flex items-center">
-                                                                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-500 mr-1"></div>
-                                                                                <span className="text-xs text-gray-500">Cargando...</span>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <>
-                                                        <span className="text-sm font-semibold text-gray-900">
-                                                          Enlaces  {linkStats.total}
-                                                        </span>
-                                                                                <span className="text-xs text-gray-500 ml-1">total</span>
-                                                                            </>
-                                                                        )}
-                                                                    </div>
-                                                                    {!loadingBiositeLinks[biosite.id] && linkStats.total > 0 && (
-                                                                        <div className="flex space-x-2 text-xs text-gray-500">
-                                                                            {linkStats.social > 0 && (
-                                                                                <span className="flex items-center">
-                                                            <Share2 className="w-3 h-3 mr-1" />
-                                                                                    {linkStats.social}
-                                                        </span>
-                                                                            )}
-                                                                            {linkStats.whatsApp > 0 && (
-                                                                                <span className="flex items-center text-green-600">
-                                                            <MessageCircle className="w-3 h-3 mr-1" />
-                                                                                    {linkStats.whatsApp}
-                                                        </span>
-                                                                            )}
-                                                                            {linkStats.apps > 0 && (
-                                                                                <span className="flex items-center">
-                                                            <Smartphone className="w-3 h-3 mr-1" />
-                                                                                    {linkStats.apps}
-                                                        </span>
-                                                                            )}
-                                                                            {linkStats.embed > 0 && (
-                                                                                <span className="flex items-center text-purple-600">
-                                                            <Music className="w-3 h-3 mr-1" />
-                                                                                    {linkStats.embed}
-                                                        </span>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
                                                             {isLoadingLinks ? (
                                                                 <div className="bg-white p-4 rounded border text-center">
                                                                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
                                                                     <p className="text-sm text-gray-600">Cargando enlaces...</p>
                                                                 </div>
                                                             ) : currentBiositeLinks.length > 0 ? (
-                                                                <div className="max-h-80 overflow-y-auto space-y-2">
+                                                                <div className="max-h-80 overflow-y-auto space-y-3">
                                                                     {currentBiositeLinks.filter(link => link.isActive)
                                                                         .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
-                                                                        .map((link, index) => (
-                                                                            <div key={link.id || index} className="bg-white p-4 rounded border">
-                                                                                <div className="flex items-start justify-between">
-                                                                                    <div className="flex items-start space-x-3 flex-1">
-                                                                                        <div className="flex items-center mt-1">
-                                                                                            {link.icon ? (
-                                                                                                <span className="text-lg">{link.icon}</span>
-                                                                                            ) : link.image ? (
-                                                                                                <img
-                                                                                                    src={link.image}
-                                                                                                    className="w-4 h-4 object-cover rounded"
-                                                                                                    alt="Link icon"
-                                                                                                />
-                                                                                            ) : (
-                                                                                                <LinkIcon className="w-4 h-4 text-gray-400" />
-                                                                                            )}
-                                                                                        </div>
-                                                                                        <div className="flex-1 min-w-0">
-                                                                                            <p className="text-sm font-medium text-gray-900 break-words">
-                                                                                                {link.label || 'Sin título'}
-                                                                                            </p>
-                                                                                            <p className="text-xs text-blue-600 hover:text-blue-800 break-all mt-1">
-                                                                                                <a
-                                                                                                    href={link.url}
-                                                                                                    target="_blank"
-                                                                                                    rel="noopener noreferrer"
-                                                                                                    className="hover:underline"
-                                                                                                >
-                                                                                                    {link.url}
-                                                                                                </a>
-                                                                                            </p>
-                                                                                            {link.description && (
-                                                                                                <p className="text-xs text-gray-400 mt-1 break-words">
-                                                                                                    {link.description}
-                                                                                                </p>
-                                                                                            )}
-                                                                                            {link.color && (
-                                                                                                <div className="flex items-center mt-2">
-                                                                                                    <div
-                                                                                                        className="w-4 h-4 rounded border mr-2"
-                                                                                                        style={{ backgroundColor: link.color }}
-                                                                                                    ></div>
-                                                                                                    <span className="text-xs text-gray-500">
-                                                                                                        {link.color}
+                                                                        .map((link, index) => {
+                                                                            const linkType = getLinkType(link);
+                                                                            return (
+                                                                                <div key={link.id || index}
+                                                                                     className="bg-white p-4 rounded border hover:shadow-sm transition-shadow">
+                                                                                    <div
+                                                                                        className="flex items-start justify-between">
+                                                                                        <div
+                                                                                            className="flex items-start space-x-3 flex-1">
+                                                                                            {/* Updated image/icon display */}
+                                                                                            <LinkImageDisplay
+                                                                                                link={link}/>
+
+                                                                                            <div
+                                                                                                className="flex-1 min-w-0">
+                                                                                                <div
+                                                                                                    className="flex items-center space-x-2 mb-1">
+                                                                                                    <p className="text-sm font-medium text-gray-900 break-words">
+                                                                                                        {link.label || 'Sin título'}
+                                                                                                    </p>
+                                                                                                    <span
+                                                                                                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${linkType.color}`}>
+                                                                                                        {linkType.icon}
+                                                                                                        <span
+                                                                                                            className="ml-1">{linkType.type}</span>
                                                                                                     </span>
                                                                                                 </div>
-                                                                                            )}
-                                                                                            <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                                                                                                <span>Orden: #{link.orderIndex || index + 1}</span>
-                                                                                                <span>ID: {link.id.substring(0, 8)}...</span>
-                                                                                                {link.createdAt && (
-                                                                                                    <span>Creado: {formatDate(link.createdAt)}</span>
+                                                                                                <p className="text-xs text-blue-600 hover:text-blue-800 break-all mt-1">
+                                                                                                    <a
+                                                                                                        href={link.url}
+                                                                                                        target="_blank"
+                                                                                                        rel="noopener noreferrer"
+                                                                                                        className="hover:underline"
+                                                                                                    >
+                                                                                                        {link.url.length > 50 ? `${link.url.substring(0, 50)}...` : link.url}
+                                                                                                    </a>
+                                                                                                </p>
+                                                                                                {link.description && (
+                                                                                                    <p className="text-xs text-gray-400 mt-1 break-words">
+                                                                                                        {link.description}
+                                                                                                    </p>
                                                                                                 )}
+                                                                                                {link.color && (
+                                                                                                    <div
+                                                                                                        className="flex items-center mt-2">
+                                                                                                        <div
+                                                                                                            className="w-4 h-4 rounded border mr-2"
+                                                                                                            style={{backgroundColor: link.color}}
+                                                                                                        ></div>
+                                                                                                        <span
+                                                                                                            className="text-xs text-gray-500">
+                                                                                                        {link.color}
+                                                                                                    </span>
+                                                                                                    </div>
+                                                                                                )}
+                                                                                                <div
+                                                                                                    className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                                                                    <span>Orden: #{link.orderIndex || index + 1}</span>
+                                                                                                    <span>ID: {link.id.substring(0, 8)}...</span>
+                                                                                                    {link.createdAt && (
+                                                                                                        <span>Creado: {formatDate(link.createdAt)}</span>
+                                                                                                    )}
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                    <div className="flex flex-col items-end space-y-1 ml-4">
-                                                                                        <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
-                                                                                            link.isActive
-                                                                                                ? 'bg-green-100 text-green-700'
-                                                                                                : 'bg-red-100 text-red-700'
-                                                                                        }`}>
+                                                                                        <div
+                                                                                            className="flex flex-col items-end space-y-1 ml-4">
+                                                                                        <span
+                                                                                            className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                                                                                                link.isActive
+                                                                                                    ? 'bg-green-100 text-green-700'
+                                                                                                    : 'bg-red-100 text-red-700'
+                                                                                            }`}>
                                                                                             {link.isActive ? 'Activo' : 'Inactivo'}
                                                                                         </span>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        ))}
+                                                                            );
+                                                                        })}
                                                                 </div>
                                                             ) : (
                                                                 <div className="text-center py-8">

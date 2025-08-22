@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {Phone, Mail, Globe, QrCode, Download,  X, User, Building } from 'lucide-react';
+import {Phone, Mail, Globe,  X, User, Building } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useBusinessCard } from '../../../hooks/useVCard';
 import imgP from "../../../../public/img/img.png";
 import {usePreview} from "../../../context/PreviewContext.tsx";
-import {useLocation, useParams} from "react-router-dom";
+import { useParams} from "react-router-dom";
 import {useUser} from "../../../hooks/useUser.ts";
 
 interface VCardData {
@@ -47,7 +47,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
-    const [showQR, setShowQR] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const { slug } = useParams<{ slug?: string }>();
     const { biosite: biositeFromContext } = usePreview() || { biosite: null };
@@ -90,7 +89,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         error,
         regenerateQRCode,
         fetchBusinessCardByUserId,
-        fetchBusinessCardBySlug,
         generarBusinessQR
     } = useBusinessCard();
 
@@ -257,7 +255,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         try {
             await regenerateQRCode(validUserId);
 
-            setShowQR(true);
         } catch (error) {
             console.error('Error regenerating QR code:', error);
         }
@@ -278,7 +275,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setShowQR(false);
     };
     const isDarkTheme = () => {
         const backgroundColor = themeConfig.colors.background;
@@ -367,7 +363,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                         ) : (
                             <>
                                 {/* QR Code - Solo se muestra si showQR es true */}
-                                {showQR && businessCard?.qrCodeUrl && (
+                                { businessCard?.qrCodeUrl && (
                                     <div className="p-6 text-center bg-gradient-to-br from-gray-50 to-gray-100">
                                         <div className="bg-white p-4 rounded-xl inline-block shadow-md">
                                             <img
@@ -385,23 +381,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
                                 {/* Contact Info */}
                                 <div className="p-6 space-y-4">
-                                    {/* Header con nombre */}
-                                    {/* Solo mostrar el botón "Mostrar QR" si el QR no se está mostrando */}
-                                    {!showQR && (
-                                        <div className="text-center flex flex-col justify-center">
-                                            <button
-                                                onClick={handleRegenerateQR}
-                                                className="p-2 hover:bg-gray-100 rounded-lg flex flex-wrap justify-center items-center cursor-pointer mt-4"
-                                                title="Generar código QR"
-                                            > Mostrar QR
-                                                <div  className={getIconClassName()} >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path fill="currentColor" d="M13 14h1v1h-1v-1Zm1 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-3-1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm3-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1-1h1v1h-1v-1Zm-2 2h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-2 1h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm1 1h1v1h-1v-1Zm1 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-1-2h1v1h-1v-1Zm1 0h1v1h-1v-1Zm1-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm0 3h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1 3h1v1h-1v-1Zm0-2h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-2-3h1v1h-1v-1Zm-6 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm-3 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm-2 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm0-19h1v1h-1V1Zm1 1h1v1h-1V2Zm-1 2h1v1h-1V4Zm1 1h1v1h-1V5Zm-1 1h1v1h-1V6Zm1 0h1v1h-1V6Zm0 1h1v1h-1V7Zm0 1h1v1h-1V8Zm-1 1h1v1h-1V9Zm1 0h1v1h-1V9Zm-1 1h1v1h-1v-1ZM1 11h1v1H1v-1Zm1 1h1v1H2v-1Zm2-1h1v1H4v-1Zm0 1h1v1H4v-1Zm1-1h1v1H5v-1Zm1 1h1v1H6v-1Zm1-1h1v1H7v-1Zm1 1h1v1H8v-1Zm0-1h1v1H8v-1Zm1 0h1v1H9v-1Zm1 0h1v1h-1v-1Zm1 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1-1h1v1h-1v-1Zm1 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-1 2h1v1h-1v-1Zm-2 9h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0-9h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm11-1h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm1 2h1v1h-1v-1Zm-5-4h1v1h-1v-1Zm1-1h1v1h-1v-1Zm4 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm1 8h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm3 0h1v1h-1v-1Z"/><path stroke="currentColor" stroke-width="2" d="M15 2h7v7h-7V2ZM2 2h7v7H2V2Zm0 13h7v7H2v-7ZM18 5h1v1h-1V5ZM5 5h1v1H5V5Zm0 13h1v1H5v-1Z"/></g></svg>
-                                                </div>
-                                            </button>
-                                            <p className="text-gray-500">Presiona mostrar QR para escanear o Presiona descarga para guardar el contacto</p>
-                                        </div>
-                                    )}
-
                                     {cardData.name && (
                                         <div className="text-center mb-6">
                                             <h3 className="text-2xl font-bold text-gray-800"
