@@ -20,11 +20,9 @@ const WhatsAppPage = () => {
         navigate('/sections');
     };
 
-    // Filtrar solo enlaces activos con api.whatsapp.com
     const getActiveApiWhatsAppLinks = () => {
         return whatsAppLinks.filter(link =>
             link.isActive &&
-            // Verificar que tenga phone y message válidos (indicativo de api.whatsapp.com)
             link.phone &&
             link.message &&
             link.phone.trim() !== '' &&
@@ -39,13 +37,10 @@ const WhatsAppPage = () => {
     const [saveMessage, setSaveMessage] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [editingLink, setEditingLink] = useState<any>(null);
-
-    // Estados para el formulario
     const [phone, setPhone] = useState("");
     const [message, setMessage] = useState("");
     const [description, setDescription] = useState("");
 
-    // Función para limpiar el formulario
     const clearForm = () => {
         setPhone("");
         setMessage("");
@@ -54,13 +49,11 @@ const WhatsAppPage = () => {
         setShowForm(false);
     };
 
-    // Función para abrir formulario de nuevo enlace
     const handleNewLink = () => {
         clearForm();
         setShowForm(true);
     };
 
-    // Función para abrir formulario de edición
     const handleEditLink = (link: any) => {
         setEditingLink(link);
         setPhone(link.phone || '');
@@ -69,13 +62,11 @@ const WhatsAppPage = () => {
         setShowForm(true);
     };
 
-    // Función para validar número de teléfono
     const isValidPhoneNumber = (phoneNumber: string): boolean => {
         const cleanPhone = phoneNumber.replace(/[^\d+]/g, '');
         return /^(\+?\d{10,15})$/.test(cleanPhone);
     };
 
-    // Función para limpiar y formatear el número de teléfono
     const cleanPhoneNumber = (phoneNumber: string): string => {
         let cleaned = phoneNumber.replace(/[^\d+]/g, '');
 
@@ -94,13 +85,6 @@ const WhatsAppPage = () => {
         return cleaned;
     };
 
-    // Función para generar la URL de WhatsApp
-    const generateWhatsAppUrl = (phone: string, message: string): string => {
-        const cleanPhone = cleanPhoneNumber(phone);
-        const encodedMessage = encodeURIComponent(message.trim());
-        return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
-    };
-
     const handleSave = async () => {
         if (!biosite?.id) {
             setSaveStatus('error');
@@ -108,7 +92,6 @@ const WhatsAppPage = () => {
             return;
         }
 
-        // Validaciones
         const trimmedPhone = phone.trim();
         const trimmedMessage = message.trim();
         const trimmedDescription = description.trim();
@@ -149,7 +132,6 @@ const WhatsAppPage = () => {
             const cleanPhone = cleanPhoneNumber(trimmedPhone);
 
             if (editingLink) {
-                // Actualizar enlace existente
                 console.log('Updating WhatsApp link:', editingLink.id);
                 await updateWhatsAppLink(editingLink.id, {
                     phone: cleanPhone,
@@ -159,7 +141,6 @@ const WhatsAppPage = () => {
                 });
                 setSaveMessage("Enlace de WhatsApp actualizado correctamente");
             } else {
-                // Crear nuevo enlace
                 console.log('Creating new WhatsApp link');
                 await addWhatsAppLink({
                     phone: cleanPhone,
@@ -184,7 +165,6 @@ const WhatsAppPage = () => {
         }
     };
 
-    // Función para eliminar un enlace
     const handleDelete = async (linkId: string, description: string) => {
         setIsSaving(true);
         try {

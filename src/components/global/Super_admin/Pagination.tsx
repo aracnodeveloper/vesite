@@ -66,7 +66,7 @@ const Pagination: React.FC<PaginationProps> = ({
                         <select
                             value={pageSize}
                             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" style={{color:"black"}}
+                            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer" style={{color:"black"}}
                             disabled={loading}
                         >
                             {pageSizeOptions.map(size => (
@@ -85,7 +85,7 @@ const Pagination: React.FC<PaginationProps> = ({
                         <button
                             onClick={onFirst}
                             disabled={!canGoPrev || loading}
-                            className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                             title="Primera página"
                         >
                             <ChevronsLeft className="w-4 h-4" />
@@ -96,7 +96,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     <button
                         onClick={onPrev}
                         disabled={!canGoPrev || loading}
-                        className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         title="Página anterior"
                     >
                         <ChevronLeft className="w-4 h-4" />
@@ -108,7 +108,7 @@ const Pagination: React.FC<PaginationProps> = ({
                             if (page === -1) {
                                 // Ellipsis
                                 return (
-                                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-400">
+                                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-400 cursor-pointer">
                     <MoreHorizontal className="w-4 h-4" />
                   </span>
                                 );
@@ -121,7 +121,7 @@ const Pagination: React.FC<PaginationProps> = ({
                                     key={page}
                                     onClick={() => onPageChange(page)}
                                     disabled={loading}
-                                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                                         isActive
                                             ? 'bg-indigo-600 text-white'
                                             : 'text-gray-700 hover:bg-gray-50 border border-gray-300'
@@ -137,7 +137,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     <button
                         onClick={onNext}
                         disabled={!canGoNext || loading}
-                        className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         title="Página siguiente"
                     >
                         <ChevronRight className="w-4 h-4" />
@@ -148,7 +148,7 @@ const Pagination: React.FC<PaginationProps> = ({
                         <button
                             onClick={onLast}
                             disabled={!canGoNext || loading}
-                            className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="p-2 rounded-md border border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                             title="Última página"
                         >
                             <ChevronsRight className="w-4 h-4" />

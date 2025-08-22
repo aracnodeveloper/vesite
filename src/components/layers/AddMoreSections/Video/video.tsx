@@ -1,8 +1,9 @@
-import {Video} from 'lucide-react';
+//import {Video} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import {VideoCameraOutlined} from "@ant-design/icons";
 
 const Videos =() =>{
+
     const navigate = useNavigate();
 
     const handleProfileClick = () => {

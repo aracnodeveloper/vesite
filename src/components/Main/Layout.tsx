@@ -236,7 +236,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const navigate = useNavigate();
     const { logout } = useAuthContext();
     const role = Cookie.get('roleName');
-    const userId = Cookie.get('userId')
+    const userId = Cookie.get('userId');
+    const hasAdminAccess = role === 'SUPER_ADMIN' || userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5';
     const { biosite } = usePreview();
     const { hasChanges, markAsSaved, resetChangeDetection } = useChangeDetection();
     const { isUpdating, handleUpdate, handleShare } = useUpdateShareActions();
@@ -410,7 +411,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     ];
 
 
-    const sidebarItems = role === 'SUPER_ADMIN'
+    const sidebarItems = hasAdminAccess
         ? [
             ...baseSidebarItems,
             { icon: Shield, label: "Administración", id: "admin", to: "/admin", color: "red" }

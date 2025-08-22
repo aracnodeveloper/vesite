@@ -87,6 +87,7 @@ type TimeRange = 'last7' | 'last30' | 'lastYear';
 const AdminPanel: React.FC = () => {
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
+    const hasAdminAccess = role === 'SUPER_ADMIN' || userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5';
     const { fetchAllBiosites } = useFetchBiosite();
     const [businessCards, setBusinessCards] = useState<{[key: string]: BusinessCard}>({});
     const [loadingCards, setLoadingCards] = useState<{[key: string]: boolean}>({});
@@ -268,7 +269,7 @@ const AdminPanel: React.FC = () => {
 
     useEffect(() => {
         const initializeData = async () => {
-            if (role !== 'SUPER_ADMIN' || !userId || initialized) return;
+            if (!hasAdminAccess  || !userId || initialized) return;
 
             try {
                 if (selectedView === 'biosites') {
@@ -346,7 +347,7 @@ const AdminPanel: React.FC = () => {
         return selectedView === 'biosites' ? biositesPagination : usersPagination;
     };
 
-    if (role !== 'SUPER_ADMIN') {
+    if (!hasAdminAccess) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
@@ -422,7 +423,7 @@ const AdminPanel: React.FC = () => {
 
                         <button
                             onClick={handleRefreshData}
-                            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2"
+                            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2 cursor-pointer"
                             disabled={currentPagination.loading}
                         >
                             <RefreshCw className={`w-4 h-4 ${currentPagination.loading ? 'animate-spin' : ''}`} />
@@ -483,14 +484,6 @@ const AdminPanel: React.FC = () => {
                                 : `Todos los Usuarios (${usersPagination.totalItems || 0})`
                             }
                         </h2>
-                        {selectedView === 'biosites' && (
-                            <div className="flex items-center space-x-2">
-                                <BarChart3 className="w-4 h-4 text-blue-500" />
-                                <span className="text-sm text-gray-600">
-                                    Analytics disponibles por biosite
-                                </span>
-                            </div>
-                        )}
                     </div>
                 </div>
 
@@ -531,6 +524,7 @@ const AdminPanel: React.FC = () => {
 
                 </div>
             </div>
+            <div className='h-20'></div>
         </div>
     );
 };

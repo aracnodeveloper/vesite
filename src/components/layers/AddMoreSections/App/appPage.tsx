@@ -18,7 +18,6 @@ const AppPage = () => {
         error
     } = usePreview();
 
-    // URLs por defecto
     const DEFAULT_APP_STORE_URL = "https://apps.apple.com/us/app/visitaecuador-com/id1385161516?ls=1";
     const DEFAULT_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es";
 
@@ -32,7 +31,6 @@ const AppPage = () => {
         const appStore = appLinks.find(link => link.store === "appstore");
         const googlePlay = appLinks.find(link => link.store === "googleplay");
 
-        // Si existe el enlace guardado, usarlo; si no, usar el por defecto
         setAppStoreUrl(appStore?.url || DEFAULT_APP_STORE_URL);
         setGooglePlayUrl(googlePlay?.url || DEFAULT_GOOGLE_PLAY_URL);
     }, [appLinks]);
@@ -46,14 +44,12 @@ const AppPage = () => {
             const appStore = appLinks.find(link => link.store === "appstore");
             const googlePlay = appLinks.find(link => link.store === "googleplay");
 
-            // Manejar App Store
             if (appStore && appStoreUrl) {
                 await updateAppLink(appStore.id, { url: appStoreUrl, isActive: true });
             } else if (!appStore && appStoreUrl) {
                 await addAppLink({ store: "appstore", url: appStoreUrl, isActive: true });
             }
 
-            // Manejar Google Play
             if (googlePlay && googlePlayUrl) {
                 await updateAppLink(googlePlay.id, { url: googlePlayUrl, isActive: true });
             } else if (!googlePlay && googlePlayUrl) {
@@ -63,7 +59,6 @@ const AppPage = () => {
             setSaveStatus('success');
             setSaveMessage("Enlaces actualizados correctamente");
 
-            // Limpiar mensaje después de 3 segundos
             setTimeout(() => {
                 setSaveStatus('idle');
                 setSaveMessage("");
@@ -74,7 +69,6 @@ const AppPage = () => {
             setSaveStatus('error');
             setSaveMessage("Error al actualizar los enlaces. Inténtalo de nuevo.");
 
-            // Limpiar mensaje después de 5 segundos
             setTimeout(() => {
                 setSaveStatus('idle');
                 setSaveMessage("");
@@ -92,20 +86,17 @@ const AppPage = () => {
                 setSaveStatus('success');
                 setSaveMessage(`Enlace de ${store === 'appstore' ? 'App Store' : 'Google Play'} eliminado`);
 
-                // Limpiar el input correspondiente
                 if (store === 'appstore') {
                     setAppStoreUrl("");
                 } else {
                     setGooglePlayUrl("");
                 }
 
-                // Limpiar mensaje después de 3 segundos
                 setTimeout(() => {
                     setSaveStatus('idle');
                     setSaveMessage("");
                 }, 3000);
             } else {
-                // Si no existe en la base de datos, solo limpiar el input
                 if (store === 'appstore') {
                     setAppStoreUrl("");
                 } else {
@@ -125,7 +116,7 @@ const AppPage = () => {
     };
 
     const isValidUrl = (url: string, type: 'appstore' | 'googleplay') => {
-        if (!url) return true; // URL vacía es válida
+        if (!url) return true;
 
         if (type === 'appstore') {
             return url.includes('apps.apple.com') || url.includes('itunes.apple.com');
@@ -163,7 +154,6 @@ const AppPage = () => {
                     </p>
                 </div>
 
-                {/* Mensaje de estado general */}
                 {error && (
                     <div className="w-full max-w-md p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-700">
                         <AlertCircle className="w-4 h-4" />
@@ -171,7 +161,6 @@ const AppPage = () => {
                     </div>
                 )}
 
-                {/* Mensaje de guardado */}
                 {saveMessage && (
                     <div className={`w-full max-w-md p-3 border rounded-md flex items-center gap-2 ${
                         saveStatus === 'success'

@@ -116,7 +116,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         }
     }, [getCurrentUserId, fetchBusinessCardByUserId, fetchUser, isDataLoaded]);
 
-    // Effect para cargar datos solo cuando se abre el modal
     useEffect(() => {
         if (isModalOpen && !isDataLoaded) {
             loadUserData();
@@ -150,13 +149,11 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
     useEffect(() => {
         setIsDataLoaded(false);
-        console.log('UserId changed, resetting data loaded flag');
     }, [currentUserId]);
 
     useEffect(() => {
         if (businessCard?.data) {
             try {
-                console.log('Raw businessCard.data:', businessCard.data);
 
                 const parsedData = typeof businessCard.data === 'string'
                     ? JSON.parse(businessCard.data)
@@ -175,8 +172,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                     website: ''
                 });
             }
-        } else {
-            console.log('No businessCard.data available');
         }
     }, [businessCard]);
 
@@ -209,7 +204,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         URL.revokeObjectURL(url);
     };
 
-    // No mostrar el botón si no hay userId válido
     if (!currentUserId) {
         console.log('VCardButton: No valid userId, not rendering');
         return null;
@@ -277,23 +271,20 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         setIsModalOpen(false);
     };
     const isDarkTheme = () => {
+
         const backgroundColor = themeConfig.colors.background;
 
-        // Handle gradient backgrounds
         if (backgroundColor.includes('gradient')) {
-            return false; // Treat gradients as light theme for now
+            return false;
         }
 
-        // Convert hex to RGB and calculate luminance
         const hex = backgroundColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
 
-        // Calculate relative luminance using WCAG formula
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-        // If luminance is less than 0.5, it's a dark theme
         return luminance < 0.5;
     };
 
@@ -327,13 +318,12 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                             </div>
                         </div>
                     <div  className={getIconClassName()} >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path fill="currentColor" d="M13 14h1v1h-1v-1Zm1 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-3-1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm3-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1-1h1v1h-1v-1Zm-2 2h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-2 1h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm1 1h1v1h-1v-1Zm1 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-1-2h1v1h-1v-1Zm1 0h1v1h-1v-1Zm1-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm0 3h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1 3h1v1h-1v-1Zm0-2h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-2-3h1v1h-1v-1Zm-6 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm-3 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm-2 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm0-19h1v1h-1V1Zm1 1h1v1h-1V2Zm-1 2h1v1h-1V4Zm1 1h1v1h-1V5Zm-1 1h1v1h-1V6Zm1 0h1v1h-1V6Zm0 1h1v1h-1V7Zm0 1h1v1h-1V8Zm-1 1h1v1h-1V9Zm1 0h1v1h-1V9Zm-1 1h1v1h-1v-1ZM1 11h1v1H1v-1Zm1 1h1v1H2v-1Zm2-1h1v1H4v-1Zm0 1h1v1H4v-1Zm1-1h1v1H5v-1Zm1 1h1v1H6v-1Zm1-1h1v1H7v-1Zm1 1h1v1H8v-1Zm0-1h1v1H8v-1Zm1 0h1v1H9v-1Zm1 0h1v1h-1v-1Zm1 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1-1h1v1h-1v-1Zm1 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-1 2h1v1h-1v-1Zm-2 9h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0-9h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm11-1h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm1 2h1v1h-1v-1Zm-5-4h1v1h-1v-1Zm1-1h1v1h-1v-1Zm4 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm1 8h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm3 0h1v1h-1v-1Z"/><path stroke="currentColor" stroke-width="2" d="M15 2h7v7h-7V2ZM2 2h7v7H2V2Zm0 13h7v7H2v-7ZM18 5h1v1h-1V5ZM5 5h1v1H5V5Zm0 13h1v1H5v-1Z"/></g></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"><g fill="none" fillRule="evenodd"><path fill="currentColor" d="M13 14h1v1h-1v-1Zm1 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-3-1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm3-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1-1h1v1h-1v-1Zm-2 2h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-2 1h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm1 1h1v1h-1v-1Zm1 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-1-2h1v1h-1v-1Zm1 0h1v1h-1v-1Zm1-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm0 3h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1-1h1v1h-1v-1Zm0-1h1v1h-1v-1Zm1 3h1v1h-1v-1Zm0-2h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-2-3h1v1h-1v-1Zm-6 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm-3 0h1v1h-1v-1Zm2 0h1v1h-1v-1Zm-2 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm0-19h1v1h-1V1Zm1 1h1v1h-1V2Zm-1 2h1v1h-1V4Zm1 1h1v1h-1V5Zm-1 1h1v1h-1V6Zm1 0h1v1h-1V6Zm0 1h1v1h-1V7Zm0 1h1v1h-1V8Zm-1 1h1v1h-1V9Zm1 0h1v1h-1V9Zm-1 1h1v1h-1v-1ZM1 11h1v1H1v-1Zm1 1h1v1H2v-1Zm2-1h1v1H4v-1Zm0 1h1v1H4v-1Zm1-1h1v1H5v-1Zm1 1h1v1H6v-1Zm1-1h1v1H7v-1Zm1 1h1v1H8v-1Zm0-1h1v1H8v-1Zm1 0h1v1H9v-1Zm1 0h1v1h-1v-1Zm1 1h1v1h-1v-1Zm2 0h1v1h-1v-1Zm1-1h1v1h-1v-1Zm1 0h1v1h-1v-1Zm1 0h1v1h-1v-1Zm-1 2h1v1h-1v-1Zm-2 9h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0-9h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm0 1h1v1h-1v-1Zm11-1h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm1 2h1v1h-1v-1Zm-5-4h1v1h-1v-1Zm1-1h1v1h-1v-1Zm4 0h1v1h-1v-1Zm0 1h1v1h-1v-1Zm-1 0h1v1h-1v-1Zm1 8h1v1h-1v-1Zm-1 1h1v1h-1v-1Zm-2 0h1v1h-1v-1Zm3 0h1v1h-1v-1Z"/><path stroke="currentColor" strokeWidth="2" d="M15 2h7v7h-7V2ZM2 2h7v7H2V2Zm0 13h7v7H2v-7ZM18 5h1v1h-1V5ZM5 5h1v1H5V5Zm0 13h1v1H5v-1Z"/></g></svg>
                     </div>
                     </div>
                 </button>
             </div>
 
-            {/* Modal solo se muestra si isModalOpen es true Y estamos en ruta expuesta */}
             {isModalOpen && isExposedRoute && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto">
@@ -362,7 +352,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                             </div>
                         ) : (
                             <>
-                                {/* QR Code - Solo se muestra si showQR es true */}
                                 { businessCard?.qrCodeUrl && (
                                     <div className="p-6 text-center bg-gradient-to-br from-gray-50 to-gray-100">
                                         <div className="bg-white p-4 rounded-xl inline-block shadow-md">
@@ -379,7 +368,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                     </div>
                                 )}
 
-                                {/* Contact Info */}
                                 <div className="p-6 space-y-4">
                                     {cardData.name && (
                                         <div className="text-center mb-6">
@@ -401,7 +389,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Mensaje cuando no hay datos */}
                                     {!cardData.name && !cardData.email && !cardData.phone && !cardData.website && !cardData.title && (
                                         <div className="text-center py-8">
                                             <div className="text-gray-400 mb-3">
@@ -434,7 +421,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                             </button>
                                         </div>
                                     )}
-                                    {/* Contact Details */}
+
                                     <div className="space-y-3">
                                         {cardData.email && (
                                             <div
@@ -499,9 +486,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                                         )}
                                     </div>
                                 </div>
-
-                                {/* Action Buttons */}
-
                             </>
                         )}
                     </div>

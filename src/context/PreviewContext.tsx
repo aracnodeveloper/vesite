@@ -329,7 +329,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }
 
             if (biositeData.fonts && biositeData.fonts !== fontFamily) {
-                console.log('Updating font from BD:', biositeData.fonts);
                 setFontFamilyState(biositeData.fonts);
             }
         }
@@ -343,12 +342,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     useEffect(() => {
         if (links && Array.isArray(links)) {
-            console.log('Processing links:', links.length);
 
             const socialLinksFromAPI = getSocialLinks();
-            console.log('Social links from API:', socialLinksFromAPI.length);
 
-            // Filtrar enlaces sociales excluyendo WhatsApp y app stores
             const socialLinksFormatted = socialLinksFromAPI
                 .filter(link => !isAppStoreLink(link) )
                 .map(link => ({
@@ -363,7 +359,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             const regularLinksFromAPI = getRegularLinks();
 
-            // Filtrar enlaces regulares excluyendo app stores y WhatsApp
             const regularLinksFormatted = regularLinksFromAPI
                 .filter(link => !isAppStoreLink(link) )
                 .map(link => ({
@@ -377,13 +372,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             const appLinksFromAPI = getAppLinks();
           const whatsAppLinkFromAPI = getWhatsAppLinks();
-            console.log('Processed links:', {
-                social: socialLinksFormatted.length,
-                regular: regularLinksFormatted.length,
-                apps: appLinksFromAPI.length,
-             whatsApp: whatsAppLinkFromAPI ? 'found' : 'not found'
-            });
-
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
             setAppLinksState(appLinksFromAPI);
@@ -431,7 +419,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         getIconIdentifier
     });
 
-    // Implementación de app links sin complejidad adicional
     const addAppLink = async (link: Omit<AppLink, 'id'>) => {
         if (!biositeData?.id) {
             throw new Error('Biosite ID is required');
@@ -563,12 +550,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 updateData.isActive = data.isActive;
             }
 
-            // Actualizar la descripción si se proporciona
             if (data.description !== undefined) {
                 updateData.label = data.description;
             }
 
-            // Si no hay descripción específica, mantener 'WhatsApp' como default
             if (!updateData.label) {
                 updateData.label = 'WhatsApp';
             }
@@ -599,14 +584,11 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 parsedColors = biositeData.colors;
             }
 
-            // Sincronizar el themeColor con el color de fondo de la BD
             if (parsedColors.background && parsedColors.background !== themeColor) {
-                console.log('Syncing theme color from BD:', parsedColors.background);
                 setThemeColorBackState(parsedColors.background);
             }
             if (parsedColors.text && parsedColors.text !== themeColor) {
-                console.log('Syncing theme color from BD:', parsedColors.text);
-                setThemeColortextState(parsedColors.text);
+               setThemeColortextState(parsedColors.text);
             }
         }
     }, [biositeData, themeColor, themetextColor,themeBackColor]);
@@ -619,7 +601,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setThemeColorBackState(color)
 
             if (biositeData?.id) {
-                // Preparar los colores actualizados
+
                 let currentColors;
                 try {
                     currentColors = typeof biositeData.colors === 'string'
@@ -636,7 +618,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     accent: accentColor
                 };
 
-                // Actualizar en la base de datos
                 const updateData = {
                     ownerId: biositeData.ownerId,
                     title: biositeData.title,
@@ -651,18 +632,14 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 const updatedBiosite = await updateBiositeHook(updateData);
 
                 if (updatedBiosite) {
-                    // Forzar actualización del estado local
                     setBiosite(prev => prev ? {
                         ...prev,
                         colors: updatedColors
                     } : null);
 
-                    console.log('Theme color updated successfully:', color);
                 }
             }
         } catch (error) {
-            console.error('Error updating theme color:', error);
-            // Revertir el estado si hay error
             setThemeColorState(prevColor => prevColor);
             setThemeColorBackState(prevColor => prevColor);
             setThemeColortextState(prevColor => prevColor);
@@ -670,14 +647,11 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, [biositeData, fontFamily, updateBiositeHook, setBiosite]);
 
-    // FIXED: Implementar setFontFamily correctamente
     const setFontFamily = useCallback(async (font: string) => {
         try {
-            console.log('Setting font family to:', font);
             setFontFamilyState(font);
 
             if (biositeData?.id) {
-                // Preparar los colores actuales
                 let currentColors;
                 try {
                     currentColors = typeof biositeData.colors === 'string'
@@ -702,18 +676,14 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 const updatedBiosite = await updateBiositeHook(updateData);
 
                 if (updatedBiosite) {
-                    // Forzar actualización del estado local
                     setBiosite(prev => prev ? {
                         ...prev,
                         fonts: font
                     } : null);
 
-                    console.log('Font family updated successfully:', font);
                 }
             }
         } catch (error) {
-            console.error('Error updating font family:', error);
-            // Revertir el estado si hay error
             setFontFamilyState(prevFont => prevFont);
             throw error;
         }

@@ -190,7 +190,6 @@ export const useBiositeOperations = ({
 
     const loadBiositeById = useCallback(async (biositeId: string): Promise<BiositeFull | null> => {
         try {
-            console.log('Loading biosite by ID:', biositeId);
             const result = await switchBiosite(biositeId);
             if (result) {
                 setBiosite(result);
@@ -198,7 +197,6 @@ export const useBiositeOperations = ({
                 Cookies.set('biositeId', biositeId);
                 Cookies.set('userId', result.ownerId);
 
-                console.log('Biosite loaded successfully:', result);
             }
             return result;
         } catch (error) {

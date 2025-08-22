@@ -105,7 +105,6 @@ const LivePreviewContent = () => {
     const currentTemplate = useMemo(() => {
 
         if (!isTemplatesLoaded || !templates.length) {
-            console.log('Templates not loaded or empty');
             return undefined;
         }
 
@@ -119,13 +118,10 @@ const LivePreviewContent = () => {
 
             if (template) {
                 return template;
-            } else {
-                console.log('Template not found, available template IDs:', templates.map(t => t.id));
             }
         }
 
         const defaultTemplate = getDefaultTemplate();
-        console.log('Using default template:', defaultTemplate);
         return defaultTemplate;
     }, [biosite?.themeId, templates, isTemplatesLoaded, getTemplateById, getDefaultTemplate]);
 
@@ -226,10 +222,6 @@ const LivePreviewContent = () => {
                         handleUserInfoClick={handleUserInfoClick}
                     />
 
-                    {/* WhatsApp Link */}
-
-
-                    {/* Links sociales */}
                     <SocialLinksSection
                         realSocialLinks={realSocialLinks}
                         isExposedRoute={isExposedRoute}

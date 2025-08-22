@@ -14,7 +14,6 @@ const VideoPage = () => {
     const [hasExistingVideo, setHasExistingVideo] = useState(false);
 
     useEffect(() => {
-        // Load existing video data
         const existingVideo = getVideoEmbed();
         if (existingVideo) {
             setUrl(existingVideo.url || '');
@@ -46,7 +45,6 @@ const VideoPage = () => {
     const handleDelete = async () => {
         try {
             setIsDeleting(true);
-            // Eliminar pasando una URL vacía para desactivar el video
             await setVideoEmbed('', '');
             console.log('Video embed deleted successfully');
             navigate(-1);
@@ -61,7 +59,6 @@ const VideoPage = () => {
     const isValidVideoUrl = (url: string) => {
         if (!url.trim()) return false;
 
-        // Check for supported video platforms
         const videoPlatforms = [
             'youtube.com',
             'youtu.be',
@@ -92,7 +89,7 @@ const VideoPage = () => {
 
     return (
         <div className="w-full h-full mb-10 mt-0 lg:mt-20 max-w-md mx-auto rounded-lg">
-            {/* Header */}
+
             <div className="px-6 py-4 border-b border-gray-700 mb-10 sr-only sm:not-sr-only">
                 <div className="flex items-center gap-3">
                     <button onClick={handleBackClick} className="flex items-center cursor-pointer text-gray-800 hover:text-white transition-colors">

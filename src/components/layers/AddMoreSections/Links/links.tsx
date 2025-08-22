@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import {usePreview} from "../../../../context/PreviewContext.tsx";
 
 const Links = () => {
+    const {regularLinks} = usePreview()
     const navigate = useNavigate();
+    const activeLinks = regularLinks.filter(link => link.isActive);
 
     return (
         <div
@@ -25,9 +28,16 @@ const Links = () => {
                     <div className="text-gray-600 text-sm">Links Diversos</div>
                 </div>
             </div>
-            <div
-                className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-[#6F4FC1] hover:border-[#6F4FC1] transition-colors">
-            <span className="text-black text-sm hover:text-white">+</span>
+
+            <div className="flex items-center space-x-2">
+                {activeLinks.length > 0 && (
+                    <span className="text-sm text-black" style={{fontSize:"11px"}}>
+                        {activeLinks.length}
+                    </span>
+                )}
+                <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-[#6F4FC1] hover:border-[#6F4FC1] transition-colors">
+                    <span className="text-black text-sm hover:text-white">+</span>
+                </div>
             </div>
         </div>
     );

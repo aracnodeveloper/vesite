@@ -55,7 +55,6 @@ const VCardPage = () => {
         loadData();
     }, [slug, currentUserId]);
 
-    // Nuevo efecto para sincronizar datos del usuario con la VCard y actualizar automáticamente
     useEffect(() => {
         const syncAndUpdateCard = async () => {
             if (user && businessCard && !slug && businessCard.id && !isEditing && !loading) {
@@ -64,21 +63,18 @@ const VCardPage = () => {
                         ? JSON.parse(businessCard.data)
                         : businessCard.data || {};
 
-                    // Sincronizar campos desde el usuario
                     const syncedData = {
                         ...parsedData,
                         name: parsedData.name || user.name || '',
-                        phone: user.phone || parsedData.phone || '', // Priorizar phone del usuario
+                        phone: user.phone || parsedData.phone || '',
                         website: parsedData.website || user.site || ''
                     };
 
-                    // Verificar si realmente hay cambios antes de actualizar
                     const hasChanges = JSON.stringify(parsedData) !== JSON.stringify(syncedData);
 
                     if (hasChanges) {
                         setCardData(syncedData);
 
-                        // Actualizar automáticamente la business card con los datos sincronizados
                         try {
                             await updateBusinessCard(businessCard.id, {
                                 ownerId: currentUserId,
@@ -90,7 +86,7 @@ const VCardPage = () => {
                             console.error('Error actualizando business card automáticamente:', updateError);
                         }
                     } else {
-                        // Solo actualizar el estado local si no hay cambios en los datos
+
                         setCardData(syncedData);
                     }
                 } catch (error) {
@@ -129,7 +125,7 @@ const VCardPage = () => {
 
     useEffect(() => {
         if (businessCard?.data && !user) {
-            // Solo usar datos de businessCard si no hay datos de usuario disponibles
+
             try {
                 const parsedData = typeof businessCard.data === 'string'
                     ? JSON.parse(businessCard.data)
@@ -147,7 +143,7 @@ const VCardPage = () => {
     const handleCreateCard = async () => {
         try {
             await createBusinessCard(currentUserId);
-            // Después de crear la tarjeta, generar automáticamente el QR
+
             setTimeout(async () => {
                 try {
                     await regenerateQRCode(currentUserId);
@@ -176,10 +172,9 @@ const VCardPage = () => {
                 isActive: true
             });
 
-            // Actualizar datos del usuario si es necesario
+
             const userUpdateData: any = {};
 
-            // Sincronizar phone del VCard al usuario si cambió
             if (cardData.phone && cardData.phone !== user?.phone) {
                 userUpdateData.phone = cardData.phone;
             }

@@ -84,12 +84,12 @@ const Social = () => {
 
 
             <div className="flex items-center space-x-2">
-                <span className="text-sm text-black"
-                      style={{fontSize:"11px"}}
-                >
-                            {activeSocialLinks.length}
-                </span>
-                <ChevronRight size={16} className="text-gray-400"/>
+                {activeSocialLinks.length > 0 && (
+                    <span className="text-sm text-black" style={{fontSize:"11px"}}>
+                        {activeSocialLinks.length}
+                    </span>
+                )}
+                <ChevronRight size={16} className="text-black"/>
             </div>
         </div>
     );
