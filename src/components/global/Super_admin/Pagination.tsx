@@ -22,6 +22,7 @@ interface PaginationProps {
     showPageInfo?: boolean;
     showFirstLast?: boolean;
     className?: string;
+    totalUnfilteredItems?: number;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
@@ -44,9 +45,12 @@ const Pagination: React.FC<PaginationProps> = ({
                                                    showPageSizeSelector = true,
                                                    showPageInfo = true,
                                                    showFirstLast = true,
-                                                   className = ''
+                                                   className = '',
+                                                   totalUnfilteredItems = 0
                                                }) => {
-    if (totalPages <= 1 && !showPageSizeSelector) {
+    const shouldShowPagination = totalPages > 1 || (totalUnfilteredItems > pageSize && totalItems === 0);
+
+    if (!shouldShowPagination && !showPageSizeSelector) {
         return null;
     }
 
@@ -56,7 +60,10 @@ const Pagination: React.FC<PaginationProps> = ({
             <div className="flex flex-col sm:flex-row items-center gap-4">
                 {showPageInfo && (
                     <div className="text-sm text-gray-700">
-                        {pageInfo}
+                        {totalItems === 0 && totalUnfilteredItems > 0
+                            ? `Sin resultados en la página ${currentPage} (${totalUnfilteredItems} items totales)`
+                            : pageInfo
+                        }
                     </div>
                 )}
 
@@ -66,7 +73,8 @@ const Pagination: React.FC<PaginationProps> = ({
                         <select
                             value={pageSize}
                             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer" style={{color:"black"}}
+                            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
+                            style={{color:"black"}}
                             disabled={loading}
                         >
                             {pageSizeOptions.map(size => (
@@ -77,8 +85,8 @@ const Pagination: React.FC<PaginationProps> = ({
                 )}
             </div>
 
-            {/* Controles de navegación */}
-            {totalPages > 1 && (
+            {/* Controles de navegación - mostrar siempre que haya potencialmente más páginas */}
+            {shouldShowPagination && (
                 <div className="flex items-center gap-1">
                     {/* Botón Primera página */}
                     {showFirstLast && (
@@ -109,8 +117,8 @@ const Pagination: React.FC<PaginationProps> = ({
                                 // Ellipsis
                                 return (
                                     <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-400 cursor-pointer">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </span>
+                                        <MoreHorizontal className="w-4 h-4" />
+                                    </span>
                                 );
                             }
 

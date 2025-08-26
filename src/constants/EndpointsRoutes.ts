@@ -2,9 +2,6 @@
 export const loginApi: string = "/auth/login-flexible"
 export const registerStudentApi: string = "/auth/register"
 
-//METRICS
-export const metricsApi = "/biosites/analytics";
-
 //Themes.ts-Templates
 export const themesApi ="/themes"
 
@@ -32,7 +29,6 @@ export const uploadBiositeAvatarApi: string = "/upload/biosite-avatar"; // POST 
 export const uploadBiositeBackgroundApi: string = "/upload/biosite-background";
 
 //User
-
 export const getALLUsersApi = "/users?page=10&size=10"
 
 

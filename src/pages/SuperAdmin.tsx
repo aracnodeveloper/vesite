@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFetchBiosite } from '../hooks/useFetchBiosite';
 import { usePagination } from '../hooks/usePagination';
-//import Pagination from '../components/global/Super_admin/Pagination.tsx';
+import SearchAndFilters from '../components/global/Super_admin/SearchAndFilters';
+import type { FilterState } from '../components/global/Super_admin/SearchAndFilters';
 import {
     Users,
     Globe,
     RefreshCw,
-    BarChart3,
     LinkIcon
 } from 'lucide-react';
 import Cookie from "js-cookie";
@@ -16,7 +16,6 @@ import { getBiositeAnalytics } from '../service/apiService';
 import apiService from '../service/apiService';
 import { BiositesTable } from '../components/global/Super_admin/BiositesTable.tsx';
 
-// Types
 interface LinkData {
     id: string;
     label: string;
@@ -105,6 +104,16 @@ const AdminPanel: React.FC = () => {
     const [selectedView, setSelectedView] = useState<'biosites' | 'users'>('biosites');
     const [initialized, setInitialized] = useState(false);
 
+    const [currentFilters, setCurrentFilters] = useState<FilterState>({
+        search: '',
+        status: 'all',
+        hasSlug: 'all',
+        dateRange: 'all',
+        sortBy: 'newest',
+        sortOrder: 'desc'
+    });
+    const [filteredData, setFilteredData] = useState<BiositeFull[]>([]);
+
     const biositesPagination = usePagination<BiositeFull>({
         initialPage: 1,
         initialSize: 10
@@ -114,6 +123,115 @@ const AdminPanel: React.FC = () => {
         initialPage: 1,
         initialSize: 10
     });
+
+    const applyFilters = useCallback((biosites: BiositeFull[], filters: FilterState): BiositeFull[] => {
+        let filtered = [...biosites];
+
+        if (filters.search.trim()) {
+            const searchTerm = filters.search.toLowerCase();
+            filtered = filtered.filter(biosite =>
+                biosite.title?.toLowerCase().includes(searchTerm) ||
+                biosite.slug?.toLowerCase().includes(searchTerm) ||
+                biosite.owner?.email?.toLowerCase().includes(searchTerm) ||
+                biosite.owner?.name?.toLowerCase().includes(searchTerm) ||
+                biosite.owner?.cedula?.includes(searchTerm) ||
+                biosite.id.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (filters.status !== 'all') {
+            filtered = filtered.filter(biosite =>
+                filters.status === 'active' ? biosite.isActive : !biosite.isActive
+            );
+        }
+
+        if (filters.hasSlug !== 'all') {
+            filtered = filtered.filter(biosite => {
+                const hasSlug = biosite.slug && biosite.slug.trim().length > 0;
+                return filters.hasSlug === 'with-slug' ? hasSlug : !hasSlug;
+            });
+        }
+
+        if (filters.dateRange !== 'all') {
+            const now = new Date();
+            const cutoffDate = new Date();
+
+            switch (filters.dateRange) {
+                case 'last7':
+                    cutoffDate.setDate(now.getDate() - 7);
+                    break;
+                case 'last30':
+                    cutoffDate.setDate(now.getDate() - 30);
+                    break;
+                case 'last90':
+                    cutoffDate.setDate(now.getDate() - 90);
+                    break;
+            }
+
+            filtered = filtered.filter(biosite =>
+                new Date(biosite.createdAt) >= cutoffDate
+            );
+        }
+
+        filtered.sort((a, b) => {
+            let aValue: any, bValue: any;
+
+            switch (filters.sortBy) {
+                case 'newest':
+                    aValue = new Date(a.createdAt);
+                    bValue = new Date(b.createdAt);
+                    break;
+                case 'oldest':
+                    aValue = new Date(a.createdAt);
+                    bValue = new Date(b.createdAt);
+                    break;
+                case 'title':
+                    aValue = a.title || '';
+                    bValue = b.title || '';
+                    break;
+                case 'updated':
+                    aValue = new Date(a.updatedAt);
+                    bValue = new Date(b.updatedAt);
+                    break;
+                default:
+                    aValue = new Date(a.createdAt);
+                    bValue = new Date(b.createdAt);
+            }
+
+            if (filters.sortOrder === 'asc') {
+                return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+            } else {
+                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+            }
+        });
+
+        return filtered;
+    }, []);
+
+    const handleSearch = useCallback((filters: FilterState) => {
+        setCurrentFilters(filters);
+
+        if (biositesPagination.data.length > 0) {
+            const filtered = applyFilters(biositesPagination.data, filters);
+            setFilteredData(filtered);
+        }
+
+        biositesPagination.setPage(1);
+    }, [biositesPagination.data, applyFilters, biositesPagination]);
+
+    const handleResetFilters = useCallback(() => {
+        const defaultFilters: FilterState = {
+            search: '',
+            status: 'all',
+            hasSlug: 'all',
+            dateRange: 'all',
+            sortBy: 'newest',
+            sortOrder: 'desc'
+        };
+        setCurrentFilters(defaultFilters);
+        setFilteredData(biositesPagination.data);
+        biositesPagination.setPage(1);
+    }, [biositesPagination.data, biositesPagination]);
 
     const fetchBiositeLinks = async (biositeId: string) => {
         if (biositeLinks[biositeId] || loadingBiositeLinks[biositeId]) return;
@@ -250,6 +368,12 @@ const AdminPanel: React.FC = () => {
 
             console.log('Biosites loaded:', response);
             biositesPagination.setPaginatedData(response);
+
+            const responseData = Array.isArray(response) ? response : response?.data || [];
+            if (responseData.length > 0) {
+                const filtered = applyFilters(responseData, currentFilters);
+                setFilteredData(filtered);
+            }
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar biosites";
             biositesPagination.setError(errorMessage);
@@ -257,8 +381,7 @@ const AdminPanel: React.FC = () => {
         } finally {
             biositesPagination.setLoading(false);
         }
-    }, [fetchAllBiosites, biositesPagination]);
-
+    }, [fetchAllBiosites, biositesPagination, applyFilters, currentFilters]);
 
 
     const handleRefreshData = useCallback(async () => {
@@ -291,6 +414,12 @@ const AdminPanel: React.FC = () => {
         }
     }, [biositesPagination.currentPage, biositesPagination.pageSize, initialized, selectedView]);
 
+    useEffect(() => {
+        if (biositesPagination.data.length > 0) {
+            const filtered = applyFilters(biositesPagination.data, currentFilters);
+            setFilteredData(filtered);
+        }
+    }, [biositesPagination.data, currentFilters, applyFilters]);
 
     const toggleBiositeExpansion = (biositeId: string) => {
         const wasExpanded = expandedBiosite === biositeId;
@@ -304,7 +433,6 @@ const AdminPanel: React.FC = () => {
             fetchBiositeLinks(biositeId);
         }
     };
-
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A';
@@ -396,13 +524,12 @@ const AdminPanel: React.FC = () => {
         );
     }
 
-
     const totalLinks = Object.values(biositeLinks).reduce((sum, links) => sum + (links?.length || 0), 0);
 
     return (
         <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
             {/* Header */}
-            <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <div className=" shadow rounded-lg p-6 mb-6">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
@@ -471,7 +598,16 @@ const AdminPanel: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            </div>
 
+            {/* Search and Filters */}
+            <div className="mb-6">
+                <SearchAndFilters
+                    onSearch={handleSearch}
+                    onReset={handleResetFilters}
+                    loading={currentPagination.loading}
+                    totalResults={filteredData.length}
+                />
             </div>
 
             {/* Main Content */}
@@ -480,7 +616,7 @@ const AdminPanel: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-medium text-gray-900">
                             {selectedView === 'biosites'
-                                ? `Todos los Biosites (${biositesPagination.totalItems || 0})`
+                                ? `Biosites (${filteredData.length} de ${biositesPagination.totalItems || 0})`
                                 : `Todos los Usuarios (${usersPagination.totalItems || 0})`
                             }
                         </h2>
@@ -500,28 +636,32 @@ const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                        <BiositesTable
-                            pagination={biositesPagination}
-                            biositeLinks={biositeLinks}
-                            loadingBiositeLinks={loadingBiositeLinks}
-                            analyticsData={analyticsData}
-                            loadingAnalytics={loadingAnalytics}
-                            showAnalytics={showAnalytics}
-                            analyticsTimeRange={analyticsTimeRange}
-                            expandedBiosite={expandedBiosite}
-                            businessCards={businessCards}
-                            loadingCards={loadingCards}
-                            categorizeLinks={categorizeLinks}
-                            toggleBiositeExpansion={toggleBiositeExpansion}
-                            toggleAnalytics={toggleAnalytics}
-                            fetchBiositeAnalytics={fetchBiositeAnalytics}
-                            setAnalyticsTimeRange={setAnalyticsTimeRange}
-                            setShowAnalytics={setShowAnalytics}
-                            setAnalyticsData={setAnalyticsData}
-                            formatDate={formatDate}
-                            parseVCardData={parseVCardData}
-                        />
-
+                    <BiositesTable
+                        pagination={{
+                            ...biositesPagination,
+                            data: filteredData,
+                            totalItems: filteredData.length,
+                            totalUnfilteredItems: biositesPagination.totalItems || 0
+                        }}
+                        biositeLinks={biositeLinks}
+                        loadingBiositeLinks={loadingBiositeLinks}
+                        analyticsData={analyticsData}
+                        loadingAnalytics={loadingAnalytics}
+                        showAnalytics={showAnalytics}
+                        analyticsTimeRange={analyticsTimeRange}
+                        expandedBiosite={expandedBiosite}
+                        businessCards={businessCards}
+                        loadingCards={loadingCards}
+                        categorizeLinks={categorizeLinks}
+                        toggleBiositeExpansion={toggleBiositeExpansion}
+                        toggleAnalytics={toggleAnalytics}
+                        fetchBiositeAnalytics={fetchBiositeAnalytics}
+                        setAnalyticsTimeRange={setAnalyticsTimeRange}
+                        setShowAnalytics={setShowAnalytics}
+                        setAnalyticsData={setAnalyticsData}
+                        formatDate={formatDate}
+                        parseVCardData={parseVCardData}
+                    />
                 </div>
             </div>
             <div className='h-20'></div>

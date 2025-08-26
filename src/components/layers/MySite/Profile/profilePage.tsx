@@ -51,6 +51,12 @@ const ProfilePage = () => {
         setShowWarning(!showWarning);
     };
 
+    // Función para transformar slug a minúsculas
+    const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.toLowerCase();
+        form.setFieldValue('slug', value);
+    };
+
     useEffect(() => {
         if (biosite && !loading) {
             fetchBiosite();
@@ -86,7 +92,7 @@ const ProfilePage = () => {
 
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
-            message.error('Error: Información del perfil no disponible');
+            message.error('Error: InformaciÃ³n del perfil no disponible');
             return;
         }
 
@@ -108,7 +114,6 @@ const ProfilePage = () => {
 
             const loadingMessage = message.loading('Actualizando perfil...', 0);
 
-            // Crear el objeto base sin avatarImage
             const baseUpdateData = {
                 ownerId: biosite.ownerId || userId,
                 title: values.title || user?.name || biosite.title,
@@ -120,12 +125,10 @@ const ProfilePage = () => {
                 isActive: biosite.isActive ?? true
             };
 
-            // Solo incluir avatarImage si es una URL válida
             const updateData: BiositeUpdateDto = hasValidAvatar
                 ? { ...baseUpdateData, avatarImage: biosite.avatarImage! }
                 : baseUpdateData;
 
-            // Update user description if changed
             if (values.description !== user?.description) {
                 const updatedUser = await updateUser(userId, {
                     description: values.description || ''
@@ -156,7 +159,7 @@ const ProfilePage = () => {
             console.error("Error al actualizar perfil:", error);
 
             if (error.response?.data?.details?.code === 'P2003') {
-                message.error('Error: Referencia de base de datos inválida');
+                message.error('Error: Referencia de base de datos invÃ¡lida');
             } else {
                 const errorMessage = error.response?.data?.message || error.message || 'Error desconocido';
                 message.error(`Error al actualizar el perfil: ${errorMessage}`);
@@ -190,10 +193,10 @@ const ProfilePage = () => {
                     </div>
                     <p className="text-lg font-semibold mb-2">No se pudo cargar el perfil</p>
                     <p className="text-sm text-gray-600 mb-4">
-                        Verifica tu conexión e inténtalo de nuevo
+                        Verifica tu conexión e intentalo de nuevo
                     </p>
                     <Button onClick={() => window.location.reload()}>
-                        Recargar página
+                        Recargar pagina
                     </Button>
                 </div>
             </div>
@@ -213,7 +216,7 @@ const ProfilePage = () => {
 
             <div className="p-6">
                 <div className="mb-6">
-                    <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">IMÁGENES</h3>
+                    <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">IMAGENES</h3>
                     <ImageUploadSection
                         biosite={biosite}
                         loading={loading}
@@ -244,7 +247,7 @@ const ProfilePage = () => {
                                     <p className="text-sm text-blue-700" style={{fontSize:"11px"}}>
                                         {biosite.backgroundImage
                                             ? 'Tienes una imagen de fondo personalizada ya previa configurada             Al configurar debes llenar todos los campos y añadir una imagen '
-                                            : ' Al configurar debes llenar todos los campos y añadir una imagen. Se aplicará una imagen de fondo por defecto a el perfil VeSite... '
+                                            : ' Al configurar debes llenar todos los campos y añadir una imagen. Se aplicara una imagen de fondo por defecto a el perfil VeSite... '
                                         }
                                     </p>
                                 </div>
@@ -267,7 +270,7 @@ const ProfilePage = () => {
                                 rules={[
                                     { required: true, message: 'El nombre es requerido' },
                                     { min: 2, message: 'El nombre debe tener al menos 2 caracteres' },
-                                    { max: 50, message: 'El nombre no puede tener más de 50 caracteres' }
+                                    { max: 50, message: 'El nombre no puede tener mas de 50 caracteres' }
                                 ]}
                                 className="mb-0"
                             >
@@ -281,7 +284,6 @@ const ProfilePage = () => {
                             </Form.Item>
                         </div>
 
-                        {/* Descripción Input */}
                         <div className="mb-4">
                             <label className="text-xs font-ligth text-gray-500 mb-4 uppercase tracking-wide text-start">
                                 DESCRIPCIÓN
@@ -289,7 +291,7 @@ const ProfilePage = () => {
                             <Form.Item
                                 name="description"
                                 rules={[
-                                    { max: 250, message: 'La descripción no puede tener más de 250 caracteres' }
+                                    { max: 250, message: 'La descripción no puede tener mas de 250 caracteres' }
                                 ]}
                                 className="mb-0"
                             >
@@ -318,26 +320,26 @@ const ProfilePage = () => {
                                 rules={[
                                     {required: true, message: 'La url es requerido'},
                                     {min: 3, message: 'La url debe tener al menos 3 caracteres'},
-                                    {max: 30, message: 'La url no puede tener más de 30 caracteres'},
+                                    {max: 30, message: 'La url no puede tener mas de 30 caracteres'},
                                     {
                                         pattern: /^[a-z0-9-]+$/,
-                                        message: 'Solo se permiten letras minúsculas, números y guiones'
+                                        message: 'Solo se permiten letras minúsculas, numeros y guiones'
                                     }
                                 ]}
                                 className="mb-0"
                             >
-                                    <Input
-                                        placeholder="tu-url-personalizada"
-                                        disabled={loading}
-                                        height={20}
-                                        addonBefore='vesite/'
-                                        maxLength={30}
-                                        className="flex-1 h-12 border-none bg-transparent text-black placeholder-gray-400 shadow-none focus:shadow-none focus:border-none hover:shadow-none p-0"
-                                        style={{fontSize: "12px", boxShadow: "none"}}
-                                    />
+                                <Input
+                                    placeholder="tu-url-personalizada"
+                                    disabled={loading}
+                                    height={20}
+                                    addonBefore='vesite/'
+                                    maxLength={30}
+                                    onChange={handleSlugChange}
+                                    className="flex-1 h-12 border-none bg-transparent text-black placeholder-gray-400 shadow-none focus:shadow-none focus:border-none hover:shadow-none p-0"
+                                    style={{fontSize: "12px", boxShadow: "none"}}
+                                />
                             </Form.Item>
 
-                            {/* Mostrar la URL completa como preview */}
                             {form.getFieldValue('slug') && (
                                 <div className="mt-2 text-sm text-gray-600" style={{fontSize: "12px"}}>
                                     URL completa: <span className="text-blue-600">visitaecuador.com/vesite/{form.getFieldValue('slug')}</span>

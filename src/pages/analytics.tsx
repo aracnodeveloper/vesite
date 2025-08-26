@@ -48,18 +48,15 @@ const AnalyticsContent = () => {
     }, 1000);
   }, []);
 
-  // Time range options for the selector
   const timeRangeOptions = [
     { value: 'last7' as TimeRange, label: 'Últimos 7 días' },
     { value: 'last30' as TimeRange, label: 'Últimos 30 días' },
     { value: 'lastYear' as TimeRange, label: 'Último año' }
   ];
 
-  // Handle time range change
   const handleTimeRangeChange = useCallback((newTimeRange: TimeRange) => {
     setTimeRange(newTimeRange);
     setLoading(true);
-    // Trigger refresh with new time range
     setTimeout(() => {
       setRefreshTrigger(prev => prev + 1);
     }, 100);
@@ -232,7 +229,6 @@ const AnalyticsContent = () => {
       }
     }
 
-    // Footer en todas las páginas
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
@@ -242,11 +238,10 @@ const AnalyticsContent = () => {
       doc.text(`Página ${i} de ${totalPages}`, 170, 285);
     }
 
-    // Generar blob del PDF
     const pdfBlob = doc.output('blob');
     return pdfBlob;
   }, [analyticsData, timeRange, timeRangeOptions]);
-  // Función para compartir métricas
+
   const handleShare = useCallback(async () => {
     if (!analyticsData) return;
 
@@ -362,7 +357,6 @@ const AnalyticsContent = () => {
   }, [analyticsData, timeRange, timeRangeOptions, generatePDFBlob]);
 
 
-  // Función para generar y descargar PDF
   const handleDownloadPDF = useCallback(async () => {
     if (!analyticsData || isDownloading) return;
 
@@ -509,11 +503,9 @@ const AnalyticsContent = () => {
         throw new Error('Could not get userId');
       }
 
-      // Llamada al API de analytics con timeRange
       const analyticsResult = await getBiositeAnalytics(userId, timeRange);
       console.log('📈 Analytics API result:', analyticsResult);
 
-      // Validar y procesar la respuesta
       if (typeof analyticsResult === 'string' && analyticsResult.includes('<!doctype html>')) {
         console.warn('⚠️ API returned HTML instead of JSON');
         setAnalyticsData({
@@ -545,7 +537,6 @@ const AnalyticsContent = () => {
         setAnalyticsData(processedData);
       } else {
         console.warn('⚠️ Invalid analytics result:', analyticsResult);
-        // Datos por defecto
         setAnalyticsData({
           dailyActivity: [{
             day: new Date().toISOString().split('T')[0],

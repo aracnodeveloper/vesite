@@ -15,155 +15,13 @@ import {
     MousePointer,
     ExternalLink
 } from 'lucide-react';
-import type {BusinessCard} from "../../../types/V-Card.ts";
-
-const iconMap: { [key: string]: string } = {
-    'instagram': '/assets/icons/instagram.svg',
-    'tiktok': '/assets/icons/tiktok.svg',
-    'twitter': '/assets/icons/X.svg',
-    'x': '/assets/icons/X.svg',
-    'youtube': '/assets/icons/youtube.svg',
-    'facebook': '/assets/icons/facebook.svg',
-    'twitch': '/assets/icons/twitch.svg',
-    'linkedin': '/assets/icons/linkdl.svg',
-    'snapchat': '/assets/icons/snapchat.svg',
-    'threads': '/assets/icons/threads.svg',
-    'pinterest': '/assets/icons/pinterest.svg',
-    'spotify': '/assets/icons/spottufy.svg',
-    'discord': '/assets/icons/discord.svg',
-    'tumblr': '/assets/icons/tumblr.svg',
-    'telegram': '/assets/icons/telegram.svg',
-    'onlyfans': '/assets/icons/onlyfans.svg',
-    'email': '/assets/icons/gmail.svg',
-    'gmail': '/assets/icons/gmail.svg',
-    'whatsapp': '/assets/icons/whatsapp.svg',
-    'amazon': '/assets/icons/amazon.svg',
-    'appstore': '/assets/icons/appstore.svg',
-    'googleplay': '/assets/icons/googleplay.svg',
-    '/assets/icons/instagram.svg': '/assets/icons/instagram.svg',
-    '/assets/icons/tiktok.svg': '/assets/icons/tiktok.svg',
-    '/assets/icons/X.svg': '/assets/icons/X.svg',
-    '/assets/icons/youtube.svg': '/assets/icons/youtube.svg',
-    '/assets/icons/facebook.svg': '/assets/icons/facebook.svg',
-    '/assets/icons/twitch.svg': '/assets/icons/twitch.svg',
-    '/assets/icons/linkdl.svg': '/assets/icons/linkdl.svg',
-    '/assets/icons/snapchat.svg': '/assets/icons/snapchat.svg',
-    '/assets/icons/threads.svg': '/assets/icons/threads.svg',
-    '/assets/icons/gmail.svg': '/assets/icons/gmail.svg',
-    '/assets/icons/pinterest.svg': '/assets/icons/pinterest.svg',
-    '/assets/icons/spottufy.svg': '/assets/icons/spottufy.svg',
-    '/assets/icons/discord.svg': '/assets/icons/discord.svg',
-    '/assets/icons/tumblr.svg': '/assets/icons/tumblr.svg',
-    '/assets/icons/whatsapp.svg': '/assets/icons/whatsapp.svg',
-    '/assets/icons/telegram.svg': '/assets/icons/telegram.svg',
-    '/assets/icons/amazon.svg': '/assets/icons/amazon.svg',
-    '/assets/icons/onlyfans.svg': '/assets/icons/onlyfans.svg',
-    '/assets/icons/appstore.svg': '/assets/icons/appstore.svg',
-    '/assets/icons/googleplay.svg': '/assets/icons/googleplay.svg'
-};
+import type {BiositeFull,LinkData,LinkImageDisplayProps, BiositesTableProps, TimeRange} from '../../../interfaces/AdminData.ts'
+import {socialMediaPlatforms} from "../../../media/socialPlataforms.ts";
 
 const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f8fafc' rx='8' stroke='%23e2e8f0' stroke-width='1'/%3E%3Cpath d='M13 13h14v14H13z' fill='%23e2e8f0'/%3E%3Ccircle cx='18' cy='18' r='2.5' fill='%239ca3af'/%3E%3Cpath d='M15 29l6-4 6 4H15z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-interface LinkData {
-    id: string;
-    label: string;
-    url: string;
-    icon?: string;
-    isActive: boolean;
-    orderIndex: number;
-    description?: string;
-    image?: string;
-    color?: string;
-    biositeId?: string;
-    createdAt?: string;
-    updatedAt?: string;
-}
 
-interface LinkImageDisplayProps {
-    link: LinkData;
-    size?: 'sm' | 'md' | 'lg';
-}
 
-interface User {
-    id: string;
-    email: string;
-    cedula?: string;
-    name?: string;
-    description?: string;
-    avatarUrl?: string;
-    site?: string;
-    phone?: string;
-    isActive?: boolean;
-    role?: string;
-    parentId?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    biosites?: BiositeFull[];
-}
-
-interface BiositeFull {
-    id: string;
-    ownerId: string;
-    title: string | null;
-    slug: string | null;
-    themeId: string | null;
-    colors: string | any;
-    fonts?: string;
-    avatarImage?: string;
-    backgroundImage?: string;
-    videoUrl?: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    links?: LinkData[];
-    owner?: User;
-    businessCard?: BusinessCard;
-}
-
-interface AnalyticsData {
-    views: number;
-    clicks: number;
-    dailyActivity: Array<{
-        day: string;
-        views: number;
-        clicks: number;
-    }>;
-    clickDetails: Array<{
-        label: string;
-        count: number;
-    }>;
-}
-
-type TimeRange = 'last7' | 'last30' | 'lastYear';
-
-interface BiositesTableProps {
-    pagination: any;
-    biositeLinks: {[key: string]: LinkData[]};
-    loadingBiositeLinks: {[key: string]: boolean};
-    analyticsData: {[key: string]: AnalyticsData};
-    loadingAnalytics: {[key: string]: boolean};
-    showAnalytics: {[key: string]: boolean};
-    analyticsTimeRange: TimeRange;
-    expandedBiosite: string | null;
-    businessCards: {[key: string]: BusinessCard};
-    loadingCards: {[key: string]: boolean};
-    categorizeLinks: (links: LinkData[]) => {
-        total: number;
-        social: number;
-        regular: number;
-        whatsApp: number;
-        apps: number;
-        embed: number;
-    };
-    toggleBiositeExpansion: (biositeId: string) => void;
-    toggleAnalytics: (biositeId: string, ownerId: string) => void;
-    fetchBiositeAnalytics: (biositeId: string, ownerId: string) => void;
-    setAnalyticsTimeRange: (range: TimeRange) => void;
-    setShowAnalytics: React.Dispatch<React.SetStateAction<{[key: string]: boolean}>>;
-    setAnalyticsData: React.Dispatch<React.SetStateAction<{[key: string]: AnalyticsData}>>;
-    formatDate: (dateString?: string) => string;
-    parseVCardData: (businessCard: BusinessCard | null) => any;
-}
 
 const LinkImageDisplay: React.FC<LinkImageDisplayProps> = ({ link, size = 'md' }) => {
     const [imageError, setImageError] = React.useState(false);
@@ -198,75 +56,99 @@ const LinkImageDisplay: React.FC<LinkImageDisplayProps> = ({ link, size = 'md' }
     const getIconPath = (iconIdentifier: string): string | null => {
         if (!iconIdentifier) return null;
 
-        if (iconIdentifier.startsWith('/assets/icons/') || iconIdentifier.startsWith('http')) {
+        if (iconIdentifier.startsWith('http') || iconIdentifier.startsWith('/assets/icons/')) {
             return iconIdentifier;
         }
 
         const cleanIdentifier = iconIdentifier.toLowerCase().trim();
 
-        if (iconMap[cleanIdentifier]) {
-            return iconMap[cleanIdentifier];
+        const iconPathMap: { [key: string]: string } = {
+            'instagram': '/assets/icons/instagram.svg',
+            'tiktok': '/assets/icons/tiktok.svg',
+            'twitter': '/assets/icons/X.svg',
+            'x': '/assets/icons/X.svg',
+            'youtube': '/assets/icons/youtube.svg',
+            'facebook': '/assets/icons/facebook.svg',
+            'twitch': '/assets/icons/twitch.svg',
+            'linkedin': '/assets/icons/linkdl.svg',
+            'snapchat': '/assets/icons/snapchat.svg',
+            'threads': '/assets/icons/threads.svg',
+            'gmail': '/assets/icons/gmail.svg',
+            'email': '/assets/icons/gmail.svg',
+            'pinterest': '/assets/icons/pinterest.svg',
+            'spotify': '/assets/icons/spottufy.svg',
+            'discord': '/assets/icons/discord.svg',
+            'tumblr': '/assets/icons/tumblr.svg',
+            'whatsapp': '/assets/icons/whatsapp.svg',
+            'telegram': '/assets/icons/telegram.svg',
+            'amazon': '/assets/icons/amazon.svg',
+            'onlyfans': '/assets/icons/onlyfans.svg',
+            'appstore': '/assets/icons/appstore.svg',
+            'googleplay': '/assets/icons/googleplay.svg'
+        };
+
+        if (iconPathMap[cleanIdentifier]) {
+            return iconPathMap[cleanIdentifier];
         }
 
         const urlLower = link.url?.toLowerCase() || '';
         const labelLower = link.label?.toLowerCase() || '';
 
         if (urlLower.includes('instagram.com') || labelLower.includes('instagram')) {
-            return iconMap.instagram;
+            return '/assets/icons/instagram.svg';
         }
         if (urlLower.includes('tiktok.com') || labelLower.includes('tiktok')) {
-            return iconMap.tiktok;
+            return '/assets/icons/tiktok.svg';
         }
         if (urlLower.includes('twitter.com') || urlLower.includes('x.com') || labelLower.includes('twitter') || labelLower.includes(' x ')) {
-            return iconMap.x;
+            return '/assets/icons/X.svg';
         }
         if (urlLower.includes('youtube.com') || labelLower.includes('youtube')) {
-            return iconMap.youtube;
+            return '/assets/icons/youtube.svg';
         }
         if (urlLower.includes('facebook.com') || labelLower.includes('facebook')) {
-            return iconMap.facebook;
+            return '/assets/icons/facebook.svg';
         }
         if (urlLower.includes('twitch.tv') || labelLower.includes('twitch')) {
-            return iconMap.twitch;
+            return '/assets/icons/twitch.svg';
         }
         if (urlLower.includes('linkedin.com') || labelLower.includes('linkedin')) {
-            return iconMap.linkedin;
+            return '/assets/icons/linkdl.svg';
         }
         if (urlLower.includes('snapchat.com') || labelLower.includes('snapchat')) {
-            return iconMap.snapchat;
+            return '/assets/icons/snapchat.svg';
         }
         if (urlLower.includes('spotify.com') || labelLower.includes('spotify')) {
-            return iconMap.spotify;
+            return '/assets/icons/spottufy.svg';
         }
         if (urlLower.includes('discord') || labelLower.includes('discord')) {
-            return iconMap.discord;
+            return '/assets/icons/discord.svg';
         }
         if (urlLower.includes('whatsapp.com') || urlLower.includes('api.whatsapp.com') || labelLower.includes('whatsapp')) {
-            return iconMap.whatsapp;
+            return '/assets/icons/whatsapp.svg';
         }
         if (urlLower.includes('telegram') || labelLower.includes('telegram')) {
-            return iconMap.telegram;
+            return '/assets/icons/telegram.svg';
         }
         if (urlLower.includes('pinterest.com') || labelLower.includes('pinterest')) {
-            return iconMap.pinterest;
+            return '/assets/icons/pinterest.svg';
         }
         if (urlLower.includes('apps.apple.com') || labelLower.includes('app store')) {
-            return iconMap.appstore;
+            return '/assets/icons/appstore.svg';
         }
         if (urlLower.includes('play.google.com') || labelLower.includes('google play')) {
-            return iconMap.googleplay;
+            return '/assets/icons/googleplay.svg';
         }
         if (urlLower.includes('amazon.com') || labelLower.includes('amazon')) {
-            return iconMap.amazon;
+            return '/assets/icons/amazon.svg';
         }
         if (urlLower.includes('gmail.com') || labelLower.includes('gmail') || labelLower.includes('email')) {
-            return iconMap.gmail;
+            return '/assets/icons/gmail.svg';
         }
 
         return null;
     };
 
-    // Get platform name for better accessibility
     const getPlatformName = (iconPath: string): string => {
         const platformMap: {[key: string]: string} = {
             '/assets/icons/instagram.svg': 'Instagram',
@@ -341,11 +223,16 @@ const LinkImageDisplay: React.FC<LinkImageDisplayProps> = ({ link, size = 'md' }
     }
 
     const iconPath = getIconPath(link.icon || '');
+    const platform = socialMediaPlatforms.find(p =>
+        p.name.toLowerCase() === link.label.toLowerCase() ||
+        link.label.toLowerCase().includes(p.id.toLowerCase()) ||
+        p.id.toLowerCase() === link.label.toLowerCase()
+    );
     if (iconPath && !iconError) {
         return (
             <div className={`${sizeClasses[size]} rounded-lg bg-white overflow-hidden flex-shrink-0 border shadow-sm`}>
                 <img
-                    src={iconPath}
+                    src={platform?.icon}
                     alt={`${getPlatformName(iconPath)} icon`}
                     className="w-full h-full object-contain p-2"
                     onError={handleIconError}
@@ -429,7 +316,6 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                                 expandedBiosite,
                                                                 businessCards,
                                                                 loadingCards,
-                                                                categorizeLinks,
                                                                 toggleBiositeExpansion,
                                                                 toggleAnalytics,
                                                                 fetchBiositeAnalytics,
@@ -478,7 +364,6 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                     {pagination.data.map((biosite: BiositeFull) => {
-                        const linkStats = categorizeLinks(biositeLinks[biosite.id] || []);
                         const isExpanded = expandedBiosite === biosite.id;
                         const userBusinessCard = businessCards[biosite.ownerId];
                         const isLoadingCard = loadingCards[biosite.ownerId];
@@ -618,7 +503,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                         ...prev,
                                                         [biosite.id]: !prev[biosite.id]
                                                     }))}
-                                                    className="text-blue-600 hover:text-blue-900 flex items-center text-xs"
+                                                    className="text-blue-600 hover:text-blue-900 flex items-center text-xs cursor-pointer"
                                                 >
                                                     <BarChart3 className="w-3 h-3 mr-1" />
                                                     {isShowingAnalytics ? 'Ocultar analytics' : 'Ver analytics'}
@@ -1108,6 +993,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                 onLast={pagination.goToLastPage}
                 onNext={pagination.nextPage}
                 onPrev={pagination.prevPage}
+                totalUnfilteredItems={pagination.totalUnfilteredItems}
             />
         </div>
     );

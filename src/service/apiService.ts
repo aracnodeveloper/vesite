@@ -1,5 +1,11 @@
 import api from "./api";
 import type { AxiosRequestConfig } from "axios";
+import {
+    biositeAnalyticsApi,
+    getClicksByBiositeApi,
+    linksClicksApi,
+    registerVisitApi
+} from "../constants/EndpointsRoutes.ts";
 
 export interface PaginationParams {
     page?: number;
@@ -94,7 +100,7 @@ const apiService = {
 // Analytics functions
 export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | 'last30' | 'lastYear' = 'last7') => {
     try {
-        const response = await api.get(`/biosites/analytics/${userId}`, {
+        const response = await api.get(`${biositeAnalyticsApi}/${userId}`, {
             params: { timeRange },
         });
         return response.data;
@@ -106,7 +112,7 @@ export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | '
 
 export const getClicksGroupedByLabel = async (biositeId: string) => {
     try {
-        const response = await api.get(`/links-clicks/biosite/${biositeId}/links-clicks`);
+        const response = await api.get(`${getClicksByBiositeApi}/${biositeId}/${linksClicksApi}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching clicks grouped by label:', error);
@@ -122,7 +128,7 @@ export const trackVisit = async (data: {
     referer?: string;
 }) => {
     try {
-        const response = await api.post('/visits-stats/register-parser', data);
+        const response = await api.post(`${registerVisitApi}`, data);
         return response.data;
     } catch (error) {
         console.error('Error tracking visit:', error);
