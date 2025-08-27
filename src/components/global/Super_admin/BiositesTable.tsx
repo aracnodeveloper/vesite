@@ -334,6 +334,24 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
     return (
         <div>
             <div className="overflow-x-auto">
+                <Pagination
+                    currentPage={pagination.currentPage}
+                    totalPages={pagination.totalPages}
+                    pageSize={pagination.pageSize}
+                    totalItems={pagination.totalItems}
+                    loading={pagination.loading}
+                    canGoNext={pagination.canGoNext}
+                    canGoPrev={pagination.canGoPrev}
+                    visiblePages={pagination.visiblePages}
+                    pageInfo={pagination.pageInfo}
+                    onPageChange={pagination.setPage}
+                    onPageSizeChange={pagination.setPageSize}
+                    onFirst={pagination.goToFirstPage}
+                    onLast={pagination.goToLastPage}
+                    onNext={pagination.nextPage}
+                    onPrev={pagination.prevPage}
+                    totalUnfilteredItems={pagination.totalUnfilteredItems}
+                />
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg">
                     <thead className="bg-gray-50">
                     <tr>

@@ -303,7 +303,7 @@ export const UserInfoSection = ({ biosite, user, description, themeConfig, isExp
             {biosite.title || user?.name || "Tu nombre aquí"}
         </h1>
 
-        <p className="text-sm mt-2 px-2 leading-relaxed"
+        <p className="text-md mt-2 px-2 leading-relaxed"
            style={{
                color: themeConfig.colors.text,
                opacity: 0.8,
