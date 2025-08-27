@@ -1,5 +1,3 @@
-// biositeList.tsx - Correcciones para la lógica de biosites hijos
-
 import React, { useState, useEffect } from "react";
 import {
     Check,
@@ -63,7 +61,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
     };
 
     const getMainUserId = (): UUID | null => {
-        // Obtener el userId principal (cuenta padre)
+
         const mainUserId = document.cookie
             .split('; ')
             .find(row => row.startsWith('mainUserId='))
@@ -95,14 +93,11 @@ const BiositesList: React.FC<BiositeListProps> = ({
         return imgP;
     };
 
-    // CORRECCIÓN: Un biosite es principal si su ownerId es igual al mainUserId
     const isMainBiosite = (biositeData: BiositeFull): boolean => {
         const mainUserId = getMainUserId();
         return biositeData.ownerId === mainUserId;
     };
 
-    // CORRECCIÓN: Un biosite es hijo si su ownerId es diferente al mainUserId
-    // Esto significa que pertenece a un usuario hijo
     const isChildBiosite = (biositeData: BiositeFull): boolean => {
         const mainUserId = getMainUserId();
         return biositeData.ownerId !== mainUserId;
@@ -129,7 +124,6 @@ const BiositesList: React.FC<BiositeListProps> = ({
 
             await apiService.delete(updateBiositeApi, biositeData.id);
 
-            // Si es un biosite hijo, también eliminar el usuario asociado
             if (isChildBiosite(biositeData)) {
                 try {
                     await apiService.delete('/users', biositeData.ownerId);

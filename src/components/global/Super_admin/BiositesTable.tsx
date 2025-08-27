@@ -21,8 +21,6 @@ import {socialMediaPlatforms} from "../../../media/socialPlataforms.ts";
 const placeholderLinkImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f8fafc' rx='8' stroke='%23e2e8f0' stroke-width='1'/%3E%3Cpath d='M13 13h14v14H13z' fill='%23e2e8f0'/%3E%3Ccircle cx='18' cy='18' r='2.5' fill='%239ca3af'/%3E%3Cpath d='M15 29l6-4 6 4H15z' fill='%239ca3af'/%3E%3C/svg%3E";
 
 
-
-
 const LinkImageDisplay: React.FC<LinkImageDisplayProps> = ({ link, size = 'md' }) => {
     const [imageError, setImageError] = React.useState(false);
     const [imageLoading, setImageLoading] = React.useState(false);
@@ -658,15 +656,15 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <div>
                                                                 <p className="text-xs text-gray-500">Nombre</p>
-                                                                <p className="text-sm">{biosite.owner?.name || 'N/A'}</p>
+                                                                <p className="text-sm text-gray-700">{biosite.owner?.name || 'N/A'}</p>
                                                             </div>
                                                             <div>
                                                                 <p className="text-xs text-gray-500">Email</p>
-                                                                <p className="text-sm">{biosite.owner?.email || 'N/A'}</p>
+                                                                <p className="text-sm text-gray-700">{biosite.owner?.email || 'N/A'}</p>
                                                             </div>
                                                             <div>
                                                                 <p className="text-xs text-gray-500">Cédula</p>
-                                                                <p className="text-sm">{biosite.owner?.cedula || 'N/A'}</p>
+                                                                <p className="text-sm text-gray-700">{biosite.owner?.cedula || 'N/A'}</p>
                                                             </div>
                                                             <div>
                                                                 <p className="text-xs text-gray-500">Rol</p>

@@ -1,4 +1,3 @@
-// hooks/useChangeDetection.ts
 import { useState, useEffect, useRef } from 'react';
 import { usePreview } from '../context/PreviewContext.tsx';
 import {useUser} from "./useUser.ts";
@@ -10,7 +9,7 @@ export const useChangeDetection = () => {
     const [lastSavedState, setLastSavedState] = useState<string | null>(null);
     const isInitialMount = useRef(true);
 
-    // Función para generar hash del estado actual
+
     const generateStateHash = () => {
         if (!biosite) return null;
 
@@ -53,7 +52,6 @@ export const useChangeDetection = () => {
         return JSON.stringify(currentState);
     };
 
-    // Inicializar el estado guardado
     useEffect(() => {
         if (biosite && isInitialMount.current) {
             const currentHash = generateStateHash();
@@ -63,7 +61,6 @@ export const useChangeDetection = () => {
         }
     }, [biosite]);
 
-    // Detectar cambios
     useEffect(() => {
         if (biosite && !isInitialMount.current) {
             const currentHash = generateStateHash();
@@ -72,19 +69,16 @@ export const useChangeDetection = () => {
         }
     }, [biosite, socialLinks, regularLinks, appLinks, lastSavedState]);
 
-    // Función para marcar como guardado
     const markAsSaved = () => {
         const currentHash = generateStateHash();
         setLastSavedState(currentHash);
         setHasChanges(false);
     };
 
-    // Función para forzar actualización
     const forceUpdate = () => {
         setHasChanges(true);
     };
 
-    // Función para resetear estado
     const resetChangeDetection = () => {
         const currentHash = generateStateHash();
         setLastSavedState(currentHash);

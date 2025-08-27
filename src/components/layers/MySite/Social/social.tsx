@@ -10,6 +10,7 @@ const Social = () => {
     const handleSocialClick = () => {
         navigate("/social");
     };
+
     const activeSocialLinks = socialLinks.filter(link => {
         if (!link.isActive) return false;
 
@@ -76,12 +77,9 @@ const Social = () => {
                         <path d="M20.1272 24.3128L27.6486 21.1885M20.1272 28.4013L27.6486 31.5256" stroke="white"
                               strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-
                 </div>
                 <span className="text-black font-medium">Social</span>
             </div>
-
-
 
             <div className="flex items-center space-x-2">
                 {activeSocialLinks.length > 0 && (

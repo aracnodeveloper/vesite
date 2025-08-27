@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from "lucide-react";
 import {WhatsAppOutlined} from "@ant-design/icons";
 import {usePreview} from "../../../../context/PreviewContext.tsx";
 
@@ -38,15 +39,12 @@ const WhatsApp = () => {
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-
                     {activeApiLinks.length > 0 && (
                         <span className="text-sm text-black" style={{fontSize:"11px"}}>
                             {activeApiLinks.length}
                         </span>
                     )}
-                    <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-green-600 hover:border-green-600 transition-colors">
-                        <span className="text-black text-sm hover:text-white">+</span>
-                    </div>
+                    <ChevronRight size={16} className="text-black"/>
                 </div>
             </div>
         </>
