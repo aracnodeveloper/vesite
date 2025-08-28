@@ -55,7 +55,7 @@ const Add = () => {
     const isSocialVisible = visibleSections.some(section => section.titulo === 'Social');
 
     return (
-        <div className="w-full mt-8">
+        <div className="w-full ">
             <h3 className="text-xs font-bold text-gray-800 mb-5 uppercase tracking-wide text-start">
                 Contenido
             </h3>
