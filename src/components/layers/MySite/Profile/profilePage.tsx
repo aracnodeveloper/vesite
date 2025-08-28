@@ -321,10 +321,7 @@ const ProfilePage = () => {
                                     {required: true, message: 'La url es requerido'},
                                     {min: 3, message: 'La url debe tener al menos 3 caracteres'},
                                     {max: 30, message: 'La url no puede tener mas de 30 caracteres'},
-                                    {
-                                        pattern: /^[a-z0-9-]+$/,
-                                        message: 'Solo se permiten letras minúsculas, numeros y guiones'
-                                    }
+
                                 ]}
                                 className="mb-0"
                             >
