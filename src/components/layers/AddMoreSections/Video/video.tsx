@@ -1,6 +1,7 @@
 //import {Video} from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import {VideoCameraOutlined} from "@ant-design/icons";
+import {ChevronRight} from "lucide-react";
 
 const Videos =() =>{
 
@@ -23,9 +24,7 @@ const Videos =() =>{
                     <div className="text-gray-400 text-sm">Añade un video de Youtube que quieras mostrar </div>
                 </div>
             </div>
-            <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-blue-600 hover:border-blue-600 transition-colors">
-                <span className="text-black text-sm hover:text-white">+</span>
-            </div>
+            <ChevronRight size={16} className="text-black"/>
         </div>
     );
 }

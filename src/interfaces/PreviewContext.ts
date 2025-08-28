@@ -95,7 +95,9 @@ export interface PreviewContextType {
     setSocialPost: (url: string, note?: string) => Promise<void>;
     getVideoEmbed: () => any;
     setVideoEmbed: (url: string, title?: string) => Promise<void>;
-
+    getVideoLinks: () => any[];
+    getMusicLinks: () => any[];
+    getSocialPostLinks: () => any[];
     clearError: () => void;
 }
 

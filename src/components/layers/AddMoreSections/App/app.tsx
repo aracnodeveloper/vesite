@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import React from "react";
 import {usePreview} from "../../../../context/PreviewContext.tsx";
+import {ChevronRight} from "lucide-react";
 
 const AppD = () => {
     const {appLinks} = usePreview()
@@ -33,9 +34,7 @@ const AppD = () => {
                             {activeLinks.length}
                         </span>
                     )}
-                    <div className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center cursor-pointer hover:bg-[#6F4FC1] hover:border-[#6F4FC1] transition-colors">
-                        <span className="text-black text-sm hover:text-white">+</span>
-                    </div>
+                    <ChevronRight size={16} className="text-black"/>
                 </div>
             </div>
         </>

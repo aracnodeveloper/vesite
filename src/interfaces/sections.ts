@@ -3,25 +3,23 @@ export interface Section {
     biositeId: string;
     titulo: string;
     icon: string;
-    image?: string;
     descripcion: string;
     orderIndex: number;
-    isActive?: boolean;
+    image?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
-export interface CreateSectionDto {
+export interface CreateSectionData {
     biositeId: string;
     titulo: string;
     icon: string;
-    image?: string;
     descripcion: string;
     orderIndex: number;
+    image?: string;
 }
 
-export interface UpdateSectionDto {
-    titulo?: string;
-    icon?: string;
-    image?: string;
-    descripcion?: string;
-    orderIndex?: number;
+export interface ReorderSectionData {
+    id: string;
+    orderIndex: number;
 }

@@ -18,7 +18,7 @@ const AppPage = () => {
         error
     } = usePreview();
 
-    const DEFAULT_APP_STORE_URL = "https://apps.apple.com/us/app/visitaecuador-com/id1385161516?ls=1";
+    const DEFAULT_APP_STORE_URL = "https://apps.apple.com/ec/app/visitaecuador-com/id1385161516";
     const DEFAULT_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es";
 
     const [appStoreUrl, setAppStoreUrl] = useState("");

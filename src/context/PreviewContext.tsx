@@ -688,6 +688,67 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [biositeData, updateBiositeHook, setBiosite]);
+    const getVideoLinks = useCallback(() => {
+        if (!links || !Array.isArray(links)) return [];
+
+        return links.filter(link => {
+            if (!link.isActive) return false;
+
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return (
+                labelLower.includes('video') ||
+                labelLower.includes('vimeo') ||
+                urlLower.includes('youtube.com/watch') ||
+                urlLower.includes('vimeo.com') ||
+                labelLower.includes('tiktok video')
+            );
+        });
+    }, [links]);
+
+// Function to get all music links as an array
+    const getMusicLinks = useCallback(() => {
+        if (!links || !Array.isArray(links)) return [];
+
+        return links.filter(link => {
+            if (!link.isActive) return false;
+
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return (
+                labelLower.includes('music') ||
+                labelLower.includes('soundcloud') ||
+                urlLower.includes('open.spotify.com/embed') ||
+                urlLower.includes('music.apple.com') ||
+                urlLower.includes('soundcloud.com') ||
+                labelLower.includes('apple music') ||
+                labelLower.includes('audio') ||
+                labelLower.includes('music embed')
+            );
+        });
+    }, [links]);
+
+// Function to get all social post links as an array
+    const getSocialPostLinks = useCallback(() => {
+        if (!links || !Array.isArray(links)) return [];
+
+        return links.filter(link => {
+            if (!link.isActive) return false;
+
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return (
+                labelLower.includes('post') ||
+                labelLower.includes('publicacion') ||
+                labelLower.includes('contenido') ||
+                labelLower.includes('social post') ||
+                (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
+            );
+        });
+    }, [links]);
 
     const contextValue: PreviewContextType = {
         biosite,
@@ -706,6 +767,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         getMusicEmbed,
         getSocialPost,
         getVideoEmbed,
+        getMusicLinks,
+        getSocialPostLinks,
+        getVideoLinks,
         ...biositeOperations,
         ...linkOperations,
         setAppLinks: setAppLinksState,

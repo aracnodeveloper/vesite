@@ -21,6 +21,13 @@ export const getALLBiositesApi = "/biosites?page=10&size=10"
 export const LinksApi = "/links"
 export const LinksImageApi = "/upload/image-link";
 
+//Sections
+export const sectionsApi = "/section";
+export const createSectionApi = "/section"; // POST
+export const getSectionsByUserApi = "/sections/user"; // GET /:userId
+export const getSectionsByBiositeApi = "/section/biosite"; // GET /:biositeId
+export const reorderSectionsApi = "/section/reorder"; // PATCH /:biositeId
+
 //upload
 export const uploadImageApi: string = "/upload/image";
 export const deleteImageApi: string = "/upload/image"; // DELETE /{filename}
@@ -30,7 +37,6 @@ export const uploadBiositeBackgroundApi: string = "/upload/biosite-background";
 
 //User
 export const getALLUsersApi = "/users?page=10&size=10"
-
 
 // BUSINESS CARDS (V-Card.ts)
 export const businessCardsApi = "/business-cards";
