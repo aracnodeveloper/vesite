@@ -61,7 +61,7 @@ const Social = () => {
         >
             <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-[#0EBBAA] rounded-lg flex items-center justify-center">
-                    <svg width="50" height="51" viewBox="0 0 50 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="100" height="100" viewBox="0 0 50 51" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M6 12.5C6 9.73858 8.23858 7.5 11 7.5H38C40.7614 7.5 43 9.73858 43 12.5V39.5C43 42.2614 40.7614 44.5 38 44.5H11C8.23858 44.5 6 42.2614 6 39.5V12.5Z"
                             fill="#0EBBAA"/>
