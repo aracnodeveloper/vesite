@@ -245,7 +245,7 @@ const MySite = () => {
                         >
                             {/* Drag handle - visible on hover or when dragging */}
                             <div className={`
-                                absolute left-0 top-2/5 transform -translate-y-1/2 z-10
+                                absolute left-0 top-1/2 transform -translate-y-1/2 z-10
                                 p-1 rounded bg-white shadow-sm border border-gray-200
                                 ${draggedIndex === index ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
                                 transition-opacity duration-200
