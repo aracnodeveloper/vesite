@@ -956,7 +956,7 @@ const PublicBiositeView = () => {
                                         backgroundColor: themeConfig.colors.accent,
                                         background: themeConfig.colors.accent
                                     }}
-                                    className="w-full p-2 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer rounded-lg"
+                                    className="w-full p-2 mb-3 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer rounded-lg"
 
                                 >
 
