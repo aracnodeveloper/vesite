@@ -10,7 +10,7 @@ const Links = () => {
     return (
         <div
             onClick={() => navigate("/links")}
-            className="bg-[#FAFFF6] rounded-lg p-4 mb-4 flex items-center justify-between cursor-pointer  transition-colors"
+            className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer  transition-colors"
         >
             <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-[#6F4FC1] rounded-lg flex items-center justify-center">

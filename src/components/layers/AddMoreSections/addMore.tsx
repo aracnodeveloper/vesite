@@ -59,11 +59,11 @@ const Add = () => {
             <h3 className="text-xs font-bold text-gray-800 mb-5 uppercase tracking-wide text-start">
                 Contenido
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-5">
                 {/* Show Social component only when NOT visible in MySite */}
                 {!isSocialVisible && (
                     <div
-                        className="bg-[#FAFFF6] rounded-lg p-4 mb-4 flex items-center justify-between cursor-pointer transition-colors"
+                        className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer transition-colors"
                         onClick={() => navigate('/social')}
                     >
                         <div className="flex items-center space-x-3">
@@ -94,7 +94,7 @@ const Add = () => {
                 )}
 
                 <div
-                    className="bg-[#FAFFF6] rounded-lg p-4 mb-4 flex items-center justify-between cursor-pointer transition-colors"
+                    className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer transition-colors"
                     onClick={() => navigate('/links')}
                 >
                     <div className="flex items-center space-x-3">
@@ -116,7 +116,7 @@ const Add = () => {
                 </div>
 
                 <div
-                    className="bg-[#FAFFF6] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer transition-colors"
+                    className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer transition-colors"
                     onClick={() => navigate('/whatsApp')}
                 >
                     <div className="flex items-center space-x-3">
@@ -136,7 +136,7 @@ const Add = () => {
                 </div>
 
                 <div
-                    className="bg-[#FAFFF6] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer transition-colors"
+                    className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer transition-colors"
                     onClick={() => navigate('/app')}
                 >
                     <div className="flex items-center space-x-3">
@@ -159,7 +159,7 @@ const Add = () => {
                 </div>
 
                     <div onClick={() => navigate('/videos')}
-                    className="bg-[#FAFFF6] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer  transition-colors">
+                    className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer  transition-colors">
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                             <VideoCameraOutlined  style={{color:'white'}}/>
@@ -176,7 +176,7 @@ const Add = () => {
 
                 <div
                     onClick={() => navigate('/music')}
-                    className="bg-[#FAFFF6] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer  transition-colors">
+                    className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer  transition-colors">
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                             <Music size={16} className="text-white" />
@@ -193,7 +193,7 @@ const Add = () => {
 
                 <div
                     onClick={() => navigate('/post')}
-                    className="bg-[#FAFFF6] rounded-lg p-4 mb-3 flex items-center justify-between cursor-pointer  transition-colors">
+                    className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer  transition-colors">
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-pink-600 rounded-lg flex items-center justify-center">
                             <Instagram size={16} className="text-white" />

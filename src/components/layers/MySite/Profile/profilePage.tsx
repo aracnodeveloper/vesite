@@ -51,11 +51,7 @@ const ProfilePage = () => {
         setShowWarning(!showWarning);
     };
 
-    // Función para transformar slug a minúsculas
-    const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.toLowerCase();
-        form.setFieldValue('slug', value);
-    };
+
 
     useEffect(() => {
         if (biosite && !loading) {
@@ -331,7 +327,6 @@ const ProfilePage = () => {
                                     height={20}
                                     addonBefore='vesite/'
                                     maxLength={30}
-                                    onChange={handleSlugChange}
                                     className="flex-1 h-12 border-none bg-transparent text-black placeholder-gray-400 shadow-none focus:shadow-none focus:border-none hover:shadow-none p-0"
                                     style={{fontSize: "12px", boxShadow: "none"}}
                                 />

@@ -71,7 +71,7 @@ export const BackgroundSection = ({
                         <img
                             src={imgPng5}
                             alt="vector"
-                            className="absolute top-1 left-1 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none"
+                            className="absolute top-24 -right-5 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none"
                         />
                     </div>
                 </div>
@@ -417,7 +417,7 @@ export const RegularLinksSection = ({
                                         handleLinkClick // Nueva prop para manejar clics con analytics
                                     }: any) => (
     regularLinksData.length > 0 && (
-        <div className="px-4 pb-2 space-y-2">
+        <div className="px-4 pb-4 space-y-2">
             {regularLinksData.map((link: any) => {
 
 
