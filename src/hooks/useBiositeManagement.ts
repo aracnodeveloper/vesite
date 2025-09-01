@@ -100,7 +100,7 @@ export const useBiositeOperations = ({
         }
 
         try {
-            // ✅ Actualizar estado inmediatamente para UI responsiva
+
             setFontFamilyState(font);
 
             let colorsString: string;
@@ -116,14 +116,13 @@ export const useBiositeOperations = ({
                 slug: biositeData.slug,
                 themeId: biositeData.themeId,
                 colors: colorsString,
-                fonts: font, // ← La fuente nueva
+                fonts: font,
                 backgroundImage: biositeData.backgroundImage || '',
                 isActive: biositeData.isActive
             };
 
             const updatedBiosite = await updateBiosite(updateData);
 
-            // ✅ AGREGAR: Forzar actualización del biosite local
             if (updatedBiosite) {
                 setBiosite(updatedBiosite);
                 console.log('Font updated successfully, biosite refreshed:', font);

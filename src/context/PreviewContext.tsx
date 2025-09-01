@@ -80,6 +80,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             '/assets/icons/appstore.svg': 'appstore',
             '/assets/icons/googleplay.svg': 'googleplay'
         };
+        if (iconPath === 'link') return 'link';
+        if (iconPath === 'social-post') return 'social-post';
+        if (iconPath === 'music-embed') return 'music-embed';
+        if (iconPath === 'video-embed') return 'video-embed';
 
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
         if (fullPath) return iconMap[fullPath];
@@ -485,6 +489,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     };
+
     {/*  */}
     const addWhatsAppLink = async (link: Omit<WhatsAppLink, 'id'>) => {
         if (!biositeData?.id) {
@@ -498,7 +503,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
             const linkData = {
                 biositeId: biositeData.id,
-                label: link.description || 'WhatsApp', // Usar la descripción proporcionada
+                label: link.description || 'WhatsApp',
                 url: whatsappUrl,
                 icon: 'whatsapp',
                 orderIndex: links.length,
@@ -688,6 +693,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [biositeData, updateBiositeHook, setBiosite]);
+
     const getVideoLinks = useCallback(() => {
         if (!links || !Array.isArray(links)) return [];
 
@@ -707,7 +713,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         });
     }, [links]);
 
-// Function to get all music links as an array
     const getMusicLinks = useCallback(() => {
         if (!links || !Array.isArray(links)) return [];
 
@@ -730,7 +735,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         });
     }, [links]);
 
-// Function to get all social post links as an array
     const getSocialPostLinks = useCallback(() => {
         if (!links || !Array.isArray(links)) return [];
 

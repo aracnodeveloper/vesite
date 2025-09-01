@@ -37,7 +37,6 @@ export const useFetchBiosite = (userId?: string) => {
     const isInitializedRef = useRef<boolean>(false);
     const currentUserIdRef = useRef<string | undefined>(undefined);
 
-    // Nuevo método para obtener todos los usuarios con paginación
     const fetchAllUsers = useCallback(async (params?: PaginationParams): Promise<ChildUser[] | PaginatedResponse<ChildUser>> => {
         try {
             setLoading(true);
@@ -45,7 +44,6 @@ export const useFetchBiosite = (userId?: string) => {
 
             let url = getALLUsersApi;
 
-            // Agregar parámetros de paginación si se proporcionan
             if (params?.page && params?.size) {
                 const searchParams = new URLSearchParams({
                     page: params.page.toString(),
@@ -56,18 +54,15 @@ export const useFetchBiosite = (userId?: string) => {
 
             const response = await apiService.getAll<ChildUser[] | PaginatedResponse<ChildUser>>(url);
 
-            // Si es array, significa que no hay paginación
             if (Array.isArray(response)) {
                 return response;
             }
 
-            // Si es objeto, significa que hay paginación
             return response as PaginatedResponse<ChildUser>;
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar todos los usuarios";
             setError(errorMessage);
 
-            // Retornar estructura vacía según el tipo esperado
             if (params?.page && params?.size) {
                 return {
                     data: [],
@@ -83,7 +78,6 @@ export const useFetchBiosite = (userId?: string) => {
         }
     }, []);
 
-    // Nuevo método para obtener todos los biosites con paginación
     const fetchAllBiosites = useCallback(async (params?: PaginationParams): Promise<BiositeFull[] | PaginatedResponse<BiositeFull>> => {
         try {
             setLoading(true);
@@ -91,9 +85,8 @@ export const useFetchBiosite = (userId?: string) => {
 
             let url = getALLBiositesApi;
 
-            // Si no se especifican parámetros, usar la URL original que ya tiene page=10&size=10
             if (params?.page && params?.size) {
-                url = getBiositesApi; // URL base sin parámetros predeterminados
+                url = getBiositesApi;
                 const searchParams = new URLSearchParams({
                     page: params.page.toString(),
                     size: params.size.toString()
@@ -103,18 +96,15 @@ export const useFetchBiosite = (userId?: string) => {
 
             const response = await apiService.getAll<BiositeFull[] | PaginatedResponse<BiositeFull>>(url);
 
-            // Si es array, significa que no hay paginación
             if (Array.isArray(response)) {
                 return response;
             }
 
-            // Si es objeto, significa que hay paginación
             return response as PaginatedResponse<BiositeFull>;
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar todos los biosites";
             setError(errorMessage);
 
-            // Retornar estructura vacía según el tipo esperado
             if (params?.page && params?.size) {
                 return {
                     data: [],

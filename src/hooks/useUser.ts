@@ -33,7 +33,6 @@ export const useUser = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // NUEVO: Obtener todos los usuarios
     const fetchAllUsers = useCallback(async (): Promise<User[]> => {
         setLoading(true);
         setError(null);

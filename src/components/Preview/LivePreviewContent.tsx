@@ -72,7 +72,7 @@ const LivePreviewContent = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setCanStartChecking(true);
-        }, 3000);
+        }, 100);
 
         return () => clearTimeout(timer);
     }, []);

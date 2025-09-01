@@ -663,29 +663,37 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                 {/* Original expanded biosite details */}
                                 {isExpanded && (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-4 bg-gray-50">
+                                        <td colSpan={8} className="px-6 py-4 bg-gray-50 border-2 border-t-black border-b-[#96C121]">
                                             <div className="space-y-6">
                                                 {/* Información del Usuario */}
                                                 <div>
+
                                                     <h4 className="text-sm font-semibold text-gray-700 mb-2">
                                                         Información del Usuario
                                                     </h4>
-                                                    <div className="bg-white p-3 rounded border">
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                    <div className=" p-3 rounded border">
+                                                        <div
+                                                            className="grid grid-cols-2 gap-4 p-2 rounded-lg"
+                                                            style={{
+                                                                backgroundColor: 'rgba(150, 193, 33, 0.7)',
+                                                                transform: 'translate3d(0, 0, 0)',
+                                                                backfaceVisibility: 'hidden'
+                                                            }}
+                                                        >
                                                             <div>
-                                                                <p className="text-xs text-gray-500">Nombre</p>
-                                                                <p className="text-sm text-gray-700">{biosite.owner?.name || 'N/A'}</p>
+                                                                <p className="text-xs text-white uppercase">Nombre</p>
+                                                                <p className="text-sm text-black">{biosite.owner?.name || 'N/A'}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-500">Email</p>
-                                                                <p className="text-sm text-gray-700">{biosite.owner?.email || 'N/A'}</p>
+                                                                <p className="text-xs text-white uppercase">Email</p>
+                                                                <p className="text-sm text-black">{biosite.owner?.email || 'N/A'}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-500">Cédula</p>
-                                                                <p className="text-sm text-gray-700">{biosite.owner?.cedula || 'N/A'}</p>
+                                                                <p className="text-xs text-white uppercase">Cédula</p>
+                                                                <p className="text-sm text-black">{biosite.owner?.cedula || 'N/A'}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-gray-500">Rol</p>
+                                                                <p className="text-xs text-white uppercase">Rol</p>
                                                                 <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                                                                     biosite.owner?.role === 'ADMIN' ? 'bg-blue-100 text-blue-800' :
                                                                         biosite.owner?.role === 'SUPER_ADMIN' ? 'bg-red-100 text-red-800' :
@@ -694,7 +702,10 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                                     {biosite.owner?.role || 'USER'}
                                                                 </span>
                                                             </div>
-                                                            {biosite.avatarImage && (
+
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4 ">
+                                                                {biosite.avatarImage && (
                                                                 <div>
                                                                     <p className="text-xs text-gray-500 mb-2">Avatar</p>
                                                                     <img
@@ -704,16 +715,16 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                                     />
                                                                 </div>
                                                             )}
-                                                            {biosite.backgroundImage && (
-                                                                <div>
-                                                                    <p className="text-xs text-gray-500 mb-2">Background</p>
-                                                                    <img
-                                                                        src={biosite.backgroundImage}
-                                                                        className="h-24 w-96 rounded-lg object-cover"
-                                                                        alt="Background"
-                                                                    />
-                                                                </div>
-                                                            )}
+                                                                {biosite.backgroundImage && (
+                                                                    <div>
+                                                                        <p className="text-xs text-gray-500 mb-2">Background</p>
+                                                                        <img
+                                                                            src={biosite.backgroundImage}
+                                                                            className="h-24 w-96 rounded-lg object-cover"
+                                                                            alt="Background"
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -986,6 +997,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                         </td>
                                     </tr>
                                 )}
+
                             </React.Fragment>
                         );
                     })}

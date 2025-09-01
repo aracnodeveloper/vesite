@@ -240,12 +240,12 @@ const MySite = () => {
                                 transition-all duration-200 ease-in-out
                                  hover:shadow-sm
                                 ${draggedIndex === index ? 'opacity-50 scale-70 shadow-lg' : ''}
-                                ${dragOverIndex === index ? 'border-2 border-blue-400 border-dashed bg-blue-50' : 'border border-transparent'}
+                                ${dragOverIndex === index ? 'border-2 border-[#96C121] border-dashed bg-blue-50' : 'border border-transparent'}
                             `}
                         >
                             {/* Drag handle - visible on hover or when dragging */}
                             <div className={`
-                                absolute left-0 top-1/2 transform -translate-y-1/2 z-10
+                                absolute -left-10 top-1/2 transform -translate-y-1/2 z-10
                                 p-1 rounded bg-white shadow-sm border border-gray-200
                                 ${draggedIndex === index ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
                                 transition-opacity duration-200
@@ -257,14 +257,14 @@ const MySite = () => {
                             {/* Section content */}
                             <div className={`
                                 transition-all duration-200
-                                ${draggedIndex === index ? 'pl-8' : 'pl-0 group-hover:pl-8'}
+                                ${draggedIndex === index ? '' : ''}
                             `}>
                                 {component}
                             </div>
 
                             {/* Drop indicator */}
                             {dragOverIndex === index && draggedIndex !== index && (
-                                <div className="absolute inset-0 pointer-events-none border-2 border-blue-400 border-dashed rounded-lg bg-blue-50/30" />
+                                <div className="absolute inset-0 pointer-events-none border-2 border-[#96C121] border-dashed rounded-lg bg-blue-50/30" />
                             )}
                         </div>
                     );
@@ -278,17 +278,17 @@ const MySite = () => {
                     onDrop={(e) => handleDrop(e, 'vcard')}
                     className={`
                         transition-all duration-200
-                        ${dragOverIndex === 'vcard' ? 'border-t-4 border-blue-400 border-dashed pt-2' : ''}
+                        ${dragOverIndex === 'vcard' ? 'border-t-4 border-[#96C121] border-dashed pt-2' : ''}
                     `}
                 >
                     {/* Drop indicator for VCard area */}
                     {dragOverIndex === 'vcard' && draggedIndex !== null && (
-                        <div className="mb-2 p-2 border-2 border-blue-400 border-dashed rounded-lg bg-blue-50 text-center">
+                        <div className="mb-2 p-2 border-2 border-[#96C121] border-dashed rounded-lg bg-blue-50 text-center">
                             <span className="text-sm text-blue-600 font-medium">Soltar aquí</span>
                         </div>
                     )}
 
-                    {/* VCard always shows last */}
+
                     <V_Card />
                 </div>
 
