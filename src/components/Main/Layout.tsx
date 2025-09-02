@@ -501,7 +501,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 onTouchStart={handleDragStart}
                                 className="w-full py-4 cursor-grab active:cursor-grabbing flex-shrink-0"
                             >
-                                <div className="w-10 h-1.5 bg-gray-600 rounded-full mx-auto" />
+                                <div className="flex justify-center items-center w-10 h-1.5 bg-gray-600 rounded-full mx-auto " />
                                 <div className="flex items-center justify-between px-4 pt-3">
                                     {/* Back button for drawer navigation */}
                                     <button onClick={goBackToSections} className="flex items-center space-x-2 text-gray-800">
