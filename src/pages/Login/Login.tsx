@@ -1,4 +1,4 @@
-import {type FC, useState} from "react";
+import {type FC, useState, useEffect} from "react";
 import Cookies from "js-cookie";
 import {
     Alert,
@@ -17,7 +17,87 @@ const { Content } = Layout;
 export const Login: FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [form] = Form.useForm(); // Agregamos referencia al formulario
     const { login} = useAuthContext();
+
+    // Efecto para auto-login usando datos del localStorage
+    useEffect(() => {
+        const autoLogin = () => {
+            try {
+                // Buscar datos en localStorage
+                const storedData = localStorage.getItem('datos');
+                if (!storedData) {
+                    console.log('No hay datos en localStorage');
+                    return;
+                }
+
+                const parsedData = JSON.parse(storedData);
+
+                // Extraer la cédula
+                const cedula = parsedData?.data?.ci;
+                if (!cedula || typeof cedula !== 'string') {
+                    console.log('No se encontró cédula válida en localStorage');
+                    return;
+                }
+
+                // Crear credenciales automáticamente
+                const email = cedula; // La cédula como email/usuario
+                const password = cedula.substring(0, 5); // Primeros 5 dígitos como contraseña
+
+                console.log('Intentando auto-login con:', { email, password: '***' });
+
+                // Llenar el formulario automáticamente (opcional, para mostrar al usuario)
+                form.setFieldsValue({
+                    email: email,
+                    password: password
+                });
+
+                // Ejecutar login automáticamente
+                handleAutoLogin(email, password);
+
+            } catch (error) {
+                console.error('Error en auto-login:', error);
+            }
+        };
+
+        // Verificar si ya hay un token válido
+        const existingToken = Cookies.get("accessToken");
+        if (!existingToken) {
+            // Solo hacer auto-login si no hay token
+            autoLogin();
+        }
+    }, [form]);
+
+    // Función para manejar el auto-login
+    const handleAutoLogin = async (email: string, password: string) => {
+        if (!login) {
+            console.error("Login functionality is not available.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const response = await login(email, password);
+
+            if (response.success) {
+                const token = Cookies.get("accessToken");
+                if (token) {
+                    console.log('Auto-login exitoso');
+                    // Recargar la página antes de navegar
+                    window.location.href = "/sections";
+                } else {
+                    setError("Auto-login falló. No se encontró token.");
+                }
+            } else {
+                setError("Auto-login falló. Verifica tus credenciales almacenadas.");
+            }
+        } catch (err) {
+            console.error("Auto-login error:", err);
+            setError("Error inesperado en auto-login.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const onFinish = async (values: {
         email: string;
@@ -80,10 +160,11 @@ export const Login: FC = () => {
                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                  }}>
                 <div className="w-30 h-20">
-                <img src='./img/veosite.png' className="w-30 h-20"/>
-            </div>
+                    <img src='./img/veosite.png' className="w-30 h-20"/>
+                </div>
                 <div className="flex items-center space-x-4 w-full sm:w-auto">
                     <Form
+                        form={form} // Agregamos la referencia del formulario
                         layout="inline"
                         onFinish={onFinish}
                         className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto"
@@ -159,7 +240,7 @@ export const Login: FC = () => {
                                 }}
                                 alt="VESites Demo"
                             />
-                         </div>
+                        </div>
                     </div>
 
                     {/* Right Side - Enhanced text content */}
