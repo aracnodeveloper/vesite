@@ -249,7 +249,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
         <>
             {ownBiosites.length > 0 && (
                 <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-gray-600">Mis Biosites</h3>
+                    <h3 className="text-sm font-medium text-gray-600">Mi vesite</h3>
                     {ownBiosites.map((biositeData) => renderBiositeItem(biositeData))}
                 </div>
             )}
@@ -259,7 +259,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-gray-600 flex items-center">
                             <Users className="h-4 w-4 mr-2"/>
-                            Biosites Hijos ({childBiosites.length})
+                            vesites Hijos ({childBiosites.length})
                         </h3>
                         <button
                             onClick={() => setShowChildBiosites(!showChildBiosites)}
@@ -279,9 +279,9 @@ const BiositesList: React.FC<BiositeListProps> = ({
 
             {biositeStructure.allBiosites.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                    <p className="text-sm">No hay biosites disponibles</p>
+                    <p className="text-sm">No hay vesites disponibles</p>
                     {canCreateBiosites && (
-                        <p className="text-xs mt-2">Crea tu primer biosite para comenzar</p>
+                        <p className="text-xs mt-2">Crea tu primer vesite para comenzar</p>
                     )}
                 </div>
             )}
@@ -298,7 +298,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                     </div>
                     <div className="flex-1">
                         <div className="font-medium text-black group-hover:text-white text-sm">
-                            Create New Site
+                            Crear Nuevo vesite
                         </div>
                     </div>
                 </div>

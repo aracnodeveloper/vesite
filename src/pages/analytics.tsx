@@ -64,16 +64,13 @@ const AnalyticsContent = () => {
   const generatePDFBlob = useCallback(async (): Promise<Blob> => {
     const timeRangeLabel = timeRangeOptions.find(option => option.value === timeRange)?.label || 'Período seleccionado';
 
-    // Crear nueva instancia de jsPDF
     const doc = new jsPDF();
 
-    // Configuración de colores
-    const primaryColor: [number, number, number] = [152, 192, 34]; // #98C022
-    const darkColor: [number, number, number] = [51, 51, 51]; // #333333
-    const grayColor: [number, number, number] = [102, 102, 102]; // #666666
-    const lightGrayColor: [number, number, number] = [248, 249, 250]; // #f8f9fa
+    const primaryColor: [number, number, number] = [152, 192, 34];
+    const darkColor: [number, number, number] = [51, 51, 51];
+    const grayColor: [number, number, number] = [102, 102, 102];
+    const lightGrayColor: [number, number, number] = [248, 249, 250];
 
-    // Header
     doc.setFontSize(24);
     doc.setTextColor(...primaryColor);
     doc.text('Reporte de Métricas', 20, 30);
@@ -91,7 +88,6 @@ const AnalyticsContent = () => {
     });
     doc.text(`Generado el ${currentDate}`, 20, 50);
 
-    // Línea separadora
     doc.setLineWidth(0.5);
     doc.setDrawColor(...primaryColor);
     doc.line(20, 55, 190, 55);
@@ -561,6 +557,30 @@ const AnalyticsContent = () => {
     fetchAnalyticsData();
   }, [fetchAnalyticsData]);
 
+  const formatDateForDisplay = (dateStr: string, timeRange: TimeRange) => {
+    const date = new Date(dateStr);
+
+    if (timeRange === 'lastYear') {
+      // For yearly view, show month name
+      return date.toLocaleDateString('es-ES', {
+        month: 'short',
+        year: 'numeric'
+      });
+    } else if (timeRange === 'last30') {
+      // For 30-day view, show day and month
+      return date.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short'
+      });
+    } else {
+      // For 7-day view, show weekday
+      return date.toLocaleDateString('es-ES', {
+        weekday: 'short',
+        day: '2-digit'
+      });
+    }
+  };
+
   const handleManualRefresh = useCallback(() => {
     console.log('🔄 Manual refresh triggered');
     setLoading(true);
@@ -569,7 +589,7 @@ const AnalyticsContent = () => {
 
   const totalViews = analyticsData?.views || 0;
   const totalClicks = analyticsData?.clicks || 0;
-  const ctr = totalViews > 0 ? Math.round(( totalViews/ totalClicks) * 100) : 0;
+  const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
 
   if (loading) {
     return (

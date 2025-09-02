@@ -237,7 +237,7 @@ const StylesPage = () => {
             </div>
 
             {/* Información adicional */}
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200" onClick={toggleWarning}>
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-10" onClick={toggleWarning}>
                 <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 cursor-pointer">
                         <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">

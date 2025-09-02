@@ -123,6 +123,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     }, [isModalOpen, isDataLoaded, loadUserData]);
 
     useEffect(() => {
+        if(isModalOpen){
         const autoGenerateQR = async () => {
 
             if (!initialLoad && !slug && currentUserId && businessCard && !loading) {
@@ -144,7 +145,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             }
         };
 
-        autoGenerateQR();
+        autoGenerateQR();}
     }, [businessCard, initialLoad, slug, currentUserId, loading]);
 
     useEffect(() => {

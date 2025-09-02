@@ -6,7 +6,7 @@ import {
     BarChartHorizontalBig,
     Palette,
     GanttChart,
-    Shield, Edit3
+    Shield
 } from "lucide-react";
 
 import imgP from "../../../public/img/img.png";

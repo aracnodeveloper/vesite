@@ -366,7 +366,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             {isLoadingState ? (
                                 <div className="flex items-center justify-center py-8">
                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400"/>
-                                    <span className="ml-2 text-sm text-gray-500">Cargando biosites...</span>
+                                    <span className="ml-2 text-sm text-gray-500">Cargando vesites...</span>
                                 </div>
                             ) : (
                                 <BiositesList

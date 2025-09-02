@@ -137,12 +137,11 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             let description = label || 'WhatsApp';
 
             if (url.includes('api.whatsapp.com/send')) {
-                // Extraer parámetros de la URL de WhatsApp API
+                
                 const urlParams = new URLSearchParams(url.split('?')[1] || '');
                 phone = urlParams.get('phone') || '';
                 message = decodeURIComponent(urlParams.get('text') || '');
 
-                // Si hay label, usarlo como descripción, sino usar WhatsApp por defecto
                 description = label || 'WhatsApp';
 
             }
@@ -177,7 +176,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     }, []);
 
 
-    // Función para obtener app links desde los links generales
     const getAppLinks = useCallback(() => {
         return links
             .filter(isAppStoreLink)
@@ -198,14 +196,13 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     id: link.id,
                     phone,
                     message,
-                    description, // Ahora incluye la descripción
+                    description,
                     isActive: link.isActive
                 };
             });
         }, [links, isWhatsAppLink, parseWhatsAppFromUrl]);
 
 
-    // Función para obtener enlaces de música
     const getMusicEmbed = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
@@ -227,7 +224,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         return musicLink || null;
     }, [links]);
 
-    // Función para obtener posts sociales
     const getSocialPost = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
@@ -247,7 +243,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         return socialPostLink || null;
     }, [links]);
 
-    // Función para obtener videos
+
     const getVideoEmbed = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
@@ -288,7 +284,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, [biositeId, fetchBiosite, resetState]);
 
-    // Simplificación de la inicialización - solo usar userId y biositeId
+
     useEffect(() => {
         const initializeBiosite = async () => {
             if (!userId || initialized) return;
@@ -297,10 +293,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 const biositeId = Cookie.get('biositeId');
 
                 if (biositeId) {
-                    // Cargar biosite específico por ID
+
                     await loadBiositeById(biositeId);
                 } else {
-                    // Cargar el primer biosite del usuario
+
                     const userBiosites = await fetchUserBiosites();
                     if (userBiosites && userBiosites.length > 0) {
                         const firstBiosite = userBiosites[0];
