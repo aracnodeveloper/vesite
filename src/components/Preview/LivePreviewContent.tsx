@@ -96,7 +96,7 @@ const LivePreviewContent = () => {
 
             const timer = setTimeout(() => {
                 window.location.reload();
-            }, 100);
+            }, 2000);
 
             return () => clearTimeout(timer);
         } else if (biosite) {
