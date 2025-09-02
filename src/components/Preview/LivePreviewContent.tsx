@@ -72,7 +72,7 @@ const LivePreviewContent = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setCanStartChecking(true);
-        }, 2000);
+        }, 3000);
 
         return () => clearTimeout(timer);
     }, []);
@@ -96,7 +96,7 @@ const LivePreviewContent = () => {
 
             const timer = setTimeout(() => {
                 window.location.reload();
-            }, 2000);
+            }, 100);
 
             return () => clearTimeout(timer);
         } else if (biosite) {
