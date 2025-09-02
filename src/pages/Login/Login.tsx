@@ -1,4 +1,4 @@
-import {type FC, useState} from "react";
+import {type FC, useState, useEffect} from "react";
 import Cookies from "js-cookie";
 import {
     Alert,
@@ -11,13 +11,47 @@ import {
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
+import { useAutoLogin, useManualAutoLogin } from "../../hooks/useAutoLogin.ts"; // Importar el hook
 import imgP6 from "../../../public/img/img_8.png";
 const { Content } = Layout;
 
 export const Login: FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { login} = useAuthContext();
+    const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
+    const { login, isAuthenticated } = useAuthContext();
+    const { executeAutoLogin } = useManualAutoLogin();
+
+    // Usar el hook de auto-login automático
+    useAutoLogin();
+
+    // Efecto adicional para manejar el auto-login manual si el automático falla
+    useEffect(() => {
+        const attemptManualAutoLogin = async () => {
+            if (!autoLoginAttempted && !isAuthenticated) {
+                setAutoLoginAttempted(true);
+                setLoading(true);
+
+                const result = await executeAutoLogin();
+
+                if (!result.success) {
+                    console.log('Auto-login no exitoso:', result.message);
+                }
+
+                setLoading(false);
+            }
+        };
+
+        const timeoutId = setTimeout(attemptManualAutoLogin, 500);
+        return () => clearTimeout(timeoutId);
+    }, [autoLoginAttempted, isAuthenticated, executeAutoLogin]);
+
+    // Redirigir si ya está autenticado
+    useEffect(() => {
+        if (isAuthenticated) {
+            window.location.href = "/sections";
+        }
+    }, [isAuthenticated]);
 
     const onFinish = async (values: {
         email: string;
@@ -54,6 +88,20 @@ export const Login: FC = () => {
         }
     };
 
+    // Función para forzar auto-login manual
+    const handleAutoLogin = async () => {
+        setLoading(true);
+        setError(null);
+
+        const result = await executeAutoLogin();
+
+        if (!result.success) {
+            setError(result.message);
+        }
+
+        setLoading(false);
+    };
+
     return (
         <Content
             className="h-screen flex relative overflow-hidden"
@@ -80,8 +128,8 @@ export const Login: FC = () => {
                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                  }}>
                 <div className="w-30 h-20">
-                <img src='./img/veosite.png' className="w-30 h-20"/>
-            </div>
+                    <img src='./img/veosite.png' className="w-30 h-20"/>
+                </div>
                 <div className="flex items-center space-x-4 w-full sm:w-auto">
                     <Form
                         layout="inline"
@@ -142,6 +190,21 @@ export const Login: FC = () => {
                             </Button>
                         </Form.Item>
                     </Form>
+
+                    {/* Botón para auto-login manual */}
+                    <Button
+                        onClick={handleAutoLogin}
+                        loading={loading}
+                        className="rounded-xl px-6 py-3 border-0 font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                        style={{
+                            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                            color: 'white',
+                            height: '32px',
+                            fontSize: '14px'
+                        }}
+                    >
+                        Auto Login
+                    </Button>
                 </div>
             </div>
 
@@ -159,7 +222,7 @@ export const Login: FC = () => {
                                 }}
                                 alt="VESites Demo"
                             />
-                         </div>
+                        </div>
                     </div>
 
                     {/* Right Side - Enhanced text content */}
@@ -197,9 +260,6 @@ export const Login: FC = () => {
                                     VeSites
                                 </span>
                             </Typography.Text>
-
-                            {/* Decorative elements */}
-
                         </div>
                     </div>
                 </div>
