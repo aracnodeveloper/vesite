@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useFetchBiosite } from '../hooks/useFetchBiosite';
 import { usePagination } from '../hooks/usePagination';
 import SearchAndFilters from '../components/global/Super_admin/SearchAndFilters';
@@ -15,6 +15,7 @@ import {businessCardService} from "../service/VCardService.ts";
 import { getBiositeAnalytics } from '../service/apiService';
 import apiService from '../service/apiService';
 import { BiositesTable } from '../components/global/Super_admin/BiositesTable.tsx';
+import { AdminChildBiositesTable } from '../components/global/Super_admin/AdminChildBiositesTable.tsx';
 
 interface LinkData {
     id: string;
@@ -86,8 +87,28 @@ type TimeRange = 'last7' | 'last30' | 'lastYear';
 const AdminPanel: React.FC = () => {
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
-    const hasAdminAccess = role === 'SUPER_ADMIN' || userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5';
-    const { fetchAllBiosites } = useFetchBiosite();
+
+    // Memoizar permisos para evitar recálculos
+    const permissions = useMemo(() => {
+        const isSpecialUser = userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5';
+        const isSuperAdmin = role === 'SUPER_ADMIN';
+        const isAdmin = role === 'ADMIN';
+
+        return {
+            hasFullAccess: isSpecialUser || isSuperAdmin,
+            hasChildBiositeAccess: isAdmin || isSpecialUser || isSuperAdmin,
+            isAdmin,
+            isSuperAdmin,
+            isSpecialUser
+        };
+    }, [role, userId]);
+
+    const {
+        fetchAllBiosites,
+        fetchCompleteBiositeStructure,
+        fetchChildBiosites
+    } = useFetchBiosite();
+
     const [businessCards, setBusinessCards] = useState<{[key: string]: BusinessCard}>({});
     const [loadingCards, setLoadingCards] = useState<{[key: string]: boolean}>({});
 
@@ -101,7 +122,6 @@ const AdminPanel: React.FC = () => {
 
     const [error, setError] = useState<string | null>(null);
     const [expandedBiosite, setExpandedBiosite] = useState<string | null>(null);
-    const [selectedView, setSelectedView] = useState<'biosites' | 'users'>('biosites');
     const [initialized, setInitialized] = useState(false);
 
     const [currentFilters, setCurrentFilters] = useState<FilterState>({
@@ -114,16 +134,28 @@ const AdminPanel: React.FC = () => {
     });
     const [filteredData, setFilteredData] = useState<BiositeFull[]>([]);
 
-    const biositesPagination = usePagination<BiositeFull>({
+    // Diferentes paginaciones para diferentes vistas
+    const allBiositesPagination = usePagination<BiositeFull>({
         initialPage: 1,
         initialSize: 10
     });
 
-    const usersPagination = usePagination<User>({
+    const childBiositesPagination = usePagination<BiositeFull>({
         initialPage: 1,
         initialSize: 10
     });
 
+    // Función memoizada para determinar qué paginación usar
+    const getCurrentPagination = useCallback(() => {
+        if (permissions.hasFullAccess) {
+            return allBiositesPagination;
+        } else if (permissions.hasChildBiositeAccess) {
+            return childBiositesPagination;
+        }
+        return allBiositesPagination; // fallback
+    }, [permissions.hasFullAccess, permissions.hasChildBiositeAccess, allBiositesPagination, childBiositesPagination]);
+
+    // Memoizar la función applyFilters para evitar recreaciones innecesarias
     const applyFilters = useCallback((biosites: BiositeFull[], filters: FilterState): BiositeFull[] => {
         let filtered = [...biosites];
 
@@ -208,16 +240,18 @@ const AdminPanel: React.FC = () => {
         return filtered;
     }, []);
 
+    // Memoizar handleSearch para evitar recreaciones innecesarias
     const handleSearch = useCallback((filters: FilterState) => {
         setCurrentFilters(filters);
+        const currentPagination = getCurrentPagination();
 
-        if (biositesPagination.data.length > 0) {
-            const filtered = applyFilters(biositesPagination.data, filters);
+        if (currentPagination.data.length > 0) {
+            const filtered = applyFilters(currentPagination.data, filters);
             setFilteredData(filtered);
         }
 
-        biositesPagination.setPage(1);
-    }, [biositesPagination.data, applyFilters, biositesPagination]);
+        currentPagination.setPage(1);
+    }, [getCurrentPagination, applyFilters]);
 
     const handleResetFilters = useCallback(() => {
         const defaultFilters: FilterState = {
@@ -229,27 +263,27 @@ const AdminPanel: React.FC = () => {
             sortOrder: 'desc'
         };
         setCurrentFilters(defaultFilters);
-        setFilteredData(biositesPagination.data);
-        biositesPagination.setPage(1);
-    }, [biositesPagination.data, biositesPagination]);
+        const currentPagination = getCurrentPagination();
+        setFilteredData(currentPagination.data);
+        currentPagination.setPage(1);
+    }, [getCurrentPagination]);
 
-    const fetchBiositeLinks = async (biositeId: string) => {
+    const fetchBiositeLinks = useCallback(async (biositeId: string) => {
         if (biositeLinks[biositeId] || loadingBiositeLinks[biositeId]) return;
 
         setLoadingBiositeLinks(prev => ({ ...prev, [biositeId]: true }));
         try {
             const links = await apiService.getAll<LinkData[]>(`/links/biosite/${biositeId}`);
             setBiositeLinks(prev => ({ ...prev, [biositeId]: links || [] }));
-            console.log(`Links loaded for biosite ${biositeId}:`, links);
         } catch (error) {
             console.error(`Error fetching links for biosite ${biositeId}:`, error);
             setBiositeLinks(prev => ({ ...prev, [biositeId]: [] }));
         } finally {
             setLoadingBiositeLinks(prev => ({ ...prev, [biositeId]: false }));
         }
-    };
+    }, [biositeLinks, loadingBiositeLinks]);
 
-    const fetchBiositeAnalytics = async (biositeId: string, ownerId: string) => {
+    const fetchBiositeAnalytics = useCallback(async (biositeId: string, ownerId: string) => {
         if (analyticsData[biositeId] || loadingAnalytics[biositeId]) return;
 
         setLoadingAnalytics(prev => ({ ...prev, [biositeId]: true }));
@@ -308,16 +342,16 @@ const AdminPanel: React.FC = () => {
         } finally {
             setLoadingAnalytics(prev => ({ ...prev, [biositeId]: false }));
         }
-    };
+    }, [analyticsData, loadingAnalytics, analyticsTimeRange]);
 
-    const toggleAnalytics = (biositeId: string, ownerId: string) => {
+    const toggleAnalytics = useCallback((biositeId: string, ownerId: string) => {
         const isCurrentlyShowing = showAnalytics[biositeId];
         setShowAnalytics(prev => ({ ...prev, [biositeId]: !isCurrentlyShowing }));
 
         if (!isCurrentlyShowing && !analyticsData[biositeId]) {
             fetchBiositeAnalytics(biositeId, ownerId);
         }
-    };
+    }, [showAnalytics, analyticsData, fetchBiositeAnalytics]);
 
     const categorizeLinks = useCallback((links: LinkData[]) => {
         const categories = {
@@ -358,47 +392,68 @@ const AdminPanel: React.FC = () => {
         return categories;
     }, []);
 
-    const loadBiosites = useCallback(async () => {
+    // Cargar datos según el rol del usuario - FUNCIÓN MEMOIZADA
+    const loadData = useCallback(async () => {
+        if (!permissions.hasChildBiositeAccess || !userId) return;
+
         try {
-            biositesPagination.setLoading(true);
-            biositesPagination.setError(null);
+            const currentPagination = getCurrentPagination();
+            currentPagination.setLoading(true);
+            currentPagination.setError(null);
 
-            const params = biositesPagination.getPaginationParams();
-            const response = await fetchAllBiosites(params);
+            let responseData: BiositeFull[] = [];
 
-            console.log('Biosites loaded:', response);
-            biositesPagination.setPaginatedData(response);
+            if (permissions.hasFullAccess) {
+                // SUPER_ADMIN o usuario especial: ver todos los biosites
+                const params = currentPagination.getPaginationParams();
+                const response = await fetchAllBiosites(params);
+                currentPagination.setPaginatedData(response);
+                responseData = Array.isArray(response) ? response : response?.data || [];
+            } else if (permissions.isAdmin) {
+                // ADMIN: ver solo biosites hijos
+                const childBiosites = await fetchChildBiosites(userId);
+                responseData = childBiosites;
 
-            const responseData = Array.isArray(response) ? response : response?.data || [];
+                // Para admin, simular paginación local
+                const startIndex = (currentPagination.currentPage - 1) * currentPagination.pageSize;
+                const endIndex = startIndex + currentPagination.pageSize;
+            }
+
             if (responseData.length > 0) {
                 const filtered = applyFilters(responseData, currentFilters);
                 setFilteredData(filtered);
             }
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar biosites";
-            biositesPagination.setError(errorMessage);
+            getCurrentPagination().setError(errorMessage);
             setError(errorMessage);
         } finally {
-            biositesPagination.setLoading(false);
+            getCurrentPagination().setLoading(false);
         }
-    }, [fetchAllBiosites, biositesPagination, applyFilters, currentFilters]);
-
+    }, [
+        permissions.hasChildBiositeAccess,
+        permissions.hasFullAccess,
+        permissions.isAdmin,
+        userId,
+        fetchAllBiosites,
+        fetchChildBiosites,
+        getCurrentPagination,
+        applyFilters,
+        currentFilters
+    ]);
 
     const handleRefreshData = useCallback(async () => {
-        if (selectedView === 'biosites') {
-            await loadBiosites();
-        }
-    }, [selectedView, loadBiosites]);
+        await loadData();
+    }, [loadData]);
 
+    // Efecto principal de inicialización - CORREGIDO
     useEffect(() => {
         const initializeData = async () => {
-            if (!hasAdminAccess  || !userId || initialized) return;
+            if (!permissions.hasChildBiositeAccess || !userId || initialized) return;
 
             try {
-                if (selectedView === 'biosites') {
-                    await loadBiosites();
-                }
-                setInitialized(true);
+                setInitialized(true); // Marcar como inicializado ANTES de cargar datos
+                await loadData();
             } catch (error) {
                 console.error('Error initializing data:', error);
                 setError('Error al inicializar datos');
@@ -406,44 +461,48 @@ const AdminPanel: React.FC = () => {
         };
 
         initializeData();
-    }, [role, userId, initialized, selectedView]);
+    }, [permissions.hasChildBiositeAccess, userId]); // Dependencias mínimas
 
+    // Efecto para cambios de paginación - CORREGIDO
     useEffect(() => {
-        if (initialized && selectedView === 'biosites') {
-            loadBiosites();
-        }
-    }, [biositesPagination.currentPage, biositesPagination.pageSize, initialized, selectedView]);
+        if (!initialized) return;
 
+        loadData();
+    }, [initialized, getCurrentPagination().currentPage, getCurrentPagination().pageSize]);
+
+    // Efecto para aplicar filtros cuando cambian los datos - CORREGIDO
     useEffect(() => {
-        if (biositesPagination.data.length > 0) {
-            const filtered = applyFilters(biositesPagination.data, currentFilters);
+        const currentPagination = getCurrentPagination();
+        if (currentPagination.data.length > 0) {
+            const filtered = applyFilters(currentPagination.data, currentFilters);
             setFilteredData(filtered);
         }
-    }, [biositesPagination.data, currentFilters, applyFilters]);
+    }, [currentFilters]); // Solo depende de currentFilters
 
-    const toggleBiositeExpansion = (biositeId: string) => {
+    const toggleBiositeExpansion = useCallback((biositeId: string) => {
         const wasExpanded = expandedBiosite === biositeId;
         setExpandedBiosite(wasExpanded ? null : biositeId);
 
         if (!wasExpanded) {
-            const biosite = biositesPagination.data.find(b => b.id === biositeId);
+            const currentPagination = getCurrentPagination();
+            const biosite = currentPagination.data.find(b => b.id === biositeId);
             if (biosite?.ownerId) {
                 fetchBusinessCard(biosite.ownerId);
             }
             fetchBiositeLinks(biositeId);
         }
-    };
+    }, [expandedBiosite, getCurrentPagination, fetchBiositeLinks]);
 
-    const formatDate = (dateString?: string) => {
+    const formatDate = useCallback((dateString?: string) => {
         if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         });
-    };
+    }, []);
 
-    const fetchBusinessCard = async (ownerId: string) => {
+    const fetchBusinessCard = useCallback(async (ownerId: string) => {
         if (businessCards[ownerId] || loadingCards[ownerId]) return;
 
         setLoadingCards(prev => ({ ...prev, [ownerId]: true }));
@@ -456,9 +515,9 @@ const AdminPanel: React.FC = () => {
         } finally {
             setLoadingCards(prev => ({ ...prev, [ownerId]: false }));
         }
-    };
+    }, [businessCards, loadingCards]);
 
-    const parseVCardData = (businessCard: BusinessCard | null) => {
+    const parseVCardData = useCallback((businessCard: BusinessCard | null) => {
         if (!businessCard?.data) return null;
 
         try {
@@ -469,18 +528,17 @@ const AdminPanel: React.FC = () => {
             console.error('Error parsing VCard data:', error);
             return null;
         }
-    };
+    }, []);
 
-    const getCurrentPagination = () => {
-        return selectedView === 'biosites' ? biositesPagination : usersPagination;
-    };
-
-    if (!hasAdminAccess) {
+    // Verificar permisos de acceso
+    if (!permissions.hasChildBiositeAccess) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
                     <h2 className="text-xl font-semibold text-gray-600">Acceso Denegado</h2>
-                    <p className="text-gray-500">Solo los usuarios SUPER_ADMIN pueden acceder a este panel.</p>
+                    <p className="text-gray-500">
+                        Solo los usuarios ADMIN y SUPER_ADMIN pueden acceder a este panel.
+                    </p>
                 </div>
             </div>
         );
@@ -494,7 +552,7 @@ const AdminPanel: React.FC = () => {
                 <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
                     <p className="text-gray-600">
-                        Cargando {selectedView === 'biosites' ? 'biosites' : 'usuarios'}...
+                        Cargando {permissions.hasFullAccess ? 'todos los biosites' : 'biosites hijos'}...
                     </p>
                 </div>
             </div>
@@ -525,29 +583,30 @@ const AdminPanel: React.FC = () => {
     }
 
     const totalLinks = Object.values(biositeLinks).reduce((sum, links) => sum + (links?.length || 0), 0);
+    const currentData = filteredData.length > 0 ? filteredData : currentPagination.data;
 
     return (
         <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
             {/* Header */}
-            <div className=" shadow rounded-lg p-6 mb-6">
+            <div className="shadow rounded-lg p-6 mb-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
-                        <p className="text-gray-600">Gestión completa de biosites, usuarios y analytics</p>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Panel de {permissions.hasFullAccess ? 'Super Administración' : 'Administración'}
+                        </h1>
+                        <p className="text-gray-600">
+                            {permissions.hasFullAccess
+                                ? 'Gestión completa de biosites, usuarios y analytics'
+                                : 'Gestión de biosites hijos y analytics'
+                            }
+                        </p>
+                        {permissions.isAdmin && (
+                            <p className="text-sm text-yellow-600 mt-1">
+                                Vista limitada: Solo biosites bajo tu administración
+                            </p>
+                        )}
                     </div>
                     <div className="flex space-x-2">
-                        <button
-                            onClick={() => setSelectedView('biosites')}
-                            className={`px-4 py-2 rounded-md transition-colors flex items-center space-x-2 ${
-                                selectedView === 'biosites'
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            <Globe className="w-4 h-4" />
-                            <span>Biosites</span>
-                        </button>
-
                         <button
                             onClick={handleRefreshData}
                             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2 cursor-pointer"
@@ -566,10 +625,14 @@ const AdminPanel: React.FC = () => {
                     <div className="flex items-center">
                         <Globe className="w-8 h-8 text-green-500" />
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Total Biosites</p>
-                            <p className="text-2xl font-semibold text-gray-900">{biositesPagination.totalItems || 0}</p>
+                            <p className="text-sm font-medium text-gray-500">
+                                {permissions.hasFullAccess ? 'Total Biosites' : 'Biosites Hijos'}
+                            </p>
+                            <p className="text-2xl font-semibold text-gray-900">
+                                {currentPagination.totalItems || 0}
+                            </p>
                             <p className="text-xs text-gray-400">
-                                {biositesPagination.data.filter(biosite => biosite.isActive).length} activos
+                                {currentData.filter(biosite => biosite.isActive).length} activos
                             </p>
                         </div>
                     </div>
@@ -591,33 +654,37 @@ const AdminPanel: React.FC = () => {
                     <div className="flex items-center">
                         <Users className="w-8 h-8 text-blue-500" />
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Usuarios Únicos</p>
+                            <p className="text-sm font-medium text-gray-500">
+                                {permissions.hasFullAccess ? 'Usuarios Únicos' : 'Usuarios Hijos'}
+                            </p>
                             <p className="text-2xl font-semibold text-gray-900">
-                                {usersPagination.totalItems || new Set(biositesPagination.data.map(biosite => biosite.ownerId)).size}
+                                {new Set(currentData.map(biosite => biosite.ownerId)).size}
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Search and Filters */}
-            <div className="mb-6">
-                <SearchAndFilters
-                    onSearch={handleSearch}
-                    onReset={handleResetFilters}
-                    loading={currentPagination.loading}
-                    totalResults={filteredData.length}
-                />
-            </div>
+            {/* Search and Filters - Solo mostrar si hay datos o es SUPER_ADMIN */}
+            {(permissions.hasFullAccess || currentData.length > 0) && (
+                <div className="mb-6">
+                    <SearchAndFilters
+                        onSearch={handleSearch}
+                        onReset={handleResetFilters}
+                        loading={currentPagination.loading}
+                        totalResults={filteredData.length}
+                    />
+                </div>
+            )}
 
             {/* Main Content */}
             <div className="bg-white shadow rounded-lg">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-medium text-gray-900">
-                            {selectedView === 'biosites'
-                                ? `Biosites (${filteredData.length} de ${biositesPagination.totalItems || 0})`
-                                : `Todos los Usuarios (${usersPagination.totalItems || 0})`
+                            {permissions.hasFullAccess
+                                ? `Biosites (${filteredData.length} de ${currentPagination.totalItems || 0})`
+                                : `Biosites Hijos (${filteredData.length} de ${currentPagination.totalItems || 0})`
                             }
                         </h2>
                     </div>
@@ -636,32 +703,59 @@ const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                    <BiositesTable
-                        pagination={{
-                            ...biositesPagination,
-                            data: filteredData,
-                            totalItems: filteredData.length,
-                            totalUnfilteredItems: biositesPagination.totalItems || 0
-                        }}
-                        biositeLinks={biositeLinks}
-                        loadingBiositeLinks={loadingBiositeLinks}
-                        analyticsData={analyticsData}
-                        loadingAnalytics={loadingAnalytics}
-                        showAnalytics={showAnalytics}
-                        analyticsTimeRange={analyticsTimeRange}
-                        expandedBiosite={expandedBiosite}
-                        businessCards={businessCards}
-                        loadingCards={loadingCards}
-                        categorizeLinks={categorizeLinks}
-                        toggleBiositeExpansion={toggleBiositeExpansion}
-                        toggleAnalytics={toggleAnalytics}
-                        fetchBiositeAnalytics={fetchBiositeAnalytics}
-                        setAnalyticsTimeRange={setAnalyticsTimeRange}
-                        setShowAnalytics={setShowAnalytics}
-                        setAnalyticsData={setAnalyticsData}
-                        formatDate={formatDate}
-                        parseVCardData={parseVCardData}
-                    />
+                    {/* Renderizar tabla correspondiente según el rol */}
+                    {permissions.hasFullAccess ? (
+                        <BiositesTable
+                            pagination={{
+                                ...allBiositesPagination,
+                                data: filteredData,
+                                totalItems: filteredData.length,
+                                totalUnfilteredItems: allBiositesPagination.totalItems || 0
+                            }}
+                            biositeLinks={biositeLinks}
+                            loadingBiositeLinks={loadingBiositeLinks}
+                            analyticsData={analyticsData}
+                            loadingAnalytics={loadingAnalytics}
+                            showAnalytics={showAnalytics}
+                            analyticsTimeRange={analyticsTimeRange}
+                            expandedBiosite={expandedBiosite}
+                            businessCards={businessCards}
+                            loadingCards={loadingCards}
+                            categorizeLinks={categorizeLinks}
+                            toggleBiositeExpansion={toggleBiositeExpansion}
+                            toggleAnalytics={toggleAnalytics}
+                            fetchBiositeAnalytics={fetchBiositeAnalytics}
+                            setAnalyticsTimeRange={setAnalyticsTimeRange}
+                            setShowAnalytics={setShowAnalytics}
+                            setAnalyticsData={setAnalyticsData}
+                            formatDate={formatDate}
+                            parseVCardData={parseVCardData}
+                        />
+                    ) : (
+                        <AdminChildBiositesTable
+                            biosites={filteredData}
+                            totalBiosites={filteredData.length}
+                            loading={childBiositesPagination.loading}
+                            biositeLinks={biositeLinks}
+                            loadingBiositeLinks={loadingBiositeLinks}
+                            analyticsData={analyticsData}
+                            loadingAnalytics={loadingAnalytics}
+                            showAnalytics={showAnalytics}
+                            analyticsTimeRange={analyticsTimeRange}
+                            expandedBiosite={expandedBiosite}
+                            businessCards={businessCards}
+                            loadingCards={loadingCards}
+                            categorizeLinks={categorizeLinks}
+                            toggleBiositeExpansion={toggleBiositeExpansion}
+                            toggleAnalytics={toggleAnalytics}
+                            fetchBiositeAnalytics={fetchBiositeAnalytics}
+                            setAnalyticsTimeRange={setAnalyticsTimeRange}
+                            setShowAnalytics={setShowAnalytics}
+                            setAnalyticsData={setAnalyticsData}
+                            formatDate={formatDate}
+                            parseVCardData={parseVCardData}
+                        />
+                    )}
                 </div>
             </div>
             <div className='h-20'></div>

@@ -17,14 +17,13 @@ const { Content } = Layout;
 export const Login: FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [form] = Form.useForm(); // Agregamos referencia al formulario
+    const [form] = Form.useForm();
     const { login} = useAuthContext();
 
-    // Efecto para auto-login usando datos del localStorage
     useEffect(() => {
         const autoLogin = () => {
             try {
-                // Buscar datos en localStorage
+
                 const storedData = localStorage.getItem('datos');
                 if (!storedData) {
                     console.log('No hay datos en localStorage');
@@ -33,16 +32,14 @@ export const Login: FC = () => {
 
                 const parsedData = JSON.parse(storedData);
 
-                // Extraer la cédula
                 const cedula = parsedData?.data?.ci;
                 if (!cedula || typeof cedula !== 'string') {
                     console.log('No se encontró cédula válida en localStorage');
                     return;
                 }
 
-                // Crear credenciales automáticamente
-                const email = cedula; // La cédula como email/usuario
-                const password = cedula.substring(0, 5); // Primeros 5 dígitos como contraseña
+                const email = cedula;
+                const password = cedula.substring(0, 5);
 
                 console.log('Intentando auto-login con:', { email, password: '***' });
 
