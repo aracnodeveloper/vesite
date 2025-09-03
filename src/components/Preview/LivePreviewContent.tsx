@@ -72,7 +72,7 @@ const LivePreviewContent = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setCanStartChecking(true);
-        }, 3000);
+        }, 100);
 
         return () => clearTimeout(timer);
     }, []);
@@ -134,6 +134,7 @@ const LivePreviewContent = () => {
     const orderedContentSections = useMemo(() => {
         const sections = [];
 
+        // Social Links Section
         if (realSocialLinks.length > 0) {
             sections.push({
                 type: 'social',
@@ -151,20 +152,7 @@ const LivePreviewContent = () => {
             });
         }
 
-        // Add WhatsApp button (if active)
-        sections.push({
-            type: 'whatsapp',
-            orderIndex: getSectionOrderIndex('Contactame'),
-            component: (
-                <WhatsAppButton
-                    key="whatsapp-section"
-                    onWhatsAppClick={handleWhatsAppClick}
-                    themeConfig={themeConfig}
-                />
-            )
-        });
-
-        // Add regular links if they exist
+        // Regular Links Section
         if (regularLinksData.length > 0) {
             sections.push({
                 type: 'regular',
@@ -181,14 +169,116 @@ const LivePreviewContent = () => {
             });
         }
 
-        // Add music embed if it exists
+        // WhatsApp Section
+        sections.push({
+            type: 'whatsapp',
+            orderIndex: getSectionOrderIndex('Contactame'),
+            component: (
+                <WhatsAppButton
+                    key="whatsapp-section"
+                    onWhatsAppClick={handleWhatsAppClick}
+                    themeConfig={themeConfig}
+                />
+            )
+        });
+
+        // App Download Section
+        sections.push({
+            type: 'app',
+            orderIndex: getSectionOrderIndex('Link de mi App'),
+            component: (
+                <div key="app-section" onClick={!isExposedRoute ? handleAppClick : undefined}>
+                    <AppDownloadButtons />
+                </div>
+            )
+        });
+
+        // VCard Section
+        sections.push({
+            type: 'vcard',
+            orderIndex: getSectionOrderIndex('VCard'),
+            component: (
+                <VCardButton
+                    key="vcard-section"
+                    themeConfig={themeConfig}
+                    userId={user?.id || Cookie.get('userId')}
+                    onVcardClick={handleVCardClick}
+                />
+            )
+        });
+
+        // Video Section
+        if (videoEmbed) {
+            sections.push({
+                type: 'video',
+                orderIndex: getSectionOrderIndex('Video'),
+                component: (
+                    <div key="video-section" className="px-4 mb-4">
+                        <div className="relative rounded-lg shadow-md overflow-hidden"
+                             style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
+
+                            {getYouTubeEmbedUrl(videoEmbed.url) ? (
+                                <div className="embed-container video-embed">
+                                    <iframe
+                                        src={getYouTubeEmbedUrl(videoEmbed.url)!}
+                                        width="100%"
+                                        height={isExposedRoute ? "200" : "150"}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        loading="lazy"
+                                        title={videoEmbed.label}
+                                    ></iframe>
+                                </div>
+                            ) : (
+                                <div className="p-4 flex items-center space-x-3">
+                                    <div className="flex-shrink-0">
+                                        <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                                             style={{ backgroundColor: themeConfig.colors.accent || '#ef4444' }}>
+                                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-medium text-sm truncate"
+                                            style={{
+                                                color: themeConfig.colors.text,
+                                                fontFamily: themeConfig.fonts.primary
+                                            }}>
+                                            {videoEmbed.label}
+                                        </h3>
+                                        <p className="text-xs opacity-60 truncate mt-1"
+                                           style={{
+                                               color: themeConfig.colors.text,
+                                               fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
+                                           }}>
+                                            Video • {videoEmbed.url}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {!isExposedRoute && (
+                                <div
+                                    className="absolute inset-0 bg-transparent cursor-pointer z-10"
+                                    onClick={handleVideoClick}
+                                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}
+                                />
+                            )}
+                        </div>
+                    </div>
+                )
+            });
+        }
+
+        // Music/Podcast Section
         if (musicEmbed) {
             sections.push({
                 type: 'music',
                 orderIndex: getSectionOrderIndex('Music / Podcast'),
                 component: (
                     <div key="music-section" className="px-4 mb-4">
-
                         <div className="relative rounded-lg shadow-md overflow-hidden">
                             {getSpotifyEmbedUrl(musicEmbed.url) ? (
                                 <div className="embed-container spotify-embed">
@@ -244,7 +334,7 @@ const LivePreviewContent = () => {
             });
         }
 
-        // Add social post if it exists
+        // Social Post Section
         if (socialPost) {
             sections.push({
                 type: 'socialpost',
@@ -308,24 +398,15 @@ const LivePreviewContent = () => {
             });
         }
 
-        sections.push({
-            type: 'app',
-            orderIndex: getSectionOrderIndex('Link de mi App'),
-            component: (
-                <div key="app-section" onClick={!isExposedRoute ? handleAppClick : undefined}>
-                    <AppDownloadButtons />
-                </div>
-            )
-        });
-
         // Sort sections by orderIndex
         return sections.sort((a, b) => a.orderIndex - b.orderIndex);
     }, [
         realSocialLinks, regularLinksData, musicEmbed, socialPost, videoEmbed,
         isExposedRoute, themeConfig, findPlatformForLink, handleSocialClick,
         handleWhatsAppClick, handleLinksClick, handleMusicClick, handleSocialPostClick,
-        handleVideoClick, handleAppClick, getSpotifyEmbedUrl, getYouTubeEmbedUrl,
-        getInstagramEmbedUrl, isInstagramUrl, contextSections, getSectionOrderIndex
+        handleVideoClick, handleAppClick, handleVCardClick, getSpotifyEmbedUrl,
+        getYouTubeEmbedUrl, getInstagramEmbedUrl, isInstagramUrl, contextSections,
+        getSectionOrderIndex, user?.id
     ]);
 
     if (loading || userLoading || !isTemplatesLoaded) {
@@ -428,69 +509,6 @@ const LivePreviewContent = () => {
                         </div>
                     ))}
 
-                    {/* VCard - always at the end */}
-                    <VCardButton
-                        themeConfig={themeConfig}
-                        userId={user?.id || Cookie.get('userId')}
-                        onVcardClick={handleVCardClick}
-                    />
-                    {videoEmbed && (
-                        <div key="video-section" className="px-4 mb-4">
-                        <div className="relative rounded-lg shadow-md overflow-hidden"
-                             style={{ backgroundColor: themeConfig.colors.profileBackground || '#ffffff' }}>
-
-                            {getYouTubeEmbedUrl(videoEmbed.url) ? (
-                                <div className="embed-container video-embed">
-                                    <iframe
-                                        src={getYouTubeEmbedUrl(videoEmbed.url)!}
-                                        width="100%"
-                                        height={isExposedRoute ? "200" : "150"}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        loading="lazy"
-                                        title={videoEmbed.label}
-                                    ></iframe>
-                                </div>
-                            ) : (
-                                <div className="p-4 flex items-center space-x-3">
-                                    <div className="flex-shrink-0">
-                                        <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                                             style={{ backgroundColor: themeConfig.colors.accent || '#ef4444' }}>
-                                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-sm truncate"
-                                            style={{
-                                                color: themeConfig.colors.text,
-                                                fontFamily: themeConfig.fonts.primary
-                                            }}>
-                                            {videoEmbed.label}
-                                        </h3>
-                                        <p className="text-xs opacity-60 truncate mt-1"
-                                           style={{
-                                               color: themeConfig.colors.text,
-                                               fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
-                                           }}>
-                                            Video • {videoEmbed.url}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {!isExposedRoute && (
-                                <div
-                                    className="absolute inset-0 bg-transparent cursor-pointer z-10"
-                                    onClick={handleVideoClick}
-                                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}
-                                />
-                            )}
-                        </div>
-                    </div>
-                    )}
                     <ConditionalNavButton
                         themeConfig={themeConfig}
                     />

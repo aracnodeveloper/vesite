@@ -177,10 +177,20 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     }, [businessCard]);
 
     const generateVCardString = () => {
+        const cleanName = (() => {
+            if (!cardData.name) return 'Sin nombre';
+
+            // Si el nombre es solo números (como una cédula), usar 'Sin nombre'
+            if (/^\d+$/.test(cardData.name.trim())) {
+                return 'Sin nombre';
+            }
+
+            return cardData.name;
+        })();
         const vcard = [
             'BEGIN:VCARD',
             'VERSION:3.0',
-            `FN:${cardData.name || 'Sin nombre'}`,
+            `FN:${cleanName}`,
             `TITLE:${cardData.title || ''}`,
             `ORG:${cardData.company || ''}`,
             `EMAIL:${cardData.email || ''}`,

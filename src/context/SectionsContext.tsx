@@ -148,7 +148,6 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     shouldShow = activeWhatsAppLinks.length > 0;
                     break;
                 case 'VCard':
-                    // VCard is always visible in MySite
                     shouldShow = true;
                     break;
                 case 'Video':
