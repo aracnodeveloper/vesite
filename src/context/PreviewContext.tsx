@@ -709,6 +709,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 labelLower.includes('video') ||
                 labelLower.includes('vimeo') ||
                 urlLower.includes('youtube.com/watch') ||
+                urlLower.includes('youtu.be') ||
                 urlLower.includes('vimeo.com') ||
                 labelLower.includes('tiktok video')
             );

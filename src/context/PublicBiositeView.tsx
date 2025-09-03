@@ -26,9 +26,11 @@ import {
     getYouTubeEmbedUrl,
     getInstagramEmbedUrl,
     isInstagramUrl,
-    hasCustomUrls
+    hasCustomUrls,
+    hasCustombydUrls
 } from "../Utils/biositeUtils.ts";
 import { getSectionsByBiositeApi } from '../constants/EndpointsRoutes';
+import imgPng from "../assets/img/img_12.png";
 //import Cookie from "js-cookie";
 
 interface PublicBiositeData {
@@ -236,6 +238,17 @@ const PublicBiositeView = () => {
                                                 visitaecuador.com
                                             </div>
                                         )}
+                                        {!hasCustombydUrls(biositeData.appLinks) && (
+                                            <div
+                                                style={{
+                                                    color: themeConfig.colors.text,
+                                                    fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
+                                                }}
+                                                className="text-sm opacity-80 -mt-1"
+                                            >
+                                                BYD
+                                            </div>
+                                        )}
                                     </div>
                                     {!hasCustomUrls(biositeData.appLinks) && (
                                         <div className="ml-4">
@@ -268,6 +281,12 @@ const PublicBiositeView = () => {
                                                     </clipPath>
                                                 </defs>
                                             </svg>
+                                        </div>
+                                    )}
+
+                                    {!hasCustombydUrls(biositeData.appLinks) && (
+                                        <div className="ml-4">
+                                            <img src={imgPng} className='h-10 w-10 rounded-lg' />
                                         </div>
                                     )}
                                 </div>
@@ -505,7 +524,7 @@ const PublicBiositeView = () => {
                     videoEmbed
                 });
 
-            } catch (error: any) {
+            } catch (error:     any) {
                 const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
                 setError(errorMessage);
                 console.error('⚠️ Error fetching biosite by slug:', error);

@@ -1,5 +1,5 @@
 import type {BiositeThemeConfig} from "../../interfaces/Biosite.ts";
-import imgPng5 from "../../assets/img/vesite.svg";
+import imgPng5 from "../../assets/img/ve_logo.svg";
 import React from "react";
 
 export const LoadingComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
@@ -72,7 +72,7 @@ export const BackgroundSection = ({
                         <img
                             src={imgPng5}
                             alt="vector"
-                            className={`absolute ${isExposedRoute ? 'top-32' : 'top-24'}  right-0 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none`}
+                            className={`absolute ${isExposedRoute ? 'top-32' : 'top-22'}  right-0 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none`}
                         />
                     </div>
                 </div>
