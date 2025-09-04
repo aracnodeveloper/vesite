@@ -220,8 +220,8 @@ const PublicBiositeView = () => {
                                     )}
                                 </div>
                                 <div className="flex-1 flex items-center justify-between">
-                                    <div className="flex flex-col items-start">
-                                        <div className={`${hasCustomUrls(biositeData.appLinks) ? 'text-lg' : 'text-sm'} font-bold`} style={{
+                                    <div className="flex flex-col items-start ml-1">
+                                        <div className={`${hasCustomUrls(biositeData.appLinks) ? 'text-md' : 'text-sm'} font-bold`} style={{
                                             color: themeConfig.colors.text,
                                             fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                         }}>

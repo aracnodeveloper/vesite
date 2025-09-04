@@ -334,7 +334,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             />
             <div className="text-left">
               <div
-                className="text-black font-bold text-base"
+                className="text-black font-bold text-base ml-1"
                 style={{
                   fontFamily: themeConfig.fonts.primary,
                   color: themeConfig.colors.text,

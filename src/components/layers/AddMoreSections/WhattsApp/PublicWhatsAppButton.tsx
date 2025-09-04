@@ -84,10 +84,10 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                     </div>
 
                     {/* Contenido del botón */}
-                    <div className="flex flex-col justify-center ml-2 flex-1 text-left ">
+                    <div className="flex flex-col justify-center ml-4 flex-1 text-left ">
                         {/* Título/Descripción */}
                         <span
-                            className="font-semibold text-base leading-tight"
+                            className="font-semibold  text-xs"
                             style={{
                                 color: themeConfig.colors.text || '#ffffff',
                                 fontFamily: themeConfig.fonts.primary || 'Inter'
