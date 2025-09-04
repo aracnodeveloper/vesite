@@ -335,7 +335,7 @@ const PublicBiositeView = () => {
                                 </div>
                             ) : (
                                 <div
-                                    className="p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    className="p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-colors hidden"
                                     onClick={() => {
                                         handleEmbedClick(videoEmbed.id, 'video');
                                         window.open(videoEmbed.url, '_blank');
@@ -448,7 +448,7 @@ const PublicBiositeView = () => {
                                     ></iframe>
                                 </div>
                             ) : (
-                                <div className="p-4 flex items-center space-x-3">
+                                <div className="p-4 flex items-center space-x-3 hidden">
                                     <div className="flex-shrink-0">
                                         <div className="w-12 h-12 rounded-full flex items-center justify-center"
                                              style={{ backgroundColor: themeConfig.colors.accent || '#8b5cf6' }}>
