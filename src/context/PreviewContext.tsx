@@ -257,6 +257,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 labelLower.includes('video') ||
                 labelLower.includes('vimeo') ||
                 urlLower.includes('youtube.com/watch') ||
+                urlLower.includes('youtu.be') ||
                 urlLower.includes('vimeo.com')
             );
         });
@@ -360,7 +361,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             const regularLinksFromAPI = getRegularLinks();
 
             const regularLinksFormatted = regularLinksFromAPI
-                .filter(link => !isAppStoreLink(link) )
+                .filter(link => !isAppStoreLink(link)  )
                 .map(link => ({
                     id: link.id,
                     title: link.label,

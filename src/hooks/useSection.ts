@@ -103,6 +103,13 @@ export const useSections = () => {
         const defaultSections: CreateSectionData[] = [
             {
                 biositeId,
+                titulo: 'Profile',
+                icon: 'profile',
+                descripcion: 'User profile section',
+                orderIndex: 0, // Profile should always be first
+            },
+            {
+                biositeId,
                 titulo: 'Social',
                 icon: 'social',
                 descripcion: 'Social media links',
@@ -195,6 +202,19 @@ export const useSections = () => {
             if (existingSections.length === 0) {
                 return await createDefaultSections(biositeId);
             } else {
+                // Check if Profile section is missing and add it
+                const hasProfile = existingSections.some(section => section.titulo === 'Profile');
+                if (!hasProfile) {
+                    const profileSection: CreateSectionData = {
+                        biositeId,
+                        titulo: 'Profile',
+                        icon: 'profile',
+                        descripcion: 'User profile section',
+                        orderIndex: 0, // Profile should always be first
+                    };
+                    await createSection(profileSection);
+                }
+
                 // Check if VCard section is missing and add it
                 const hasVCard = existingSections.some(section => section.titulo === 'VCard');
                 if (!hasVCard) {
@@ -206,10 +226,9 @@ export const useSections = () => {
                         orderIndex: existingSections.length + 1,
                     };
                     await createSection(vCardSection);
-                    return await getSectionsByBiosite(biositeId);
                 }
 
-                return existingSections;
+                return await getSectionsByBiosite(biositeId);
             }
         } catch (err) {
             console.error('Error initializing sections:', err);

@@ -31,6 +31,7 @@ const VideoPage = () => {
     const handleSave = async () => {
         try {
             setIsSubmitting(true);
+            // Use the updated setVideoEmbed function from context
             await setVideoEmbed(url, title || undefined);
             console.log('Video embed saved successfully');
             navigate(-1);
@@ -45,6 +46,7 @@ const VideoPage = () => {
     const handleDelete = async () => {
         try {
             setIsDeleting(true);
+            // Use the updated setVideoEmbed function from context
             await setVideoEmbed('', '');
             console.log('Video embed deleted successfully');
             navigate(-1);

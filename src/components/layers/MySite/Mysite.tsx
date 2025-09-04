@@ -69,12 +69,15 @@ const MySite = () => {
         activeSocialPostLinks
     );
 
-    // Now ALL sections are draggable, including VCard if it exists
-    const draggableSections = visibleSections;
+    // Separate Profile section from draggable sections
+    const profileSection = visibleSections.find(section => section.titulo === 'Profile');
+    const draggableSections = visibleSections.filter(section => section.titulo !== 'Profile');
 
     // Component mapping
     const getSectionComponent = (sectionTitle: string) => {
         switch (sectionTitle) {
+            case 'Profile':
+                return <Profile key="profile" />;
             case 'Social':
                 return <Social key="social" />;
             case 'Links':
@@ -96,13 +99,11 @@ const MySite = () => {
         }
     };
 
-    // Handle drag end event
     const handleDragEnd = async (result: DropResult) => {
         setIsDragging(false);
 
         const { destination, source } = result;
 
-        // If dropped outside droppable area or same position
         if (!destination || destination.index === source.index) {
             return;
         }
@@ -112,11 +113,13 @@ const MySite = () => {
             const [draggedSection] = newSections.splice(source.index, 1);
             newSections.splice(destination.index, 0, draggedSection);
 
-            // Update order indexes for all sections
-            const reorderData = newSections.map((section, index) => ({
-                id: section.id,
-                orderIndex: index + 1
-            }));
+            const reorderData = [
+                ...(profileSection ? [{ id: profileSection.id, orderIndex: 0 }] : []),
+                ...newSections.map((section, index) => ({
+                    id: section.id,
+                    orderIndex: index + 1
+                }))
+            ];
 
             await reorderSections(reorderData);
         } catch (error) {
@@ -133,7 +136,6 @@ const MySite = () => {
             <div className="w-full mt-60">
                 <h3 className="text-lg font-bold text-gray-800 mb-5 uppercase tracking-wide text-start">My VeSite</h3>
                 <div className="space-y-3">
-                    <Profile />
                     <div className="text-center text-gray-500">Loading sections...</div>
                 </div>
             </div>
@@ -141,21 +143,25 @@ const MySite = () => {
     }
 
     return (
-        <div className="w-full mt-30 mb-5">
+        <div className="w-full mb-5">
             <h3 className="text-lg font-bold text-gray-800 mb-5 uppercase tracking-wide text-start">My VeSite</h3>
-            <div className="space-y-5">
-                {/* Profile always shows first */}
-                <Profile />
 
-                {/* Drag and Drop Context */}
-                <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-                    <Droppable droppableId="sections">
-                        {(provided, snapshot) => (
-                            <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                className={`space-y-5 ${snapshot.isDraggingOver ? 'bg-blue-50/30' : ''}`}
-                            >                                {draggableSections.map((section, index) => {
+            <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+                <Droppable droppableId="sections" direction='vertical'>
+                    {(provided, snapshot) => (
+                        <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                            className={`space-y-5 ${snapshot.isDraggingOver ? 'bg-blue-50/30' : ''}`}
+                        >
+                            {profileSection && (
+                                <div className="transition-all duration-200">
+                                    {getSectionComponent(profileSection.titulo)}
+                                </div>
+                            )}
+
+                            {/* Draggable sections */}
+                            {draggableSections.map((section, index) => {
                                 const component = getSectionComponent(section.titulo);
                                 if (!component) return null;
 
@@ -170,25 +176,23 @@ const MySite = () => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 className={`
-                                                        group relative
-                                                        ${!snapshot.isDragging ? 'transition-all duration-200 ease-in-out' : ''}
-                                                        hover:shadow-sm
-                                                        ${snapshot.isDragging ? 'opacity-50 scale-95 shadow-lg z-50' : ''}
-                                                        ${snapshot.isDropAnimating ? 'transition-transform duration-200' : ''}
-                                                        ${isDragging && !snapshot.isDragging ? 'opacity-75' : ''}
-                                                    `}
+                                                    group relative
+                                                    hover:shadow-sm
+                                                    ${snapshot.isDragging ? 'opacity-50 scale-95 shadow-lg z-50 -ml-96' : ''}
+                                                    ${snapshot.isDropAnimating ? 'transition-transform duration-200' : ''}
+                                                    ${isDragging && !snapshot.isDragging ? 'opacity-75 ' : ''}
+                                                `}
                                             >
-                                                {/* Drag handle - visible on hover or when dragging */}
                                                 <div
                                                     {...provided.dragHandleProps}
                                                     className={`
-                                                            absolute -left-10 top-1/2 transform -translate-y-1/2 z-10
-                                                            p-1 rounded bg-white shadow-sm border border-gray-200
-                                                            ${snapshot.isDragging || isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-                                                            transition-opacity duration-200
-                                                            cursor-grab active:cursor-grabbing
-                                                            hover:bg-gray-50
-                                                        `}
+                                                        absolute -right-10 top-1/2 transform -translate-y-1/2 z-10
+                                                        p-1 rounded bg-white shadow-sm border border-gray-200
+                                                        ${snapshot.isDragging || isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+                                                        transition-opacity duration-200
+                                                        cursor-grab active:cursor-grabbing
+                                                        hover:bg-gray-50
+                                                    `}
                                                 >
                                                     <GripVertical size={16} className="text-gray-400" />
                                                 </div>
@@ -197,22 +201,16 @@ const MySite = () => {
                                                 <div className="transition-all duration-200">
                                                     {component}
                                                 </div>
-
-                                                {/* Drop indicator when dragging over */}
-                                                {snapshot.isDragging && (
-                                                    <div className="absolute inset-0 pointer-events-none border-2 border-[#96C121] border-dashed rounded-lg bg-blue-50/30" />
-                                                )}
                                             </div>
                                         )}
                                     </Draggable>
                                 );
                             })}
-                                {provided.placeholder}
-                            </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
-            </div>
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </DragDropContext>
         </div>
     );
 };

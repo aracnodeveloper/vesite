@@ -6,6 +6,7 @@ import {
     linksClicksApi,
     registerVisitApi
 } from "../constants/EndpointsRoutes.ts";
+import Cookie from "js-cookie";
 
 export interface PaginationParams {
     page?: number;
@@ -290,6 +291,25 @@ export const getComprehensiveAnalytics = async (
         return response.data;
     } catch (error) {
         console.error('Error fetching comprehensive analytics:', error);
+        throw error;
+    }
+};
+
+export const updateAdminAndChildrenVideo = async (videoUrl: string) => {
+    const userId = Cookie.get('userId');
+
+    if (!userId) {
+        throw new Error('User ID not found');
+    }
+
+    try {
+        const response = await api.patch(
+            `/biosites/admin/update-video/${userId}?video=${encodeURIComponent(videoUrl)}`,
+            {}
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating video for admin and children:', error);
         throw error;
     }
 };
