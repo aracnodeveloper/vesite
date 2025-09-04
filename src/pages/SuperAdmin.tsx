@@ -18,83 +18,17 @@ import { getBiositeAnalytics } from '../service/apiService';
 import apiService from '../service/apiService';
 import { BiositesTable } from '../components/global/Super_admin/BiositesTable.tsx';
 import { AdminChildBiositesTable } from '../components/global/Super_admin/AdminChildBiositesTable.tsx';
+import type {BiositeFull,LinkData, TimeRange, AnalyticsData} from '../interfaces/AdminData.ts'
 
-interface LinkData {
-    id: string;
-    label: string;
-    url: string;
-    icon?: string;
-    isActive: boolean;
-    orderIndex: number;
-    description?: string;
-    image?: string;
-    color?: string;
-    biositeId?: string;
-    createdAt?: string;
-    updatedAt?: string;
-}
 
-interface User {
-    id: string;
-    email: string;
-    cedula?: string;
-    name?: string;
-    description?: string;
-    avatarUrl?: string;
-    site?: string;
-    phone?: string;
-    isActive?: boolean;
-    role?: string;
-    parentId?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    biosites?: BiositeFull[];
-}
-
-interface BiositeFull {
-    id: string;
-    ownerId: string;
-    title: string | null;
-    slug: string | null;
-    themeId: string | null;
-    colors: string | any;
-    fonts?: string;
-    avatarImage?: string;
-    backgroundImage?: string;
-    videoUrl?: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    links?: LinkData[];
-    owner?: User;
-    businessCard?: BusinessCard;
-}
-
-interface AnalyticsData {
-    views: number;
-    clicks: number;
-    dailyActivity: Array<{
-        day: string;
-        views: number;
-        clicks: number;
-    }>;
-    clickDetails: Array<{
-        label: string;
-        count: number;
-    }>;
-}
-
-type TimeRange = 'last7' | 'last30' | 'lastYear';
 type ViewMode = 'all' | 'children';
 
 const AdminPanel: React.FC = () => {
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
 
-    // Estado para controlar el modo de vista (solo para SUPER_ADMIN)
     const [viewMode, setViewMode] = useState<ViewMode>('all');
 
-    // Memoizar permisos para evitar recálculos
     const permissions = useMemo(() => {
         const isSpecialUser = userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5';
         const isSuperAdmin = role === 'SUPER_ADMIN';
@@ -106,13 +40,12 @@ const AdminPanel: React.FC = () => {
             isAdmin,
             isSuperAdmin,
             isSpecialUser,
-            canToggleView: isSuperAdmin || isSpecialUser // Solo SUPER_ADMIN puede cambiar vista
+            canToggleView: isSuperAdmin || isSpecialUser
         };
     }, [role, userId]);
 
     const {
         fetchAllBiosites,
-        fetchCompleteBiositeStructure,
         fetchChildBiosites
     } = useFetchBiosite();
 
@@ -152,7 +85,6 @@ const AdminPanel: React.FC = () => {
         initialSize: 10
     });
 
-    // Función memoizada para determinar qué paginación usar
     const getCurrentPagination = useCallback(() => {
         if (permissions.hasFullAccess && viewMode === 'all') {
             return allBiositesPagination;
@@ -162,7 +94,6 @@ const AdminPanel: React.FC = () => {
         return allBiositesPagination; // fallback
     }, [permissions.hasFullAccess, permissions.hasChildBiositeAccess, viewMode, allBiositesPagination, childBiositesPagination]);
 
-    // Función para cambiar el modo de vista
     const handleViewModeChange = useCallback((newViewMode: ViewMode) => {
         if (!permissions.canToggleView) return;
 
@@ -176,7 +107,7 @@ const AdminPanel: React.FC = () => {
             sortOrder: 'desc'
         });
         setFilteredData([]);
-        setInitialized(false); // Reinicializar para cargar nuevos datos
+        setInitialized(false);
     }, [permissions.canToggleView]);
 
     // Determinar si debe mostrar todos los biosites o solo hijos

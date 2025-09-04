@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 import Profile from "./Profile/profile";
 import Social from "./Social/social";
 import V_Card from "./V-Card/V-Card";
@@ -20,9 +22,8 @@ const MySite = () => {
         loading
     } = useSectionsContext();
 
-    // Drag and drop states
-    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+    // State for visual feedback during drag
+    const [isDragging, setIsDragging] = useState(false);
 
     // Filter active links
     const activeSocialLinks = socialLinks.filter(link => {
@@ -95,57 +96,21 @@ const MySite = () => {
         }
     };
 
-    // Drag handlers
-    const handleDragStart = (e: React.DragEvent, index: number) => {
-        setDraggedIndex(index);
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', '');
+    // Handle drag end event
+    const handleDragEnd = async (result: DropResult) => {
+        setIsDragging(false);
 
-        // Add visual feedback with delay
-        setTimeout(() => {
-            const target = e.target as HTMLElement;
-            target.style.opacity = '0.5';
-        }, 0);
-    };
+        const { destination, source } = result;
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    };
-
-    const handleDragEnter = (e: React.DragEvent, index: number) => {
-        e.preventDefault();
-        setDragOverIndex(index);
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        // Check if we're actually leaving the element
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const x = e.clientX;
-        const y = e.clientY;
-
-        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-            setDragOverIndex(null);
-        }
-    };
-
-    const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
-        e.preventDefault();
-
-        if (draggedIndex === null || draggedIndex === dropIndex) {
-            setDraggedIndex(null);
-            setDragOverIndex(null);
+        // If dropped outside droppable area or same position
+        if (!destination || destination.index === source.index) {
             return;
         }
 
         try {
-            const newSections = [...draggableSections];
-            const draggedSection = newSections[draggedIndex];
-
-            // Remove dragged item
-            newSections.splice(draggedIndex, 1);
-            // Insert at new position
-            newSections.splice(dropIndex, 0, draggedSection);
+            const newSections = Array.from(draggableSections);
+            const [draggedSection] = newSections.splice(source.index, 1);
+            newSections.splice(destination.index, 0, draggedSection);
 
             // Update order indexes for all sections
             const reorderData = newSections.map((section, index) => ({
@@ -156,18 +121,11 @@ const MySite = () => {
             await reorderSections(reorderData);
         } catch (error) {
             console.error('Error reordering sections:', error);
-        } finally {
-            setDraggedIndex(null);
-            setDragOverIndex(null);
         }
     };
 
-    const handleDragEnd = (e: React.DragEvent) => {
-        // Reset visual feedback
-        const target = e.target as HTMLElement;
-        target.style.opacity = '1';
-        setDraggedIndex(null);
-        setDragOverIndex(null);
+    const handleDragStart = () => {
+        setIsDragging(true);
     };
 
     if (loading) {
@@ -189,54 +147,71 @@ const MySite = () => {
                 {/* Profile always shows first */}
                 <Profile />
 
-                {/* Render all draggable section components */}
-                {draggableSections.map((section, index) => {
-                    const component = getSectionComponent(section.titulo);
-                    if (!component) return null;
+                {/* Drag and Drop Context */}
+                <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+                    <Droppable droppableId="sections">
+                        {(provided, snapshot) => (
+                            <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                className={`space-y-5 ${snapshot.isDraggingOver ? 'bg-blue-50/30' : ''}`}
+                            >                                {draggableSections.map((section, index) => {
+                                const component = getSectionComponent(section.titulo);
+                                if (!component) return null;
 
-                    return (
-                        <div
-                            key={section.id}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, index)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={handleDragOver}
-                            onDragEnter={(e) => handleDragEnter(e, index)}
-                            onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, index)}
-                            className={`
-                                group relative
-                                transition-all duration-200 ease-in-out
-                                hover:shadow-sm
-                                ${draggedIndex === index ? 'opacity-50 scale-95 shadow-lg' : ''}
-                                ${dragOverIndex === index ? 'border-2 border-[#96C121] border-dashed bg-blue-50' : 'border border-transparent'}
-                            `}
-                        >
-                            {/* Drag handle - visible on hover or when dragging */}
-                            <div className={`
-                                absolute -left-10 top-1/2 transform -translate-y-1/2 z-10
-                                p-1 rounded bg-white shadow-sm border border-gray-200
-                                ${draggedIndex === index ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-                                transition-opacity duration-200
-                                cursor-grab active:cursor-grabbing
-                            `}>
-                                <GripVertical size={16} className="text-gray-400" />
+                                return (
+                                    <Draggable
+                                        key={section.id}
+                                        draggableId={section.id.toString()}
+                                        index={index}
+                                    >
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                className={`
+                                                        group relative
+                                                        ${!snapshot.isDragging ? 'transition-all duration-200 ease-in-out' : ''}
+                                                        hover:shadow-sm
+                                                        ${snapshot.isDragging ? 'opacity-50 scale-95 shadow-lg z-50' : ''}
+                                                        ${snapshot.isDropAnimating ? 'transition-transform duration-200' : ''}
+                                                        ${isDragging && !snapshot.isDragging ? 'opacity-75' : ''}
+                                                    `}
+                                            >
+                                                {/* Drag handle - visible on hover or when dragging */}
+                                                <div
+                                                    {...provided.dragHandleProps}
+                                                    className={`
+                                                            absolute -left-10 top-1/2 transform -translate-y-1/2 z-10
+                                                            p-1 rounded bg-white shadow-sm border border-gray-200
+                                                            ${snapshot.isDragging || isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+                                                            transition-opacity duration-200
+                                                            cursor-grab active:cursor-grabbing
+                                                            hover:bg-gray-50
+                                                        `}
+                                                >
+                                                    <GripVertical size={16} className="text-gray-400" />
+                                                </div>
+
+                                                {/* Section content */}
+                                                <div className="transition-all duration-200">
+                                                    {component}
+                                                </div>
+
+                                                {/* Drop indicator when dragging over */}
+                                                {snapshot.isDragging && (
+                                                    <div className="absolute inset-0 pointer-events-none border-2 border-[#96C121] border-dashed rounded-lg bg-blue-50/30" />
+                                                )}
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                );
+                            })}
+                                {provided.placeholder}
                             </div>
-
-                            {/* Section content */}
-                            <div className={`
-                                transition-all duration-200
-                            `}>
-                                {component}
-                            </div>
-
-                            {/* Drop indicator */}
-                            {dragOverIndex === index && draggedIndex !== index && (
-                                <div className="absolute inset-0 pointer-events-none border-2 border-[#96C121] border-dashed rounded-lg bg-blue-50/30" />
-                            )}
-                        </div>
-                    );
-                })}
+                        )}
+                    </Droppable>
+                </DragDropContext>
             </div>
         </div>
     );

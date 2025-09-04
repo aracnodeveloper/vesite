@@ -135,6 +135,7 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             let shouldShow = false;
 
             switch (section.titulo) {
+
                 case 'Social':
                     shouldShow = activeSocialLinks.length > 0;
                     break;

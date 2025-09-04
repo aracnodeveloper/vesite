@@ -101,3 +101,27 @@ export interface BiositesTableProps {
     formatDate: (dateString?: string) => string;
     parseVCardData: (businessCard: BusinessCard | null) => any;
 }
+
+export interface AdminChildBiositesTableProps {
+    biosites: BiositeFull[];
+    totalBiosites: number;
+    loading: boolean;
+    biositeLinks: {[key: string]: LinkData[]};
+    loadingBiositeLinks: {[key: string]: boolean};
+    analyticsData: {[key: string]: any};
+    loadingAnalytics: {[key: string]: boolean};
+    showAnalytics: {[key: string]: boolean};
+    analyticsTimeRange: TimeRange;
+    expandedBiosite: string | null;
+    businessCards: {[key: string]: any};
+    loadingCards: {[key: string]: boolean};
+    toggleBiositeExpansion: (biositeId: string) => void;
+    toggleAnalytics: (biositeId: string, ownerId: string) => void;
+    fetchBiositeAnalytics: (biositeId: string, ownerId: string) => void;
+    setAnalyticsTimeRange: (range: TimeRange) => void;
+    setShowAnalytics: React.Dispatch<React.SetStateAction<{[key: string]: boolean}>>;
+    setAnalyticsData: React.Dispatch<React.SetStateAction<{[key: string]: any}>>;
+    formatDate: (dateString?: string) => string;
+    parseVCardData: (businessCard: any) => any;
+    categorizeLinks: (links: LinkData[]) => any;
+}

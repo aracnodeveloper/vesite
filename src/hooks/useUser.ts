@@ -20,7 +20,7 @@ interface User {
 
 interface UpdateUserDto {
     name?: string;
-    cedula?: string; // Añadido cedula al DTO de actualización
+    cedula?: string;
     description?: string;
     avatarUrl?: string;
     site?: string;
