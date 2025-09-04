@@ -144,7 +144,7 @@ const MySite = () => {
 
     return (
         <div className="w-full mb-5">
-            <h3 className="text-lg font-bold text-gray-800 mb-5 uppercase tracking-wide text-start">My VeSite</h3>
+
 
             <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
                 <Droppable droppableId="sections" direction='vertical'>
@@ -154,6 +154,7 @@ const MySite = () => {
                             ref={provided.innerRef}
                             className={`space-y-5 ${snapshot.isDraggingOver ? 'bg-blue-50/30' : ''}`}
                         >
+                            <h3 className="text-lg font-bold text-gray-800 mb-5 uppercase tracking-wide text-start">My VeSite</h3>
                             {profileSection && (
                                 <div className="transition-all duration-200">
                                     {getSectionComponent(profileSection.titulo)}

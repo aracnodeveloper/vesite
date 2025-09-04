@@ -9,6 +9,7 @@ export interface Link {
     isActive: boolean;
     color?: string;
     orderIndex: number;
+    link_type?: string;
 }
 
 export interface CreateLinkDto {
@@ -17,17 +18,19 @@ export interface CreateLinkDto {
     url: string;
     icon: string;
     description?: string;
-    image?:string;
+    image?: string;
     orderIndex: number;
     isActive?: boolean;
+    link_type?: string;
 }
 
 export interface UpdateLinkDto {
     label?: string;
     url?: string;
-    image?:string;
+    image?: string;
     description?: string;
     icon?: string;
     orderIndex?: number;
     isActive?: boolean;
+    link_type?: string;
 }
