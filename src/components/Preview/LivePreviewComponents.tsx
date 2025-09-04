@@ -63,7 +63,7 @@ export const BackgroundSection = ({
                                       themeConfig,
                                       handleImageClick
                                   }: any) => (
-    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-64' : 'h-48'} ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-40' : 'h-40 '} ${!isExposedRoute ? 'cursor-pointer' : ''}`}
          onClick={handleImageClick}>
         {validBackgroundImage ? (
             <>
@@ -72,7 +72,7 @@ export const BackgroundSection = ({
                         <img
                             src={imgPng5}
                             alt="vector"
-                            className={`absolute ${isExposedRoute ? 'top-32' : 'top-22'}  right-0 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none`}
+                            className={`absolute ${isExposedRoute ? 'top-22' : 'top-22'}  right-0 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none`}
                         />
                     </div>
                 </div>
@@ -86,13 +86,13 @@ export const BackgroundSection = ({
                 <img
                     src={validBackgroundImage}
                     alt="Background"
-                    className={`w-full object-cover ${isExposedRoute ? 'h-full' : 'h-full'}`}
+                    className={`w-full object-cover ${isExposedRoute ? 'h-full' : 'h-full '}`}
                     onLoadStart={() => handleImageLoadStart('background')}
                     onLoad={() => handleImageLoad('background')}
                     onError={() => handleImageError('background', biosite.backgroundImage)}
                     style={{
                         display: imageLoadStates.background === 'error' ? 'none' : 'block',
-                        clipPath: 'ellipse(100% 80% at 50% 0%)',
+                        clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
                     }}
                 />
                 {imageLoadStates.background === 'error' && (
@@ -139,7 +139,7 @@ export const AvatarSection = ({
                                   handleImageClick
                               }: any) => (
 
-    <div className={`flex justify-center ${isExposedRoute ? '-mt-24' : '-mt-24'} relative z-10 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+    <div className={`flex justify-center ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
          onClick={handleImageClick}>
         {validAvatarImage ? (
             <div className="relative">
@@ -153,7 +153,7 @@ export const AvatarSection = ({
                 <img
                     src={validAvatarImage }
                     alt="Avatar"
-                    className={`${isExposedRoute ? 'w-30 h-30' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
+                    className={`${isExposedRoute ? 'w-26 h-26' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
                     onLoadStart={() => handleImageLoadStart('avatar')}
                     onLoad={() => handleImageLoad('avatar')}
                     onError={() => handleImageError('avatar', biosite.avatarImage)}
