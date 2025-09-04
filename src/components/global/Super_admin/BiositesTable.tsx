@@ -398,7 +398,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                     {biosite.title || 'Sin título'}
                                                 </div>
                                                 <div className="text-xs text-gray-500">
-                                                    ID: {biosite.id.substring(0, 8)}...
+                                                    ID: {biosite.id}
                                                 </div>
                                             </div>
                                         </div>
@@ -674,26 +674,22 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                     <div className=" p-3 rounded border">
                                                         <div
                                                             className="grid grid-cols-2 gap-4 p-2 rounded-lg"
-                                                            style={{
-                                                                backgroundColor: 'rgba(150, 193, 33, 0.7)',
-                                                                transform: 'translate3d(0, 0, 0)',
-                                                                backfaceVisibility: 'hidden'
-                                                            }}
+
                                                         >
                                                             <div>
-                                                                <p className="text-xs text-white uppercase">Nombre</p>
+                                                                <p className="text-xs text-gray-600 uppercase">Nombre</p>
                                                                 <p className="text-sm text-black">{biosite.owner?.name || 'N/A'}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-white uppercase">Email</p>
+                                                                <p className="text-xs text-gray-600  uppercase">Email</p>
                                                                 <p className="text-sm text-black">{biosite.owner?.email || 'N/A'}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-white uppercase">Cédula</p>
+                                                                <p className="text-xs text-gray-600  uppercase">Cédula</p>
                                                                 <p className="text-sm text-black">{biosite.owner?.cedula || 'N/A'}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-xs text-white uppercase">Rol</p>
+                                                                <p className="text-xs text-gray-600  uppercase">Rol</p>
                                                                 <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                                                                     biosite.owner?.role === 'ADMIN' ? 'bg-blue-100 text-blue-800' :
                                                                         biosite.owner?.role === 'SUPER_ADMIN' ? 'bg-red-100 text-red-800' :
@@ -859,7 +855,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                                             {userBusinessCard.isActive ? 'V-Card Activa' : 'V-Card Inactiva'}
                                                                         </span>
                                                                         <span>
-                                                                            ID: {userBusinessCard.id?.substring(0, 8)}...
+                                                                            ID: {userBusinessCard.id}
                                                                         </span>
                                                                     </div>
                                                                 </div>

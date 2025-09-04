@@ -22,7 +22,7 @@ const MySite = () => {
 
     // Drag and drop states
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-    const [dragOverIndex, setDragOverIndex] = useState<number | string | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
     // Filter active links
     const activeSocialLinks = socialLinks.filter(link => {
@@ -68,9 +68,8 @@ const MySite = () => {
         activeSocialPostLinks
     );
 
-    // Filter out VCard from draggable sections - it needs special handling
-    const draggableSections = visibleSections.filter(section => section.titulo !== 'VCard');
-    const vCardSection = visibleSections.find(section => section.titulo === 'VCard');
+    // Now ALL sections are draggable, including VCard if it exists
+    const draggableSections = visibleSections;
 
     // Component mapping
     const getSectionComponent = (sectionTitle: string) => {
@@ -89,6 +88,8 @@ const MySite = () => {
                 return <Post key="post" />;
             case 'VCard':
                 return <V_Card key="vcard" />;
+            case 'Video':
+                return <Videos key="video" />;
             default:
                 return null;
         }
@@ -100,7 +101,7 @@ const MySite = () => {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/html', '');
 
-        // Add visual feedback with delay like in LinksPage
+        // Add visual feedback with delay
         setTimeout(() => {
             const target = e.target as HTMLElement;
             target.style.opacity = '0.5';
@@ -112,7 +113,7 @@ const MySite = () => {
         e.dataTransfer.dropEffect = 'move';
     };
 
-    const handleDragEnter = (e: React.DragEvent, index: number | string) => {
+    const handleDragEnter = (e: React.DragEvent, index: number) => {
         e.preventDefault();
         setDragOverIndex(index);
     };
@@ -128,7 +129,7 @@ const MySite = () => {
         }
     };
 
-    const handleDrop = async (e: React.DragEvent, dropIndex: number | string) => {
+    const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
         e.preventDefault();
 
         if (draggedIndex === null || draggedIndex === dropIndex) {
@@ -138,53 +139,21 @@ const MySite = () => {
         }
 
         try {
-            // For VCard drop zone (after all draggable sections)
-            if (dropIndex === 'vcard') {
-                const newSections = [...draggableSections];
-                const draggedSection = newSections[draggedIndex];
+            const newSections = [...draggableSections];
+            const draggedSection = newSections[draggedIndex];
 
-                // Remove dragged item
-                newSections.splice(draggedIndex, 1);
-                // Add at the end (before VCard position)
-                newSections.push(draggedSection);
+            // Remove dragged item
+            newSections.splice(draggedIndex, 1);
+            // Insert at new position
+            newSections.splice(dropIndex, 0, draggedSection);
 
-                // Update order indexes - VCard should maintain its position
-                const reorderData = [
-                    ...newSections.map((section, index) => ({
-                        id: section.id,
-                        orderIndex: index + 1
-                    })),
-                    ...(vCardSection ? [{
-                        id: vCardSection.id,
-                        orderIndex: newSections.length + 1
-                    }] : [])
-                ];
+            // Update order indexes for all sections
+            const reorderData = newSections.map((section, index) => ({
+                id: section.id,
+                orderIndex: index + 1
+            }));
 
-                await reorderSections(reorderData);
-            } else if (typeof dropIndex === 'number') {
-                // Normal drop within draggable sections
-                const newSections = [...draggableSections];
-                const draggedSection = newSections[draggedIndex];
-
-                // Remove dragged item
-                newSections.splice(draggedIndex, 1);
-                // Insert at new position
-                newSections.splice(dropIndex, 0, draggedSection);
-
-                // Update order indexes
-                const reorderData = [
-                    ...newSections.map((section, index) => ({
-                        id: section.id,
-                        orderIndex: index + 1
-                    })),
-                    ...(vCardSection ? [{
-                        id: vCardSection.id,
-                        orderIndex: newSections.length + 1
-                    }] : [])
-                ];
-
-                await reorderSections(reorderData);
-            }
+            await reorderSections(reorderData);
         } catch (error) {
             console.error('Error reordering sections:', error);
         } finally {
@@ -220,7 +189,7 @@ const MySite = () => {
                 {/* Profile always shows first */}
                 <Profile />
 
-                {/* Render draggable section components */}
+                {/* Render all draggable section components */}
                 {draggableSections.map((section, index) => {
                     const component = getSectionComponent(section.titulo);
                     if (!component) return null;
@@ -238,8 +207,8 @@ const MySite = () => {
                             className={`
                                 group relative
                                 transition-all duration-200 ease-in-out
-                                 hover:shadow-sm
-                                ${draggedIndex === index ? 'opacity-50 scale-70 shadow-lg' : ''}
+                                hover:shadow-sm
+                                ${draggedIndex === index ? 'opacity-50 scale-95 shadow-lg' : ''}
                                 ${dragOverIndex === index ? 'border-2 border-[#96C121] border-dashed bg-blue-50' : 'border border-transparent'}
                             `}
                         >
@@ -257,7 +226,6 @@ const MySite = () => {
                             {/* Section content */}
                             <div className={`
                                 transition-all duration-200
-                                ${draggedIndex === index ? '' : ''}
                             `}>
                                 {component}
                             </div>
@@ -269,31 +237,6 @@ const MySite = () => {
                         </div>
                     );
                 })}
-
-                {/* VCard drop zone */}
-                <div
-                    onDragOver={handleDragOver}
-                    onDragEnter={(e) => handleDragEnter(e, 'vcard')}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, 'vcard')}
-                    className={`
-                        transition-all duration-200
-                        ${dragOverIndex === 'vcard' ? 'border-t-4 border-[#96C121] border-dashed pt-2' : ''}
-                    `}
-                >
-                    {/* Drop indicator for VCard area */}
-                    {dragOverIndex === 'vcard' && draggedIndex !== null && (
-                        <div className="mb-2 p-2 border-2 border-[#96C121] border-dashed rounded-lg bg-blue-50 text-center">
-                            <span className="text-sm text-blue-600 font-medium">Soltar aquí</span>
-                        </div>
-                    )}
-
-
-                    <V_Card />
-                </div>
-
-                {/* Videos section - not draggable */}
-                {activeVideoLinks.length > 0 && <Videos key="video" />}
             </div>
         </div>
     );

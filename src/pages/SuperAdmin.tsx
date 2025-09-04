@@ -7,7 +7,9 @@ import {
     Users,
     Globe,
     RefreshCw,
-    LinkIcon
+    LinkIcon,
+    Eye,
+    Users2
 } from 'lucide-react';
 import Cookie from "js-cookie";
 import type {BusinessCard} from "../types/V-Card.ts";
@@ -83,10 +85,14 @@ interface AnalyticsData {
 }
 
 type TimeRange = 'last7' | 'last30' | 'lastYear';
+type ViewMode = 'all' | 'children';
 
 const AdminPanel: React.FC = () => {
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
+
+    // Estado para controlar el modo de vista (solo para SUPER_ADMIN)
+    const [viewMode, setViewMode] = useState<ViewMode>('all');
 
     // Memoizar permisos para evitar recálculos
     const permissions = useMemo(() => {
@@ -99,7 +105,8 @@ const AdminPanel: React.FC = () => {
             hasChildBiositeAccess: isAdmin || isSpecialUser || isSuperAdmin,
             isAdmin,
             isSuperAdmin,
-            isSpecialUser
+            isSpecialUser,
+            canToggleView: isSuperAdmin || isSpecialUser // Solo SUPER_ADMIN puede cambiar vista
         };
     }, [role, userId]);
 
@@ -147,13 +154,35 @@ const AdminPanel: React.FC = () => {
 
     // Función memoizada para determinar qué paginación usar
     const getCurrentPagination = useCallback(() => {
-        if (permissions.hasFullAccess) {
+        if (permissions.hasFullAccess && viewMode === 'all') {
             return allBiositesPagination;
         } else if (permissions.hasChildBiositeAccess) {
             return childBiositesPagination;
         }
         return allBiositesPagination; // fallback
-    }, [permissions.hasFullAccess, permissions.hasChildBiositeAccess, allBiositesPagination, childBiositesPagination]);
+    }, [permissions.hasFullAccess, permissions.hasChildBiositeAccess, viewMode, allBiositesPagination, childBiositesPagination]);
+
+    // Función para cambiar el modo de vista
+    const handleViewModeChange = useCallback((newViewMode: ViewMode) => {
+        if (!permissions.canToggleView) return;
+
+        setViewMode(newViewMode);
+        setCurrentFilters({
+            search: '',
+            status: 'all',
+            hasSlug: 'all',
+            dateRange: 'all',
+            sortBy: 'newest',
+            sortOrder: 'desc'
+        });
+        setFilteredData([]);
+        setInitialized(false); // Reinicializar para cargar nuevos datos
+    }, [permissions.canToggleView]);
+
+    // Determinar si debe mostrar todos los biosites o solo hijos
+    const shouldShowAllBiosites = useMemo(() => {
+        return permissions.hasFullAccess && viewMode === 'all';
+    }, [permissions.hasFullAccess, viewMode]);
 
     // Memoizar la función applyFilters para evitar recreaciones innecesarias
     const applyFilters = useCallback((biosites: BiositeFull[], filters: FilterState): BiositeFull[] => {
@@ -403,18 +432,18 @@ const AdminPanel: React.FC = () => {
 
             let responseData: BiositeFull[] = [];
 
-            if (permissions.hasFullAccess) {
-                // SUPER_ADMIN o usuario especial: ver todos los biosites
+            if (shouldShowAllBiosites) {
+                // SUPER_ADMIN viendo todos los biosites
                 const params = currentPagination.getPaginationParams();
                 const response = await fetchAllBiosites(params);
                 currentPagination.setPaginatedData(response);
                 responseData = Array.isArray(response) ? response : response?.data || [];
-            } else if (permissions.isAdmin) {
-                // ADMIN: ver solo biosites hijos
+            } else {
+                // ADMIN o SUPER_ADMIN viendo biosites hijos
                 const childBiosites = await fetchChildBiosites(userId);
                 responseData = childBiosites;
 
-                // Para admin, simular paginación local
+                // Para vista de hijos, simular paginación local
                 const startIndex = (currentPagination.currentPage - 1) * currentPagination.pageSize;
                 const endIndex = startIndex + currentPagination.pageSize;
             }
@@ -432,8 +461,7 @@ const AdminPanel: React.FC = () => {
         }
     }, [
         permissions.hasChildBiositeAccess,
-        permissions.hasFullAccess,
-        permissions.isAdmin,
+        shouldShowAllBiosites,
         userId,
         fetchAllBiosites,
         fetchChildBiosites,
@@ -461,7 +489,7 @@ const AdminPanel: React.FC = () => {
         };
 
         initializeData();
-    }, [permissions.hasChildBiositeAccess, userId]); // Dependencias mínimas
+    }, [permissions.hasChildBiositeAccess, userId, viewMode]); // Agregar viewMode a las dependencias
 
     // Efecto para cambios de paginación - CORREGIDO
     useEffect(() => {
@@ -552,7 +580,7 @@ const AdminPanel: React.FC = () => {
                 <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
                     <p className="text-gray-600">
-                        Cargando {permissions.hasFullAccess ? 'todos los biosites' : 'biosites hijos'}...
+                        Cargando {shouldShowAllBiosites ? 'todos los biosites' : 'biosites hijos'}...
                     </p>
                 </div>
             </div>
@@ -585,6 +613,27 @@ const AdminPanel: React.FC = () => {
     const totalLinks = Object.values(biositeLinks).reduce((sum, links) => sum + (links?.length || 0), 0);
     const currentData = filteredData.length > 0 ? filteredData : currentPagination.data;
 
+    // Función para obtener el texto del título según la vista actual
+    const getViewTitle = () => {
+        if (!permissions.canToggleView) {
+            return permissions.hasFullAccess ? 'Super Administración' : 'Administración';
+        }
+
+        return viewMode === 'all' ? 'Super Administración - Vista Completa' : 'Super Administración - Vista Hijos';
+    };
+
+    const getViewDescription = () => {
+        if (!permissions.canToggleView) {
+            return permissions.hasFullAccess
+                ? 'Gestión completa de biosites, usuarios y analytics'
+                : 'Gestión de biosites hijos y analytics';
+        }
+
+        return viewMode === 'all'
+            ? 'Vista completa de todos los biosites del sistema'
+            : 'Vista limitada a biosites bajo tu administración';
+    };
+
     return (
         <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
             {/* Header */}
@@ -592,21 +641,45 @@ const AdminPanel: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">
-                            Panel de {permissions.hasFullAccess ? 'Super Administración' : 'Administración'}
+                            Panel de {getViewTitle()}
                         </h1>
                         <p className="text-gray-600">
-                            {permissions.hasFullAccess
-                                ? 'Gestión completa de biosites, usuarios y analytics'
-                                : 'Gestión de biosites hijos y analytics'
-                            }
+                            {getViewDescription()}
                         </p>
-                        {permissions.isAdmin && (
+                        {permissions.isAdmin && !permissions.canToggleView && (
                             <p className="text-sm text-yellow-600 mt-1">
                                 Vista limitada: Solo biosites bajo tu administración
                             </p>
                         )}
                     </div>
                     <div className="flex space-x-2">
+                        {/* Toggle de vista para SUPER_ADMIN */}
+                        {permissions.canToggleView && (
+                            <div className="flex bg-gray-100 rounded-lg p-1 mr-2">
+                                <button
+                                    onClick={() => handleViewModeChange('all')}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        viewMode === 'all'
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    <Globe className="w-4 h-4" />
+                                    <span>Todos</span>
+                                </button>
+                                <button
+                                    onClick={() => handleViewModeChange('children')}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        viewMode === 'children'
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    <Users2 className="w-4 h-4" />
+                                    <span>Hijos</span>
+                                </button>
+                            </div>
+                        )}
                         <button
                             onClick={handleRefreshData}
                             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2 cursor-pointer"
@@ -626,7 +699,7 @@ const AdminPanel: React.FC = () => {
                         <Globe className="w-8 h-8 text-green-500" />
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">
-                                {permissions.hasFullAccess ? 'Total Biosites' : 'Biosites Hijos'}
+                                {shouldShowAllBiosites ? 'Total Biosites' : 'Biosites Hijos'}
                             </p>
                             <p className="text-2xl font-semibold text-gray-900">
                                 {currentPagination.totalItems || 0}
@@ -655,7 +728,7 @@ const AdminPanel: React.FC = () => {
                         <Users className="w-8 h-8 text-blue-500" />
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-500">
-                                {permissions.hasFullAccess ? 'Usuarios Únicos' : 'Usuarios Hijos'}
+                                {shouldShowAllBiosites ? 'Usuarios Únicos' : 'Usuarios Hijos'}
                             </p>
                             <p className="text-2xl font-semibold text-gray-900">
                                 {new Set(currentData.map(biosite => biosite.ownerId)).size}
@@ -682,11 +755,17 @@ const AdminPanel: React.FC = () => {
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-medium text-gray-900">
-                            {permissions.hasFullAccess
+                            {shouldShowAllBiosites
                                 ? `Biosites (${filteredData.length} de ${currentPagination.totalItems || 0})`
                                 : `Biosites Hijos (${filteredData.length} de ${currentPagination.totalItems || 0})`
                             }
                         </h2>
+                        {permissions.canToggleView && (
+                            <div className="flex items-center text-sm text-gray-500">
+                                <Eye className="w-4 h-4 mr-1" />
+                                <span>Vista: {viewMode === 'all' ? 'Completa' : 'Hijos'}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -703,8 +782,8 @@ const AdminPanel: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Renderizar tabla correspondiente según el rol */}
-                    {permissions.hasFullAccess ? (
+                    {/* Renderizar tabla correspondiente según el rol y vista seleccionada */}
+                    {shouldShowAllBiosites ? (
                         <BiositesTable
                             pagination={{
                                 ...allBiositesPagination,

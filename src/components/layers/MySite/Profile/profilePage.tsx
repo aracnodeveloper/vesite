@@ -8,9 +8,8 @@ import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { BiositeColors, BiositeUpdateDto } from "../../../../interfaces/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
-//import TemplateSelector from "./TemplateSelector.tsx";
-//import { useTemplates } from "../../../../hooks/useTemplates.ts";
-//import imgP from "../../../../../public/img/Banner.jpg"
+import apiService from "../../../../service/apiService";
+
 const { TextArea } = Input;
 
 const ProfilePage = () => {
@@ -19,14 +18,13 @@ const ProfilePage = () => {
     const userId = Cookies.get('userId');
     const { updateBiosite, fetchBiosite, loading: updateLoading } = useFetchBiosite(userId);
     const { user, fetchUser, updateUser, loading: userLoading } = useUser();
-    //const { templates, loading: templatesLoading } = useTemplates();
     const navigate = useNavigate();
     const [form] = Form.useForm();
 
     const [showWarning, setShowWarning] = useState(true);
     const [initialValuesSet, setInitialValuesSet] = useState(false);
 
-    const isAdmin = role === 'SUPER_ADMIN' ||role === 'ADMIN';
+    const isAdmin = role === 'SUPER_ADMIN' || role === 'ADMIN';
     const DEFAULT_BACKGROUND = 'https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg';
     const loading = previewLoading || updateLoading || userLoading;
 
@@ -51,6 +49,23 @@ const ProfilePage = () => {
         setShowWarning(!showWarning);
     };
 
+    // Nueva función para actualizar background del admin y sus hijos
+    const updateAdminAndChildrenBackground = async (backgroundImage: string) => {
+        if (!isAdmin || !userId) {
+            return;
+        }
+
+        try {
+            await apiService.patch(
+                `/biosites/admin/update-background/${userId}?background=${encodeURIComponent(backgroundImage)}`,
+                {}
+            );
+            console.log('Background updated for admin and children successfully');
+        } catch (error) {
+            console.error('Error updating background for admin and children:', error);
+            throw error;
+        }
+    };
 
 
     useEffect(() => {
@@ -88,7 +103,7 @@ const ProfilePage = () => {
 
     const handleFinish = async (values: any) => {
         if (!biosite?.id || !userId || typeof updateBiosite !== 'function') {
-            message.error('Error: InformaciÃ³n del perfil no disponible');
+            message.error('Error: Información del perfil no disponible');
             return;
         }
 
@@ -137,6 +152,20 @@ const ProfilePage = () => {
             const updated = await updateBiosite(updateData);
             if (updated) {
                 updatePreview(updated);
+
+                // Si es admin y tiene una imagen de fondo válida, actualizar también a los hijos
+                if (isAdmin && updated.backgroundImage && updated.backgroundImage !== DEFAULT_BACKGROUND) {
+                    try {
+                        await updateAdminAndChildrenBackground(updated.backgroundImage);
+                        message.success('Perfil actualizado exitosamente. Imagen de fondo aplicada a todos los perfiles administrados.');
+                    } catch (error) {
+                        console.warn('Error updating children backgrounds:', error);
+                        message.success('Perfil actualizado exitosamente');
+                    }
+                } else {
+                    message.success('Perfil actualizado exitosamente');
+                }
+
                 console.log("Profile updated successfully:", {
                     themeId: updated.themeId,
                     backgroundImage: updated.backgroundImage,
@@ -145,7 +174,6 @@ const ProfilePage = () => {
             }
 
             loadingMessage();
-            message.success('Perfil actualizado exitosamente');
 
             setTimeout(() => {
                 window.location.reload();
@@ -155,7 +183,7 @@ const ProfilePage = () => {
             console.error("Error al actualizar perfil:", error);
 
             if (error.response?.data?.details?.code === 'P2003') {
-                message.error('Error: Referencia de base de datos invÃ¡lida');
+                message.error('Error: Referencia de base de datos inválida');
             } else {
                 const errorMessage = error.response?.data?.message || error.message || 'Error desconocido';
                 message.error(`Error al actualizar el perfil: ${errorMessage}`);
@@ -221,7 +249,21 @@ const ProfilePage = () => {
                         updatePreview={updatePreview}
                         role={role}
                     />
-
+                    {isAdmin && (
+                        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-start gap-2">
+                                <svg className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                                <div>
+                                    <h4 className="text-xs font-medium text-blue-800 mb-1">Administrador</h4>
+                                    <p className="text-xs text-blue-700">
+                                        Al actualizar tu imagen de fondo, también se aplicará automáticamente a todos los perfiles que administras.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {!isAdmin && (
@@ -309,15 +351,14 @@ const ProfilePage = () => {
                                 SITIO
                             </label>
                             <span className="text-xs font-ligth text-gray-500 mb-4 uppercase tracking-wide text-start">
-        URL
-    </span>
+                                URL
+                            </span>
                             <Form.Item
                                 name="slug"
                                 rules={[
                                     {required: true, message: 'La url es requerido'},
                                     {min: 3, message: 'La url debe tener al menos 3 caracteres'},
                                     {max: 30, message: 'La url no puede tener mas de 30 caracteres'},
-
                                 ]}
                                 className="mb-0"
                             >

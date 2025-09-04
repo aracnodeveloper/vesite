@@ -113,7 +113,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const canSeeChildBiosites = () => {
         if (!user) return false;
-        return role === 'SUPER_ADMIN';
+        return role === 'SUPER_ADMIN' || role === 'ADMIN';
     };
 
     useEffect(() => {

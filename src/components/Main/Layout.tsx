@@ -46,7 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { logout } = useAuthContext();
     const role = Cookie.get('roleName');
     const userId = Cookie.get('userId');
-    const hasAdminAccess = role === 'SUPER_ADMIN' || userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5';
+    const hasAdminAccess = role === 'SUPER_ADMIN' || userId === '92784deb-3a8e-42a0-91ee-cd64fb3726f5' || role === 'ADMIN';
     const { biosite } = usePreview();
     const { hasChanges, markAsSaved, resetChangeDetection } = useChangeDetection();
     const { isUpdating, handleUpdate} = useUpdateShareActions();

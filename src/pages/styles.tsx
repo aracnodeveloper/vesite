@@ -38,7 +38,7 @@ const colorCategories = {
         {name: 'Verde militar', value: '#373E24', textColor: '#E3DFF3', accentColor: '#6B728049'},
         { name: "Sao Paulo", value: "#1C2928", textColor: "#B0FF2E", accentColor: "#6B728049" },
         { name: "Azul Nocturno", value: "#080221", textColor: "#FFFFFF", accentColor: "#1E1B4B82" },
-        { name: "Azul Acero", value: "#4A7BA8", textColor: "#FFFFFF", accentColor: "#60A5FA38" },
+        { name: "Azul Acero", value: "#4A7BA8", textColor: "#FFFFFF", accentColor: "#3E648C" },
         { name: "Marrón Canela", value: "#BF6737", textColor: "#FFFFFF", accentColor: "#F59E0B3A" },
         { name: "Barcelona", value: "linear-gradient(135deg, #F4E4D6 0%, #E8B4A0 50%, #A0564B 100%)", textColor: "#5D2C20", accentColor: "#A0564B4C" },
     ]

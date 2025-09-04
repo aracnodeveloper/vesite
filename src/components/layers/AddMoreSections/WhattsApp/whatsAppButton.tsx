@@ -1,6 +1,7 @@
 import { usePreview } from "../../../../context/PreviewContext";
 import { useLocation } from "react-router-dom";
 import { WhatsAppOutlined } from "@ant-design/icons";
+import React from "react";
 
 interface WhatsAppButtonProps {
     onWhatsAppClick?: (e: React.MouseEvent) => void;
@@ -65,7 +66,7 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
                 <button
                     key={link.id}
                     onClick={handleClick(link)}
-                    className="w-full p-2 rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
+                    className="w-full p-2 items-center rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
                     style={{
                         backgroundColor: themeConfig.colors.accent,
                         background: themeConfig.colors.accent
@@ -101,6 +102,23 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
                                 }
                             </span>
                         )}
+                    </div>
+                    <div className="flex-shrink-0 ml-2">
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            className="opacity-60"
+                        >
+                            <path
+                                d="M6 12L10 8L6 4"
+                                stroke={themeConfig.colors.text || '#ffffff'}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
                     </div>
                 </button>
             ))}

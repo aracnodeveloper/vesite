@@ -68,14 +68,14 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                 <button
                     key={link.id}
                     onClick={handleClick(link)}
-                    className="w-full p-3 rounded-lg text-center shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center"
+                    className="w-full p-2  text-center shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center"
                     style={{
                         backgroundColor: themeConfig.colors.accent || '#ffffff',
                         border: 'none'
                     }}
                 >
                     {/* Icono de WhatsApp */}
-                    <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+                    <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
                         <WhatsAppOutlined
                             size={20}
                             className="text-white"
@@ -84,7 +84,7 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                     </div>
 
                     {/* Contenido del botón */}
-                    <div className="flex flex-col justify-center ml-4 flex-1 text-left ite">
+                    <div className="flex flex-col justify-center ml-2 flex-1 text-left ">
                         {/* Título/Descripción */}
                         <span
                             className="font-semibold text-base leading-tight"
@@ -99,7 +99,7 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                         {/* Mensaje preview */}
                         {link.message && (
                             <span
-                                className="text-sm opacity-80 leading-tight mt-1"
+                                className="text-xs opacity-80 leading-tight mt-1"
                                 style={{
                                     color: themeConfig.colors.text || '#ffffff',
                                     fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary || 'Inter'

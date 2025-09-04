@@ -1,5 +1,6 @@
 import type {BiositeThemeConfig} from "../../interfaces/Biosite.ts";
-import imgPng5 from "../../assets/img/vesite.svg";
+import imgPng5 from "../../assets/img/ve_logo.svg";
+import React from "react";
 
 export const LoadingComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
     <div className="w-full h-full p-5 flex items-center justify-center"
@@ -45,7 +46,7 @@ export const NoBiositeComponent = ({ themeConfig }: { themeConfig: BiositeThemeC
                 </svg>
             </div>
             <p className="text-sm" style={{ color: themeConfig.colors.text }}>
-                No hay biosite disponible
+                No hay vesite disponible
             </p>
         </div>
     </div>
@@ -71,7 +72,7 @@ export const BackgroundSection = ({
                         <img
                             src={imgPng5}
                             alt="vector"
-                            className={`absolute ${isExposedRoute ? 'top-32' : 'top-24'}  right-0 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none`}
+                            className={`absolute ${isExposedRoute ? 'top-32' : 'top-22'}  right-0 w-[70px] sm:w-[70px] md:w-[70px] lg:w-[70px] xl:w-[70px] max-w-none`}
                         />
                     </div>
                 </div>
@@ -426,7 +427,7 @@ export const RegularLinksSection = ({
                     <button
                         key={link.id}
                         onClick={() => handleLinkClick ? handleLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
-                        className="w-full p-2  text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
+                        className="w-full p-2  text-center items-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                         style={{
                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                             backgroundColor: themeConfig.colors.accent,
@@ -451,20 +452,38 @@ export const RegularLinksSection = ({
                                 />
                             </div>
                         )}
-                        <div className="grid grid-cols-1 gap-1">
+                        <div className="flex flex-col justify-center ml-2 flex-1 text-left ">
                             <div className="flex items-center">
                                 <span className="font-medium text-xs truncate">
                                     {link.title}
                                 </span>
                             </div>
                         </div>
+                        <div className="flex-shrink-0 ml-2">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                className="opacity-60"
+                            >
+                                <path
+                                    d="M6 12L10 8L6 4"
+                                    stroke={themeConfig.colors.text || '#ffffff'}
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                        </div>
+
                     </button>
                 ) : (
                     <a
                         key={link.id}
                         href={undefined}
                         onClick={handleLinksClick}
-                        className="w-full p-2   text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
+                        className="w-full p-2 items-center  text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
                         style={{
                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                             backgroundColor: themeConfig.colors.accent,
@@ -490,12 +509,29 @@ export const RegularLinksSection = ({
                                 />
                             </div>
                         )}
-                        <div className="grid grid-cols-1 gap-1">
+                        <div className="flex flex-col justify-center ml-2 flex-1 text-left ">
                             <div className="flex items-center">
                                 <span className="font-medium text-md truncate">
                                     {link.title}
                                 </span>
                             </div>
+                        </div>
+                        <div className="flex-shrink-0 ml-2">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                className="opacity-60"
+                            >
+                                <path
+                                    d="M6 12L10 8L6 4"
+                                    stroke={themeConfig.colors.text || '#ffffff'}
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
                         </div>
                     </a>
                 );

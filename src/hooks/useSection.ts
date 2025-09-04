@@ -32,7 +32,7 @@ export const useSections = () => {
         }
     };
 
-    // Obtener secciones por biosite ID
+    // Obtener secciones por biosite ID - with deduplication
     const getSectionsByBiosite = async (biositeId: string): Promise<Section[]> => {
         try {
             setLoading(true);
@@ -40,8 +40,29 @@ export const useSections = () => {
             const fetchedSections = await apiService.getAll<Section[]>(
                 `${getSectionsByBiositeApi}/${biositeId}`
             );
-            setSections(fetchedSections);
-            return fetchedSections;
+
+            // Remove duplicates based on titulo, keeping the one with the lowest orderIndex
+            const uniqueSections = fetchedSections.reduce((acc: Section[], current: Section) => {
+                const existingIndex = acc.findIndex(section => section.titulo === current.titulo);
+
+                if (existingIndex === -1) {
+                    acc.push(current);
+                } else {
+                    // Keep the one with lower orderIndex or more recent updatedAt
+                    if (current.orderIndex < acc[existingIndex].orderIndex ||
+                        new Date(current.updatedAt) > new Date(acc[existingIndex].updatedAt)) {
+                        acc[existingIndex] = current;
+                    }
+                }
+
+                return acc;
+            }, []);
+
+            // Sort by orderIndex
+            uniqueSections.sort((a, b) => a.orderIndex - b.orderIndex);
+
+            setSections(uniqueSections);
+            return uniqueSections;
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error fetching sections';
             setError(errorMessage);
@@ -141,8 +162,14 @@ export const useSections = () => {
         try {
             const createdSections: Section[] = [];
             for (const sectionData of defaultSections) {
-                const created = await createSection(sectionData);
-                createdSections.push(created);
+                // Check if section already exists before creating
+                const existingSections = await getSectionsByBiosite(biositeId);
+                const existingSection = existingSections.find(s => s.titulo === sectionData.titulo);
+
+                if (!existingSection) {
+                    const created = await createSection(sectionData);
+                    createdSections.push(created);
+                }
             }
             return createdSections;
         } catch (err) {
@@ -163,12 +190,26 @@ export const useSections = () => {
 
     const initializeSections = async (biositeId: string): Promise<Section[]> => {
         try {
-            const hasExistingSections = await checkExistingSections(biositeId);
+            const existingSections = await getSectionsByBiosite(biositeId);
 
-            if (!hasExistingSections) {
+            if (existingSections.length === 0) {
                 return await createDefaultSections(biositeId);
             } else {
-                return await getSectionsByBiosite(biositeId);
+                // Check if VCard section is missing and add it
+                const hasVCard = existingSections.some(section => section.titulo === 'VCard');
+                if (!hasVCard) {
+                    const vCardSection: CreateSectionData = {
+                        biositeId,
+                        titulo: 'VCard',
+                        icon: 'vcard',
+                        descripcion: 'Digital business card',
+                        orderIndex: existingSections.length + 1,
+                    };
+                    await createSection(vCardSection);
+                    return await getSectionsByBiosite(biositeId);
+                }
+
+                return existingSections;
             }
         } catch (err) {
             console.error('Error initializing sections:', err);

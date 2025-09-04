@@ -85,7 +85,7 @@ export const useLivePreviewLogic = () => {
 
             const excludedKeywords = [
                 'open.spotify.com/embed', 'music', 'apple music', 'soundcloud', 'audio',
-                'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
+                'youtube.com/watch', 'video', 'vimeo', 'tiktok video','youtube.com',
                 'post', 'publicacion', 'contenido','api.whatsapp.com',
                 'music embed', 'video embed', 'social post',
                 'embed', 'player'
@@ -101,9 +101,13 @@ export const useLivePreviewLogic = () => {
 
             if (isExcluded) return false;
 
-            // FIXED: Only exclude WhatsApp API links, not wa.me links
             if (urlLower.includes("api.whatsapp.com")) {
                 return false;
+            }
+
+            // FIXED: Only exclude WhatsApp API links, not wa.me links
+            if (urlLower.includes('youtube.com/@')) {
+                return true;
             }
 
             // Allow wa.me WhatsApp links in social

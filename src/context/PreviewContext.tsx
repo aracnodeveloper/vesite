@@ -699,10 +699,17 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             const labelLower = link.label?.toLowerCase() || '';
             const urlLower = link.url?.toLowerCase() || '';
 
+            if (urlLower.includes('youtube.com/@')) {
+                return false;
+            }
+
+
+
             return (
                 labelLower.includes('video') ||
                 labelLower.includes('vimeo') ||
                 urlLower.includes('youtube.com/watch') ||
+                urlLower.includes('youtu.be') ||
                 urlLower.includes('vimeo.com') ||
                 labelLower.includes('tiktok video')
             );
