@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies and build
         run: |
-          pnpm install
+          pnpm install --no-frozen-lockfile
           pnpm build
 
       - name: Upload via SCP
