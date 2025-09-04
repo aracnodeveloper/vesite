@@ -1,21 +1,42 @@
+// styles.tsx - Configuración de fuentes seguras
 import { usePreview } from "../context/PreviewContext";
 import React, { useState } from "react";
 
+// Fuentes web seguras con fallbacks
 const fontOptions = [
-    { name: "Arial", value: "CINZEL" },
-    { name: "MV Boli", value: "MV Boli" },
-    { name: "Courier New", value: "Courier New" },
-    { name: "Times New Roman", value: "Times New Roman" },
-    { name: "calibri", value: "calibri" },
-    { name: "INK FREE", value: "INK FREE" },
-    { name: "Gabriola", value: "Gabriola" },
-    { name: "Impact", value: "Impact" },
-    { name: "Symbol", value: "Symbol" },
-    { name: "SimSun", value: "SimSun" },
-    { name: "Segoe Script", value: "Segoe Script" },
-    { name: "Bahnschrift", value: "Bahnschrift" }
+    // Fuentes básicas (funcionan en todos lados)
+    { name: "Arial", value: "Arial, sans-serif" },
+    { name: "Times New Roman", value: "Times New Roman, Times, serif" },
+    { name: "Courier New", value: "Courier New, Courier, monospace" },
+    { name: "Georgia", value: "Georgia, Times, serif" },
+    { name: "Verdana", value: "Verdana, Geneva, sans-serif" },
+    { name: "Helvetica", value: "Helvetica, Arial, sans-serif" },
+
+    // Fuentes del sistema con fallbacks fuertes
+    { name: "System UI", value: "system-ui, Arial, sans-serif" },
+    { name: "Segoe UI", value: "Segoe UI, Arial, sans-serif" },
+
+    { name: "Serif Stack", value: "Georgia, Times New Roman, Times, serif" },
+    { name: "Mono Stack", value: "Courier New, Monaco, monospace" },
+
+    // Opciones adicionales probadas
+    { name: "Century Gothic", value: "Century Gothic, Arial, sans-serif" },
+    { name: "Lucida Console", value: "Lucida Console, Courier New, monospace" },
 ];
 
+// Si quieres usar Google Fonts (requiere importarlas en el HTML)
+const googleFontOptions = [
+    { name: "Open Sans", value: "'Open Sans', Arial, sans-serif" },
+    { name: "Roboto", value: "'Roboto', Arial, sans-serif" },
+    { name: "Lato", value: "'Lato', Arial, sans-serif" },
+    { name: "Montserrat", value: "'Montserrat', Arial, sans-serif" },
+    { name: "Poppins", value: "'Poppins', Arial, sans-serif" },
+    { name: "Nunito", value: "'Nunito', Arial, sans-serif" },
+    { name: "Source Sans Pro", value: "'Source Sans Pro', Arial, sans-serif" },
+    { name: "Raleway", value: "'Raleway', Arial, sans-serif" },
+    { name: "Inter", value: "'Inter', Arial, sans-serif" },
+    { name: "Work Sans", value: "'Work Sans', Arial, sans-serif" }
+];
 
 const colorCategories = {
     light: [
@@ -62,14 +83,12 @@ const StylesPage = () => {
             console.log('Changing theme color to:', { color, textColor, accentColor });
             await setThemeColor(color, textColor, accentColor);
 
-            // Opcional: Forzar re-render después de un pequeño delay
             setTimeout(() => {
                 console.log('Theme color change completed');
             }, 100);
 
         } catch (error) {
             console.error("Error updating theme color:", error);
-            // Mostrar mensaje de error al usuario
             alert('Error al actualizar el color. Por favor intenta de nuevo.');
         }
     };
@@ -79,10 +98,8 @@ const StylesPage = () => {
             console.log('Changing font to:', font);
             await setFontFamily(font);
 
-            // ✅ AGREGAR: Forzar re-render con pequeño delay
             setTimeout(() => {
                 console.log('Font change completed, forcing refresh');
-                // Opcional: forzar refresh del componente padre si es necesario
             }, 200);
 
         } catch (error) {
@@ -102,7 +119,7 @@ const StylesPage = () => {
                 <button
                     key={color.value}
                     onClick={() => handleThemeColorChange(color.value, color.textColor, color.accentColor)}
-                    className={`p-4 w-40 h-20 rounded-lg cursor-pointer  transition-all duration-200 hover:shadow-md flex flex-col items-center space-y-2 bg-white ${
+                    className={`p-4 w-40 h-20 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md flex flex-col items-center space-y-2 bg-white ${
                         themeColor === color.value
                             ? "border-blue-500 ring-2 ring-blue-200"
                             : "border-gray-200 hover:border-gray-300"
@@ -126,7 +143,6 @@ const StylesPage = () => {
                     >
                         Aa
                     </div>
-                    {/* Preview del color de accent para links */}
                     <div
                         className="w-12 h-3 rounded text-xs flex items-center justify-center"
                         style={{
@@ -165,19 +181,19 @@ const StylesPage = () => {
         <div className="p-6 space-y-8 max-w-150 mx-auto h-full mt-0 lg:mt-20 ">
             {/* Información del biosite */}
             {biosite && (
-                <div className=" rounded-lg p-4 mb-0">
-
+                <div className="rounded-lg p-4 mb-0">
                     <h1 className="text-medium font-bold text-gray-800 mb-5 uppercase tracking-wide text-start sr-only sm:not-sr-only"> Estilos</h1>
                     <p className="text-sm text-gray-600">
-                        {biosite.title} Personaliza la apariencia de tu vesite con las opciones disponibles.
+                        {biosite.title} Personaliza la apariencia de tu sitio con las opciones disponibles.
                     </p>
                 </div>
             )}
-            {/* Selector de fuente    */}
-            <div className=" rounded-lg border border-gray-200 p-3">
+
+            {/* Selector de fuente */}
+            <div className="rounded-lg border border-gray-200 p-3">
                 <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">
-                Tipografía
-            </h3>
+                    Tipografía
+                </h3>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {fontOptions.map((font) => (
@@ -192,8 +208,10 @@ const StylesPage = () => {
                             style={{ fontFamily: font.value }}
                         >
                             <div className="font-medium text-sm">{font.name}</div>
-                            <div className="text-xs opacity-60 mt-1"
-                            style={{fontFamily: font.value}}>
+                            <div
+                                className="text-xs opacity-60 mt-1"
+                                style={{ fontFamily: font.value }}
+                            >
                                 Ejemplo de texto
                             </div>
                         </button>
@@ -204,9 +222,8 @@ const StylesPage = () => {
             {/* Selector de color de tema */}
             <div className="rounded-lg border border-gray-200 p-3">
                 <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">
-                    Themas
+                    Temas
                 </h3>
-
 
                 {/* Pestañas Light/Dark */}
                 <div className="flex mb-6">
@@ -245,15 +262,15 @@ const StylesPage = () => {
                         </svg>
                     </div>
                     {showWarning && (
-                    <div>
-                        <h3 className="text-sm font-medium text-blue-800">
-                            Consejo de personalización
-                        </h3>
-                        <p className="text-xs text-blue-700 mt-1">
-                            Los cambios se aplican automáticamente. Puedes ver el resultado en tiempo real en la vista previa de tu vesite. El color de fondo incluye también el color para los enlaces.
-                        </p>
-                    </div>
-                        )}
+                        <div>
+                            <h3 className="text-sm font-medium text-blue-800">
+                                Consejo de personalización
+                            </h3>
+                            <p className="text-xs text-blue-700 mt-1">
+                                Las fuentes ahora usan stacks seguros que garantizan compatibilidad en móviles y desktop. Los cambios se aplican automáticamente.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="h-20"></div>
