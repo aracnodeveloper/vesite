@@ -70,16 +70,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     const logout = () => {
         try {
             setLoading(true);
-
             Cookie.remove('accessToken');
             Cookie.remove('refreshToken');
             Cookie.remove('userId');
             Cookie.remove('roleName');
             Cookie.remove('biositeId');
             Cookie.remove('mainUserId');
-
-            localStorage.removeItem('datos');
-
             setIsAuthenticated(false);
             setUserId(null);
             setAccessToken(null);
