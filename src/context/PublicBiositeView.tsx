@@ -745,10 +745,6 @@ const PublicBiositeView = () => {
                     ))}
 
 
-              
-
-
-
                     <ConditionalNavButton
                         themeConfig={themeConfig}
                     />

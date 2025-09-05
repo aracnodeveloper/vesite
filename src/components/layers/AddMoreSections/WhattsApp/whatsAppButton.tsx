@@ -66,7 +66,7 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
                 <button
                     key={link.id}
                     onClick={handleClick(link)}
-                    className="w-full p-2 items-center rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer"
+                    className="w-full p-2 items-center rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: themeConfig.colors.accent,
                         background: themeConfig.colors.accent

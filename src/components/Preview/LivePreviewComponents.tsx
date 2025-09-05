@@ -363,7 +363,7 @@ export const SocialLinksSection = ({
                             <button
                                 key={link.id}
                                 onClick={() => handleSocialLinkClick ? handleSocialLinkClick(link.id, link.url) : window.open(link.url, '_blank')}
-                                className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                className="w-5 h-5 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.20] active:scale-[0.98]"
                                 style={{
                                     color: themeConfig.colors.text,
                                 }}
@@ -384,7 +384,7 @@ export const SocialLinksSection = ({
                                 key={link.id}
                                 href={undefined}
                                 onClick={handleSocialClick}
-                                className="w-5 h-5 gap-3 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                                className="w-5 h-5 gap-3 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.20] active:scale-[0.98]"
                                 style={{
                                     color: themeConfig.colors.text,
                                 }}
@@ -483,7 +483,7 @@ export const RegularLinksSection = ({
                         key={link.id}
                         href={undefined}
                         onClick={handleLinksClick}
-                        className="w-full p-2 items-center  text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer"
+                        className="w-full p-2 items-center  text-center shadow-lg transition-all flex flex-wrap duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                         style={{
                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                             backgroundColor: themeConfig.colors.accent,
