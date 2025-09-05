@@ -119,6 +119,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 description = label || 'WhatsApp';
             }
 
+
             phone = phone.replace(/[^\d+]/g, '');
 
             if (message) {
@@ -148,15 +149,12 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, []);
 
-    // Enhanced getMusicEmbed using link_type filtering
     const getMusicEmbed = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
-        // First try to find by link_type
         const musicByType = links.find(link => link.link_type === LINK_TYPES.MUSIC && link.isActive);
         if (musicByType) return musicByType;
 
-        // Fallback to existing logic for backward compatibility
         const musicLinks = getMusicLinks();
         return musicLinks.find(link => link.isActive) || null;
     }, [links, getMusicLinks, LINK_TYPES]);
@@ -164,11 +162,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const getSocialPost = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
-        // First try to find by link_type
         const socialPostByType = links.find(link => link.link_type === LINK_TYPES.SOCIAL_POST && link.isActive);
         if (socialPostByType) return socialPostByType;
 
-        // Fallback to existing logic for backward compatibility
         const socialPostLinks = getSocialPostLinks();
         return socialPostLinks.find(link => link.isActive) || null;
     }, [links, getSocialPostLinks, LINK_TYPES]);
@@ -176,11 +172,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const getVideoEmbed = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
-        // First try to find by link_type
         const videoByType = links.find(link => link.link_type === LINK_TYPES.VIDEO && link.isActive);
         if (videoByType) return videoByType;
 
-        // Fallback to existing logic for backward compatibility
         const videoLinks = getVideoLinks();
         return videoLinks.find(link => link.isActive) || null;
     }, [links, getVideoLinks, LINK_TYPES]);

@@ -269,8 +269,7 @@ export const useFetchLinks = (biositeId?: string) => {
 
         return (
             icon === 'whatsapp' ||
-            urlLower.includes('api.whatsapp.com') ||
-            urlLower.includes('wa.me/')
+            urlLower.includes('api.whatsapp.com')
         );
     }, []);
 
@@ -327,17 +326,15 @@ export const useFetchLinks = (biositeId?: string) => {
     }, []);
 
     const isSocialPostLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.SOCIAL_POST) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not a social post type
         if (link.link_type && link.link_type !== LINK_TYPES.SOCIAL_POST) {
             return false;
         }
 
-        // Fallback: Use existing logic
         const labelLower = link.label?.toLowerCase() || '';
         const urlLower = link.url?.toLowerCase() || '';
 
@@ -350,7 +347,6 @@ export const useFetchLinks = (biositeId?: string) => {
         );
     }, []);
 
-    // Updated filter functions
     const getSocialLinks = useCallback(() => {
         return links.filter(isSocialLink);
     }, [links, isSocialLink]);

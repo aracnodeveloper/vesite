@@ -180,7 +180,6 @@ export const AvatarSection = ({
     </div>
 );
 
-// Template 2: Layout con dos imágenes cuadradas
 export const TwoSquareImagesSection = ({
                                            isExposedRoute,
                                            validBackgroundImage,
@@ -324,25 +323,21 @@ export const SocialLinksSection = ({
                                        handleSocialLinkClick
                                    }: any) => {
 
-    // Determine if the theme is dark based on background color
     const isDarkTheme = () => {
+
         const backgroundColor = themeConfig.colors.background;
 
-        // Handle gradient backgrounds
         if (backgroundColor.includes('gradient')) {
-            return false; // Treat gradients as light theme for now
+            return false;
         }
 
-        // Convert hex to RGB and calculate luminance
         const hex = backgroundColor.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
 
-        // Calculate relative luminance using WCAG formula
         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
-        // If luminance is less than 0.5, it's a dark theme
         return luminance < 0.5;
     };
 
@@ -415,7 +410,7 @@ export const RegularLinksSection = ({
                                         isExposedRoute,
                                         handleLinksClick,
                                         themeConfig,
-                                        handleLinkClick // Nueva prop para manejar clics con analytics
+                                        handleLinkClick
                                     }: any) => (
     regularLinksData.length > 0 && (
         <div className="px-4 pb-4 space-y-2">

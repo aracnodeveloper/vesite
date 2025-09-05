@@ -392,7 +392,7 @@ const VCardPage = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-400">
           {/* QR Code Section */}
           {hasQRCode && (
-            <div className="p-6 text-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="p-6 text-center bg-[#E0EED5]">
               <div className="bg-white h-[160px] w-auto p-4 rounded-xl inline-block shadow-md">
                 <QRCodeSVG
                   value={generateVCardString()}
