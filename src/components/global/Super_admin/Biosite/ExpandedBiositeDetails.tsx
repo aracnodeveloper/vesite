@@ -8,6 +8,10 @@ import Button from "../../../shared/Button";
 import type { BiositeFull } from "../../../../interfaces/AdminData";
 import Loading from "../../../shared/Loading";
 import { useUser, type UpdateUserDto } from "../../../../hooks/useUser";
+import {
+  uploadBiositeAvatar,
+  uploadBiositeBackground,
+} from "../../../layers/MySite/Profile/lib/uploadImage";
 
 export default function ExpandedBiositeDetails({
   biosite,
@@ -27,11 +31,14 @@ export default function ExpandedBiositeDetails({
   parseVCardData;
 }) {
   const [update_profile, setUpdate_profile] = useState(false);
+  const [update_avatar, setUpdate_avatar] = useState(false);
+  const [update_background, setUpdate_background] = useState(false);
   const [editableBiosite, setEditableBiosite] = useState(biosite);
   const [isLoading, setIsLoading] = useState(false);
   const { updateUser, error } = useUser();
-  const [avatarFile, setAvatarFile] = useState();
-  const [backgroundFile, setBackgroundFile] = useState();
+  const [avatarFile, setAvatarFile] = useState<File>();
+  const [backgroundFile, setBackgroundFile] = useState<File>();
+  const [formError, setFormError] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -59,16 +66,21 @@ export default function ExpandedBiositeDetails({
   };
 
   const handleImageChange = (fieldName: string) => (file: File | null) => {
-    setEditableBiosite((prev) => ({
-      ...prev,
-      [fieldName]: file,
-    }));
+    if (fieldName == "avatarImage") {
+      setAvatarFile(file);
+      setUpdate_avatar(true);
+    } else if (fieldName == "backgroundImage") {
+      setBackgroundFile(file);
+      setUpdate_background(true);
+    } else {
+    }
     setUpdate_profile(true);
   };
 
   const onCancel = () => {
     setEditableBiosite(biosite);
     setUpdate_profile(false);
+    setFormError("");
   };
 
   const onSave = async (e: React.FormEvent) => {
@@ -87,6 +99,12 @@ export default function ExpandedBiositeDetails({
       };
 
       const result = await updateUser(biosite.ownerId, updateUserData);
+      if (update_background) {
+        await uploadBiositeBackground(backgroundFile, biosite.id);
+      }
+      if (update_avatar) {
+        await uploadBiositeAvatar(avatarFile, biosite.id);
+      }
 
       if (result) {
         setUpdate_profile(false);
@@ -100,6 +118,7 @@ export default function ExpandedBiositeDetails({
       } else if (error && typeof error === "object" && "message" in error) {
         errorMessage = (error as any).message;
       }
+      setFormError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -112,33 +131,34 @@ export default function ExpandedBiositeDetails({
         className="px-6 py-4 bg-gray-50 border-2 border-t-green-600 border-b-green-400"
       >
         {/* Mostrar error si existe */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Error al cargar información del biosite
-                </h3>
-                <div className="mt-1 text-sm text-red-700">
-                  {error || "Ha ocurrido un error desconocido"}
+        {error ||
+          (formError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-red-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3 ">
+                  <h3 className="text-sm font-medium text-red-800">
+                    Error al cargar información del biosite
+                  </h3>
+                  <div className="mt-1 text-sm text-red-700">
+                    {error || formError || "Ha ocurrido un error desconocido"}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          ))}
 
         <div className="space-y-6">
           {/* Información del Usuario */}
