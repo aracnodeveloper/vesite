@@ -14,25 +14,22 @@ export const LINK_TYPES = {
 } as const;
 
 export const useLinkProcessing = () => {
-    // Enhanced link type detection with fallback logic
+
     const detectLinkType = useCallback((link: any): string => {
-        // If link_type is explicitly set and not null, use it
+
         if (link.link_type && link.link_type !== null) {
             return link.link_type;
         }
 
-        // Fallback detection based on icon, URL, and label patterns
         const iconIdentifier = getIconIdentifier(link.icon);
         const labelLower = link.label?.toLowerCase() || '';
         const urlLower = link.url?.toLowerCase() || '';
 
-        // WhatsApp detection
         if (iconIdentifier === 'whatsapp' ||
             urlLower.includes('api.whatsapp.com')) {
             return LINK_TYPES.WHATSAPP;
         }
 
-        // App store detection
         if (iconIdentifier === 'appstore' ||
             iconIdentifier === 'googleplay' ||
             labelLower.includes('app store') ||
@@ -42,7 +39,6 @@ export const useLinkProcessing = () => {
             return LINK_TYPES.APP;
         }
 
-        // Embed content detection
         if (iconIdentifier === 'music-embed' ||
             labelLower.includes('music') ||
             labelLower.includes('podcast') ||
@@ -66,7 +62,6 @@ export const useLinkProcessing = () => {
             return LINK_TYPES.SOCIAL_POST;
         }
 
-        // Social platform detection
         const socialPlatforms = [
             'instagram', 'tiktok', 'x', 'twitter', 'facebook', 'twitch',
             'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
@@ -84,15 +79,14 @@ export const useLinkProcessing = () => {
         );
 
         if (isSocialIcon || isSocialDomain || isSocialLabel) {
-            // Special case: YouTube channels should be social, but YouTube videos should be video
-            if (urlLower.includes('youtube.com/@') ||
+
+             if (urlLower.includes('youtube.com/@') ||
                 (urlLower.includes('youtube.com') && !urlLower.includes('/watch'))) {
                 return LINK_TYPES.SOCIAL;
             }
             return LINK_TYPES.SOCIAL;
         }
 
-        // Default to regular link
         return LINK_TYPES.REGULAR;
     }, []);
 
@@ -120,7 +114,6 @@ export const useLinkProcessing = () => {
             '/assets/icons/googleplay.svg': 'googleplay'
         };
 
-        // Handle direct icon identifiers
         if (iconPath === 'link') return 'link';
         if (iconPath === 'social-post') return 'social-post';
         if (iconPath === 'music-embed') return 'music-embed';
@@ -129,16 +122,13 @@ export const useLinkProcessing = () => {
         if (iconPath === 'appstore') return 'appstore';
         if (iconPath === 'googleplay') return 'googleplay';
 
-        // Handle malformed icons (like "svg%3e")
         if (iconPath === 'svg%3e' || iconPath.includes('%')) {
-            return 'link'; // Default fallback for malformed icons
+            return 'link';
         }
 
-        // Find full path match
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
         if (fullPath) return iconMap[fullPath];
 
-        // Extract filename
         const fileName = iconPath.split('/').pop()?.replace('.svg', '') || 'link';
         return fileName.toLowerCase();
     };
@@ -155,7 +145,6 @@ export const useLinkProcessing = () => {
                 message = decodeURIComponent(urlParams.get('text') || '');
                 description = label || 'WhatsApp';
 
-                // Extract phone from wa.me URLs
                 if (url.includes('wa.me/') && !phone) {
                     const match = url.match(/wa\.me\/([0-9+]+)/);
                     if (match) {
@@ -164,10 +153,8 @@ export const useLinkProcessing = () => {
                 }
             }
 
-            // Clean phone number
             phone = phone.replace(/[^\d+]/g, '');
 
-            // Decode message properly
             if (message) {
                 try {
                     let decodedMessage = message;
@@ -269,7 +256,7 @@ export const useLinkProcessing = () => {
                         icon: iconIdentifier,
                         color: link.color || '#f3f4f6',
                         isActive: link.isActive,
-                        link_type: detectedType // Add the detected type for reference
+                        link_type: detectedType
                     });
                     break;
 
