@@ -3,6 +3,9 @@ import Button from "../../../shared/Button";
 import { LinkImageDisplay } from "../SharedLinksComponents";
 import LinkEditForm from "../../../layers/AddMoreSections/Links/Components/LinksEditForm";
 import type { LinkData } from "../../../../interfaces/AdminData";
+import { useFetchLinks } from "../../../../hooks/useFetchLinks";
+import type { UpdateLinkDto } from ".././../../../interfaces/Links";
+///home/adrian/Repos/vesite/src/interfaces/Links.ts
 
 export default function EditableLink({
   link,
@@ -16,6 +19,24 @@ export default function EditableLink({
   formatDate;
 }) {
   const [edit, setEdit] = useState(false);
+  const [editLink, setEditLink] = useState(link);
+  const { updateLink, deleteLink, toggleLinkStatus, loading, error } =
+    useFetchLinks();
+
+  const onSave = async () => {
+    try {
+      const updateData: UpdateLinkDto = {
+        label: editLink.label,
+        url: editLink.url,
+        image: editLink.image,
+        description: editLink.description,
+        orderIndex: editLink.orderIndex,
+        isActive: editLink.isActive,
+      };
+      await updateLink(editLink.id, updateData);
+    } catch {}
+  };
+
   return (
     <>
       {!edit ? (
@@ -95,23 +116,27 @@ export default function EditableLink({
         </div>
       ) : (
         <LinkEditForm
-          link={link}
-          editTitle={link.label}
-          editUrl={link.url}
-          editImage={link.image}
+          link={editLink}
+          editTitle={editLink.label}
+          editUrl={editLink.url}
+          editImage={editLink.image}
           isSubmitting={false}
-          onTitleChange={function (title: string): void {
-            throw new Error("Function not implemented.");
-          }}
-          onUrlChange={function (url: string): void {
-            throw new Error("Function not implemented.");
-          }}
+          onTitleChange={(value) =>
+            setEditLink((prev) => ({
+              ...prev,
+              ["label"]: value,
+            }))
+          }
+          onUrlChange={(value) =>
+            setEditLink((prev) => ({
+              ...prev,
+              ["url"]: value,
+            }))
+          }
           onImageChange={function (image: string | undefined): void {
             throw new Error("Function not implemented.");
           }}
-          onSave={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          onSave={onSave}
           onCancel={() => setEdit(false)}
         />
       )}

@@ -5,6 +5,10 @@ import { uploadLinkImage } from "../../../MySite/Profile/lib/uploadImage.ts";
 import LinkImage from "./LinkImage";
 import type { RegularLink } from "../../../../../interfaces/PreviewContext.ts";
 import type { LinkData } from "../../../../../interfaces/AdminData.ts";
+import FomrField from "../../../../shared/FomrField.tsx";
+import Input from "../../../../shared/Input.tsx";
+import ImageInput from "../../../../shared/ImageInput.tsx";
+import Button from "../../../../shared/Button.tsx";
 
 interface LinkEditFormProps {
   link: RegularLink | LinkData;
@@ -60,8 +64,7 @@ const LinkEditForm = ({
     return true;
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageUpload = async (file: File) => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -122,13 +125,12 @@ const LinkEditForm = ({
     }
 
     // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
-    e.target.value = "";
   };
 
   return (
     <div className="w-full max-h-screen mb-10 max-w-md mx-auto rounded-lg">
       {/* Header */}
-      <div className="p-4">
+      <div className="px-4">
         <button
           onClick={onCancel}
           className="flex items-center text-gray-300 hover:text-white transition-colors cursor-pointer"
@@ -142,81 +144,39 @@ const LinkEditForm = ({
       {/* Form Content */}
       <div className="p-4">
         <div className="space-y-4">
-          <div>
-            <p className="text-sm mb-1 text-gray-600">NOMBRE</p>
-            <input
+          <FomrField title={"NOMBRE"}>
+            <Input
               value={editTitle}
-              onChange={(e) => onTitleChange(e.target.value)}
-              className="w-full p-5 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
               placeholder="Nombre del enlace"
               disabled={isSubmitting}
+              onChange={(e) => onTitleChange(e.target.value)}
             />
-          </div>
-
-          <div>
-            <p className="text-sm mb-1 text-gray-600">URL</p>
-            <input
+          </FomrField>
+          <FomrField title={"URL"}>
+            <Input
               value={editUrl}
-              onChange={(e) => onUrlChange(e.target.value)}
-              className="w-full p-5 rounded-lg bg-[#FAFFF6] text-black focus:outline-none focus:border-blue-500"
               placeholder="https://ejemplo.com"
               disabled={isSubmitting}
+              onChange={(e) => onUrlChange(e.target.value)}
             />
-          </div>
+          </FomrField>
 
-          <div>
-            <p className="text-sm mb-1 text-gray-600">IMAGEN (opcional)</p>
-            <div className="flex items-center space-x-2">
-              {editImage ? (
-                <div className="relative">
-                  <LinkImage
-                    image={editImage}
-                    title={editTitle || "Link"}
-                    size="large"
-                  />
-                  LinkEditForm
-                  <button
-                    onClick={() => onImageChange(undefined)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-                    disabled={isSubmitting || uploadingImage}
-                  >
-                    <X size={12} />
-                  </button>
-                  {uploadingImage && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-32 rounded-lg border-2 cursor-pointer border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 bg-gray-50 transition-colors relative"
-                  disabled={isSubmitting || uploadingImage}
-                >
-                  {uploadingImage ? (
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
-                  ) : (
-                    <ImagePlus size={24} className="text-gray-400" />
-                  )}
-                </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
+          <div className="flex items-center space-x-2">
+            <FomrField title={"IMAGEN (opcional)"}>
+              <ImageInput
+                maxHeight={170}
+                square
+                initialSrc={editImage}
                 onChange={handleImageUpload}
-                className="hidden"
-                disabled={uploadingImage}
               />
-            </div>
+            </FomrField>
             {uploadingImage && (
               <p className="text-sm text-blue-600 mt-1">Subiendo imagen...</p>
             )}
           </div>
 
-          <div className="flex space-x-3 pt-4">
-            <button
+          <div className="grid grid-cols-2 gap-x-5 max-w-[200px]">
+            <Button
               onClick={onSave}
               disabled={
                 isSubmitting ||
@@ -224,17 +184,16 @@ const LinkEditForm = ({
                 !editUrl.trim() ||
                 uploadingImage
               }
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSubmitting ? "Guardando..." : "Guardar cambios"}
-            </button>
-            <button
+              {isSubmitting ? "Guardando..." : "Guardar"}
+            </Button>
+            <Button
+              variant="secondary"
               onClick={onCancel}
               disabled={isSubmitting || uploadingImage}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               Cancelar
-            </button>
+            </Button>
           </div>
         </div>
       </div>
