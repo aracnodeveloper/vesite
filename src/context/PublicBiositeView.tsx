@@ -745,13 +745,7 @@ const PublicBiositeView = () => {
                     ))}
 
 
-                    {/* Links regulares */}
-                    <RegularLinksSection
-                        regularLinksData={biositeData.regularLinks.filter(link => link.isActive ) }
-                        isExposedRoute={isExposedRoute}
-                        themeConfig={themeConfig}
-                    />
-
+              
 
 
 
