@@ -315,10 +315,10 @@ const VCardButton: React.FC<VCardButtonProps> = ({
   };
   return (
     <>
-      <div className="px-4 mb-1 ">
+      <div className="px-4 mb-4 ">
         <button
           onClick={handleButtonClick}
-          className="block w-full p-2  text-center transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer"
+          className="block w-full p-2  text-center transition-all duration-300 shadow-md relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
           style={{
             backgroundColor: themeConfig.colors.accent,
             background: themeConfig.colors.accent,

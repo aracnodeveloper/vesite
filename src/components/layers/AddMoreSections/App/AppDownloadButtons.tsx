@@ -40,7 +40,7 @@ const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
                         backgroundColor: themeConfig.colors.accent,
                         background: themeConfig.colors.accent
                     }}
-                    className="w-full p-2 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer rounded-lg"
+                    className="w-full p-2 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer rounded-lg hover:scale-[1.02] active:scale-[0.98]"
                 >
                     {/* App Store Icon */}
                     <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg overflow-hidden mr-3 flex-shrink-0">
@@ -152,7 +152,7 @@ const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
                         backgroundColor: themeConfig.colors.accent,
                         background: themeConfig.colors.accent
                     }}
-                    className="w-full p-2 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer rounded-lg"
+                    className="w-full p-2 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer rounded-lg hover:scale-[1.02] active:scale-[0.98]"
                 >
                     {/* Google Play Icon */}
                     <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg overflow-hidden mr-3 flex-shrink-0">

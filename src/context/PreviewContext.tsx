@@ -37,6 +37,12 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         reorderLinks,
         getSocialLinks,
         getRegularLinks,
+        getAppLinks,
+        getWhatsAppLinks,
+        getMusicLinks,
+        getVideoLinks,
+        getSocialPostLinks,
+        LINK_TYPES,
         clearError: clearLinksError
     } = useFetchLinks(biositeData?.id);
 
@@ -54,8 +60,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     const loading = biositeLoading || linksLoading;
     const error = biositeError || linksError;
-
-
 
     const getIconIdentifier = useCallback((iconPath: string): string => {
         const iconMap: { [key: string]: string } = {
@@ -92,44 +96,16 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         return fileName.toLowerCase();
     }, []);
 
-    const isAppStoreLink = useCallback((link: any): boolean => {
-        const labelLower = link.label.toLowerCase();
-        const urlLower = link.url.toLowerCase();
-
-        return (
-            labelLower.includes('app store') ||
-            labelLower.includes('appstore') ||
-            urlLower.includes('apps.apple.com') ||
-            labelLower.includes('google play') ||
-            labelLower.includes('googleplay') ||
-            urlLower.includes('play.google.com')
-        );
-    }, []);
-
-    {/* */}
-        const isWhatsAppLink = useCallback((link: any): boolean => {
-            const urlLower = link.url?.toLowerCase() || '';
-            const icon = link.icon?.toLowerCase() || '';
-
-            return (
-                icon === 'whatsapp' ||
-                urlLower.includes('api.whatsapp.com')
-            );
-        }, [])
-
-
-
     const getStoreType = useCallback((link: any): 'appstore' | 'googleplay' => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
 
         if (labelLower.includes('google play') || urlLower.includes('play.google.com')) {
-            return 'googleplay';
+            return 'googleplay'
         }
         return 'appstore';
     }, []);
 
-    {/*  */ }
     const parseWhatsAppFromUrl = useCallback((url: string, label?: string): { phone: string; message: string; description: string } => {
         try {
             let phone = '';
@@ -137,13 +113,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             let description = label || 'WhatsApp';
 
             if (url.includes('api.whatsapp.com/send')) {
-                
                 const urlParams = new URLSearchParams(url.split('?')[1] || '');
                 phone = urlParams.get('phone') || '';
                 message = decodeURIComponent(urlParams.get('text') || '');
-
                 description = label || 'WhatsApp';
-
             }
 
             phone = phone.replace(/[^\d+]/g, '');
@@ -175,95 +148,42 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, []);
 
-
-    const getAppLinks = useCallback(() => {
-        return links
-            .filter(isAppStoreLink)
-            .map(link => ({
-                id: link.id,
-                store: getStoreType(link),
-                url: link.url,
-                isActive: link.isActive
-            }));
-    }, [links, isAppStoreLink, getStoreType]);
-    {/**/}
-    const getWhatsAppLinks = useCallback(() => {
-        return links
-            .filter(isWhatsAppLink)
-            .map(link => {
-                const { phone, message, description } = parseWhatsAppFromUrl(link.url, link.label);
-                return {
-                    id: link.id,
-                    phone,
-                    message,
-                    description,
-                    isActive: link.isActive
-                };
-            });
-        }, [links, isWhatsAppLink, parseWhatsAppFromUrl]);
-
-
+    // Enhanced getMusicEmbed using link_type filtering
     const getMusicEmbed = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
-        const musicLink = links.find(link => {
-            if (!link.isActive) return false;
+        // First try to find by link_type
+        const musicByType = links.find(link => link.link_type === LINK_TYPES.MUSIC && link.isActive);
+        if (musicByType) return musicByType;
 
-            const labelLower = link.label?.toLowerCase() || '';
-            const urlLower = link.url?.toLowerCase() || '';
-
-            return (
-                labelLower.includes('music') ||
-                labelLower.includes('soundcloud') ||
-                urlLower.includes('open.spotify.com') ||
-                urlLower.includes('music.apple.com') ||
-                urlLower.includes('soundcloud.com')
-            );
-        });
-
-        return musicLink || null;
-    }, [links]);
+        // Fallback to existing logic for backward compatibility
+        const musicLinks = getMusicLinks();
+        return musicLinks.find(link => link.isActive) || null;
+    }, [links, getMusicLinks, LINK_TYPES]);
 
     const getSocialPost = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
-        const socialPostLink = links.find(link => {
-            if (!link.isActive) return false;
+        // First try to find by link_type
+        const socialPostByType = links.find(link => link.link_type === LINK_TYPES.SOCIAL_POST && link.isActive);
+        if (socialPostByType) return socialPostByType;
 
-            const labelLower = link.label?.toLowerCase() || '';
-            const urlLower = link.url?.toLowerCase() || '';
-
-            return (
-                labelLower.includes('post') ||
-                labelLower.includes('publicacion') ||
-                (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
-            );
-        });
-
-        return socialPostLink || null;
-    }, [links]);
-
+        // Fallback to existing logic for backward compatibility
+        const socialPostLinks = getSocialPostLinks();
+        return socialPostLinks.find(link => link.isActive) || null;
+    }, [links, getSocialPostLinks, LINK_TYPES]);
 
     const getVideoEmbed = useCallback(() => {
         if (!links || !Array.isArray(links)) return null;
 
-        const videoLink = links.find(link => {
-            if (!link.isActive) return false;
+        // First try to find by link_type
+        const videoByType = links.find(link => link.link_type === LINK_TYPES.VIDEO && link.isActive);
+        if (videoByType) return videoByType;
 
-            const labelLower = link.label?.toLowerCase() || '';
-            const urlLower = link.url?.toLowerCase() || '';
-
-            return (
-                labelLower.includes('video') ||
-                labelLower.includes('vimeo') ||
-                urlLower.includes('youtube.com/watch') ||
-                urlLower.includes('youtu.be') ||
-                urlLower.includes('vimeo.com')
-            );
-        });
-
-        return videoLink || null;
-    }, [links]);
+        // Fallback to existing logic for backward compatibility
+        const videoLinks = getVideoLinks();
+        return videoLinks.find(link => link.isActive) || null;
+    }, [links, getVideoLinks, LINK_TYPES]);
 
     useEffect(() => {
         if (!biositeId) {
@@ -285,7 +205,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, [biositeId, fetchBiosite, resetState]);
 
-
     useEffect(() => {
         const initializeBiosite = async () => {
             if (!userId || initialized) return;
@@ -294,10 +213,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 const biositeId = Cookie.get('biositeId');
 
                 if (biositeId) {
-
                     await loadBiositeById(biositeId);
                 } else {
-
                     const userBiosites = await fetchUserBiosites();
                     if (userBiosites && userBiosites.length > 0) {
                         const firstBiosite = userBiosites[0];
@@ -343,42 +260,59 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
 
     useEffect(() => {
         if (links && Array.isArray(links)) {
-
+            // Use the enhanced filtering methods
             const socialLinksFromAPI = getSocialLinks();
-
-            const socialLinksFormatted = socialLinksFromAPI
-                .filter(link => !isAppStoreLink(link) )
-                .map(link => ({
-                    id: link.id,
-                    label: link.label,
-                    name: link.label,
-                    url: link.url,
-                    icon: link.icon,
-                    color: link.color,
-                    isActive: link.isActive
-                }));
-
             const regularLinksFromAPI = getRegularLinks();
-
-            const regularLinksFormatted = regularLinksFromAPI
-                .filter(link => !isAppStoreLink(link)  )
-                .map(link => ({
-                    id: link.id,
-                    title: link.label,
-                    url: link.url,
-                    image: link.image,
-                    orderIndex: link.orderIndex,
-                    isActive: link.isActive
-                }));
-
             const appLinksFromAPI = getAppLinks();
-          const whatsAppLinkFromAPI = getWhatsAppLinks();
+            const whatsAppLinksFromAPI = getWhatsAppLinks();
+
+            // Format social links
+            const socialLinksFormatted = socialLinksFromAPI.map(link => ({
+                id: link.id,
+                label: link.label,
+                name: link.label,
+                url: link.url,
+                icon: link.icon,
+                color: link.color,
+                isActive: link.isActive
+            }));
+
+            // Format regular links
+            const regularLinksFormatted = regularLinksFromAPI.map(link => ({
+                id: link.id,
+                title: link.label,
+                url: link.url,
+                image: link.image,
+                orderIndex: link.orderIndex,
+                isActive: link.isActive
+            }));
+
+            // Format app links
+            const appLinksFormatted = appLinksFromAPI.map(link => ({
+                id: link.id,
+                store: getStoreType(link),
+                url: link.url,
+                isActive: link.isActive
+            }));
+
+            // Format WhatsApp links
+            const whatsAppLinksFormatted = whatsAppLinksFromAPI.map(link => {
+                const { phone, message, description } = parseWhatsAppFromUrl(link.url, link.label);
+                return {
+                    id: link.id,
+                    phone,
+                    message,
+                    description,
+                    isActive: link.isActive
+                };
+            });
+
             setSocialLinksState(socialLinksFormatted);
             setRegularLinksState(regularLinksFormatted.sort((a, b) => a.orderIndex - b.orderIndex));
-            setAppLinksState(appLinksFromAPI);
-          setWhatsAppLinksState(whatsAppLinkFromAPI);
+            setAppLinksState(appLinksFormatted);
+            setWhatsAppLinksState(whatsAppLinksFormatted);
         }
-    }, [links, getSocialLinks, getRegularLinks, getAppLinks, isAppStoreLink,getWhatsAppLinks,isWhatsAppLink, biositeData?.id]);
+    }, [links, getSocialLinks, getRegularLinks, getAppLinks, getWhatsAppLinks, getStoreType, parseWhatsAppFromUrl]);
 
     const updatePreview = useCallback((data: Partial<BiositeFull>) => {
         setBiosite(prev => prev ? { ...prev, ...data } : null);
@@ -420,6 +354,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         getIconIdentifier
     });
 
+    // Enhanced addAppLink with link_type
     const addAppLink = async (link: Omit<AppLink, 'id'>) => {
         if (!biositeData?.id) {
             throw new Error('Biosite ID is required');
@@ -435,7 +370,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 url: link.url,
                 icon,
                 orderIndex: links.length,
-                isActive: link.isActive
+                isActive: link.isActive,
+                link_type: LINK_TYPES.APP // Set the link_type
             };
 
             const newLink = await createLink(linkData);
@@ -477,6 +413,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 updateData.label = data.store === 'appstore' ? 'App Store' : 'Google Play';
             }
 
+            // Ensure link_type is set
+            updateData.link_type = LINK_TYPES.APP;
+
             const updatedLink = await updateLink(id, updateData);
             if (updatedLink) {
                 console.log('App link updated successfully:', updatedLink);
@@ -487,7 +426,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     };
 
-    {/*  */}
+    // Enhanced addWhatsAppLink with link_type
     const addWhatsAppLink = async (link: Omit<WhatsAppLink, 'id'>) => {
         if (!biositeData?.id) {
             throw new Error('Biosite ID is required');
@@ -504,7 +443,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 url: whatsappUrl,
                 icon: 'whatsapp',
                 orderIndex: links.length,
-                isActive: link.isActive
+                isActive: link.isActive,
+                link_type: LINK_TYPES.WHATSAPP // Set the link_type
             };
 
             const newLink = await createLink(linkData);
@@ -517,18 +457,17 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     };
 
-
-        const removeWhatsAppLink = async (id: string) => {
-            try {
-                const success = await deleteLink(id);
-                if (success) {
-                    console.log('WhatsApp link deleted successfully:', id);
-                }
-            } catch (error) {
-                console.error('Error deleting WhatsApp link:', error);
-                throw error;
+    const removeWhatsAppLink = async (id: string) => {
+        try {
+            const success = await deleteLink(id);
+            if (success) {
+                console.log('WhatsApp link deleted successfully:', id);
             }
-        };
+        } catch (error) {
+            console.error('Error deleting WhatsApp link:', error);
+            throw error;
+        }
+    };
 
     const updateWhatsAppLink = async (id: string, data: Partial<WhatsAppLink>) => {
         try {
@@ -561,6 +500,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             }
 
             updateData.icon = 'whatsapp';
+            updateData.link_type = LINK_TYPES.WHATSAPP; // Ensure link_type is set
 
             const updatedLink = await updateLink(id, updateData);
             if (updatedLink) {
@@ -590,11 +530,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 setThemeColorBackState(parsedColors.background);
             }
             if (parsedColors.text && parsedColors.text !== themeColor) {
-               setThemeColortextState(parsedColors.text);
+                setThemeColortextState(parsedColors.text);
             }
         }
     }, [biositeData, themeColor, themetextColor,themeBackColor]);
-
 
     const setThemeColor = useCallback(async (color: string,textColor:string, accentColor: string) => {
         try {
@@ -603,7 +542,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setThemeColorBackState(color)
 
             if (biositeData?.id) {
-
                 let currentColors;
                 try {
                     currentColors = typeof biositeData.colors === 'string'
@@ -638,7 +576,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                         ...prev,
                         colors: updatedColors
                     } : null);
-
                 }
             }
         } catch (error) {
@@ -663,7 +600,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     currentColors = {};
                 }
 
-
                 const updateData = {
                     ownerId: biositeData.ownerId,
                     title: biositeData.title,
@@ -682,7 +618,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                         ...prev,
                         fonts: font
                     } : null);
-
                 }
             }
         } catch (error) {
@@ -690,73 +625,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             throw error;
         }
     }, [biositeData, updateBiositeHook, setBiosite]);
-
-    const getVideoLinks = useCallback(() => {
-        if (!links || !Array.isArray(links)) return [];
-
-        return links.filter(link => {
-            if (!link.isActive) return false;
-
-            const labelLower = link.label?.toLowerCase() || '';
-            const urlLower = link.url?.toLowerCase() || '';
-
-            if (urlLower.includes('youtube.com/@')) {
-                return false;
-            }
-
-
-
-            return (
-                labelLower.includes('video') ||
-                labelLower.includes('vimeo') ||
-                urlLower.includes('youtube.com/watch') ||
-                urlLower.includes('youtu.be') ||
-                urlLower.includes('vimeo.com') ||
-                labelLower.includes('tiktok video')
-            );
-        });
-    }, [links]);
-
-    const getMusicLinks = useCallback(() => {
-        if (!links || !Array.isArray(links)) return [];
-
-        return links.filter(link => {
-            if (!link.isActive) return false;
-
-            const labelLower = link.label?.toLowerCase() || '';
-            const urlLower = link.url?.toLowerCase() || '';
-
-            return (
-                labelLower.includes('music') ||
-                labelLower.includes('soundcloud') ||
-                urlLower.includes('open.spotify.com/embed') ||
-                urlLower.includes('music.apple.com') ||
-                urlLower.includes('soundcloud.com') ||
-                labelLower.includes('apple music') ||
-                labelLower.includes('audio') ||
-                labelLower.includes('music embed')
-            );
-        });
-    }, [links]);
-
-    const getSocialPostLinks = useCallback(() => {
-        if (!links || !Array.isArray(links)) return [];
-
-        return links.filter(link => {
-            if (!link.isActive) return false;
-
-            const labelLower = link.label?.toLowerCase() || '';
-            const urlLower = link.url?.toLowerCase() || '';
-
-            return (
-                labelLower.includes('post') ||
-                labelLower.includes('publicacion') ||
-                labelLower.includes('contenido') ||
-                labelLower.includes('social post') ||
-                (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
-            );
-        });
-    }, [links]);
 
     const contextValue: PreviewContextType = {
         biosite,
@@ -784,10 +652,10 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         addAppLink,
         removeAppLink,
         updateAppLink,
-       setWhatsAppLinks: setWhatsAppLinksState,
+        setWhatsAppLinks: setWhatsAppLinksState,
         addWhatsAppLink,
-       removeWhatsAppLink,
-       updateWhatsAppLink
+        removeWhatsAppLink,
+        updateWhatsAppLink
     };
 
     return (

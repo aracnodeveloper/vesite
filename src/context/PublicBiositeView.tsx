@@ -18,7 +18,7 @@ import { useTemplates } from "../hooks/useTemplates.ts";
 import { useUser } from "../hooks/useUser.ts";
 import { useAnalytics } from "../hooks/useAnalytics.ts";
 import PublicWhatsAppButton from "../components/layers/AddMoreSections/WhattsApp/PublicWhatsAppButton.tsx";
-import { useLinkProcessing } from "../hooks/useLinkProcessing.ts";
+import { useLinkProcessing, LINK_TYPES } from "../hooks/useLinkProcessing.ts";
 import {
     isValidImageUrl,
     getThemeConfig,
@@ -31,7 +31,6 @@ import {
 } from "../Utils/biositeUtils.ts";
 import { getSectionsByBiositeApi } from '../constants/EndpointsRoutes';
 import imgPng from "../assets/img/img_12.png";
-//import Cookie from "js-cookie";
 
 interface PublicBiositeData {
     biosite: BiositeFull;
@@ -54,7 +53,7 @@ const PublicBiositeView = () => {
     const [imageLoadStates, setImageLoadStates] = useState<{ [key: string]: 'loading' | 'loaded' | 'error' }>({});
     const isPublicView = true;
     const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } = useTemplates();
-    const { processLinks, findPlatformForLink, filterRealSocialLinks } = useLinkProcessing();
+    const { processLinks, findPlatformForLink, filterRealSocialLinks, LINK_TYPES } = useLinkProcessing();
 
     const currentTemplate = useMemo(() => {
         if (!isTemplatesLoaded || !templates.length) {
@@ -120,6 +119,82 @@ const PublicBiositeView = () => {
         return section?.orderIndex || 999;
     };
 
+    // Enhanced getMusicEmbed using link_type filtering
+    const getMusicEmbed = useCallback(() => {
+        if (!biositeData?.biosite?.links || !Array.isArray(biositeData.biosite.links)) return null;
+
+        // First try to find by link_type
+        const musicByType = biositeData.biosite.links.find(link =>
+            link.link_type === LINK_TYPES.MUSIC && link.isActive
+        );
+        if (musicByType) return musicByType;
+
+        // Fallback to existing logic for backward compatibility
+        const musicLinks = biositeData.biosite.links.filter(link => {
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return link.isActive && (
+                labelLower.includes('music') ||
+                labelLower.includes('spotify') ||
+                urlLower.includes('spotify.com/track/') ||
+                urlLower.includes('open.spotify.com')
+            );
+        });
+
+        return musicLinks.find(link => link.isActive) || null;
+    }, [biositeData?.biosite?.links]);
+
+    const getSocialPost = useCallback(() => {
+        if (!biositeData?.biosite?.links || !Array.isArray(biositeData.biosite.links)) return null;
+
+        // First try to find by link_type
+        const socialPostByType = biositeData.biosite.links.find(link =>
+            link.link_type === LINK_TYPES.SOCIAL_POST && link.isActive
+        );
+        if (socialPostByType) return socialPostByType;
+
+        // Fallback to existing logic for backward compatibility
+        const socialPostLinks = biositeData.biosite.links.filter(link => {
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return link.isActive && (
+                labelLower.includes('post') ||
+                labelLower.includes('instagram') ||
+                urlLower.includes('instagram.com/p/') ||
+                urlLower.includes('instagram.com/reel/')
+            );
+        });
+
+        return socialPostLinks.find(link => link.isActive) || null;
+    }, [biositeData?.biosite?.links]);
+
+    const getVideoEmbed = useCallback(() => {
+        if (!biositeData?.biosite?.links || !Array.isArray(biositeData.biosite.links)) return null;
+
+        // First try to find by link_type
+        const videoByType = biositeData.biosite.links.find(link =>
+            link.link_type === LINK_TYPES.VIDEO && link.isActive
+        );
+        if (videoByType) return videoByType;
+
+        // Fallback to existing logic for backward compatibility
+        const videoLinks = biositeData.biosite.links.filter(link => {
+            const labelLower = link.label?.toLowerCase() || '';
+            const urlLower = link.url?.toLowerCase() || '';
+
+            return link.isActive && (
+                labelLower.includes('video') ||
+                labelLower.includes('youtube') ||
+                urlLower.includes('youtube.com/watch') ||
+                urlLower.includes('youtu.be/')
+            );
+        });
+
+        return videoLinks.find(link => link.isActive) || null;
+    }, [biositeData?.biosite?.links]);
+
     const orderedContentSections = useMemo(() => {
         if (!biositeData) return [];
 
@@ -127,10 +202,11 @@ const PublicBiositeView = () => {
         const socialLinksData = biositeData.socialLinks.filter(link => link.isActive);
         const regularLinksData = biositeData.regularLinks.filter(link => link.isActive);
         const realsocialLinks = filterRealSocialLinks(socialLinksData);
+
         const themeConfig = getThemeConfig(biositeData.biosite);
-        const musicEmbed = biositeData.musicEmbed;
-        const socialPost = biositeData.socialPost;
-        const videoEmbed = biositeData.videoEmbed;
+        const musicEmbed = getMusicEmbed();
+        const socialPost = getSocialPost();
+        const videoEmbed = getVideoEmbed();
         const isExposedRoute = true;
 
         if (realsocialLinks.length > 0) {
@@ -196,7 +272,7 @@ const PublicBiositeView = () => {
                                     backgroundColor: themeConfig.colors.accent,
                                     background: themeConfig.colors.accent
                                 }}
-                                className="w-full p-2 mb-3 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer"
+                                className="w-full p-2 mb-3 text-center shadow-lg transition-all h-14 flex items-center duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg overflow-hidden mr-3 flex-shrink-0">
                                     {appLink.store === 'appstore' ? (
@@ -524,7 +600,7 @@ const PublicBiositeView = () => {
                     videoEmbed
                 });
 
-            } catch (error:     any) {
+            } catch (error: any) {
                 const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar el biosite";
                 setError(errorMessage);
                 console.error('⚠️ Error fetching biosite by slug:', error);

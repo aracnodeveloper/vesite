@@ -9,6 +9,7 @@ export interface SocialLink {
     icon: string;
     color: string;
     isActive: boolean;
+    link_type?: string;
 }
 
 export interface RegularLink {
@@ -18,6 +19,7 @@ export interface RegularLink {
     image?: string;
     orderIndex: number;
     isActive: boolean;
+    link_type?: string;
 }
 
 export interface AppLink {
@@ -25,6 +27,7 @@ export interface AppLink {
     store: 'appstore' | 'googleplay';
     url: string;
     isActive: boolean;
+    link_type?: string;
 }
 
 {/**/}
@@ -34,6 +37,7 @@ export interface AppLink {
         description?: string;
         message: string;
         isActive: boolean;
+        link_type?: string;
     }
 
 

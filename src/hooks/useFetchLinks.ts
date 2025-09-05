@@ -3,6 +3,17 @@ import apiService from "../service/apiService";
 import { LinksApi} from "../constants/EndpointsRoutes.ts";
 import type {Link, CreateLinkDto, UpdateLinkDto} from "../interfaces/Links.ts";
 
+// Link type constants
+const LINK_TYPES = {
+    SOCIAL: 'social',
+    REGULAR: 'regular',
+    APP: 'app',
+    WHATSAPP: 'whatsapp',
+    MUSIC: 'music',
+    VIDEO: 'video',
+    SOCIAL_POST: 'social_post'
+} as const;
+
 const SOCIAL_PLATFORMS = [
     'instagram', 'tiktok', 'twitter', 'x', 'youtube', 'facebook', 'twitch',
     'linkedin', 'snapchat', 'threads', 'email', 'gmail', 'pinterest', 'spotify',
@@ -25,7 +36,6 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
 
             const res = await apiService.getAll<Link[]>(`/links/biosite/${biositeId}`);
-
 
             const linksArray = Array.isArray(res) ? res : [];
             setLinks(linksArray);
@@ -98,15 +108,13 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
             console.log("Deleting link with ID:", linkId);
 
-            // Verificar que el enlace existe antes de intentar eliminarlo
             const linkExists = links.find(link => link.id === linkId);
             if (!linkExists) {
                 console.warn("Link not found in local state:", linkId);
-
             }
 
             const response = await apiService.delete(LinksApi, linkId);
-
+            return true;
 
         } catch (error: any) {
             return false;
@@ -121,7 +129,6 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
             console.log("Reordering links:", reorderedLinks);
 
-            // Usar el endpoint específico de reordenamiento del backend
             await apiService.patch(`/links/reorder/${biositeId}`, { links: reorderedLinks });
             console.log("Links reordered successfully");
 
@@ -177,11 +184,21 @@ export const useFetchLinks = (biositeId?: string) => {
         }
     }, []);
 
-    // Función para determinar si un enlace es social basado en su label o URL
+    // Improved filtering using link_type property
     const isSocialLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.SOCIAL) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not a social type
+        if (link.link_type && link.link_type !== LINK_TYPES.SOCIAL) {
+            return false;
+        }
+
+        // Fallback: Use existing logic for backward compatibility
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
-
 
         return SOCIAL_PLATFORMS.some(platform =>
             labelLower.includes(platform) ||
@@ -190,15 +207,177 @@ export const useFetchLinks = (biositeId?: string) => {
         );
     }, []);
 
-    // Función para obtener solo enlaces sociales
+    const isRegularLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.REGULAR) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not a regular type
+        if (link.link_type && link.link_type !== LINK_TYPES.REGULAR) {
+            return false;
+        }
+
+        // Fallback: Use existing logic - regular links are those that are not social, app, whatsapp, etc.
+        return !isSocialLink(link) &&
+            !isAppLink(link) &&
+            !isWhatsAppLink(link) &&
+            !isMusicLink(link) &&
+            !isVideoLink(link) &&
+            !isSocialPostLink(link);
+    }, []);
+
+    const isAppLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.APP) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not an app type
+        if (link.link_type && link.link_type !== LINK_TYPES.APP) {
+            return false;
+        }
+
+        // Fallback: Use existing logic
+        const labelLower = link.label.toLowerCase();
+        const urlLower = link.url.toLowerCase();
+
+        return (
+            labelLower.includes('app store') ||
+            labelLower.includes('appstore') ||
+            urlLower.includes('apps.apple.com') ||
+            labelLower.includes('google play') ||
+            labelLower.includes('googleplay') ||
+            urlLower.includes('play.google.com')
+        );
+    }, []);
+
+    const isWhatsAppLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.WHATSAPP) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not a whatsapp type
+        if (link.link_type && link.link_type !== LINK_TYPES.WHATSAPP) {
+            return false;
+        }
+
+        // Fallback: Use existing logic
+        const urlLower = link.url?.toLowerCase() || '';
+        const icon = link.icon?.toLowerCase() || '';
+
+        return (
+            icon === 'whatsapp' ||
+            urlLower.includes('api.whatsapp.com') ||
+            urlLower.includes('wa.me/')
+        );
+    }, []);
+
+    const isMusicLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.MUSIC) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not a music type
+        if (link.link_type && link.link_type !== LINK_TYPES.MUSIC) {
+            return false;
+        }
+
+        // Fallback: Use existing logic
+        const labelLower = link.label?.toLowerCase() || '';
+        const urlLower = link.url?.toLowerCase() || '';
+
+        return (
+            labelLower.includes('music') ||
+            labelLower.includes('soundcloud') ||
+            urlLower.includes('open.spotify.com') ||
+            urlLower.includes('music.apple.com') ||
+            urlLower.includes('soundcloud.com') ||
+            labelLower.includes('apple music') ||
+            labelLower.includes('audio') ||
+            labelLower.includes('music embed')
+        );
+    }, []);
+
+    const isVideoLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.VIDEO) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not a video type
+        if (link.link_type && link.link_type !== LINK_TYPES.VIDEO) {
+            return false;
+        }
+
+        // Fallback: Use existing logic
+        const labelLower = link.label?.toLowerCase() || '';
+        const urlLower = link.url?.toLowerCase() || '';
+
+        return (
+            labelLower.includes('video') ||
+            labelLower.includes('vimeo') ||
+            urlLower.includes('youtube.com/watch') ||
+            urlLower.includes('youtu.be') ||
+            urlLower.includes('vimeo.com') ||
+            labelLower.includes('tiktok video')
+        );
+    }, []);
+
+    const isSocialPostLink = useCallback((link: Link): boolean => {
+        // Primary: Check link_type property
+        if (link.link_type === LINK_TYPES.SOCIAL_POST) {
+            return true;
+        }
+
+        // Secondary: Check if it's explicitly not a social post type
+        if (link.link_type && link.link_type !== LINK_TYPES.SOCIAL_POST) {
+            return false;
+        }
+
+        // Fallback: Use existing logic
+        const labelLower = link.label?.toLowerCase() || '';
+        const urlLower = link.url?.toLowerCase() || '';
+
+        return (
+            labelLower.includes('post') ||
+            labelLower.includes('publicacion') ||
+            labelLower.includes('contenido') ||
+            labelLower.includes('social post') ||
+            (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
+        );
+    }, []);
+
+    // Updated filter functions
     const getSocialLinks = useCallback(() => {
         return links.filter(isSocialLink);
     }, [links, isSocialLink]);
 
-    // Función para obtener solo enlaces regulares
     const getRegularLinks = useCallback(() => {
-        return links.filter(link => !isSocialLink(link));
-    }, [links, isSocialLink]);
+        return links.filter(isRegularLink);
+    }, [links, isRegularLink]);
+
+    const getAppLinks = useCallback(() => {
+        return links.filter(isAppLink);
+    }, [links, isAppLink]);
+
+    const getWhatsAppLinks = useCallback(() => {
+        return links.filter(isWhatsAppLink);
+    }, [links, isWhatsAppLink]);
+
+    const getMusicLinks = useCallback(() => {
+        return links.filter(isMusicLink);
+    }, [links, isMusicLink]);
+
+    const getVideoLinks = useCallback(() => {
+        return links.filter(isVideoLink);
+    }, [links, isVideoLink]);
+
+    const getSocialPostLinks = useCallback(() => {
+        return links.filter(isSocialPostLink);
+    }, [links, isSocialPostLink]);
 
     const clearError = useCallback(() => setError(null), []);
 
@@ -218,10 +397,25 @@ export const useFetchLinks = (biositeId?: string) => {
         deleteLink,
         reorderLinks,
         toggleLinkStatus,
+        // Enhanced filtering methods
         getSocialLinks,
         getRegularLinks,
+        getAppLinks,
+        getWhatsAppLinks,
+        getMusicLinks,
+        getVideoLinks,
+        getSocialPostLinks,
+        // Individual type checkers
         isSocialLink,
+        isRegularLink,
+        isAppLink,
+        isWhatsAppLink,
+        isMusicLink,
+        isVideoLink,
+        isSocialPostLink,
         clearError,
-        resetState
+        resetState,
+        // Constants for external use
+        LINK_TYPES
     };
 };

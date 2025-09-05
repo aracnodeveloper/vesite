@@ -55,6 +55,7 @@ export interface BiositeLink {
     orderIndex: number;
     createdAt: string;
     updatedAt: string;
+    link_type?: string;
 }
 
 export interface BiositeFull {

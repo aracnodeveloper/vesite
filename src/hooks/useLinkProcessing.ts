@@ -2,7 +2,100 @@ import { useCallback } from 'react';
 import type { SocialLink, RegularLink, AppLink, WhatsAppLink } from "../interfaces/PreviewContext";
 import { socialMediaPlatforms } from "../media/socialPlataforms.ts";
 
+// Define LINK_TYPES constant
+export const LINK_TYPES = {
+    SOCIAL: 'social',
+    REGULAR: 'regular',
+    APP: 'app',
+    WHATSAPP: 'whatsapp',
+    MUSIC: 'music',
+    VIDEO: 'video',
+    SOCIAL_POST: 'social-post'
+} as const;
+
 export const useLinkProcessing = () => {
+    // Enhanced link type detection with fallback logic
+    const detectLinkType = useCallback((link: any): string => {
+        // If link_type is explicitly set and not null, use it
+        if (link.link_type && link.link_type !== null) {
+            return link.link_type;
+        }
+
+        // Fallback detection based on icon, URL, and label patterns
+        const iconIdentifier = getIconIdentifier(link.icon);
+        const labelLower = link.label?.toLowerCase() || '';
+        const urlLower = link.url?.toLowerCase() || '';
+
+        // WhatsApp detection
+        if (iconIdentifier === 'whatsapp' ||
+            urlLower.includes('api.whatsapp.com')) {
+            return LINK_TYPES.WHATSAPP;
+        }
+
+        // App store detection
+        if (iconIdentifier === 'appstore' ||
+            iconIdentifier === 'googleplay' ||
+            labelLower.includes('app store') ||
+            labelLower.includes('google play') ||
+            urlLower.includes('apps.apple.com') ||
+            urlLower.includes('play.google.com')) {
+            return LINK_TYPES.APP;
+        }
+
+        // Embed content detection
+        if (iconIdentifier === 'music-embed' ||
+            labelLower.includes('music') ||
+            labelLower.includes('podcast') ||
+            urlLower.includes('spotify.com/track/') ||
+            urlLower.includes('open.spotify.com')) {
+            return LINK_TYPES.MUSIC;
+        }
+
+        if (iconIdentifier === 'video-embed' ||
+            labelLower.includes('video') ||
+            urlLower.includes('youtube.com/watch') ||
+            urlLower.includes('youtu.be/')) {
+            return LINK_TYPES.VIDEO;
+        }
+
+        if (iconIdentifier === 'social-post' ||
+            labelLower.includes('social post') ||
+            labelLower.includes('post') ||
+            (urlLower.includes('instagram.com') &&
+                (urlLower.includes('/p/') || urlLower.includes('/reel/')))) {
+            return LINK_TYPES.SOCIAL_POST;
+        }
+
+        // Social platform detection
+        const socialPlatforms = [
+            'instagram', 'tiktok', 'x', 'twitter', 'facebook', 'twitch',
+            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
+            'tumblr', 'telegram', 'onlyfans', 'amazon', 'gmail', 'spotify', 'youtube'
+        ];
+
+        const isSocialIcon = socialPlatforms.includes(iconIdentifier);
+        const isSocialDomain = socialPlatforms.some(platform =>
+            urlLower.includes(`${platform}.com`) ||
+            urlLower.includes(`${platform}.net`) ||
+            urlLower.includes(`${platform}.tv`)
+        );
+        const isSocialLabel = socialPlatforms.some(platform =>
+            labelLower === platform || labelLower.includes(platform)
+        );
+
+        if (isSocialIcon || isSocialDomain || isSocialLabel) {
+            // Special case: YouTube channels should be social, but YouTube videos should be video
+            if (urlLower.includes('youtube.com/@') ||
+                (urlLower.includes('youtube.com') && !urlLower.includes('/watch'))) {
+                return LINK_TYPES.SOCIAL;
+            }
+            return LINK_TYPES.SOCIAL;
+        }
+
+        // Default to regular link
+        return LINK_TYPES.REGULAR;
+    }, []);
+
     const getIconIdentifier = (iconPath: string): string => {
         const iconMap: { [key: string]: string } = {
             '/assets/icons/instagram.svg': 'instagram',
@@ -27,50 +120,27 @@ export const useLinkProcessing = () => {
             '/assets/icons/googleplay.svg': 'googleplay'
         };
 
+        // Handle direct icon identifiers
         if (iconPath === 'link') return 'link';
         if (iconPath === 'social-post') return 'social-post';
         if (iconPath === 'music-embed') return 'music-embed';
         if (iconPath === 'video-embed') return 'video-embed';
+        if (iconPath === 'whatsapp') return 'whatsapp';
+        if (iconPath === 'appstore') return 'appstore';
+        if (iconPath === 'googleplay') return 'googleplay';
 
+        // Handle malformed icons (like "svg%3e")
+        if (iconPath === 'svg%3e' || iconPath.includes('%')) {
+            return 'link'; // Default fallback for malformed icons
+        }
+
+        // Find full path match
         const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
         if (fullPath) return iconMap[fullPath];
 
+        // Extract filename
         const fileName = iconPath.split('/').pop()?.replace('.svg', '') || 'link';
         return fileName.toLowerCase();
-    };
-
-    const isAppStoreLink = (link: any): boolean => {
-        const labelLower = link.label.toLowerCase();
-        const urlLower = link.url.toLowerCase();
-
-        return (
-            labelLower.includes('app store') ||
-            labelLower.includes('appstore') ||
-            urlLower.includes('apps.apple.com') ||
-            labelLower.includes('google play') ||
-            labelLower.includes('googleplay') ||
-            urlLower.includes('play.google.com')
-        );
-    };
-
-    const isWhatsAppLink = useCallback((link: any): boolean => {
-        const urlLower = link.url?.toLowerCase() || '';
-        const icon = link.icon?.toLowerCase() || '';
-
-        return (
-            icon === 'whatsapp' ||
-            urlLower.includes('api.whatsapp.com')
-        );
-    }, []);
-
-    const getStoreType = (link: any): 'appstore' | 'googleplay' => {
-        const labelLower = link.label.toLowerCase();
-        const urlLower = link.url.toLowerCase();
-
-        if (labelLower.includes('google play') || urlLower.includes('play.google.com')) {
-            return 'googleplay';
-        }
-        return 'appstore';
     };
 
     const parseWhatsAppFromUrl = useCallback((url: string, label?: string): { phone: string; message: string; description?: string; } => {
@@ -79,15 +149,25 @@ export const useLinkProcessing = () => {
             let message = '';
             let description = label || 'WhatsApp';
 
-            if (url.includes('api.whatsapp.com/send')) {
+            if (url.includes('api.whatsapp.com/send') || url.includes('wa.me/')) {
                 const urlParams = new URLSearchParams(url.split('?')[1] || '');
                 phone = urlParams.get('phone') || '';
                 message = decodeURIComponent(urlParams.get('text') || '');
                 description = label || 'WhatsApp';
+
+                // Extract phone from wa.me URLs
+                if (url.includes('wa.me/') && !phone) {
+                    const match = url.match(/wa\.me\/([0-9+]+)/);
+                    if (match) {
+                        phone = match[1];
+                    }
+                }
             }
 
+            // Clean phone number
             phone = phone.replace(/[^\d+]/g, '');
 
+            // Decode message properly
             if (message) {
                 try {
                     let decodedMessage = message;
@@ -115,109 +195,17 @@ export const useLinkProcessing = () => {
         }
     }, []);
 
-    const isSocialLink = (link: any): boolean => {
-        const iconIdentifier = getIconIdentifier(link.icon);
-        const labelLower = link.label.toLowerCase();
-        const urlLower = link.url.toLowerCase();
-
-        const socialPlatforms = [
-            'instagram', 'tiktok', 'x', 'facebook', 'twitch',
-            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
-            'tumblr', 'whatsapp', 'telegram', 'onlyfans', 'amazon', 'gmail', 'spotify'
-        ];
-
-        if (socialPlatforms.includes(iconIdentifier)) {
-            return true;
-        }
-
-        const socialDomains = [
-            'instagram.com', 'tiktok.com', 'twitter.com', 'x.com', 'facebook.com',
-            'twitch.tv', 'linkedin.com', 'snapchat.com', 'threads.net',
-            'pinterest.com', 'discord.gg', 'discord.com', 'tumblr.com',
-            'wa.me', 'whatsapp.com', 't.me', 'telegram.me', 'onlyfans.com', 'amazon.com', 'gmail.com', 'spotify.com'
-        ];
-
-        const hasSocialDomain = socialDomains.some(domain => {
-            return urlLower.includes(`://${domain}/`) || urlLower.includes(`://www.${domain}/`) ||
-                urlLower.includes(`://${domain}`) || urlLower.includes(`://www.${domain}`);
-        });
-
-        if (hasSocialDomain) {
-            return true;
-        }
-
-        const exactSocialLabels = [
-            'instagram', 'tiktok', 'twitter', 'twitter/x', 'x', 'facebook', 'twitch',
-            'linkedin', 'snapchat', 'threads', 'pinterest', 'discord', 'youtube',
-            'tumblr', 'whatsapp', 'telegram', 'onlyfans', 'amazon', 'gmail', 'spotify'
-        ];
-
-        return exactSocialLabels.some(label => labelLower === label);
-    };
-
-    const isEmbedLink = (link: any): boolean => {
+    const getStoreType = (link: any): 'appstore' | 'googleplay' => {
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
         const iconIdentifier = getIconIdentifier(link.icon);
 
-        if (iconIdentifier === 'social-post' || iconIdentifier === 'music-embed' || iconIdentifier === 'video-embed') {
-            return true;
+        if (iconIdentifier === 'googleplay' ||
+            labelLower.includes('google play') ||
+            urlLower.includes('play.google.com')) {
+            return 'googleplay';
         }
-
-        const embedLabels = [
-            'music embed', 'video embed', 'social post', 'embed', 'player',
-            'spotify track', 'youtube video', 'youtube.com/watch', 'instagram post', 'music/podcast', 'open.spotify.com/embed'
-        ];
-
-        const hasEmbedLabel = embedLabels.some(embedLabel => labelLower.includes(embedLabel));
-
-        if (hasEmbedLabel) {
-            return true;
-        }
-
-        const isSpotifyTrack = urlLower.includes('spotify.com/track/');
-        const isYouTubeVideo = urlLower.includes('youtube.com/watch') || urlLower.includes('youtu.be/');
-        const isInstagramPost = urlLower.includes('instagram.com/p/') || urlLower.includes('instagram.com/reel/');
-
-        return isSpotifyTrack || isYouTubeVideo || isInstagramPost;
-    };
-
-    const getEmbedType = (link: any): 'music' | 'social-post' | 'video' | null => {
-        const iconIdentifier = getIconIdentifier(link.icon);
-        const labelLower = link.label.toLowerCase();
-        const urlLower = link.url.toLowerCase();
-
-        if (iconIdentifier === 'music-embed' || iconIdentifier === 'music') {
-            return 'music';
-        }
-        if (iconIdentifier === 'social-post') {
-            return 'social-post';
-        }
-        if (iconIdentifier === 'video-embed' || iconIdentifier === 'video') {
-            return 'video';
-        }
-
-        if (labelLower.includes('music') || labelLower.includes('podcast')) {
-            return 'music';
-        }
-        if (labelLower.includes('social post') || labelLower.includes('post')) {
-            return 'social-post';
-        }
-        if (labelLower.includes('video')) {
-            return 'video';
-        }
-
-        if (urlLower.includes('spotify.com/track/')) {
-            return 'music';
-        }
-        if (urlLower.includes('instagram.com/p/') || urlLower.includes('instagram.com/reel/')) {
-            return 'social-post';
-        }
-        if (urlLower.includes('youtube.com/watch') || urlLower.includes('youtu.be/')) {
-            return 'video';
-        }
-
-        return null;
+        return 'appstore';
     };
 
     const processLinks = (links: any) => {
@@ -230,53 +218,72 @@ export const useLinkProcessing = () => {
         let videoEmbed: any = null;
 
         links.forEach(link => {
+            const detectedType = detectLinkType(link);
             const iconIdentifier = getIconIdentifier(link.icon);
 
-            if (isWhatsAppLink(link)) {
-                const { phone, message } = parseWhatsAppFromUrl(link.url);
-                whatsApplinks.push({
-                    id: link.id,
-                    phone,
-                    message,
-                    description: link.label,
-                    isActive: link.isActive
-                });
-            } else if (isAppStoreLink(link)) {
-                appLinks.push({
-                    id: link.id,
-                    store: getStoreType(link),
-                    url: link.url,
-                    isActive: link.isActive
-                });
-            } else if (isEmbedLink(link)) {
-                const embedType = getEmbedType(link);
+            switch (detectedType) {
+                case LINK_TYPES.WHATSAPP:
+                    const { phone, message } = parseWhatsAppFromUrl(link.url);
+                    whatsApplinks.push({
+                        id: link.id,
+                        phone,
+                        message,
+                        description: link.label,
+                        isActive: link.isActive
+                    });
+                    break;
 
-                if (embedType === 'music') {
-                    musicEmbed = link;
-                } else if (embedType === 'social-post') {
-                    socialPost = link;
-                } else if (embedType === 'video') {
-                    videoEmbed = link;
-                }
-            } else if (isSocialLink(link)) {
-                socialLinks.push({
-                    id: link.id,
-                    label: link.label,
-                    name: link.label,
-                    url: link.url,
-                    icon: iconIdentifier,
-                    color: link.color || '#f3f4f6',
-                    isActive: link.isActive
-                });
-            } else {
-                regularLinks.push({
-                    id: link.id,
-                    title: link.label,
-                    url: link.url,
-                    image: link.image,
-                    orderIndex: link.orderIndex || 0,
-                    isActive: link.isActive
-                });
+                case LINK_TYPES.APP:
+                    appLinks.push({
+                        id: link.id,
+                        store: getStoreType(link),
+                        url: link.url,
+                        isActive: link.isActive
+                    });
+                    break;
+
+                case LINK_TYPES.MUSIC:
+                    if (!musicEmbed || link.isActive) {
+                        musicEmbed = link;
+                    }
+                    break;
+
+                case LINK_TYPES.SOCIAL_POST:
+                    if (!socialPost || link.isActive) {
+                        socialPost = link;
+                    }
+                    break;
+
+                case LINK_TYPES.VIDEO:
+                    if (!videoEmbed || link.isActive) {
+                        videoEmbed = link;
+                    }
+                    break;
+
+                case LINK_TYPES.SOCIAL:
+                    socialLinks.push({
+                        id: link.id,
+                        label: link.label,
+                        name: link.label,
+                        url: link.url,
+                        icon: iconIdentifier,
+                        color: link.color || '#f3f4f6',
+                        isActive: link.isActive,
+                        link_type: detectedType // Add the detected type for reference
+                    });
+                    break;
+
+                case LINK_TYPES.REGULAR:
+                default:
+                    regularLinks.push({
+                        id: link.id,
+                        title: link.label,
+                        url: link.url,
+                        image: link.image,
+                        orderIndex: link.orderIndex || 0,
+                        isActive: link.isActive
+                    });
+                    break;
             }
         });
 
@@ -310,31 +317,14 @@ export const useLinkProcessing = () => {
         return links.filter(link => {
             if (!link.isActive) return false;
 
-            const excludedKeywords = [
-                'open.spotify.com/embed', 'music', 'apple music', 'soundcloud', 'audio',
-                'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
-                'post', 'publicacion', 'contenido', 'api.whatsapp.com',
-                'music embed', 'video embed', 'social post',
-                'embed', 'player'
-            ];
+            const detectedType = detectLinkType(link);
 
-            const labelLower = link.label.toLowerCase();
-            const urlLower = link.url.toLowerCase();
-
-            const isExcluded = excludedKeywords.some(keyword =>
-                labelLower.includes(keyword) || urlLower.includes(keyword)
-            );
-
-            if (isExcluded) return false;
-
-            if (urlLower.includes("api.whatsapp.com")) {
+            // Only include links that are actually social type
+            if (detectedType !== LINK_TYPES.SOCIAL) {
                 return false;
             }
 
-            if (urlLower.includes("wa.me/") || urlLower.includes("whatsapp.com")) {
-                return true;
-            }
-
+            // Additional validation: ensure the link has a valid platform match
             const platform = findPlatformForLink(link);
             return platform !== undefined && platform !== null;
         });
@@ -343,6 +333,8 @@ export const useLinkProcessing = () => {
     return {
         processLinks,
         findPlatformForLink,
-        filterRealSocialLinks
+        filterRealSocialLinks,
+        detectLinkType,
+        LINK_TYPES
     };
 };

@@ -32,35 +32,28 @@ const SocialPage = () => {
 
     const navigate = useNavigate();
 
-    // Función para formatear URLs de WhatsApp
     const formatWhatsAppUrl = (url: string): string => {
-        // Si ya está en formato correcto, devolver como está
+
         if (url.includes('wa.me/') ) {
             return url;
         }
 
-        // Extraer número de teléfono de diferentes formatos
         let phoneNumber = '';
 
-        // Si es solo un número
         if (/^\+?\d+$/.test(url.replace(/[\s\-\(\)]/g, ''))) {
+
             phoneNumber = url.replace(/[\s\-\(\)]/g, '');
         }
-        // Si contiene whatsapp.com
         else if (url.includes('whatsapp.com')) {
             const match = url.match(/phone=(\d+)/);
             if (match) {
                 phoneNumber = match[1];
             }
         }
-        // Si es otro formato, intentar extraer números
         else {
             phoneNumber = url.replace(/\D/g, '');
         }
-
-        // Asegurar que tenga código de país si no lo tiene
         if (phoneNumber && !phoneNumber.startsWith('1') && !phoneNumber.startsWith('5') && phoneNumber.length >= 10) {
-            // Si no tiene código de país, asumir que es de Ecuador (+593)
             if (phoneNumber.length === 9 || phoneNumber.length === 10) {
                 phoneNumber = '593' + phoneNumber;
             }
@@ -182,7 +175,6 @@ const SocialPage = () => {
         try {
             setIsSubmitting(true);
 
-            // Formatear URL si es WhatsApp
             let processedUrl = urlInput.trim();
             if (isWhatsAppPlatform(editingPlatform)) {
                 processedUrl = formatWhatsAppUrl(processedUrl);
