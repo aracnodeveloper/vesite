@@ -5,7 +5,7 @@ import FomrField from "../../../shared/FomrField";
 import ImageInput from "../../../shared/ImageInput";
 import { useState } from "react";
 import Button from "../../../shared/Button";
-import type { BiositeFull } from "../../../../interfaces/AdminData";
+import type { BiositeFull, LinkData } from "../../../../interfaces/AdminData";
 import Loading from "../../../shared/Loading";
 import { useUser, type UpdateUserDto } from "../../../../hooks/useUser";
 import {
