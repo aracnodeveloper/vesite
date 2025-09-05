@@ -5,6 +5,9 @@ interface ImageInputProps {
   initialSrc?: string; // URL de imagen inicial
   onChange: (file: File | null) => void;
   placeholder?: string;
+  name?: string;
+  maxHeight?: number;
+  square?: boolean;
 }
 
 const ImageInput: React.FC<ImageInputProps> = ({
@@ -12,12 +15,15 @@ const ImageInput: React.FC<ImageInputProps> = ({
   initialSrc,
   onChange,
   placeholder = "Haz clic para subir una imagen",
+  name,
+  maxHeight,
+  square,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(initialSrc || null);
 
   React.useEffect(() => {
-    if (value) {
+    if (value && value instanceof File) {
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result as string);
       reader.readAsDataURL(value);
@@ -45,6 +51,7 @@ const ImageInput: React.FC<ImageInputProps> = ({
     <div>
       <input
         type="file"
+        name={name}
         accept="image/*"
         ref={inputRef}
         style={{ display: "none" }}
@@ -52,13 +59,16 @@ const ImageInput: React.FC<ImageInputProps> = ({
       />
       {preview ? (
         <div
-          className="relative group cursor-pointer overflow-hidden rounded-xl"
+          style={{ maxHeight: maxHeight ? `${maxHeight}px` : undefined }}
+          className={`relative group cursor-pointer overflow-hidden rounded-xl ${
+            square ? "aspect-square" : ""
+          }`}
           onClick={handleClick}
         >
           <img
             src={preview}
             alt="Preview"
-            className="preview-image rounded-xl w-full h-auto transition-all duration-300 group-hover:brightness-75 group-hover:scale-105"
+            className="preview-image rounded-xl w-full h-full object-cover transition-all duration-300 group-hover:brightness-75 group-hover:scale-105"
           />
           {/* Overlay de hover */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl flex items-center justify-center">

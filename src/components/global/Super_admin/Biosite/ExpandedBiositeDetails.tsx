@@ -2,8 +2,12 @@ import { Database, LinkIcon } from "lucide-react";
 import Input from "../../../shared/Input";
 import { getLinkType, LinkImageDisplay } from "../SharedLinksComponents";
 import FomrField from "../../../shared/FomrField";
-import { Upload } from "antd";
 import ImageInput from "../../../shared/ImageInput";
+import { useState } from "react";
+import Button from "../../../shared/Button";
+import type { BiositeFull } from "../../../../interfaces/AdminData";
+import Loading from "../../../shared/Loading";
+import { useUser, type UpdateUserDto } from "../../../../hooks/useUser";
 
 export default function ExpandedBiositeDetails({
   biosite,
@@ -14,7 +18,7 @@ export default function ExpandedBiositeDetails({
   formatDate,
   parseVCardData,
 }: {
-  biosite;
+  biosite: BiositeFull;
   userBusinessCard;
   isLoadingCard;
   biositeLinks;
@@ -22,48 +26,155 @@ export default function ExpandedBiositeDetails({
   formatDate;
   parseVCardData;
 }) {
+  const [update_profile, setUpdate_profile] = useState(false);
+  const [editableBiosite, setEditableBiosite] = useState(biosite);
+  const [isLoading, setIsLoading] = useState(false);
+  const { updateUser, error } = useUser();
+  const [avatarFile, setAvatarFile] = useState();
+  const [backgroundFile, setBackgroundFile] = useState();
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+
+    if (name.includes(".")) {
+      const [parentKey, childKey] = name.split(".");
+      setEditableBiosite((prev) => ({
+        ...prev,
+        [parentKey]: {
+          ...prev[parentKey],
+          [childKey]: value,
+        },
+      }));
+    } else {
+      setEditableBiosite((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+    setUpdate_profile(true);
+  };
+
+  const handleImageChange = (fieldName: string) => (file: File | null) => {
+    setEditableBiosite((prev) => ({
+      ...prev,
+      [fieldName]: file,
+    }));
+    setUpdate_profile(true);
+  };
+
+  const onCancel = () => {
+    setEditableBiosite(biosite);
+    setUpdate_profile(false);
+  };
+
+  const onSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const updateUserData: UpdateUserDto = {
+        name: editableBiosite.owner?.name,
+        cedula: editableBiosite.owner?.cedula,
+        description: editableBiosite.owner?.description,
+        avatarUrl: editableBiosite.owner?.avatarUrl,
+        site: editableBiosite.owner?.site,
+        phone: editableBiosite.owner?.phone,
+        isActive: editableBiosite.owner?.isActive,
+      };
+
+      const result = await updateUser(biosite.ownerId, updateUserData);
+
+      if (result) {
+        setUpdate_profile(false);
+      }
+    } catch (error) {
+      let errorMessage = "Error desconocido";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      } else if (error && typeof error === "object" && "message" in error) {
+        errorMessage = (error as any).message;
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <tr>
       <td
         colSpan={8}
         className="px-6 py-4 bg-gray-50 border-2 border-t-green-600 border-b-green-400"
       >
+        {/* Mostrar error si existe */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  Error al cargar información del biosite
+                </h3>
+                <div className="mt-1 text-sm text-red-700">
+                  {error || "Ha ocurrido un error desconocido"}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-6">
           {/* Información del Usuario */}
           <div>
             <h4 className="text-sm font-semibold text-gray-700 mb-2">
               Información del Usuario Hijo
+              {error && (
+                <span className="ml-2 text-xs text-red-600 font-normal">
+                  (Error al cargar datos)
+                </span>
+              )}
             </h4>
             <div className=" p-2 rounded border">
-              <div className="grid grid-cols-2 gap-4 rounded-lg">
+              <form
+                onSubmit={onSave}
+                className="grid grid-cols-2 gap-4 rounded-lg"
+              >
                 <FomrField title={"Nombre"}>
                   <Input
-                    value={biosite.owner?.name ?? "N/A"}
-                    onChange={function (
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ): void {
-                      throw new Error("Function not implemented.");
-                    }}
+                    name="owner.name"
+                    value={editableBiosite.owner?.name ?? ""}
+                    onChange={handleChange}
                   />
                 </FomrField>
                 <FomrField title={"Email"}>
                   <Input
-                    value={biosite.owner?.email ?? "N/A"}
-                    onChange={function (
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ): void {
-                      throw new Error("Function not implemented.");
-                    }}
+                    name="owner.email"
+                    value={editableBiosite.owner?.email ?? ""}
+                    onChange={handleChange}
                   />
                 </FomrField>
                 <FomrField title={"Cédula"}>
                   <Input
-                    value={biosite.owner?.cedula ?? "N/A"}
-                    onChange={function (
-                      e: React.ChangeEvent<HTMLInputElement>
-                    ): void {
-                      throw new Error("Function not implemented.");
-                    }}
+                    name="owner.cedula"
+                    value={editableBiosite.owner?.cedula ?? ""}
+                    onChange={handleChange}
                   />
                 </FomrField>
                 <div>
@@ -81,28 +192,41 @@ export default function ExpandedBiositeDetails({
                   </span>
                 </div>
                 {biosite.avatarImage && (
-                  <div className="w-[120px]">
-                    <FomrField title={"Avatar"}>
-                      <ImageInput
-                        initialSrc={biosite.avatarImage}
-                        onChange={function (file: File | null): void {
-                          throw new Error("Function not implemented.");
-                        }}
-                      />
-                    </FomrField>
-                  </div>
+                  <FomrField title={"Avatar"}>
+                    <ImageInput
+                      maxHeight={200}
+                      square
+                      value={avatarFile}
+                      initialSrc={biosite.avatarImage}
+                      onChange={handleImageChange("avatarImage")}
+                    />
+                  </FomrField>
                 )}
                 {biosite.backgroundImage && (
                   <FomrField title={"Background"}>
                     <ImageInput
+                      maxHeight={200}
+                      value={backgroundFile}
                       initialSrc={biosite.backgroundImage}
-                      onChange={function (file: File | null): void {
-                        throw new Error("Function not implemented.");
-                      }}
+                      onChange={handleImageChange("backgroundImage")}
                     />
                   </FomrField>
                 )}
-              </div>
+                {update_profile && (
+                  <div className="grid grid-cols-2 gap-x-5 max-w-[200px]">
+                    <Button submit disabled={isLoading}>
+                      {isLoading ? <Loading /> : "Guardar"}
+                    </Button>
+                    <Button
+                      onClick={onCancel}
+                      variant="secondary"
+                      disabled={isLoading}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                )}
+              </form>
             </div>
           </div>
 

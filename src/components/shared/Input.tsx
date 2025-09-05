@@ -3,15 +3,18 @@ export default function Input({
   onChange,
   type = "text",
   placeholder,
+  name,
 }: {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   placeholder?: string;
+  name?: string;
 }) {
   return (
     <input
       type={type}
+      name={name}
       value={value}
       onChange={onChange}
       placeholder={placeholder}
