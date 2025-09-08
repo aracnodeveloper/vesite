@@ -212,27 +212,23 @@ export default function ExpandedBiositeDetails({
                     {biosite.owner?.role || "USER"}
                   </span>
                 </div>
-                {biosite.avatarImage && (
-                  <FomrField title={"Avatar"}>
-                    <ImageInput
-                      maxHeight={200}
-                      square
-                      value={avatarFile}
-                      initialSrc={biosite.avatarImage}
-                      onChange={handleImageChange("avatarImage")}
-                    />
-                  </FomrField>
-                )}
-                {biosite.backgroundImage && (
-                  <FomrField title={"Background"}>
-                    <ImageInput
-                      maxHeight={200}
-                      value={backgroundFile}
-                      initialSrc={biosite.backgroundImage}
-                      onChange={handleImageChange("backgroundImage")}
-                    />
-                  </FomrField>
-                )}
+                <FomrField title={"Avatar"}>
+                  <ImageInput
+                    maxHeight={200}
+                    square
+                    value={avatarFile}
+                    initialSrc={biosite.avatarImage}
+                    onChange={handleImageChange("avatarImage")}
+                  />
+                </FomrField>
+                <FomrField title={"Background"}>
+                  <ImageInput
+                    maxHeight={200}
+                    value={backgroundFile}
+                    initialSrc={biosite.backgroundImage}
+                    onChange={handleImageChange("backgroundImage")}
+                  />
+                </FomrField>
                 {update_profile && (
                   <div className="grid grid-cols-2 gap-x-5 max-w-[200px]">
                     <Button submit disabled={isLoading}>
@@ -434,7 +430,7 @@ export default function ExpandedBiositeDetails({
                 {isLoadingLinks ? (
                   <Loading />
                 ) : currentBiositeLinks.length > 0 ? (
-                  <div className="max-h-80 overflow-y-auto space-y-3">
+                  <div className="max-h-[800px] overflow-y-auto space-y-3">
                     {currentBiositeLinks
                       .filter((link) => link.isActive)
                       .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))

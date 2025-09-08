@@ -60,7 +60,7 @@ const ImageInput: React.FC<ImageInputProps> = ({
       {preview ? (
         <div
           style={{ maxHeight: maxHeight ? `${maxHeight}px` : undefined }}
-          className={`relative group cursor-pointer overflow-hidden rounded-xl ${
+          className={`relative group cursor-pointer overflow-hidden bg-white rounded-xl ${
             square ? "aspect-square" : ""
           }`}
           onClick={handleClick}
