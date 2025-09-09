@@ -137,7 +137,7 @@ const AdminPanel: React.FC = () => {
   // Memoizar la función applyFilters para evitar recreaciones innecesarias
   const applyFilters = useCallback(
     async (
-      biosites: BiositeFull[],
+      currentPage: number,
       filters: FilterState
     ): Promise<BiositeFull[]> => {
       // Crear objeto de parámetros que incluya tanto paginación como filtros
@@ -149,6 +149,7 @@ const AdminPanel: React.FC = () => {
         dateRange: filters.dateRange !== "all" ? filters.dateRange : undefined,
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder,
+        page: currentPage,
       };
 
       // Filtrar parámetros undefined para enviar solo los necesarios
@@ -171,7 +172,10 @@ const AdminPanel: React.FC = () => {
       const currentPagination = getCurrentPagination();
 
       if (currentPagination.data.length > 0) {
-        const filtered = await applyFilters(currentPagination.data, filters);
+        const filtered = await applyFilters(
+          currentPagination.currentPage,
+          filters
+        );
         setFilteredData(filtered);
       }
 
@@ -429,7 +433,10 @@ const AdminPanel: React.FC = () => {
       }
 
       if (responseData.length > 0) {
-        const filtered = await applyFilters(responseData, currentFilters);
+        const filtered = await applyFilters(
+          currentPagination.currentPage,
+          currentFilters
+        );
         setFilteredData(filtered);
       }
     } catch (error: any) {
@@ -475,18 +482,25 @@ const AdminPanel: React.FC = () => {
   }, [permissions.hasChildBiositeAccess, userId, viewMode]); // Agregar viewMode a las dependencias
 
   // Efecto para cambios de paginación - CORREGIDO
-  useEffect(() => {
-    if (!initialized) return;
 
-    loadData();
-  }, [
-    initialized,
-    getCurrentPagination().currentPage,
-    getCurrentPagination().pageSize,
-  ]);
+  ///////////////////PRIMERO ESTE///////////////////TERCERO////////////////
 
   // Efecto para aplicar filtros cuando cambian los datos - CORREGIDO
+  /////////////////segundo///////////////////////
+  useEffect(() => {
+    const applyFiltersAsync = async () => {
+      const currentPagination = getCurrentPagination();
+      if (currentPagination.data.length > 0) {
+        const filtered = await applyFilters(
+          currentPagination.currentPage,
+          currentFilters
+        );
+        setFilteredData(filtered);
+      }
+    };
 
+    applyFiltersAsync();
+  }, [currentFilters, getCurrentPagination().currentPage]);
   const toggleBiositeExpansion = useCallback(
     (biositeId: string) => {
       const wasExpanded = expandedBiosite === biositeId;
