@@ -99,9 +99,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     fetchBusinessCardByUserId,
     generarBusinessQR,
   } = useBusinessCard();
-  const {
-    user
-  } = useUser();
 
   const { fetchUser } = useUser();
 
@@ -208,7 +205,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
       `TITLE:${cardData.title || ""}`,
       `ORG:${cardData.company || ""}`,
       `EMAIL;TYPE=INTERNET:${cardData.email || ""}`,
-      `TEL;TYPE=CELL:${user.phone || cardData.phone || ""}`,
+      `TEL;TYPE=CELL:${cardData.phone || ""}`,
       `URL:${cardData.website || ""}`,
       "END:VCARD",
     ].join("\r\n");
@@ -495,7 +492,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                         </div>
                       </div>
                     )}
-                  {(cardData.name || cardData.email || user.phone || cardData.phone ) && (
+                  {(cardData.name || cardData.email || cardData.phone) && (
                     <div className="border-t flex w-full justify-center bg-[#96C121]/80">
                       <button
                         onClick={downloadVCard}
@@ -547,10 +544,10 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-500 mb-1">Teléfono</p>
                           <a
-                            href={`tel:${user.phone || cardData.phone}`}
+                            href={`tel:${cardData.phone}`}
                             className="text-sm font-medium text-gray-800 hover:text-green-600 transition-colors"
                           >
-                            {user.phone ||cardData.phone}
+                            {cardData.phone}
                           </a>
                         </div>
                       </div>
