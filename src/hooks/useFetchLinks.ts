@@ -3,7 +3,6 @@ import apiService from "../service/apiService";
 import { LinksApi} from "../constants/EndpointsRoutes.ts";
 import type {Link, CreateLinkDto, UpdateLinkDto} from "../interfaces/Links.ts";
 
-// Link type constants
 const LINK_TYPES = {
     SOCIAL: 'social',
     REGULAR: 'regular',
@@ -60,7 +59,6 @@ export const useFetchLinks = (biositeId?: string) => {
             const newLink = await apiService.create<CreateLinkDto, Link>(LinksApi, linkData);
             console.log("Link created:", newLink);
 
-            // Update local state
             setLinks(prev => [...prev, newLink]);
             return newLink;
         } catch (error: any) {
@@ -82,7 +80,6 @@ export const useFetchLinks = (biositeId?: string) => {
             const updatedLink = await apiService.update<UpdateLinkDto>(LinksApi, linkId, updateData);
             console.log("Link updated:", updatedLink);
 
-            // Update local state
             setLinks(prev =>
                 prev.map(link =>
                     link.id === linkId
@@ -132,7 +129,6 @@ export const useFetchLinks = (biositeId?: string) => {
             await apiService.patch(`/links/reorder/${biositeId}`, { links: reorderedLinks });
             console.log("Links reordered successfully");
 
-            // Update local state
             setLinks(prev => {
                 const updated = [...prev];
                 reorderedLinks.forEach(({ id, orderIndex }) => {
@@ -164,7 +160,6 @@ export const useFetchLinks = (biositeId?: string) => {
             const updatedLink = await apiService.update<UpdateLinkDto>("/links", linkId, { isActive });
             console.log("Link status updated:", updatedLink);
 
-            // Update local state
             setLinks(prev =>
                 prev.map(link =>
                     link.id === linkId
@@ -184,19 +179,16 @@ export const useFetchLinks = (biositeId?: string) => {
         }
     }, []);
 
-    // Improved filtering using link_type property
     const isSocialLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.SOCIAL) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not a social type
         if (link.link_type && link.link_type !== LINK_TYPES.SOCIAL) {
             return false;
         }
 
-        // Fallback: Use existing logic for backward compatibility
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
 
@@ -208,17 +200,15 @@ export const useFetchLinks = (biositeId?: string) => {
     }, []);
 
     const isRegularLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.REGULAR) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not a regular type
         if (link.link_type && link.link_type !== LINK_TYPES.REGULAR) {
             return false;
         }
 
-        // Fallback: Use existing logic - regular links are those that are not social, app, whatsapp, etc.
         return !isSocialLink(link) &&
             !isAppLink(link) &&
             !isWhatsAppLink(link) &&
@@ -228,17 +218,15 @@ export const useFetchLinks = (biositeId?: string) => {
     }, []);
 
     const isAppLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.APP) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not an app type
         if (link.link_type && link.link_type !== LINK_TYPES.APP) {
             return false;
         }
 
-        // Fallback: Use existing logic
         const labelLower = link.label.toLowerCase();
         const urlLower = link.url.toLowerCase();
 
@@ -253,17 +241,15 @@ export const useFetchLinks = (biositeId?: string) => {
     }, []);
 
     const isWhatsAppLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.WHATSAPP) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not a whatsapp type
         if (link.link_type && link.link_type !== LINK_TYPES.WHATSAPP) {
             return false;
         }
 
-        // Fallback: Use existing logic
         const urlLower = link.url?.toLowerCase() || '';
         const icon = link.icon?.toLowerCase() || '';
 
@@ -274,17 +260,15 @@ export const useFetchLinks = (biositeId?: string) => {
     }, []);
 
     const isMusicLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.MUSIC) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not a music type
         if (link.link_type && link.link_type !== LINK_TYPES.MUSIC) {
             return false;
         }
 
-        // Fallback: Use existing logic
         const labelLower = link.label?.toLowerCase() || '';
         const urlLower = link.url?.toLowerCase() || '';
 
@@ -301,17 +285,15 @@ export const useFetchLinks = (biositeId?: string) => {
     }, []);
 
     const isVideoLink = useCallback((link: Link): boolean => {
-        // Primary: Check link_type property
+
         if (link.link_type === LINK_TYPES.VIDEO) {
             return true;
         }
 
-        // Secondary: Check if it's explicitly not a video type
         if (link.link_type && link.link_type !== LINK_TYPES.VIDEO) {
             return false;
         }
 
-        // Fallback: Use existing logic
         const labelLower = link.label?.toLowerCase() || '';
         const urlLower = link.url?.toLowerCase() || '';
 
@@ -393,7 +375,6 @@ export const useFetchLinks = (biositeId?: string) => {
         deleteLink,
         reorderLinks,
         toggleLinkStatus,
-        // Enhanced filtering methods
         getSocialLinks,
         getRegularLinks,
         getAppLinks,
@@ -401,7 +382,6 @@ export const useFetchLinks = (biositeId?: string) => {
         getMusicLinks,
         getVideoLinks,
         getSocialPostLinks,
-        // Individual type checkers
         isSocialLink,
         isRegularLink,
         isAppLink,
@@ -411,7 +391,6 @@ export const useFetchLinks = (biositeId?: string) => {
         isSocialPostLink,
         clearError,
         resetState,
-        // Constants for external use
         LINK_TYPES
     };
 };

@@ -36,7 +36,6 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
         return null;
     }
 
-    // Generar la URL de WhatsApp
     const generateWhatsAppUrl = (phone: string, message: string): string => {
         const cleanPhone = phone.replace(/[^\d+]/g, '');
         const encodedMessage = encodeURIComponent(message.trim());
@@ -47,15 +46,15 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
         e.preventDefault();
 
         if (isExposedRoute && handleWhatsAppLinkClick) {
-            // En vista pública con analytics
+
             const url = generateWhatsAppUrl(link.phone, link.message);
             handleWhatsAppLinkClick(link.id, url);
         } else if (isExposedRoute) {
-            // En vista pública sin analytics
+
             const url = generateWhatsAppUrl(link.phone, link.message);
             window.open(url, '_blank');
         } else {
-            // En preview, navegar a la página de configuración
+
             onWhatsAppClick && onWhatsAppClick(e);
         }
     };

@@ -18,7 +18,7 @@ import { useTemplates } from "../hooks/useTemplates.ts";
 import { useUser } from "../hooks/useUser.ts";
 import { useAnalytics } from "../hooks/useAnalytics.ts";
 import PublicWhatsAppButton from "../components/layers/AddMoreSections/WhattsApp/PublicWhatsAppButton.tsx";
-import { useLinkProcessing, LINK_TYPES } from "../hooks/useLinkProcessing.ts";
+import { useLinkProcessing } from "../hooks/useLinkProcessing.ts";
 import {
     isValidImageUrl,
     getThemeConfig,

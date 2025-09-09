@@ -28,10 +28,8 @@ export const useLivePreviewLogic = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Determinar si estamos en la ruta expuesta
     const isExposedRoute = location.pathname === '/expoced';
 
-    // Fetch user data when component mounts
     useEffect(() => {
         const userId = Cookies.get('userId');
         if (userId && !user) {

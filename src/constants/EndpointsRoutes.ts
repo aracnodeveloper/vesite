@@ -28,6 +28,15 @@ export const getSectionsByUserApi = "/sections/user"; // GET /:userId
 export const getSectionsByBiositeApi = "/section/biosite"; // GET /:biositeId
 export const reorderSectionsApi = "/section/reorder"; // PATCH /:biositeId
 
+//Text Blocks (for Carousel)
+export const textsBlocksApi = "/texts-blocks";
+export const createTextsBlockApi = "/texts-blocks"; // POST
+export const getTextsBlocksApi = "/texts-blocks"; // GET
+export const getTextsBlockByIdApi = "/texts-blocks"; // GET /{id}
+export const updateTextsBlockApi = "/texts-blocks"; // PATCH /{id}
+export const deleteTextsBlockApi = "/texts-blocks";
+export const BlockImageApi = "/upload/image-block";
+
 //upload
 export const uploadImageApi: string = "/upload/image";
 export const deleteImageApi: string = "/upload/image"; // DELETE /{filename}

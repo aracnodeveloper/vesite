@@ -124,4 +124,5 @@ export interface AdminChildBiositesTableProps {
     formatDate: (dateString?: string) => string;
     parseVCardData: (businessCard: any) => any;
     categorizeLinks: (links: LinkData[]) => any;
+    fetchBusinessCard: (ownerId: string) => void;
 }

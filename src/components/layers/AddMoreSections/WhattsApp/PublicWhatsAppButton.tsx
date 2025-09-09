@@ -18,7 +18,7 @@ interface PublicWhatsAppButtonProps {
             secondary: string;
         };
     };
-    onLinkClick?: (linkId: string, url: string) => void; // Para analytics
+    onLinkClick?: (linkId: string, url: string) => void;
 }
 
 const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
@@ -26,37 +26,31 @@ const PublicWhatsAppButton: React.FC<PublicWhatsAppButtonProps> = ({
                                                                        themeConfig,
                                                                        onLinkClick
                                                                    }) => {
-    // Filtrar solo enlaces activos
+
     const activeWhatsAppLinks = whatsAppLinks.filter(link => link.isActive);
 
-    // Si no hay enlaces activos, no mostrar nada
     if (!activeWhatsAppLinks || activeWhatsAppLinks.length === 0) {
         return null;
     }
 
-    // Generar URL de WhatsApp
     const generateWhatsAppUrl = (phone: string, message: string): string => {
         const cleanPhone = phone.replace(/[^\d+]/g, '');
         const encodedMessage = encodeURIComponent(message.trim());
         return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
     };
 
-    // Manejar click en el botón
     const handleClick = (link: WhatsAppLink) => async (e: React.MouseEvent) => {
         e.preventDefault();
 
         const url = generateWhatsAppUrl(link.phone, link.message);
 
-        // Si hay función de analytics, usarla
         if (onLinkClick) {
             await onLinkClick(link.id, url);
         }
 
-        // Abrir WhatsApp
         window.open(url, '_blank');
     };
 
-    // Truncar texto largo
     const truncateText = (text: string, maxLength: number = 40): string => {
         if (text.length <= maxLength) return text;
         return `${text.substring(0, maxLength)}...`;

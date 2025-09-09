@@ -82,6 +82,7 @@ const AdminPanel: React.FC = () => {
     sortOrder: "desc",
   });
   const [filteredData, setFilteredData] = useState<BiositeFull[]>([]);
+  const [BioData, setBioData] = useState<BiositeFull[]>([]);
 
   // Diferentes paginaciones para diferentes vistas
   const allBiositesPagination = usePagination<BiositeFull>({
@@ -405,6 +406,7 @@ const AdminPanel: React.FC = () => {
       currentPagination.setError(null);
 
       let responseData: BiositeFull[] = [];
+      let responseBioData: BiositeFull[] = [];
 
       if (shouldShowAllBiosites) {
         // SUPER_ADMIN viendo todos los biosites
@@ -417,7 +419,8 @@ const AdminPanel: React.FC = () => {
       } else {
         // ADMIN o SUPER_ADMIN viendo biosites hijos
         const childBiosites = await fetchChildBiosites(userId);
-        responseData = childBiosites;
+        responseBioData = childBiosites;
+        setBioData(responseBioData);
 
         // Para vista de hijos, simular paginación local
         const startIndex =
@@ -815,7 +818,7 @@ const AdminPanel: React.FC = () => {
             />
           ) : (
             <AdminChildBiositesTable
-              biosites={filteredData}
+              biosites={BioData}
               totalBiosites={filteredData.length}
               loading={childBiositesPagination.loading}
               biositeLinks={biositeLinks}
@@ -836,6 +839,7 @@ const AdminPanel: React.FC = () => {
               setAnalyticsData={setAnalyticsData}
               formatDate={formatDate}
               parseVCardData={parseVCardData}
+              fetchBusinessCard={fetchBusinessCard}
             />
           )}
         </div>
