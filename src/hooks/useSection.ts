@@ -145,31 +145,24 @@ export const useSections = () => {
             },
             {
                 biositeId,
-                titulo: 'Galeria',
-                icon: 'gallery',
-                descripcion: 'Image carousel gallery',
-                orderIndex: 6,
-            },
-            {
-                biositeId,
                 titulo: 'Video',
                 icon: 'video',
                 descripcion: 'YouTube videos',
-                orderIndex: 7,
+                orderIndex: 6,
             },
             {
                 biositeId,
                 titulo: 'Music / Podcast',
                 icon: 'music',
                 descripcion: 'Audio content',
-                orderIndex: 8,
+                orderIndex: 7,
             },
             {
                 biositeId,
                 titulo: 'Social Post',
                 icon: 'instagram',
                 descripcion: 'Instagram posts',
-                orderIndex: 9,
+                orderIndex: 8,
             },
         ];
 
@@ -235,18 +228,6 @@ export const useSections = () => {
                     await createSection(vCardSection);
                 }
 
-                // Check if Galeria section is missing and add it
-                const hasGaleria = existingSections.some(section => section.titulo === 'Galeria');
-                if (!hasGaleria) {
-                    const galeriaSection: CreateSectionData = {
-                        biositeId,
-                        titulo: 'Galeria',
-                        icon: 'gallery',
-                        descripcion: 'Image carousel gallery',
-                        orderIndex: existingSections.length + 2,
-                    };
-                    await createSection(galeriaSection);
-                }
 
                 return await getSectionsByBiosite(biositeId);
             }
