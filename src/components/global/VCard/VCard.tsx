@@ -100,7 +100,13 @@ const VCardButton: React.FC<VCardButtonProps> = ({
     generarBusinessQR,
   } = useBusinessCard();
 
-  const { fetchUser } = useUser();
+  const { fetchUser, user } = useUser();
+  useEffect(() => {
+
+    if (currentUserId && !user) {
+      fetchUser(userId);
+    }
+  }, [fetchUser, user]);
 
   const loadUserData = useCallback(async () => {
     const validUserId = getCurrentUserId();
@@ -205,7 +211,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
       `TITLE:${cardData.title || ""}`,
       `ORG:${cardData.company || ""}`,
       `EMAIL;TYPE=INTERNET:${cardData.email || ""}`,
-      `TEL;TYPE=CELL:${cardData.phone || ""}`,
+      `TEL;TYPE=CELL:${user.phone || cardData.phone || ""}`,
       `URL:${cardData.website || ""}`,
       "END:VCARD",
     ].join("\r\n");
@@ -233,7 +239,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
   const getAvatarImage = () => {
     if (avatarError || !biosite?.avatarImage) {
-      console.log("Using default avatar - error or no image");
       return imgP;
     }
 
@@ -492,7 +497,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                         </div>
                       </div>
                     )}
-                  {(cardData.name || cardData.email || cardData.phone) && (
+                  {(cardData.name || cardData.email || user.phone || cardData.phone) && (
                     <div className="border-t flex w-full justify-center bg-[#96C121]/80">
                       <button
                         onClick={downloadVCard}
@@ -538,16 +543,16 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                       </div>
                     )}
 
-                    {cardData.phone && (
+                    {(user.phone || cardData.phone) && (
                       <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                         <Phone className="w-5 h-5 text-green-600 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-500 mb-1">Teléfono</p>
                           <a
-                            href={`tel:${cardData.phone}`}
+                            href={`tel:${user.phone ||cardData.phone}`}
                             className="text-sm font-medium text-gray-800 hover:text-green-600 transition-colors"
                           >
-                            {cardData.phone}
+                            {user.phone || cardData.phone}
                           </a>
                         </div>
                       </div>
