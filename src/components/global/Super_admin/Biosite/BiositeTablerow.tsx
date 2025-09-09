@@ -210,6 +210,7 @@ export default function BiositeTableRow({
       {/* Expanded biosite details */}
       {isExpanded && (
         <ExpandedBiositeDetails
+          ischild
           biosite={biosite}
           userBusinessCard={userBusinessCard}
           isLoadingCard={isLoadingCard}

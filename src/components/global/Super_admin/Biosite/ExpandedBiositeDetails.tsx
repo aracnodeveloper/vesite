@@ -22,6 +22,7 @@ export default function ExpandedBiositeDetails({
   loadingBiositeLinks,
   formatDate,
   parseVCardData,
+  ischild = false,
 }: {
   biosite: BiositeFull;
   userBusinessCard;
@@ -30,6 +31,7 @@ export default function ExpandedBiositeDetails({
   loadingBiositeLinks;
   formatDate;
   parseVCardData;
+  ischild?: boolean;
 }) {
   const [update_profile, setUpdate_profile] = useState(false);
   const [update_avatar, setUpdate_avatar] = useState(false);
@@ -165,7 +167,7 @@ export default function ExpandedBiositeDetails({
           {/* Información del Usuario */}
           <div>
             <h4 className="text-sm font-semibold text-gray-700 mb-2">
-              Información del Usuario Hijo
+              Información del Usuario{ischild !== false ? " Hijo" : ""}
               {error && (
                 <span className="ml-2 text-xs text-red-600 font-normal">
                   (Error al cargar datos)
@@ -251,16 +253,11 @@ export default function ExpandedBiositeDetails({
           <div>
             <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
               <Database className="w-4 h-4 mr-2" />
-              Tarjeta Digital del Usuario Hijo
+              Tarjeta Digital del Usuario{ischild !== false ? " Hijo" : ""}
             </h4>
 
             {isLoadingCard ? (
-              <div className="bg-white p-4 rounded border flex items-center justify-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-2"></div>
-                <span className="text-sm text-gray-600">
-                  Cargando V-Card...
-                </span>
-              </div>
+              <Loading />
             ) : userBusinessCard ? (
               <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                 {/* QR Code Section */}
@@ -423,7 +420,7 @@ export default function ExpandedBiositeDetails({
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                   <LinkIcon className="w-4 h-4 text-purple-500 mr-2" />
-                  Enlaces del Biosite Hijo ({currentBiositeLinks.length})
+                  Enlaces del Biosite{ischild !== false ? " Hijo" : ""}
                   {isLoadingLinks && <Loading />}
                 </h4>
 
