@@ -1,30 +1,21 @@
-// styles.tsx - Configuración de fuentes seguras
 import { usePreview } from "../context/PreviewContext";
 import React, { useState } from "react";
 
-// Fuentes web seguras con fallbacks
 const fontOptions = [
-    // Fuentes básicas (funcionan en todos lados)
     { name: "Arial", value: "Arial, sans-serif" },
     { name: "Times New Roman", value: "Times New Roman, Times, serif" },
     { name: "Courier New", value: "Courier New, Courier, monospace" },
     { name: "Georgia", value: "Georgia, Times, serif" },
     { name: "Verdana", value: "Verdana, Geneva, sans-serif" },
     { name: "Helvetica", value: "Helvetica, Arial, sans-serif" },
-
-    // Fuentes del sistema con fallbacks fuertes
     { name: "System UI", value: "system-ui, Arial, sans-serif" },
     { name: "Segoe UI", value: "Segoe UI, Arial, sans-serif" },
-
     { name: "Serif Stack", value: "Georgia, Times New Roman, Times, serif" },
     { name: "Mono Stack", value: "Courier New, Monaco, monospace" },
-
-    // Opciones adicionales probadas
     { name: "Century Gothic", value: "Century Gothic, Arial, sans-serif" },
     { name: "Lucida Console", value: "Lucida Console, Courier New, monospace" },
 ];
 
-// Si quieres usar Google Fonts (requiere importarlas en el HTML)
 const googleFontOptions = [
     { name: "Open Sans", value: "'Open Sans', Arial, sans-serif" },
     { name: "Roboto", value: "'Roboto', Arial, sans-serif" },
@@ -42,10 +33,10 @@ const colorCategories = {
     light: [
         { name: "Blanco", value: "#ffffff", textColor: "#000000", accentColor: "#f3f4f6" },
         { name: "Lavanda Suave", value: "#EAE2F2", textColor: "#15074D", accentColor: "#DDD6FE87" },
-        { name: "Amarillo ", value: "#FDF46B", textColor: "#92400E", accentColor: "#FEF3C770" },
+        { name: "Terracota", value: "#dcc6ad", textColor: "#92400E", accentColor: "#FEF3C770" },
         { name: "Verde Lima", value: "#F1FEDD", textColor: "#1A4442", accentColor: "#D1FAE554" },
         { name: "Azul Jeans", value: "#E2EEEE", textColor: "#061861", accentColor: "#DBEAFE" },
-        { name: "Beige Cálido", value: "#F3F0E7", textColor: "#92400E", accentColor: "#FEF7CD" },
+        { name: "Beige Cálido", value: "#F3F0E7", textColor: "#92400E", accentColor: "#dbdfca" },
         { name: "Rosa Pálido", value: "#EFDBDB", textColor: "#272727", accentColor: "#FECACA7C" },
         { name: "Gradiente Seoul", value: "linear-gradient(180deg, #A7F3D0 0%, #F3E8FF 100%)", textColor: "#4D1A81", accentColor: "#E9D5FF6" },
         { name: "Rosa Berlin", value: "linear-gradient(135deg, #E8D3C1 0%, #EC9FE4 100%)", textColor: "#000000", accentColor: "#F3E8FF7C" },
