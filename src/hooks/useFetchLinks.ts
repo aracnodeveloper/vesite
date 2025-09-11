@@ -251,10 +251,8 @@ export const useFetchLinks = (biositeId?: string) => {
         }
 
         const urlLower = link.url?.toLowerCase() || '';
-        const icon = link.icon?.toLowerCase() || '';
 
         return (
-            icon === 'whatsapp' ||
             urlLower.includes('api.whatsapp.com')
         );
     }, []);

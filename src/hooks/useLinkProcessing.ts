@@ -57,6 +57,8 @@ export const useLinkProcessing = () => {
         if (iconIdentifier === 'social-post' ||
             labelLower.includes('social post') ||
             labelLower.includes('post') ||
+            urlLower.includes("tiktok.com/t/") ||
+
             (urlLower.includes('instagram.com') &&
                 (urlLower.includes('/p/') || urlLower.includes('/reel/')))) {
             return LINK_TYPES.SOCIAL_POST;

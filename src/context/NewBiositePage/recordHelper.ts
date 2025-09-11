@@ -1,9 +1,24 @@
 import type { BiositeLink } from "../../interfaces/Biosite";
 import type { Section } from "../../interfaces/sections";
 import type { Section_type } from "./BiositeSection";
+import type {SocialLink} from "../../interfaces/PreviewContext.ts";
+import {socialMediaPlatforms} from "../../media/socialPlataforms.ts";
 
 /**
- * Link type constants for categorizing links
+ * Link type constants for categorizing links - Synchronized with useLinkProcessing
+ */
+export const LINK_TYPES = {
+  SOCIAL: 'social',
+  REGULAR: 'regular',
+  APP: 'app',
+  WHATSAPP: 'whatsapp',
+  MUSIC: 'music',
+  VIDEO: 'video',
+  SOCIAL_POST: 'social-post'
+} as const;
+
+/**
+ * Link category constants for backward compatibility
  */
 export const LINK_CATEGORIES = {
   MUSIC: "MUSIC",
@@ -15,186 +30,246 @@ export const LINK_CATEGORIES = {
  * Gets the order index for a section by its title
  */
 export const getSectionOrderIndex = (
-  sectionTitle: string,
-  sections: Section[]
+    sectionTitle: string,
+    sections: Section[]
 ): number => {
   const section = sections.find((s) => s.titulo === sectionTitle);
   return section?.orderIndex || 999;
 };
 
 /**
- * Finds music-related links from biosite links
+ * Enhanced icon identifier detection - synchronized with useLinkProcessing
  */
-export const getMusicLinks = (
-  links: BiositeLink[],
-  LINK_TYPES: any
-): BiositeLink[] => {
-  if (!links || !Array.isArray(links)) return [];
+const getIconIdentifier = (iconPath: string): string => {
+  const iconMap: { [key: string]: string } = {
+    '/assets/icons/instagram.svg': 'instagram',
+    '/assets/icons/tiktok.svg': 'tiktok',
+    '/assets/icons/X.svg': 'twitter',
+    '/assets/icons/facebook.svg': 'facebook',
+    '/assets/icons/twitch.svg': 'twitch',
+    '/assets/icons/linkdl.svg': 'linkedin',
+    '/assets/icons/snapchat.svg': 'snapchat',
+    '/assets/icons/threads.svg': 'threads',
+    '/assets/icons/gmail.svg': 'email',
+    '/assets/icons/pinterest.svg': 'pinterest',
+    '/assets/icons/spottufy.svg': 'spotify',
+    '/assets/icons/music.svg': 'apple-music',
+    '/assets/icons/discord.svg': 'discord',
+    '/assets/icons/tumblr.svg': 'tumblr',
+    '/assets/icons/whatsapp.svg': 'whatsapp',
+    '/assets/icons/telegram.svg': 'telegram',
+    '/assets/icons/amazon.svg': 'amazon',
+    '/assets/icons/onlyfans.svg': 'onlyfans',
+    '/assets/icons/appstore.svg': 'appstore',
+    '/assets/icons/googleplay.svg': 'googleplay'
+  };
 
-  // First try to find by link_type
-  const musicByType = links.filter(
-    (link) => link.link_type === LINK_TYPES.MUSIC && link.isActive
-  );
-  if (musicByType.length > 0) return musicByType;
+  if (iconPath === 'link') return 'link';
+  if (iconPath === 'social-post') return 'social-post';
+  if (iconPath === 'music-embed') return 'music-embed';
+  if (iconPath === 'video-embed') return 'video-embed';
+  if (iconPath === 'whatsapp') return 'whatsapp';
+  if (iconPath === 'appstore') return 'appstore';
+  if (iconPath === 'googleplay') return 'googleplay';
 
-  // Fallback to existing logic for backward compatibility
-  const musicLinks = links.filter((link) => {
-    const labelLower = link.label?.toLowerCase() || "";
-    const urlLower = link.url?.toLowerCase() || "";
+  if (iconPath === 'svg%3e' || iconPath.includes('%')) {
+    return 'link';
+  }
 
-    return (
-      link.isActive &&
-      (labelLower.includes("music") ||
-        labelLower.includes("spotify") ||
-        urlLower.includes("spotify.com/track/") ||
-        urlLower.includes("open.spotify.com"))
-    );
-  });
+  const fullPath = Object.keys(iconMap).find(path => path.includes(iconPath));
+  if (fullPath) return iconMap[fullPath];
 
-  return musicLinks;
+  const fileName = iconPath.split('/').pop()?.replace('.svg', '') || 'link';
+  return fileName.toLowerCase();
 };
 
 /**
- * Finds social post links from biosite links
+ * Enhanced link type detection - synchronized with useLinkProcessing
  */
-export const getSocialPostLinks = (
-  links: BiositeLink[],
-  LINK_TYPES: any
-): BiositeLink[] => {
-  if (!links || !Array.isArray(links)) return [];
+const detectLinkType = (link: BiositeLink): string => {
+  // First check if link_type is explicitly set
+  if (link.link_type && link.link_type !== null) {
+    return link.link_type;
+  }
 
-  // First try to find by link_type
-  const socialPostByType = links.filter(
-    (link) => link.link_type === LINK_TYPES.SOCIAL_POST && link.isActive
+  const iconIdentifier = getIconIdentifier(link.icon || '');
+  const labelLower = link.label?.toLowerCase() || '';
+  const urlLower = link.url?.toLowerCase() || '';
+
+  // WhatsApp detection
+  if (iconIdentifier === 'whatsapp' ||
+      urlLower.includes('api.whatsapp.com')) {
+    return LINK_TYPES.WHATSAPP;
+  }
+
+  // App store detection
+  if (iconIdentifier === 'appstore' ||
+      iconIdentifier === 'googleplay' ||
+      labelLower.includes('app store') ||
+      labelLower.includes('google play') ||
+      urlLower.includes('apps.apple.com') ||
+      urlLower.includes('play.google.com')) {
+    return LINK_TYPES.APP;
+  }
+
+  // Music detection
+  if (iconIdentifier === 'music-embed' ||
+      labelLower.includes('music') ||
+      labelLower.includes('podcast') ||
+      urlLower.includes('spotify.com/track/') ||
+      urlLower.includes('open.spotify.com') ||
+      urlLower.includes('music.apple.com') ||
+      urlLower.includes('soundcloud.com') ||
+      urlLower.includes('deezer.com') ||
+      urlLower.includes('tidal.com')) {
+    return LINK_TYPES.MUSIC;
+  }
+
+  // Video detection
+  if (iconIdentifier === 'video-embed' ||
+      labelLower.includes('video') ||
+      urlLower.includes('youtube.com/watch') ||
+      urlLower.includes('youtu.be/') ||
+      urlLower.includes('vimeo.com')) {
+    return LINK_TYPES.VIDEO;
+  }
+
+  if (iconIdentifier === 'social-post' ||
+      labelLower.includes('social post') ||
+      labelLower.includes('post') ||
+      labelLower.includes('publicacion') ||
+      labelLower.includes('contenido') ||
+      (urlLower.includes('instagram.com') &&
+          (urlLower.includes('/p/') || urlLower.includes('/reel/')))) {
+    return LINK_TYPES.SOCIAL_POST;
+  }
+
+  // Social media detection
+  const socialPlatforms = [
+    'instagram', 'tiktok', 'x', 'twitter', 'facebook', 'twitch',
+    'linkedin', 'snapchat', 'threads', 'pinterest', 'discord',
+    'tumblr', 'telegram', 'onlyfans', 'amazon', 'gmail', 'spotify', 'youtube'
+  ];
+
+  const isSocialIcon = socialPlatforms.includes(iconIdentifier);
+  const isSocialDomain = socialPlatforms.some(platform =>
+      urlLower.includes(`${platform}.com`) ||
+      urlLower.includes(`${platform}.net`) ||
+      urlLower.includes(`${platform}.tv`)
   );
-  if (socialPostByType.length > 0) return socialPostByType;
+  const isSocialLabel = socialPlatforms.some(platform =>
+      labelLower === platform || labelLower.includes(platform)
+  );
 
-  // Fallback to existing logic for backward compatibility
-  const socialPostLinks = links.filter((link) => {
-    const labelLower = link.label?.toLowerCase() || "";
-    const urlLower = link.url?.toLowerCase() || "";
+  if (isSocialIcon || isSocialDomain || isSocialLabel) {
+    // Special case for YouTube channels vs videos
+    if (urlLower.includes('youtube.com/@') ||
+        (urlLower.includes('youtube.com') && !urlLower.includes('/watch'))) {
+      return LINK_TYPES.SOCIAL;
+    }
+    return LINK_TYPES.SOCIAL;
+  }
 
-    return (
-      link.isActive &&
-      (labelLower.includes("post") ||
-        labelLower.includes("instagram") ||
-        urlLower.includes("instagram.com/p/") ||
-        urlLower.includes("instagram.com/reel/"))
-    );
-  });
-
-  return socialPostLinks;
+  return LINK_TYPES.REGULAR;
 };
 
 /**
- * Finds video-related links from biosite links
- */
-export const getVideoLinks = (
-  links: BiositeLink[],
-  LINK_TYPES: any
-): BiositeLink[] => {
-  if (!links || !Array.isArray(links)) return [];
-
-  // First try to find by link_type
-  const videoByType = links.filter(
-    (link) => link.link_type === LINK_TYPES.VIDEO && link.isActive
-  );
-  if (videoByType.length > 0) return videoByType;
-
-  // Fallback to existing logic for backward compatibility
-  const videoLinks = links.filter((link) => {
-    const labelLower = link.label?.toLowerCase() || "";
-    const urlLower = link.url?.toLowerCase() || "";
-
-    return (
-      link.isActive &&
-      (labelLower.includes("video") ||
-        labelLower.includes("youtube") ||
-        urlLower.includes("youtube.com/watch") ||
-        urlLower.includes("youtu.be/"))
-    );
-  });
-
-  return videoLinks;
-};
-
-/**
- * Helper functions to identify link types
+ * Enhanced helper functions using improved detection logic
  */
 const isSocialLink = (link: BiositeLink): boolean => {
-  const url = link.url?.toLowerCase() || "";
-  const socialPlatforms = [
-    "facebook.com",
-    "instagram.com",
-    "twitter.com",
-    "linkedin.com",
-    "tiktok.com",
-    "youtube.com",
-  ];
-  return (
-    link.link_type == "social" ||
-    socialPlatforms.some((platform) => url.includes(platform))
-  );
+  return detectLinkType(link) === LINK_TYPES.SOCIAL;
 };
 
 const isRegularLink = (link: BiositeLink): boolean => {
-  // Links that are not social, whatsapp, music, video, etc.
-  return !isSocialLink(link) && !isWhatsAppLink(link) && !isMusicLink(link);
+  const linkType = detectLinkType(link);
+  return linkType === LINK_TYPES.REGULAR;
 };
 
 const isWhatsAppLink = (link: BiositeLink): boolean => {
-  const url = link.url?.toLowerCase() || "";
-  const label = link.label?.toLowerCase() || "";
-  return (
-    url.includes("whatsapp") ||
-    label.includes("whatsapp") ||
-    url.includes("wa.me")
-  );
+  return detectLinkType(link) === LINK_TYPES.WHATSAPP;
 };
 
-/**
- * Enhanced link categorization functions
- */
 const isMusicLink = (link: BiositeLink): boolean => {
-  const url = link.url?.toLowerCase() || "";
-  const label = link.label?.toLowerCase() || "";
-  return (
-    link.link_type == "Music / Podcast" ||
-    url.includes("spotify.com") ||
-    url.includes("music.apple.com") ||
-    url.includes("soundcloud.com") ||
-    url.includes("deezer.com") ||
-    url.includes("tidal.com") ||
-    label.includes("music") ||
-    label.includes("spotify") ||
-    label.includes("podcast")
-  );
+  return detectLinkType(link) === LINK_TYPES.MUSIC;
 };
 
 const isVideoLink = (link: BiositeLink): boolean => {
-  const url = link.url?.toLowerCase() || "";
-  const label = link.label?.toLowerCase() || "";
-  return (
-    url.includes("youtube.com") ||
-    url.includes("youtu.be") ||
-    url.includes("vimeo.com") ||
-    url.includes("tiktok.com") ||
-    label.includes("video") ||
-    label.includes("youtube")
-  );
+  return detectLinkType(link) === LINK_TYPES.VIDEO;
+};
+
+const isSocialPostLink = (link: BiositeLink): boolean => {
+  return detectLinkType(link) === LINK_TYPES.SOCIAL_POST;
 };
 
 const isAppLink = (link: BiositeLink): boolean => {
-  const url = link.url?.toLowerCase() || "";
-  const label = link.label?.toLowerCase() || "";
-  return (
-    url.includes("play.google.com") ||
-    url.includes("apps.apple.com") ||
-    url.includes("app.") ||
-    label.includes("app") ||
-    label.includes("aplicación") ||
-    label.includes("aplicacion")
-  );
+  return detectLinkType(link) === LINK_TYPES.APP;
+};
+
+/**
+ * Finds music-related links using enhanced detection
+ */
+export const getMusicLinks = (
+    links: BiositeLink[],
+    LINK_TYPES_PARAM?: any
+): BiositeLink[] => {
+  if (!links || !Array.isArray(links)) return [];
+
+  return links.filter(link => link.isActive && isMusicLink(link));
+};
+
+/**
+ * Finds social post links using enhanced detection
+ */
+export const getSocialPostLinks = (
+    links: BiositeLink[],
+    LINK_TYPES_PARAM?: any
+): BiositeLink[] => {
+  if (!links || !Array.isArray(links)) return [];
+
+  return links.filter(link => link.isActive && isSocialPostLink(link));
+};
+
+/**
+ * Finds video-related links using enhanced detection
+ */
+export const getVideoLinks = (
+    links: BiositeLink[],
+    LINK_TYPES_PARAM?: any
+): BiositeLink[] => {
+  if (!links || !Array.isArray(links)) return [];
+
+  return links.filter(link => link.isActive && isVideoLink(link));
+};
+
+/**
+ * Enhanced link validation - filters out links that shouldn't be treated as regular links
+ */
+const isValidRegularLink = (link: BiositeLink): boolean => {
+  if (!link.isActive) return false;
+
+  const labelLower = link.label?.toLowerCase() || '';
+  const urlLower = link.url?.toLowerCase() || '';
+
+  const excludedPatterns = [
+    () => urlLower.includes("api.whatsapp.com"),
+
+    () => labelLower.includes('app store') || labelLower.includes('appstore') || urlLower.includes('apps.apple.com'),
+    () => labelLower.includes('google play') || labelLower.includes('googleplay') || urlLower.includes('play.google.com'),
+
+    () => labelLower.includes('music') || labelLower.includes('soundcloud') || urlLower.includes('open.spotify.com'),
+    () => urlLower.includes('music.apple.com') || urlLower.includes('soundcloud.com'),
+    () => labelLower.includes('apple music') || labelLower.includes('audio') || labelLower.includes('music embed'),
+
+    () => labelLower.includes('video') || labelLower.includes('vimeo'),
+    () => urlLower.includes('youtube.com/watch') || urlLower.includes('youtu.be') || urlLower.includes('vimeo.com'),
+    () => labelLower.includes('tiktok video'),
+
+    () => labelLower.includes('post') || labelLower.includes('publicacion') || labelLower.includes('contenido'),
+    () => labelLower.includes('social post') || urlLower.includes('instagram.com/p/'),
+    () => urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/'))
+  ];
+
+  return !excludedPatterns.some(check => check());
 };
 
 /**
@@ -202,148 +277,265 @@ const isAppLink = (link: BiositeLink): boolean => {
  * Respects the order of sections passed as parameter
  */
 export const groupLinksBySection = (
-  links: BiositeLink[],
-  sections: Section[]
+    links: BiositeLink[],
+    sections: Section[]
 ): Map<string, BiositeLink[]> => {
   const grouped = new Map<string, BiositeLink[]>();
 
-  // Initialize groups for all sections IN THE SAME ORDER as provided
-  // Initialize groups preserving the order from sections array
   // Initialize groups preserving the order from sections array
   sections.forEach((section) => {
     grouped.set(section.titulo, []);
   });
 
-  // Group active links by matching section titles
+  // Group active links by matching section titles with strict priority matching
   links
-    .filter((link) => link.isActive)
-    .forEach((link) => {
-      // Enhanced matching logic - find the matching section from the ordered list
-      const matchingSection = sections.find((section) => {
-        const sectionTitle = section.titulo.toLowerCase();
-        const linkLabel = link.label?.toLowerCase() || "";
+      .filter((link) => link.isActive)
+      .forEach((link) => {
+        const linkType = detectLinkType(link);
+        const sectionTitle = findBestSectionMatch(link, linkType, sections);
 
-        // Direct label matching
-        if (sectionTitle === linkLabel) return true;
-
-        // Category-based matching
-        if (sectionTitle.includes("social") && isSocialLink(link)) return true;
-        if (sectionTitle.includes("links") && isRegularLink(link)) return true;
-        if (sectionTitle.includes("contactame") && isWhatsAppLink(link))
-          return true;
-        if (sectionTitle.includes("music") && isMusicLink(link)) return true;
-        if (sectionTitle.includes("video") && isVideoLink(link)) return true;
-        if (sectionTitle.includes("app") && isAppLink(link)) return true;
-
-        // Partial matching
-        return (
-          sectionTitle.includes(linkLabel) || linkLabel.includes(sectionTitle)
-        );
+        if (sectionTitle && grouped.has(sectionTitle)) {
+          grouped.get(sectionTitle)?.push(link);
+        }
       });
-
-      if (matchingSection) {
-        grouped.get(matchingSection.titulo)?.push(link);
-      }
-    });
 
   return grouped;
 };
 
+export const findPlatformForLink = (link: SocialLink) => {
+  return socialMediaPlatforms.find(platform => {
+    const linkLabelLower = link.label.toLowerCase();
+    const platformNameLower = platform.name.toLowerCase();
+    const platformIdLower = platform.id.toLowerCase();
+
+    return (
+        linkLabelLower === platformNameLower ||
+        linkLabelLower.includes(platformIdLower) ||
+        link.icon === platform.icon ||
+        linkLabelLower.replace(/[^a-z0-9]/g, '') === platformNameLower.replace(/[^a-z0-9]/g, '')
+    );
+  });
+};
+
 /**
- * Determines which section a link belongs to based on various criteria
+ * Helper function to find the best section match for a link
  */
-const determineLinkSection = (
-  link: BiositeLink,
-  sectionsInfo: { titulo: string; orderIndex: number }[],
-  LINK_TYPES?: any
-): { titulo: string; orderIndex: number } | null => {
+const findBestSectionMatch = (
+    link: BiositeLink,
+    linkType: string,
+    sections: Section[]
+): string | null => {
   const linkLabel = link.label?.toLowerCase() || "";
 
-  // Try exact match first
-  let matchingSection = sectionsInfo.find(
-    (s) => s.titulo.toLowerCase() === linkLabel
-  );
-  if (matchingSection) return matchingSection;
+  // PRIORITY 1: Explicit link_type matching with strict rules
+  if (link.link_type) {
 
-  // Try matching by link_type if available
-  if (LINK_TYPES && link.link_type) {
-    if (link.link_type === LINK_TYPES.MUSIC) {
-      matchingSection = sectionsInfo.find(
-        (s) =>
+    switch (link.link_type) {
+      case 'whatsapp':
+        return sections.find(s =>
+            s.titulo.toLowerCase().includes("contactame") ||
+            s.titulo.toLowerCase().includes("contacto") ||
+            s.titulo.toLowerCase().includes("whatsapp")
+        )?.titulo || null;
+
+      case 'social_post':
+        return sections.find(s =>
+            s.titulo.toLowerCase().includes("Social Post") ||
+            s.titulo.toLowerCase().includes("social_post") ||
+            s.titulo === "Social Post"
+        )?.titulo || null;
+
+      case 'music':
+        return sections.find(s =>
+            s.titulo.toLowerCase().includes("music") ||
+            s.titulo.toLowerCase().includes("música") ||
+            s.titulo.toLowerCase().includes("podcast")
+        )?.titulo || null;
+
+      case 'video':
+        return sections.find(s =>
+            s.titulo.toLowerCase().includes("video") ||
+            s.titulo.toLowerCase().includes("vídeo")
+        )?.titulo || null;
+
+      case 'social':
+        // Only match social section if it's NOT a WhatsApp link
+        if (!isWhatsAppLink(link) && !isSocialPostLink(link)) {
+          return sections.find(s =>
+              s.titulo.toLowerCase().includes("social") ||
+              s.titulo.toLowerCase().includes("redes")
+          )?.titulo || null;
+        }
+        break;
+
+      case 'regular':
+        if (isValidRegularLink(link)) {
+          return sections.find(s =>
+              s.titulo.toLowerCase().includes("links") ||
+              s.titulo.toLowerCase().includes("enlaces")
+          )?.titulo || null;
+        }
+        break;
+    }
+  }
+
+  // PRIORITY 2: Direct label matching
+  const exactMatch = sections.find(s => s.titulo.toLowerCase() === linkLabel);
+  if (exactMatch) return exactMatch.titulo;
+
+  // PRIORITY 3: Type-based matching with strict hierarchy
+  switch (linkType) {
+    case LINK_TYPES.WHATSAPP:
+      return sections.find(s =>
+          s.titulo.toLowerCase().includes("contactame") ||
+          s.titulo.toLowerCase().includes("contacto") ||
+          s.titulo.toLowerCase().includes("whatsapp")
+      )?.titulo || null;
+
+    case LINK_TYPES.SOCIAL_POST:
+      return sections.find(s =>
+          s.titulo.toLowerCase().includes("Social Post")
+      )?.titulo || null;
+
+    case LINK_TYPES.MUSIC:
+      return sections.find(s =>
           s.titulo.toLowerCase().includes("music") ||
           s.titulo.toLowerCase().includes("música") ||
           s.titulo.toLowerCase().includes("podcast")
-      );
-      if (matchingSection) return matchingSection;
-    }
+      )?.titulo || null;
 
-    if (link.link_type === LINK_TYPES.VIDEO) {
-      matchingSection = sectionsInfo.find(
-        (s) =>
+    case LINK_TYPES.VIDEO:
+      return sections.find(s =>
           s.titulo.toLowerCase().includes("video") ||
           s.titulo.toLowerCase().includes("vídeo")
-      );
-      if (matchingSection) return matchingSection;
-    }
+      )?.titulo || null;
 
-    if (link.link_type === LINK_TYPES.SOCIAL_POST) {
-      matchingSection = sectionsInfo.find(
-        (s) =>
+    case LINK_TYPES.SOCIAL:
+      return sections.find(s =>
           s.titulo.toLowerCase().includes("social") ||
-          s.titulo.toLowerCase().includes("post")
+          s.titulo.toLowerCase().includes("redes")
+      )?.titulo || null;
+
+    case LINK_TYPES.APP:
+      return sections.find(s =>
+          s.titulo.toLowerCase().includes("app") ||
+          s.titulo.toLowerCase().includes("aplicación") ||
+          s.titulo.toLowerCase().includes("aplicacion")
+      )?.titulo || null;
+
+    case LINK_TYPES.REGULAR:
+      if (isValidRegularLink(link)) {
+        return sections.find(s =>
+            s.titulo.toLowerCase().includes("links") ||
+            s.titulo.toLowerCase().includes("enlaces")
+        )?.titulo || null;
+      }
+      break;
+  }
+
+  // PRIORITY 4: Partial matching fallback (only for regular links)
+  if (linkType === LINK_TYPES.REGULAR && isValidRegularLink(link)) {
+    const partialMatch = sections.find(s => {
+      const sectionTitle = s.titulo.toLowerCase();
+      return sectionTitle.includes(linkLabel) || linkLabel.includes(sectionTitle);
+    });
+
+    if (partialMatch) return partialMatch.titulo;
+
+    // Final fallback to Links section
+    return sections.find(s =>
+        s.titulo.toLowerCase().includes("links") ||
+        s.titulo.toLowerCase().includes("enlaces")
+    )?.titulo || null;
+  }
+
+  return null;
+};
+
+/**
+ * Enhanced section determination with improved link type detection
+ */
+const determineLinkSection = (
+    link: BiositeLink,
+    sectionsInfo: { titulo: string; orderIndex: number }[],
+    LINK_TYPES_PARAM?: any
+): { titulo: string; orderIndex: number } | null => {
+  const linkLabel = link.label?.toLowerCase() || "";
+  const linkType = detectLinkType(link);
+
+  // Try exact match first
+  let matchingSection = sectionsInfo.find(
+      (s) => s.titulo.toLowerCase() === linkLabel
+  );
+  if (matchingSection) return matchingSection;
+
+  // Enhanced type-based matching using improved detection
+  switch (linkType) {
+    case LINK_TYPES.MUSIC:
+      matchingSection = sectionsInfo.find(
+          (s) =>
+              s.titulo.toLowerCase().includes("music") ||
+              s.titulo.toLowerCase().includes("música") ||
+              s.titulo.toLowerCase().includes("podcast")
       );
-      if (matchingSection) return matchingSection;
-    }
+      break;
+
+    case LINK_TYPES.VIDEO:
+      matchingSection = sectionsInfo.find(
+          (s) =>
+              s.titulo.toLowerCase().includes("video") ||
+              s.titulo.toLowerCase().includes("vídeo")
+      );
+      break;
+
+    case LINK_TYPES.SOCIAL_POST:
+      matchingSection = sectionsInfo.find(
+          (s) =>
+              s.titulo.toLowerCase().includes("social") ||
+              s.titulo.toLowerCase().includes("post") ||
+              s.titulo.toLowerCase().includes("publicacion")
+      );
+      break;
+
+    case LINK_TYPES.SOCIAL:
+      matchingSection = sectionsInfo.find(
+          (s) =>
+              s.titulo.toLowerCase().includes("social") ||
+              s.titulo.toLowerCase().includes("redes")
+      );
+      break;
+
+    case LINK_TYPES.WHATSAPP:
+      matchingSection = sectionsInfo.find(
+          (s) =>
+              s.titulo.toLowerCase().includes("contactame") ||
+              s.titulo.toLowerCase().includes("contacto") ||
+              s.titulo.toLowerCase().includes("whatsapp")
+      );
+      break;
+
+    case LINK_TYPES.APP:
+      matchingSection = sectionsInfo.find(
+          (s) =>
+              s.titulo.toLowerCase().includes("app") ||
+              s.titulo.toLowerCase().includes("aplicación") ||
+              s.titulo.toLowerCase().includes("aplicacion")
+      );
+      break;
+
+    case LINK_TYPES.REGULAR:
+      // For regular links, only include if they pass validation
+      if (isValidRegularLink(link)) {
+        matchingSection = sectionsInfo.find(
+            (s) =>
+                s.titulo.toLowerCase().includes("links") ||
+                s.titulo.toLowerCase().includes("enlaces")
+        );
+      }
+      break;
   }
 
-  // Enhanced category-based matching using improved helper functions
-  if (isMusicLink(link)) {
-    matchingSection = sectionsInfo.find(
-      (s) =>
-        s.titulo.toLowerCase().includes("music") ||
-        s.titulo.toLowerCase().includes("música") ||
-        s.titulo.toLowerCase().includes("podcast")
-    );
-    if (matchingSection) return matchingSection;
-  }
-
-  if (isVideoLink(link)) {
-    matchingSection = sectionsInfo.find(
-      (s) =>
-        s.titulo.toLowerCase().includes("video") ||
-        s.titulo.toLowerCase().includes("vídeo")
-    );
-    if (matchingSection) return matchingSection;
-  }
-
-  if (isSocialLink(link)) {
-    matchingSection = sectionsInfo.find(
-      (s) =>
-        s.titulo.toLowerCase().includes("social") ||
-        s.titulo.toLowerCase().includes("redes")
-    );
-    if (matchingSection) return matchingSection;
-  }
-
-  if (isWhatsAppLink(link)) {
-    matchingSection = sectionsInfo.find(
-      (s) =>
-        s.titulo.toLowerCase().includes("contactame") ||
-        s.titulo.toLowerCase().includes("contacto") ||
-        s.titulo.toLowerCase().includes("whatsapp")
-    );
-    if (matchingSection) return matchingSection;
-  }
-
-  if (isAppLink(link)) {
-    matchingSection = sectionsInfo.find(
-      (s) =>
-        s.titulo.toLowerCase().includes("app") ||
-        s.titulo.toLowerCase().includes("aplicación") ||
-        s.titulo.toLowerCase().includes("aplicacion")
-    );
-    if (matchingSection) return matchingSection;
-  }
+  if (matchingSection) return matchingSection;
 
   // Partial matching fallback
   matchingSection = sectionsInfo.find((s) => {
@@ -352,25 +544,29 @@ const determineLinkSection = (
   });
   if (matchingSection) return matchingSection;
 
-  // Default to "Links" section if exists, otherwise return null
-  return (
-    sectionsInfo.find(
-      (s) =>
-        s.titulo.toLowerCase().includes("links") ||
-        s.titulo.toLowerCase().includes("enlaces")
-    ) || null
-  );
+  // Default to "Links" section if exists for valid regular links, otherwise return null
+  if (linkType === LINK_TYPES.REGULAR && isValidRegularLink(link)) {
+    return (
+        sectionsInfo.find(
+            (s) =>
+                s.titulo.toLowerCase().includes("links") ||
+                s.titulo.toLowerCase().includes("enlaces")
+        ) || null
+    );
+  }
+
+  return null;
 };
 
 /**
- * Enhanced getSectionsRecord function with intelligent section assignment
+ * Enhanced getSectionsRecord function with intelligent section assignment and validation
  */
 export function getSectionsRecord(
-  links: BiositeLink[],
-  sectionsInfo: { titulo: string; orderIndex: number }[],
-  LINK_TYPES?: any
+    links: BiositeLink[],
+    sectionsInfo: { titulo: string; orderIndex: number }[],
+    LINK_TYPES_PARAM?: any
 ) {
-  // Agrupa los links activos por título de sección
+  // Group active and valid links by section title
   const grouped: Record<string, BiositeLink[]> = {};
   for (const section of sectionsInfo) {
     grouped[section.titulo] = [];
@@ -379,9 +575,9 @@ export function getSectionsRecord(
   for (const link of links) {
     if (link.isActive) {
       const matchingSection = determineLinkSection(
-        link,
-        sectionsInfo,
-        LINK_TYPES
+          link,
+          sectionsInfo,
+          LINK_TYPES_PARAM
       );
 
       if (matchingSection) {
@@ -390,12 +586,12 @@ export function getSectionsRecord(
     }
   }
 
-  // Ordena las secciones por orderIndex y elimina títulos repetidos
+  // Sort sections by orderIndex and remove duplicate titles
   const orderedSections = sectionsInfo
-    .filter((v, i, a) => a.findIndex((t) => t.titulo === v.titulo) === i)
-    .sort((a, b) => a.orderIndex - b.orderIndex);
+      .filter((v, i, a) => a.findIndex((t) => t.titulo === v.titulo) === i)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
 
-  // Construye el record final
+  // Build final record
   const sections: Record<string, BiositeLink[]> = {};
   for (const section of orderedSections) {
     sections[section.titulo] = grouped[section.titulo] || [];
@@ -405,38 +601,35 @@ export function getSectionsRecord(
 
 /**
  * Creates an ordered sections record with active links using Section interface
+ * Enhanced with improved validation and filtering
  */
 export const createOrderedSectionsRecord = (
-  links: BiositeLink[],
-  sections: Section[]
+    links: BiositeLink[],
+    sections: Section[]
 ): Map<Section_type, BiositeLink[]> => {
   // Remove duplicates and sort by orderIndex
   const uniqueSections = sections
-    .reduce((acc, current) => {
-      const existing = acc.find((section) => section.titulo === current.titulo);
-      if (!existing) {
-        acc.push(current);
-      } else {
-        // Check if current has more recent update (handle both updatedAt and updated_at properties)
-        const currentDate =
-          current.updatedAt || current.updatedAt || new Date(0);
-        const existingDate =
-          existing.updatedAt || existing.updatedAt || new Date(0);
+      .reduce((acc, current) => {
+        const existing = acc.find((section) => section.titulo === current.titulo);
+        if (!existing) {
+          acc.push(current);
+        } else {
+          // Check if current has more recent update
+          const currentDate = current.updatedAt || current.updatedAt || new Date(0);
+          const existingDate = existing.updatedAt || existing.updatedAt || new Date(0);
 
-        if (
-          new Date(currentDate).getTime() > new Date(existingDate).getTime()
-        ) {
-          const index = acc.findIndex(
-            (section) => section.titulo === current.titulo
-          );
-          acc[index] = current;
+          if (new Date(currentDate).getTime() > new Date(existingDate).getTime()) {
+            const index = acc.findIndex(
+                (section) => section.titulo === current.titulo
+            );
+            acc[index] = current;
+          }
         }
-      }
-      return acc;
-    }, [] as Section[])
-    .sort((a, b) => a.orderIndex - b.orderIndex);
+        return acc;
+      }, [] as Section[])
+      .sort((a, b) => a.orderIndex - b.orderIndex);
 
-  // Group links by section (this will respect the order of uniqueSections)
+  // Group links by section with enhanced validation
   const grouped = groupLinksBySection(links, uniqueSections);
 
   // Create final ordered Map - PRESERVE THE ORDER from uniqueSections
@@ -446,10 +639,10 @@ export const createOrderedSectionsRecord = (
   uniqueSections.forEach((section) => {
     const sectionLinks = grouped.get(section.titulo) || [];
 
-    // Keep sections with links or if it's a vCard section
+    // Keep sections with links or if it's a vCard/Profile section
     const isVCardSection =
-      section.titulo.toLowerCase().includes("vcard") ||
-      section.titulo.toLowerCase().includes("Profile");
+        section.titulo.toLowerCase().includes("vcard") ||
+        section.titulo.toLowerCase().includes("profile");
 
     if (sectionLinks.length > 0 || isVCardSection) {
       orderedMap.set(section.titulo as Section_type, sectionLinks);

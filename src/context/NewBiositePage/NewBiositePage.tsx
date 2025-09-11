@@ -157,7 +157,7 @@ export default function NewBiositePage() {
           defaultAvatar={defaultAvatar}
         />
 
-        <div className={`w-full mb-8 max-w-md mx-auto`}>
+        <div className={`w-full  max-w-md mx-auto`}>
           <UserInfoSection
             biosite={biosite}
             user={user}
@@ -165,7 +165,7 @@ export default function NewBiositePage() {
             themeConfig={themeConfig}
           />
         </div>
-        <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center">
+        <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-2 -mt-2">
           {links &&
             Array.from(links.entries()).map(([sectionId, sectionLinks]) => (
               <BiositeSection
