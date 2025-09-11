@@ -67,6 +67,7 @@ const PublicBiositeView = () => {
   const {
     processLinks,
     findPlatformForLink,
+    filterRealLinks,
     filterRealSocialLinks,
     LINK_TYPES,
   } = useLinkProcessing();
@@ -197,9 +198,12 @@ const PublicBiositeView = () => {
       return (
         link.isActive &&
         (labelLower.includes("post") ||
-          labelLower.includes("instagram") ||
+          labelLower.includes("publicacion") ||
+          labelLower.includes("contenido") ||
+          labelLower.includes("social post") ||
           urlLower.includes("instagram.com/p/") ||
-          urlLower.includes("instagram.com/reel/"))
+          (urlLower.includes("instagram.com") &&
+            (urlLower.includes("/p/") || urlLower.includes("/reel/"))))
       );
     });
 
@@ -219,7 +223,6 @@ const PublicBiositeView = () => {
     );
     if (videoByType) return videoByType;
 
-    // Fallback to existing logic for backward compatibility
     const videoLinks = biositeData.biosite.links.filter((link) => {
       const labelLower = link.label?.toLowerCase() || "";
       const urlLower = link.url?.toLowerCase() || "";
@@ -243,9 +246,10 @@ const PublicBiositeView = () => {
     const socialLinksData = biositeData.socialLinks.filter(
       (link) => link.isActive
     );
-    const regularLinksData = biositeData.regularLinks.filter(
-      (link) => link.isActive
-    );
+    const regularLinksData = biositeData.regularLinks
+      .filter((link) => link.isActive)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    const filteredRegularLinks = filterRealLinks(regularLinksData);
     const realsocialLinks = filterRealSocialLinks(socialLinksData);
 
     const themeConfig = getThemeConfig(biositeData.biosite);
@@ -283,14 +287,14 @@ const PublicBiositeView = () => {
       ),
     });
 
-    if (regularLinksData.length > 0) {
+    if (filteredRegularLinks.length > 0) {
       sectionsArray.push({
         type: "regular",
         orderIndex: getSectionOrderIndex("Links"),
         component: (
           <RegularLinksSection
             key="regular-section"
-            regularLinksData={regularLinksData}
+            regularLinksData={filteredRegularLinks}
             isExposedRoute={isExposedRoute}
             handleLinkClick={analytics.handleLinkClick}
             themeConfig={themeConfig}

@@ -317,10 +317,51 @@ export const useLinkProcessing = () => {
         });
     };
 
+    const filterRealLinks = (links: RegularLink[]) => {
+        return links.filter(link => {
+            if (!link.isActive) return false;
+            const labelLower = link.title.toLowerCase();
+            const urlLower = link.url.toLowerCase();
+
+            if (urlLower.includes("api.whatsapp.com") ||
+                labelLower.includes('app store') ||
+                labelLower.includes('appstore') ||
+                urlLower.includes('apps.apple.com') ||
+                labelLower.includes('google play') ||
+                labelLower.includes('googleplay') ||
+                urlLower.includes('play.google.com') ||
+                labelLower.includes('music') ||
+                labelLower.includes('soundcloud') ||
+                urlLower.includes('open.spotify.com') ||
+                urlLower.includes('music.apple.com') ||
+                urlLower.includes('soundcloud.com') ||
+                labelLower.includes('apple music') ||
+                labelLower.includes('audio') ||
+                labelLower.includes('music embed') ||
+                labelLower.includes('video') ||
+                labelLower.includes('vimeo') ||
+                urlLower.includes('youtube.com/watch') ||
+                urlLower.includes('youtu.be') ||
+                urlLower.includes('vimeo.com') ||
+                labelLower.includes('tiktok video') ||
+                labelLower.includes('post') ||
+                labelLower.includes('publicacion') ||
+                labelLower.includes('contenido') ||
+                labelLower.includes('social post') ||
+                urlLower.includes('instagram.com/p/') ||
+                (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
+            ) {
+                return false;
+            }
+
+            return true;
+        });
+    };
     return {
         processLinks,
         findPlatformForLink,
         filterRealSocialLinks,
+        filterRealLinks,
         detectLinkType,
         LINK_TYPES
     };
