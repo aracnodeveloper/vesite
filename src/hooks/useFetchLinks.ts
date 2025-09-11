@@ -325,6 +325,7 @@ export const useFetchLinks = (biositeId?: string) => {
             labelLower.includes('publicacion') ||
             labelLower.includes('contenido') ||
             labelLower.includes('social post') ||
+            urlLower.includes('instagram.com/p/') ||
             (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
         );
     }, []);

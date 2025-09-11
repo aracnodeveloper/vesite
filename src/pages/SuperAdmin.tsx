@@ -829,6 +829,7 @@ const AdminPanel: React.FC = () => {
               setAnalyticsData={setAnalyticsData}
               formatDate={formatDate}
               parseVCardData={parseVCardData}
+              fetchBusinessCard={fetchBusinessCard}
             />
           ) : (
             <AdminChildBiositesTable

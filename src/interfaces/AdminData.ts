@@ -100,6 +100,7 @@ export interface BiositesTableProps {
     setAnalyticsData: React.Dispatch<React.SetStateAction<{[key: string]: AnalyticsData}>>;
     formatDate: (dateString?: string) => string;
     parseVCardData: (businessCard: BusinessCard | null) => any;
+    fetchBusinessCard: (ownerId: string) => void;
 }
 
 export interface AdminChildBiositesTableProps {
