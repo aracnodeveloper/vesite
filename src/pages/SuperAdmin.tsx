@@ -138,6 +138,7 @@ const AdminPanel: React.FC = () => {
   const applyFilters = useCallback(
     async (
       currentPage: number,
+      size: number,
       filters: FilterState
     ): Promise<BiositeFull[]> => {
       // Crear objeto de parámetros que incluya tanto paginación como filtros
@@ -150,6 +151,7 @@ const AdminPanel: React.FC = () => {
         sortBy: filters.sortBy,
         sortOrder: filters.sortOrder,
         page: currentPage,
+        size: size,
       };
 
       // Filtrar parámetros undefined para enviar solo los necesarios
@@ -174,6 +176,7 @@ const AdminPanel: React.FC = () => {
       if (currentPagination.data.length > 0) {
         const filtered = await applyFilters(
           currentPagination.currentPage,
+          currentPagination.pageSize,
           filters
         );
         setFilteredData(filtered);
@@ -435,6 +438,7 @@ const AdminPanel: React.FC = () => {
       if (responseData.length > 0) {
         const filtered = await applyFilters(
           currentPagination.currentPage,
+          currentPagination.pageSize,
           currentFilters
         );
         setFilteredData(filtered);
@@ -493,6 +497,7 @@ const AdminPanel: React.FC = () => {
       if (currentPagination.data.length > 0) {
         const filtered = await applyFilters(
           currentPagination.currentPage,
+          currentPagination.pageSize,
           currentFilters
         );
         setFilteredData(filtered);
@@ -500,7 +505,11 @@ const AdminPanel: React.FC = () => {
     };
 
     applyFiltersAsync();
-  }, [currentFilters, getCurrentPagination().currentPage]);
+  }, [
+    currentFilters,
+    getCurrentPagination().currentPage,
+    getCurrentPagination().pageSize,
+  ]);
   const toggleBiositeExpansion = useCallback(
     (biositeId: string) => {
       const wasExpanded = expandedBiosite === biositeId;
