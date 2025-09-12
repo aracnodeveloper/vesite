@@ -13,10 +13,9 @@ import {
   UserInfoSection,
 } from "../../components/Preview/LivePreviewComponents";
 import { useUser } from "../../hooks/useUser";
-import { createOrderedSectionsRecord, getSectionsRecord } from "./recordHelper";
+import { createOrderedSectionsRecord } from "./recordHelper";
 import BiositeSection, { Section_type } from "./BiositeSection";
 import ConditionalNavButton from "../../components/ConditionalNavButton";
-import Cardbase from "./CardBase";
 import VCardModal from "./VCardModal";
 import type { VCardData } from "../../types/V-Card";
 
@@ -32,6 +31,18 @@ export default function NewBiositePage() {
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
   }>({});
+
+  // Bloquear scroll cuando el modal VCard está abierto
+  useEffect(() => {
+    if (showVCard) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showVCard]);
 
   useEffect(() => {
     const fetchSections = async () => {
