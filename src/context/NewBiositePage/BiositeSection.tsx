@@ -1,7 +1,6 @@
-import { QRCode } from "antd";
 import type { BiositeLink } from "../../interfaces/Biosite";
 import Cardbase from "./CardBase";
-import { ArrowBigRight, ArrowRight, QrCodeIcon } from "lucide-react";
+import { ArrowRight, QrCodeIcon } from "lucide-react";
 import MusicEmbed from "./MusicEmbed";
 import SocialEmbed from "./SocialEmbed";
 
@@ -72,7 +71,15 @@ export default function BiositeSection({
       case Section_type.Music_Podcast:
         return <MusicEmbed link={links[0]} />;
       case Section_type.Link_de_mi_App:
-        return <div>Link_de_mi_App Section</div>;
+        return (
+          <Cardbase
+            icon={ArrowRight}
+            image={links[0].icon}
+            key={links[0].orderIndex}
+            themeConfig={themeConfig}
+            title={links[0].label}
+          />
+        );
       case Section_type.Social_Post:
         return <SocialEmbed link={links[0]} themeConfig={themeConfig} />;
       case Section_type.Social:
@@ -86,3 +93,6 @@ export default function BiositeSection({
 
   return renderSection();
 }
+//https://www.instagram.com/anthony_ramosc/
+//https://www.facebook.com/anthony.ramosc.7/
+//https://wa.me/5930963296668

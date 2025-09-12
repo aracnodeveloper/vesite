@@ -234,7 +234,7 @@ export default function ExpandedBiositeDetails({
                 {update_profile && (
                   <div className="grid grid-cols-2 gap-x-5 max-w-[200px]">
                     <Button submit disabled={isLoading}>
-                      {isLoading ? <Loading /> : "Guardar"}
+                      {isLoading ? "Cargndo" : "Guardar"}
                     </Button>
                     <Button
                       onClick={onCancel}

@@ -485,12 +485,7 @@ const AdminPanel: React.FC = () => {
     initializeData();
   }, [permissions.hasChildBiositeAccess, userId, viewMode]); // Agregar viewMode a las dependencias
 
-  // Efecto para cambios de paginación - CORREGIDO
-
-  ///////////////////PRIMERO ESTE///////////////////TERCERO////////////////
-
   // Efecto para aplicar filtros cuando cambian los datos - CORREGIDO
-  /////////////////segundo///////////////////////
   useEffect(() => {
     const applyFiltersAsync = async () => {
       const currentPagination = getCurrentPagination();

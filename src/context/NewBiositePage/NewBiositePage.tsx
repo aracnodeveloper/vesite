@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import apiService from "../../service/apiService";
 import type { Section } from "../../interfaces/sections";
 import { getSectionsByBiositeApi } from "../../constants/EndpointsRoutes";
@@ -7,14 +7,12 @@ import { useParams } from "react-router-dom";
 import type { BiositeFull, BiositeLink } from "../../interfaces/Biosite";
 import Loading from "../../components/shared/Loading";
 import { getThemeConfig, isValidImageUrl } from "../../Utils/biositeUtils";
-import { useTemplates } from "../../hooks/useTemplates";
 import {
   AvatarSection,
   BackgroundSection,
   UserInfoSection,
 } from "../../components/Preview/LivePreviewComponents";
 import { useUser } from "../../hooks/useUser";
-import Cardbase from "./CardBase";
 import { createOrderedSectionsRecord, getSectionsRecord } from "./recordHelper";
 import BiositeSection, { Section_type } from "./BiositeSection";
 
@@ -25,8 +23,7 @@ export default function NewBiositePage() {
   const [links, setLinks] = useState<Map<Section_type, BiositeLink[]>>();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } =
-    useTemplates();
+
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
   }>({});
@@ -144,6 +141,7 @@ export default function NewBiositePage() {
           isExposedRoute={isExposedRoute}
           validBackgroundImage={validBackgroundImage}
           imageLoadStates={imageLoadStates}
+          handleImageLoad={setImageLoadStates}
           biosite={biosite}
           themeConfig={themeConfig}
         />
@@ -152,6 +150,7 @@ export default function NewBiositePage() {
           isExposedRoute={isExposedRoute}
           validAvatarImage={validAvatarImage}
           imageLoadStates={imageLoadStates}
+          handleImageLoad={setImageLoadStates}
           biosite={biosite}
           themeConfig={themeConfig}
           defaultAvatar={defaultAvatar}
