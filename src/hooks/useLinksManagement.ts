@@ -121,7 +121,7 @@ export const useLinkOperations = ({
                 label: updateData.label,
                 url: updateData.url,
                 isActive: updateData.isActive,
-                link_type: LINK_TYPES.SOCIAL // Ensure link_type is maintained
+                link_type: LINK_TYPES.SOCIAL
             };
 
             if (updateData.icon) {
@@ -155,7 +155,7 @@ export const useLinkOperations = ({
                 icon: 'link',
                 orderIndex: link.orderIndex,
                 isActive: link.isActive,
-                link_type: LINK_TYPES.REGULAR // Set link_type
+                link_type: LINK_TYPES.REGULAR
             });
 
             console.log("Regular link added:", newLink);
@@ -187,7 +187,7 @@ export const useLinkOperations = ({
                 url: updateData.url,
                 isActive: updateData.isActive,
                 orderIndex: updateData.orderIndex,
-                link_type: LINK_TYPES.REGULAR // Ensure link_type is maintained
+                link_type: LINK_TYPES.REGULAR
             };
 
             if (updateData.image !== undefined) {
@@ -222,7 +222,6 @@ export const useLinkOperations = ({
         }
     }, [biositeData?.id, reorderLinks, fetchLinks, setRegularLinksState]);
 
-    // Enhanced special content management functions with link_type
     const getMusicEmbed = useCallback(() => {
         return links.find(link =>
             (link.link_type === LINK_TYPES.MUSIC || link.icon === 'music-embed') &&

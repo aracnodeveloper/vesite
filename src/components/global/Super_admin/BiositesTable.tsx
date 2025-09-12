@@ -39,7 +39,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                                                               setAnalyticsData,
                                                               formatDate,
                                                               parseVCardData,
-                                                              fetchBusinessCard, 
+                                                              fetchBusinessCard,
                                                             }) => {
 
   const handleToggleBiositeExpansion = useCallback(

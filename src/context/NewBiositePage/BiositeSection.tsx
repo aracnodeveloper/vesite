@@ -1,8 +1,15 @@
 import type { BiositeLink } from "../../interfaces/Biosite";
 import Cardbase from "./CardBase";
-import { ArrowRight, QrCodeIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import MusicEmbed from "./MusicEmbed";
 import SocialEmbed from "./SocialEmbed";
+import SocialLinks from "./SocialLink.tsx";
+import SVG from "../../assets/icons/WHATS.svg";
+import QR from "../../assets/icons/QR.svg";
+import visitaecuador_com from "../../assets/icons/visitaecuador_com.svg";
+import AppleStore from "../../assets/icons/AppleStore.svg";
+import GooglePlay from "../../assets/icons/GooglePLay.svg";
+import VideoEmbed from "./VideoEmbed.tsx";
 
 export enum Section_type {
   Profile = "Profile",
@@ -32,14 +39,25 @@ export default function BiositeSection({
   themeConfig?: any;
   vcard?: VCard;
 }) {
+  const isVisitaEcuadorApp = (url: string) => {
+    return (
+      url?.includes(
+        "https://apps.apple.com/ec/app/visitaecuador-com/id1385161516"
+      ) ||
+      url?.includes(
+        "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es"
+      )
+    );
+  };
+
   const renderSection = () => {
     switch (section) {
       case Section_type.Profile:
-        return <div>Profile Section</div>;
+        return <div className="hidden">Profile Section</div>;
       case Section_type.VCard:
         return (
           <Cardbase
-            icon={QrCodeIcon}
+            icon={QR}
             key={0}
             themeConfig={themeConfig}
             title={"VCard"}
@@ -50,7 +68,7 @@ export default function BiositeSection({
       case Section_type.Links:
         return links.map((link) => (
           <Cardbase
-            icon={ArrowRight}
+            icon={ChevronRight}
             url={link.url}
             image={link.image}
             key={link.orderIndex}
@@ -61,8 +79,8 @@ export default function BiositeSection({
       case Section_type.Contactame:
         return links.map((link) => (
           <Cardbase
-            icon={ArrowRight}
-            image={link.icon}
+            icon={ChevronRight}
+            image={SVG}
             key={link.orderIndex}
             themeConfig={themeConfig}
             title={link.label}
@@ -71,21 +89,23 @@ export default function BiositeSection({
       case Section_type.Music_Podcast:
         return <MusicEmbed link={links[0]} />;
       case Section_type.Link_de_mi_App:
-        return (
+        return links.map((link) => (
           <Cardbase
-            icon={ArrowRight}
-            image={links[0].icon}
-            key={links[0].orderIndex}
+            icon={isVisitaEcuadorApp(link.url) ? visitaecuador_com : ""}
+            image={
+              link.url?.includes("apps.apple.com") ? AppleStore : GooglePlay
+            }
+            key={link.orderIndex}
             themeConfig={themeConfig}
-            title={links[0].label}
+            title={link.label}
           />
-        );
+        ));
       case Section_type.Social_Post:
         return <SocialEmbed link={links[0]} themeConfig={themeConfig} />;
       case Section_type.Social:
-        return <div>Social Section</div>;
+        return <SocialLinks links={links} themeConfig={themeConfig} />;
       case Section_type.Video:
-        return <div>Video Section</div>;
+        return <VideoEmbed link={links[0]} />;
       default:
         return null;
     }
@@ -93,6 +113,3 @@ export default function BiositeSection({
 
   return renderSection();
 }
-//https://www.instagram.com/anthony_ramosc/
-//https://www.facebook.com/anthony.ramosc.7/
-//https://wa.me/5930963296668
