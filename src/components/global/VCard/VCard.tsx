@@ -102,7 +102,6 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
   const { fetchUser, user } = useUser();
   useEffect(() => {
-
     if (currentUserId && !user) {
       fetchUser(userId);
     }
@@ -497,7 +496,10 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                         </div>
                       </div>
                     )}
-                  {(cardData.name || cardData.email || user.phone || cardData.phone) && (
+                  {(cardData.name ||
+                    cardData.email ||
+                    user.phone ||
+                    cardData.phone) && (
                     <div className="border-t flex w-full justify-center bg-[#96C121]/80">
                       <button
                         onClick={downloadVCard}
@@ -549,7 +551,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-500 mb-1">Teléfono</p>
                           <a
-                            href={`tel:${user.phone ||cardData.phone}`}
+                            href={`tel:${user.phone || cardData.phone}`}
                             className="text-sm font-medium text-gray-800 hover:text-green-600 transition-colors"
                           >
                             {user.phone || cardData.phone}

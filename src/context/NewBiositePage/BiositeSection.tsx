@@ -10,6 +10,12 @@ import visitaecuador_com from "../../assets/icons/visitaecuador_com.svg";
 import AppleStore from "../../assets/icons/AppleStore.svg";
 import GooglePlay from "../../assets/icons/GooglePLay.svg";
 import VideoEmbed from "./VideoEmbed.tsx";
+import { useAnalytics } from "../../hooks/useAnalytics.ts";
+import VCardModal from "./VCardModal.tsx";
+import { useCallback, useEffect, useState } from "react";
+import type { VCardData } from "../../types/V-Card.ts";
+import { useBusinessCard } from "../../hooks/useVCard.ts";
+import VCardButton from "../../components/global/VCard/VCard.tsx";
 
 export enum Section_type {
   Profile = "Profile",
@@ -39,6 +45,8 @@ export default function BiositeSection({
   themeConfig?: any;
   vcard?: VCard;
 }) {
+  const { businessCard } = useBusinessCard();
+
   const isVisitaEcuadorApp = (url: string) => {
     return (
       url?.includes(
@@ -50,6 +58,20 @@ export default function BiositeSection({
     );
   };
 
+  let analytics;
+
+  if (links[0] && links[0].biositeId) {
+    analytics = useAnalytics({
+      biositeId: links[0].biositeId,
+      isPublicView: true,
+      debug: false,
+    });
+  }
+
+  const onTrack = (id: string) => {
+    analytics.trackLinkClick(id);
+  };
+
   const renderSection = () => {
     switch (section) {
       case Section_type.Profile:
@@ -58,7 +80,8 @@ export default function BiositeSection({
         return (
           <Cardbase
             icon={QR}
-            key={0}
+            onTrack={onTrack}
+            id={""}
             themeConfig={themeConfig}
             title={"VCard"}
             image={vcard.avatar}
@@ -69,9 +92,10 @@ export default function BiositeSection({
         return links.map((link) => (
           <Cardbase
             icon={ChevronRight}
+            onTrack={onTrack}
             url={link.url}
             image={link.image}
-            key={link.orderIndex}
+            id={link.id}
             themeConfig={themeConfig}
             title={link.label}
           />
@@ -81,7 +105,8 @@ export default function BiositeSection({
           <Cardbase
             icon={ChevronRight}
             image={SVG}
-            key={link.orderIndex}
+            onTrack={onTrack}
+            id={link.id}
             themeConfig={themeConfig}
             title={link.label}
           />
@@ -95,7 +120,8 @@ export default function BiositeSection({
             image={
               link.url?.includes("apps.apple.com") ? AppleStore : GooglePlay
             }
-            key={link.orderIndex}
+            onTrack={onTrack}
+            id={link.id}
             themeConfig={themeConfig}
             title={link.label}
           />
@@ -103,7 +129,13 @@ export default function BiositeSection({
       case Section_type.Social_Post:
         return <SocialEmbed link={links[0]} themeConfig={themeConfig} />;
       case Section_type.Social:
-        return <SocialLinks links={links} themeConfig={themeConfig} />;
+        return (
+          <SocialLinks
+            onTrack={onTrack}
+            links={links}
+            themeConfig={themeConfig}
+          />
+        );
       case Section_type.Video:
         return <VideoEmbed link={links[0]} />;
       default:

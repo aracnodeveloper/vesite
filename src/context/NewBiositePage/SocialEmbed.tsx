@@ -52,10 +52,7 @@ const getInstagramEmbedUrl = (url: string): string | null => {
 
 // Función para verificar si es una URL de TikTok
 const isTikTokUrl = (url: string): boolean => {
-  return (
-    url.includes("vm.tiktok.com") ||
-    url.includes("tiktok.com/t/")
-  );
+  return url.includes("vm.tiktok.com") || url.includes("tiktok.com/t/");
 };
 
 // Función para obtener la URL del embed de TikTok

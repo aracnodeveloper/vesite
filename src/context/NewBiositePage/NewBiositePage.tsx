@@ -15,6 +15,10 @@ import {
 import { useUser } from "../../hooks/useUser";
 import { createOrderedSectionsRecord, getSectionsRecord } from "./recordHelper";
 import BiositeSection, { Section_type } from "./BiositeSection";
+import ConditionalNavButton from "../../components/ConditionalNavButton";
+import Cardbase from "./CardBase";
+import VCardModal from "./VCardModal";
+import type { VCardData } from "../../types/V-Card";
 
 export default function NewBiositePage() {
   const { user } = useUser();
@@ -23,6 +27,7 @@ export default function NewBiositePage() {
   const [links, setLinks] = useState<Map<Section_type, BiositeLink[]>>();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showVCard, setShowVCard] = useState(true);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -116,70 +121,91 @@ export default function NewBiositePage() {
 
   const description = biosite.owner.description;
 
-  function onVcardClick() {}
-
-  console.log(links);
+  const getCardData = (): VCardData => {
+    return {
+      name: biosite?.owner?.name || "",
+      title: biosite?.owner?.description || "",
+      company: biosite?.owner?.site || "",
+      email: biosite?.owner?.email || "",
+      phone: biosite?.owner?.phone || "",
+      website: biosite?.owner?.site || "",
+    };
+  };
 
   return (
-    <div
-      className={`w-full min-h-screen flex items-center justify-center`}
-      style={{
-        background: themeConfig.colors.background.startsWith("linear-gradient")
-          ? themeConfig.colors.background
-          : themeConfig.colors.background,
-        backgroundColor: themeConfig.colors.background.startsWith(
-          "linear-gradient"
-        )
-          ? undefined
-          : themeConfig.colors.background,
-        fontFamily: themeConfig.fonts.primary,
-        color: themeConfig.colors.text,
-      }}
-    >
-      <div className={`w-full max-w-full min-h-screen mx-auto`}>
-        <BackgroundSection
-          isExposedRoute={isExposedRoute}
-          validBackgroundImage={validBackgroundImage}
-          imageLoadStates={imageLoadStates}
-          handleImageLoad={setImageLoadStates}
-          biosite={biosite}
-          themeConfig={themeConfig}
-        />
-
-        <AvatarSection
-          isExposedRoute={isExposedRoute}
-          validAvatarImage={validAvatarImage}
-          imageLoadStates={imageLoadStates}
-          handleImageLoad={setImageLoadStates}
-          biosite={biosite}
-          themeConfig={themeConfig}
-          defaultAvatar={defaultAvatar}
-        />
-
-        <div className={`w-full  max-w-md mx-auto`}>
-          <UserInfoSection
+    <>
+      <div
+        className={`w-full min-h-screen flex items-center justify-center`}
+        style={{
+          background: themeConfig.colors.background.startsWith(
+            "linear-gradient"
+          )
+            ? themeConfig.colors.background
+            : themeConfig.colors.background,
+          backgroundColor: themeConfig.colors.background.startsWith(
+            "linear-gradient"
+          )
+            ? undefined
+            : themeConfig.colors.background,
+          fontFamily: themeConfig.fonts.primary,
+          color: themeConfig.colors.text,
+        }}
+      >
+        <div className={`w-full max-w-full min-h-screen mx-auto`}>
+          <BackgroundSection
+            isExposedRoute={isExposedRoute}
+            validBackgroundImage={validBackgroundImage}
+            imageLoadStates={imageLoadStates}
+            handleImageLoad={setImageLoadStates}
             biosite={biosite}
-            user={user}
-            description={description}
             themeConfig={themeConfig}
           />
-        </div>
-        <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-2 -mt-2">
-          {links &&
-            Array.from(links.entries()).map(([sectionId, sectionLinks]) => (
-              <BiositeSection
-                themeConfig={themeConfig}
-                key={sectionId}
-                section={sectionId}
-                links={sectionLinks}
-                vcard={{
-                  avatar: validAvatarImage,
-                  onClick: () => onVcardClick,
-                }}
-              />
-            ))}
+
+          <AvatarSection
+            isExposedRoute={isExposedRoute}
+            validAvatarImage={validAvatarImage}
+            imageLoadStates={imageLoadStates}
+            handleImageLoad={setImageLoadStates}
+            biosite={biosite}
+            themeConfig={themeConfig}
+            defaultAvatar={defaultAvatar}
+          />
+
+          <div className={`w-full  max-w-md mx-auto`}>
+            <UserInfoSection
+              biosite={biosite}
+              user={user}
+              description={description}
+              themeConfig={themeConfig}
+            />
+          </div>
+          <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-2 -mt-2">
+            <>
+              {links &&
+                Array.from(links.entries()).map(([sectionId, sectionLinks]) => (
+                  <BiositeSection
+                    themeConfig={themeConfig}
+                    key={sectionId}
+                    section={sectionId}
+                    links={sectionLinks}
+                    vcard={{
+                      avatar: validAvatarImage,
+                      onClick: () => setShowVCard(true),
+                    }}
+                  />
+                ))}
+              <ConditionalNavButton themeConfig={themeConfig} />
+            </>
+          </div>
         </div>
       </div>
-    </div>
+      {showVCard && (
+        <VCardModal
+          cardData={getCardData()}
+          themeConfig={themeConfig}
+          onClose={() => setShowVCard(false)}
+        />
+      )}
+    </>
   );
 }
