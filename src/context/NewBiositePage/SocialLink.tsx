@@ -57,7 +57,12 @@ export default function SocialLinks({
       {links.map((link) => {
         const platform = findPlatformForLink(link);
         return (
-          <div onClick={() => onTrack(link.id)}>
+          <div
+            onClick={() => {
+              onTrack(link.id);
+              link.onClick();
+            }}
+          >
             <a
               key={link.orderIndex}
               href={link.url}

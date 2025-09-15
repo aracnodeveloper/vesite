@@ -4,9 +4,15 @@ import Loading from "../../components/shared/Loading";
 
 interface MusicEmbedProps {
   link: BiositeLink;
+  onClick: () => void;
+  onTrack: (id: string) => void;
 }
 
-export default function MusicEmbed({ link }: MusicEmbedProps) {
+export default function MusicEmbed({
+  link,
+  onClick,
+  onTrack,
+}: MusicEmbedProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [embedUrl, setEmbedUrl] = useState<string>("");
 
@@ -31,8 +37,18 @@ export default function MusicEmbed({ link }: MusicEmbedProps) {
     setIsLoading(false);
   };
 
+  const handleOnCLick = () => {
+    if (onClick) {
+      onClick();
+    }
+    onTrack(link.id);
+  };
+
   return (
-    <div className="rounded-lg shadow-lg transition-all flex items-center duration-200 hover:shadow-md cursor-pointer ">
+    <div
+      onClick={handleOnCLick}
+      className="rounded-lg shadow-lg transition-all flex items-center duration-200 hover:shadow-md cursor-pointer "
+    >
       {/* Contenedor del embed */}
       <div className="relative w-full rounded-lg overflow-hidden shadow-lg">
         {isLoading && (
@@ -48,10 +64,12 @@ export default function MusicEmbed({ link }: MusicEmbedProps) {
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
           onLoad={handleIframeLoad}
+          onClick={() => onTrack(link.id)}
           className="rounded-lg"
           style={{
             opacity: isLoading ? 0 : 1,
             transition: "opacity 0.3s ease-in-out",
+            pointerEvents: onClick ? "none" : "auto",
           }}
         />
       </div>

@@ -1,10 +1,10 @@
-import React from "react";
 import type { BiositeLink } from "../../interfaces/Biosite";
 
 interface SocialEmbedProps {
   link: BiositeLink;
   themeConfig: any;
-  onLinkClick?: (linkId: string) => void;
+  onLinkClick?: () => void;
+  onTrack?: (id) => void;
   isExposedRoute?: boolean;
 }
 
@@ -71,18 +71,17 @@ export default function SocialEmbed({
   link,
   themeConfig,
   onLinkClick,
+  onTrack,
   isExposedRoute = true,
 }: SocialEmbedProps) {
   const handleClick = () => {
     if (onLinkClick) {
-      onLinkClick(link.id);
-    }
-  };
-
-  const handleExternalClick = () => {
-    if (link.url) {
+      onLinkClick();
+    } else {
       window.open(link.url, "_blank", "noopener,noreferrer");
-      handleClick();
+    }
+    if (onTrack) {
+      onTrack(link.id);
     }
   };
 
@@ -103,7 +102,8 @@ export default function SocialEmbed({
 
   return (
     <div
-      className="relative rounded-lg shadow-md overflow-hidden"
+      onClick={handleClick}
+      className="relative cursor-pointer rounded-lg shadow-md overflow-hidden"
       style={{
         backgroundColor: themeConfig.colors.profileBackground || "#ffffff",
       }}
@@ -118,19 +118,17 @@ export default function SocialEmbed({
             src={embedUrl}
             width="100%"
             height={isExposedRoute ? (isInstagram ? "700" : "400") : "400"}
-            frameBorder="0"
-            scrolling="no"
             loading="lazy"
             title={link.label}
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            onLoad={handleClick}
+            style={{ pointerEvents: "none" }}
           />
         </div>
       ) : (
         // Fallback: Mostrar como tarjeta cuando no se puede embebber
         <div
           className="p-4 flex items-center space-x-3 cursor-pointer hover:bg-opacity-90 transition-colors duration-200"
-          onClick={handleExternalClick}
+          onClick={handleClick}
         >
           <div className="flex-shrink-0">
             <div

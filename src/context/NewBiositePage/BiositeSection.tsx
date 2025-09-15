@@ -11,11 +11,8 @@ import AppleStore from "../../assets/icons/AppleStore.svg";
 import GooglePlay from "../../assets/icons/GooglePLay.svg";
 import VideoEmbed from "./VideoEmbed.tsx";
 import { useAnalytics } from "../../hooks/useAnalytics.ts";
-import VCardModal from "./VCardModal.tsx";
-import { useCallback, useEffect, useState } from "react";
-import type { VCardData } from "../../types/V-Card.ts";
 import { useBusinessCard } from "../../hooks/useVCard.ts";
-import VCardButton from "../../components/global/VCard/VCard.tsx";
+import { useNavigate } from "react-router-dom";
 
 export enum Section_type {
   Profile = "Profile",
@@ -39,13 +36,15 @@ export default function BiositeSection({
   links,
   themeConfig,
   vcard,
+  isPreview = false,
 }: {
   section: Section_type;
   links: BiositeLink[];
   themeConfig?: any;
   vcard?: VCard;
+  isPreview?: boolean;
 }) {
-  const { businessCard } = useBusinessCard();
+  const navigate = useNavigate();
 
   const isVisitaEcuadorApp = (url: string) => {
     return (
@@ -85,7 +84,7 @@ export default function BiositeSection({
             themeConfig={themeConfig}
             title={"VCard"}
             image={vcard.avatar}
-            onClick={vcard.onClick}
+            onClick={!isPreview ? vcard.onClick : () => navigate("/VCard")}
           />
         );
       case Section_type.Links:
@@ -95,6 +94,7 @@ export default function BiositeSection({
             onTrack={onTrack}
             url={link.url}
             image={link.image}
+            onClick={link.onClick}
             id={link.id}
             themeConfig={themeConfig}
             title={link.label}
@@ -104,30 +104,47 @@ export default function BiositeSection({
         return links.map((link) => (
           <Cardbase
             icon={ChevronRight}
+            url={link.url}
             image={SVG}
             onTrack={onTrack}
+            onClick={link.onClick}
             id={link.id}
             themeConfig={themeConfig}
             title={link.label}
           />
         ));
       case Section_type.Music_Podcast:
-        return <MusicEmbed link={links[0]} />;
+        return (
+          <MusicEmbed
+            onClick={links[0].onClick}
+            onTrack={onTrack}
+            link={links[0]}
+          />
+        );
       case Section_type.Link_de_mi_App:
         return links.map((link) => (
           <Cardbase
             icon={isVisitaEcuadorApp(link.url) ? visitaecuador_com : ""}
             image={
-              link.url?.includes("apps.apple.com") ? AppleStore : GooglePlay
+              link.tag?.includes("apps.apple.com") ? AppleStore : GooglePlay
             }
             onTrack={onTrack}
             id={link.id}
             themeConfig={themeConfig}
+            onClick={link.onClick}
+            url={link.url}
             title={link.label}
           />
         ));
       case Section_type.Social_Post:
-        return <SocialEmbed link={links[0]} themeConfig={themeConfig} />;
+        return (
+          <SocialEmbed
+            onLinkClick={links[0].onClick}
+            onTrack={onTrack}
+            link={links[0]}
+            themeConfig={themeConfig}
+          />
+        );
       case Section_type.Social:
         return (
           <SocialLinks
@@ -137,7 +154,7 @@ export default function BiositeSection({
           />
         );
       case Section_type.Video:
-        return <VideoEmbed link={links[0]} />;
+        return <VideoEmbed onClick={links[0].onClick} link={links[0]} />;
       default:
         return null;
     }

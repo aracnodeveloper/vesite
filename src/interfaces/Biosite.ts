@@ -57,6 +57,8 @@ export interface BiositeLink {
   updatedAt: string;
   link_type?: string;
   image: string;
+  onClick?: () => void;
+  tag?: string;
 }
 
 export interface BiositeFull {

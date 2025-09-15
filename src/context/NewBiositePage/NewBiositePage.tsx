@@ -3,7 +3,7 @@ import apiService from "../../service/apiService";
 import type { Section } from "../../interfaces/sections";
 import { getSectionsByBiositeApi } from "../../constants/EndpointsRoutes";
 import Button from "../../components/shared/Button";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import type { BiositeFull, BiositeLink } from "../../interfaces/Biosite";
 import Loading from "../../components/shared/Loading";
 import { getThemeConfig, isValidImageUrl } from "../../Utils/biositeUtils";
@@ -19,14 +19,16 @@ import ConditionalNavButton from "../../components/ConditionalNavButton";
 import VCardModal from "./VCardModal";
 import type { VCardData } from "../../types/V-Card";
 
-export default function NewBiositePage() {
+export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
+  const { slug: paramSlug } = useParams<{ slug: string }>();
+  const slug = propSlug || paramSlug;
   const { user } = useUser();
-  const { slug } = useParams<{ slug: string }>();
   const [biosite, setBiosite] = useState<BiositeFull>();
   const [links, setLinks] = useState<Map<Section_type, BiositeLink[]>>();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showVCard, setShowVCard] = useState(true);
+  const [showVCard, setShowVCard] = useState(false);
+  const navigate = useNavigate();
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -44,6 +46,10 @@ export default function NewBiositePage() {
     };
   }, [showVCard]);
 
+  const onNavigate = (route: string) => {
+    navigate(route);
+  };
+
   useEffect(() => {
     const fetchSections = async () => {
       try {
@@ -52,8 +58,16 @@ export default function NewBiositePage() {
           const fetchedSections = await apiService.getAll<Section[]>(
             `${getSectionsByBiositeApi}/${biosite.id}`
           );
+          let links: Map<Section_type, BiositeLink[]>;
 
-          setLinks(createOrderedSectionsRecord(biosite.links, fetchedSections));
+          links = createOrderedSectionsRecord(
+            biosite.links,
+            fetchedSections,
+            propSlug != null,
+            onNavigate
+          );
+
+          setLinks(links);
         }
       } catch (erro: any) {
         setError("Error al cargar secciones");
@@ -195,6 +209,7 @@ export default function NewBiositePage() {
               {links &&
                 Array.from(links.entries()).map(([sectionId, sectionLinks]) => (
                   <BiositeSection
+                    isPreview={propSlug != null}
                     themeConfig={themeConfig}
                     key={sectionId}
                     section={sectionId}
@@ -205,7 +220,9 @@ export default function NewBiositePage() {
                     }}
                   />
                 ))}
-              <ConditionalNavButton themeConfig={themeConfig} />
+              {propSlug == null && (
+                <ConditionalNavButton themeConfig={themeConfig} />
+              )}
             </>
           </div>
         </div>

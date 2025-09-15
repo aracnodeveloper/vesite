@@ -41,18 +41,10 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               {/* Ruta pública para ver biosite por slug */}
               <Route
-                path="/alt/:slug"
-                element={
-                  <div className="min-h-screen bg-gray-100">
-                    <NewBiositePage />
-                  </div>
-                }
-              />
-              <Route
                 path="/:slug"
                 element={
                   <div className="min-h-screen bg-gray-100">
-                    <PublicBiositeView />
+                    <NewBiositePage />
                   </div>
                 }
               />
