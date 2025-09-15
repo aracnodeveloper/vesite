@@ -80,7 +80,7 @@ export default function VCardModal({
           <div className="flex w-full justify-center py-4">
             <button
               onClick={downloadVCard}
-              className="flex items-center gap-2 px-2 py-1 rounded-md bg-white border border-gray-200 shadow hover:bg-gray-50 active:bg-gray-100 text-gray-700 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="flex items-center gap-2 px-2 py-1 rounded-md bg-white border border-gray-200 shadow hover:bg-gray-50 active:bg-gray-100 text-gray-700 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               aria-label={`Descargar archivo vCard de ${
                 cardData.name || "contacto"
               }`}
@@ -91,7 +91,7 @@ export default function VCardModal({
                 className="text-[#96C121]"
                 aria-hidden="true"
               />
-              <span className="text-md font-semibold">Agregar contacto</span>
+              <span className="text-md font-semibold ">Agregar contacto</span>
             </button>
           </div>
           <p className="text-sm text-gray-600 mt-2 mb-4">

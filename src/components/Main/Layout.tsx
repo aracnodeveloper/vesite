@@ -562,7 +562,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span>{buttonContent.text}</span>
                 </button>
                 <PhonePreview>
-                  <NewBiositePage slug={biosite?.slug} />
+                  <LivePreviewContent />
                 </PhonePreview>
               </div>
             </div>
@@ -637,7 +637,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           style={{ maxHeight: "calc(100vh - 100px)" }}
         >
           <PhonePreview className="mobile-view">
-            <NewBiositePage slug={biosite?.slug} />
+            <LivePreviewContent />
           </PhonePreview>
         </main>
 

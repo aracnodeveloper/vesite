@@ -115,6 +115,12 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   if (loading) {
     return <Loading />;
   }
+  const handleUserInfoClick = (e: React.MouseEvent) => {
+    if (!isExposedRoute) {
+      e.preventDefault();
+      navigate('/profile');
+    }
+  };
 
   if (error) {
     return (
@@ -184,6 +190,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
             handleImageLoad={setImageLoadStates}
             biosite={biosite}
             themeConfig={themeConfig}
+            handleImageClick={handleUserInfoClick}
           />
 
           <AvatarSection
@@ -194,6 +201,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
             biosite={biosite}
             themeConfig={themeConfig}
             defaultAvatar={defaultAvatar}
+            handleImageClick={handleUserInfoClick}
           />
 
           <div className={`w-full  max-w-md mx-auto`}>
@@ -202,6 +210,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
               user={user}
               description={description}
               themeConfig={themeConfig}
+              handleUserInfoClick={() => handleUserInfoClick}
             />
           </div>
           <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-2 -mt-2">

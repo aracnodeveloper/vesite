@@ -60,12 +60,10 @@ export const Login: FC = () => {
         // Verificar si ya hay un token válido
         const existingToken = Cookies.get("accessToken");
         if (!existingToken) {
-            // Solo hacer auto-login si no hay token
             autoLogin();
         }
     }, [form]);
 
-    // Función para manejar el auto-login
     const handleAutoLogin = async (email: string, password: string) => {
         if (!login) {
             console.error("Login functionality is not available.");
