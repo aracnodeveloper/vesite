@@ -5,6 +5,7 @@ import { ChevronLeft, QrCode, Edit, Save, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import { QRCodeSVG } from "qrcode.react";
+import Loading from "../../../shared/Loading.tsx";
 
 const VCardPage = () => {
   const navigate = useNavigate();
@@ -291,11 +292,7 @@ const VCardPage = () => {
   const hasCardButNoQR = businessCard && !businessCard.qrCodeUrl;
 
   if (isLoading && initialLoad) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-lg">Cargando...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error && !businessCard) {
