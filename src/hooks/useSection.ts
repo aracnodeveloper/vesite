@@ -74,7 +74,7 @@ export const useSections = () => {
 
     const reorderSections = async (
         biositeId: string,
-        reorderData: { id: string; orderIndex: number,  isSelected: false }[]
+        reorderData: { id: string; orderIndex: number }[]
     ): Promise<Section[]> => {
         try {
             setLoading(true);
@@ -113,7 +113,6 @@ export const useSections = () => {
                     icon: 'profile',
                     descripcion: 'User profile section',
                     orderIndex: 0,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -121,7 +120,6 @@ export const useSections = () => {
                     icon: 'social',
                     descripcion: 'Social media links',
                     orderIndex: 1,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -129,7 +127,6 @@ export const useSections = () => {
                     icon: 'link',
                     descripcion: 'Enlaces diversos',
                     orderIndex: 2,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -137,7 +134,6 @@ export const useSections = () => {
                     icon: 'whatsapp',
                     descripcion: 'WhatsApp contact',
                     orderIndex: 3,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -145,7 +141,6 @@ export const useSections = () => {
                     icon: 'app',
                     descripcion: 'App download links',
                     orderIndex: 4,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -153,7 +148,6 @@ export const useSections = () => {
                     icon: 'vcard',
                     descripcion: 'Digital business card',
                     orderIndex: 5,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -161,7 +155,6 @@ export const useSections = () => {
                     icon: 'video',
                     descripcion: 'YouTube videos',
                     orderIndex: 6,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -169,7 +162,6 @@ export const useSections = () => {
                     icon: 'music',
                     descripcion: 'Audio content',
                     orderIndex: 7,
-                    isSelected: false,
                 },
                 {
                     biositeId,
@@ -177,7 +169,6 @@ export const useSections = () => {
                     icon: 'instagram',
                     descripcion: 'Instagram posts',
                     orderIndex: 8,
-                    isSelected: false,
                 },
             ];
 
@@ -321,8 +312,7 @@ export const useSections = () => {
                 titulo: 'Profile',
                 icon: 'profile',
                 descripcion: 'User profile section',
-                orderIndex: 0, // Profile should always be first
-                isSelected: false,
+                orderIndex: 0, // Profile
             },
             {
                 biositeId,
@@ -330,7 +320,6 @@ export const useSections = () => {
                 icon: 'social',
                 descripcion: 'Social media links',
                 orderIndex: 1,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -338,7 +327,6 @@ export const useSections = () => {
                 icon: 'link',
                 descripcion: 'Enlaces diversos',
                 orderIndex: 2,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -346,7 +334,6 @@ export const useSections = () => {
                 icon: 'whatsapp',
                 descripcion: 'WhatsApp contact',
                 orderIndex: 3,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -354,7 +341,6 @@ export const useSections = () => {
                 icon: 'app',
                 descripcion: 'App download links',
                 orderIndex: 4,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -362,7 +348,6 @@ export const useSections = () => {
                 icon: 'vcard',
                 descripcion: 'Digital business card',
                 orderIndex: 5,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -370,7 +355,6 @@ export const useSections = () => {
                 icon: 'video',
                 descripcion: 'YouTube videos',
                 orderIndex: 6,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -378,7 +362,6 @@ export const useSections = () => {
                 icon: 'music',
                 descripcion: 'Audio content',
                 orderIndex: 7,
-                isSelected: false,
             },
             {
                 biositeId,
@@ -386,7 +369,6 @@ export const useSections = () => {
                 icon: 'instagram',
                 descripcion: 'Instagram posts',
                 orderIndex: 8,
-                isSelected: false,
             },
         ];
 
@@ -434,8 +416,7 @@ export const useSections = () => {
                         titulo: 'Profile',
                         icon: 'profile',
                         descripcion: 'User profile section',
-                        orderIndex: 0, // Profile should always be first
-                        isSelected: false,
+                        orderIndex: 0,
                     };
                     await createSection(profileSection);
                 }
@@ -449,7 +430,6 @@ export const useSections = () => {
                         icon: 'vcard',
                         descripcion: 'Digital business card',
                         orderIndex: existingSections.length + 1,
-                        isSelected: false,
                     };
                     await createSection(vCardSection);
                 }

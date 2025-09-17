@@ -6,7 +6,6 @@ export interface Section {
   descripcion: string;
   orderIndex: number;
   image?: string;
-  isSelected: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,7 +17,6 @@ export interface CreateSectionData {
   descripcion: string;
   orderIndex: number;
   image?: string;
-  isSelected: boolean;
 }
 
 export interface ReorderSectionData {
