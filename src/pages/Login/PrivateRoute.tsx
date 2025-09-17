@@ -3,7 +3,8 @@ import {Navigate, type RouteProps} from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const PrivateRoute: FC<RouteProps> = ({children}) => {
-    const accessToken = Cookies.get('accessToken');
+    const accessToken = Cookies.get('accessToken') &&    Cookies.get('userId') &&
+    Cookies.get('biositeId');
 
     if (!accessToken || accessToken === 'undefined' || accessToken === 'null' || accessToken === '') {
         Cookies.remove('accessToken');

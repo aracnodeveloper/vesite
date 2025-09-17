@@ -7,7 +7,6 @@ interface SocialLinksProps {
   onTrack?: (id: string) => void;
 }
 
-// Local function to find platform for BiositeLink - adapted from recordHelper.ts
 const findPlatformForLink = (link: BiositeLink) => {
   return socialMediaPlatforms.find((platform) => {
     const linkLabelLower = link.label.toLowerCase();
@@ -68,7 +67,7 @@ export default function SocialLinks({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className=" w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-[1.20] active:scale-[0.98]"
+              className="cursor-pointer w-5 h-5 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-[1.20] active:scale-[0.98]"
             >
               <img
                 src={platform?.icon || link.icon}
