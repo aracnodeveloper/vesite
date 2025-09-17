@@ -46,7 +46,7 @@ export default function VCardModal({
   };
 
   return (
-    <div className="fixed py-2 inset-0 bg-black/50 flex items-center justify-center p-0 z-50 h-screen min-h-screen">
+    <div className="fixed py-2 inset-0 bg-black/50 flex items-start justify-center p-0 z-50 h-screen min-h-screen">
       <div className="bg-white shadow-2xl rounded-2xl max-w-md w-full max-h-[90vh] mx-2 flex flex-col min-h-0 justify-between">
         <div className="flex items-center justify-between p-3 border-b">
           <h2
@@ -100,7 +100,7 @@ export default function VCardModal({
         </div>
         <div className="p-4 gap-y-2 min-h-0 flex-1 overflow-y-auto flex flex-col justify-center">
           {cardData.name && (
-            <div className="text-center grid gap-y-1 sm:gap-y-2 my-2 sm:my-3 px-2 [@media(max-height:800px)]:mt-20 md:mt-2">
+            <div className="text-center grid gap-y-1 sm:gap-y-2 my-2 sm:my-3 px-2 [@media(max-height:700px)]:mt-20 md:mt-2">
               <h3
                 className="text-lg sm:text-2xl  font-bold text-gray-800"
                 style={{ fontFamily: themeConfig.fonts.primary }}
