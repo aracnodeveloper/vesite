@@ -79,7 +79,7 @@ export default function BiositeTableRow({
                 {biosite.title || "Sin título"}
               </div>
               <div className="text-xs text-green-600 font-medium">
-                BIOSITE HIJO
+                VESITE HIJO
               </div>
               <div className="text-xs text-gray-500">
                 ID: {biosite.id.substring(0, 8)}...

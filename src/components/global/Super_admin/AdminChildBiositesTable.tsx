@@ -36,7 +36,7 @@ export const AdminChildBiositesTable: React.FC<
         <div className="text-center py-8">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-2"></div>
-            <span className="text-gray-600">Cargando biosites hijos...</span>
+            <span className="text-gray-600">Cargando veSites hijos...</span>
           </div>
         </div>
     );
@@ -48,9 +48,9 @@ export const AdminChildBiositesTable: React.FC<
           <div className="text-gray-400 mb-4">
             <Users className="w-12 h-12 mx-auto mb-2" />
           </div>
-          <p className="text-gray-500">No hay biosites hijos para mostrar</p>
+          <p className="text-gray-500">No hay veSites hijos para mostrar</p>
           <p className="text-sm text-gray-400 mt-1">
-            Los biosites hijos aparecerán aquí cuando se creen
+            Los veSites hijos aparecerán aquí cuando se creen
           </p>
         </div>
     );
@@ -80,8 +80,8 @@ export const AdminChildBiositesTable: React.FC<
                   Vista de Administrador
                 </h3>
                 <p className="text-sm text-yellow-700">
-                  Mostrando únicamente los biosites hijos bajo tu administración (
-                  {totalBiosites} biosites)
+                  Mostrando únicamente los veSites hijos bajo tu administración (
+                  {totalBiosites} veSites)
                 </p>
               </div>
             </div>
@@ -93,7 +93,7 @@ export const AdminChildBiositesTable: React.FC<
             <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Biosite Hijo
+                veSite Hijo
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Usuario

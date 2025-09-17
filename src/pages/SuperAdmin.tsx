@@ -590,7 +590,7 @@ const AdminPanel: React.FC = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
           <p className="text-gray-600">
             Cargando{" "}
-            {shouldShowAllBiosites ? "todos los biosites" : "biosites hijos"}...
+            {shouldShowAllBiosites ? "todos los veSites" : "veSites hijos"}...
           </p>
         </div>
       </div>
@@ -643,13 +643,13 @@ const AdminPanel: React.FC = () => {
   const getViewDescription = () => {
     if (!permissions.canToggleView) {
       return permissions.hasFullAccess
-        ? "Gestión completa de biosites, usuarios y analytics"
-        : "Gestión de biosites hijos y analytics";
+        ? "Gestión completa de veSites, usuarios y analytics"
+        : "Gestión de veSites hijos y analytics";
     }
 
     return viewMode === "all"
       ? "Vista completa de todos los biosites del sistema"
-      : "Vista limitada a biosites bajo tu administración";
+      : "Vista limitada a veSites bajo tu administración";
   };
 
   return (
@@ -664,7 +664,7 @@ const AdminPanel: React.FC = () => {
             <p className="text-gray-600">{getViewDescription()}</p>
             {permissions.isAdmin && !permissions.canToggleView && (
               <p className="text-sm text-yellow-600 mt-1">
-                Vista limitada: Solo biosites bajo tu administración
+                Vista limitada: Solo veSites bajo tu administración
               </p>
             )}
           </div>
@@ -719,7 +719,7 @@ const AdminPanel: React.FC = () => {
             <Globe className="w-8 h-8 text-green-500" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">
-                {shouldShowAllBiosites ? "Total Biosites" : "Biosites Hijos"}
+                {shouldShowAllBiosites ? "Total veSites" : "veSites Hijos"}
               </p>
               <p className="text-2xl font-semibold text-gray-900">
                 {currentPagination.totalItems || 0}
@@ -777,10 +777,10 @@ const AdminPanel: React.FC = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-900">
               {shouldShowAllBiosites
-                ? `Biosites (${filteredData.length} de ${
+                ? `veSites (${filteredData.length} de ${
                     currentPagination.totalItems || 0
                   })`
-                : `Biosites Hijos ${BioData.length}`}
+                : `veSites Hijos ${BioData.length}`}
             </h2>
             {permissions.canToggleView && (
               <div className="flex items-center text-sm text-gray-500">

@@ -420,7 +420,7 @@ export default function ExpandedBiositeDetails({
               <div>
                 <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                   <LinkIcon className="w-4 h-4 text-purple-500 mr-2" />
-                  Enlaces del Biosite{ischild !== false ? " Hijo" : ""}
+                  Enlaces del veSite{ischild !== false ? " Hijo" : ""}
                   {isLoadingLinks && <Loading />}
                 </h4>
 
