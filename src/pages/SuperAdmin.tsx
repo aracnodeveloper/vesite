@@ -780,9 +780,7 @@ const AdminPanel: React.FC = () => {
                 ? `Biosites (${filteredData.length} de ${
                     currentPagination.totalItems || 0
                   })`
-                : `Biosites Hijos (${filteredData.length} de ${
-                    currentPagination.totalItems || 0
-                  })`}
+                : `Biosites Hijos ${BioData.length}`}
             </h2>
             {permissions.canToggleView && (
               <div className="flex items-center text-sm text-gray-500">
@@ -838,7 +836,7 @@ const AdminPanel: React.FC = () => {
           ) : (
             <AdminChildBiositesTable
               biosites={BioData}
-              totalBiosites={filteredData.length}
+              totalBiosites={BioData.length}
               loading={childBiositesPagination.loading}
               biositeLinks={biositeLinks}
               loadingBiositeLinks={loadingBiositeLinks}
