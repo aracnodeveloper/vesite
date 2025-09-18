@@ -23,7 +23,7 @@ const ConditionalNavButton: React.FC<ConditionalNavButtonProps> = ({
   };
 
   return (
-    <div className="px-3 shadow-2xl rounded-xl sm:px-4">
+    <div className="px-3  rounded-xl sm:px-4">
       <button
         onClick={handleClick}
         className="w-full gap-x-5 flex items-center cursor-pointer justify-center  py-2 sm:py-3 px-3 sm:px-4 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"

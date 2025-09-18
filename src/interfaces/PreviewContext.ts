@@ -10,6 +10,7 @@ export interface SocialLink {
     color: string;
     isActive: boolean;
     link_type?: string;
+    isSelected?: boolean;
 }
 
 export interface RegularLink {
@@ -20,6 +21,7 @@ export interface RegularLink {
     orderIndex: number;
     isActive: boolean;
     link_type?: string;
+    isSelected?: boolean;
 }
 
 export interface AppLink {
@@ -28,6 +30,7 @@ export interface AppLink {
     url: string;
     isActive: boolean;
     link_type?: string;
+    isSelected?: boolean;
 }
 
 {/**/}
@@ -38,6 +41,7 @@ export interface AppLink {
         message: string;
         isActive: boolean;
         link_type?: string;
+        isSelected?: boolean;
     }
 
 
@@ -46,6 +50,14 @@ export interface CreateBiositeDto {
     title: string;
     slug: string;
     password?: string;
+}
+
+export interface AdminLinkCreationData {
+    icon: string;
+    url: string;
+    label: string;
+    link_type: string;
+    isSelected: boolean; // This determines if it propagates to children
 }
 
 export interface PreviewContextType {

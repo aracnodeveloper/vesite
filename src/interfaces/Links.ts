@@ -10,6 +10,7 @@ export interface Link {
     color?: string;
     orderIndex: number;
     link_type?: string;
+    isSelected?: boolean;
 }
 
 export interface CreateLinkDto {
@@ -22,6 +23,7 @@ export interface CreateLinkDto {
     orderIndex: number;
     isActive?: boolean;
     link_type?: string;
+    isSelected?: boolean;
 }
 
 export interface UpdateLinkDto {
@@ -33,4 +35,5 @@ export interface UpdateLinkDto {
     orderIndex?: number;
     isActive?: boolean;
     link_type?: string;
+    isSelected?: boolean;
 }
