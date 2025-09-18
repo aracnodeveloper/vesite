@@ -23,7 +23,7 @@ export default function Cardbase({
   children?: any;
 }) {
   const commonClasses =
-    "w-full p-3 h-[70px] rounded-lg shadow-lg transition-all flex items-center duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]";
+    "w-full p-2 h-[65px] rounded-lg shadow-lg transition-all flex items-center duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]";
   const commonStyles = {
     backgroundColor: themeConfig.colors.accent,
     background: themeConfig.colors.accent,

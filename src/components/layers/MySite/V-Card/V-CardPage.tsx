@@ -269,7 +269,6 @@ const VCardPage = () => {
     const vcard = [
       "BEGIN:VCARD",
       "VERSION:3.0",
-      `FN:${cardData.name || "Sin nombre"}`,
       `N:${
         cardData.name
           ? cardData.name.split(" ").reverse().join(";")

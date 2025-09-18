@@ -22,13 +22,15 @@ export const useAnalytics = ({
         }
     }, [debug]);
 
+
+
     // Trackear visita automáticamente cuando se monta el componente en vista pública
     useEffect(() => {
         if (isPublicView && biositeId && !hasTrackedVisit.current) {
             log('Auto-tracking visit on mount', { biositeId, isPublicView });
             trackVisit();
         }
-    }, [biositeId, isPublicView]); // Removido log de las dependencias
+    }, [biositeId, isPublicView]);
 
     const trackVisit = useCallback(async () => {
         if (!biositeId || hasTrackedVisit.current) {
