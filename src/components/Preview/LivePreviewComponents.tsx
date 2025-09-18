@@ -63,7 +63,7 @@ export const BackgroundSection = ({
                                       themeConfig,
                                       handleImageClick
                                   }: any) => (
-    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-40' : 'h-40 '} ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-40' : 'h-40 '} ${!isExposedRoute ? '' : 'cursor-pointer'}`}
          onClick={handleImageClick}>
         {validBackgroundImage ? (
             <>
@@ -139,7 +139,7 @@ export const AvatarSection = ({
                                   handleImageClick
                               }: any) => (
 
-    <div className={`flex justify-center ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? 'cursor-pointer' : ''}`}
+    <div className={`flex justify-center ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? '' : 'cursor-pointer'}`}
          onClick={handleImageClick}>
         {validAvatarImage ? (
             <div className="relative">
