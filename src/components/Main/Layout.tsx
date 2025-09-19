@@ -380,7 +380,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const renderDrawerContent = () => {
     switch (selectedSection) {
       case "sections":
-        // Use the new drag and drop component
         return (
           <div className="p-4">
             <SectionsWithDrawerInteraction

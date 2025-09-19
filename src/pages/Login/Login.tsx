@@ -20,6 +20,17 @@ export const Login: FC = () => {
     const [form] = Form.useForm();
     const { login} = useAuthContext();
 
+    // useEffect para auto-ocultar el error después de 4 segundos
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => {
+                setError(null);
+            }, 2000); // 4 segundos
+
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
+
     useEffect(() => {
         const autoLogin = () => {
             try {
@@ -34,7 +45,7 @@ export const Login: FC = () => {
 
                 const cedula = parsedData?.data?.ci;
                 if (!cedula || typeof cedula !== 'string') {
-                    console.log('No se encontró cédula válida en localStorage');
+                    console.log('No se encontrÃ³ cÃ©dula vÃ¡lida en localStorage');
                     return;
                 }
 
@@ -43,13 +54,13 @@ export const Login: FC = () => {
 
                 console.log('Intentando auto-login con:', { email, password: '***' });
 
-                // Llenar el formulario automáticamente (opcional, para mostrar al usuario)
+                // Llenar el formulario automÃ¡ticamente (opcional, para mostrar al usuario)
                 form.setFieldsValue({
                     email: email,
                     password: password
                 });
 
-                // Ejecutar login automáticamente
+                // Ejecutar login automÃ¡ticamente
                 handleAutoLogin(email, password);
 
             } catch (error) {
@@ -57,7 +68,7 @@ export const Login: FC = () => {
             }
         };
 
-        // Verificar si ya hay un token válido
+        // Verificar si ya hay un token vÃ¡lido
         const existingToken = Cookies.get("accessToken");
         if (!existingToken) {
             autoLogin();
@@ -78,13 +89,13 @@ export const Login: FC = () => {
                 const token = Cookies.get("accessToken");
                 if (token) {
                     console.log('Auto-login exitoso');
-                    // Recargar la página antes de navegar
+                    // Recargar la pÃ¡gina antes de navegar
                     window.location.href = "/sections";
                 } else {
-                    setError("Auto-login falló. No se encontró token.");
+                    setError("Auto-login fallÃ³. No se encontrÃ³ token.");
                 }
             } else {
-                setError("Auto-login falló. Verifica tus credenciales almacenadas.");
+                setError("Auto-login fallÃ³. Verifica tus credenciales almacenadas.");
             }
         } catch (err) {
             console.error("Auto-login error:", err);
@@ -113,7 +124,7 @@ export const Login: FC = () => {
             if (response.success) {
                 const token = Cookies.get("accessToken");
                 if (token) {
-                    // Recargar la página antes de navegar
+                    // Recargar la pÃ¡gina antes de navegar
                     window.location.href = "/sections";
                 } else {
                     setError("Login failed. No token found.");
@@ -184,7 +195,7 @@ export const Login: FC = () => {
 
                         <Form.Item
                             name="password"
-                            rules={[{ required: true, message: "Contraseña requerida" }]}
+                            rules={[{ required: true, message: "ContraseÃ±a requerida" }]}
                             className="mb-0 w-full sm:w-auto"
                         >
                             <Input.Password
@@ -214,7 +225,7 @@ export const Login: FC = () => {
                                     fontSize: '15px'
                                 }}
                             >
-                                {loading ? "Cargando..." : "Iniciar Sesión"}
+                                {loading ? "Cargando..." : "Iniciar SesiÃ³n"}
                             </Button>
                         </Form.Item>
                     </Form>
@@ -289,6 +300,8 @@ export const Login: FC = () => {
                             message={error}
                             type="error"
                             showIcon
+                            closable
+                            onClose={() => setError(null)}
                             className="rounded-2xl shadow-2xl border-0"
                             style={{
                                 background: 'rgba(254, 226, 226, 0.95)',
