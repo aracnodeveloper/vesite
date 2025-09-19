@@ -35,7 +35,7 @@ import ShareButton from "../ShareButton.tsx";
 import Cookie from "js-cookie";
 
 import SectionsWithDrawerInteraction from "./MobileDrawer.tsx";
-import NewBiositePage from "../../context/NewBiositePage/NewBiositePage.tsx";
+//import NewBiositePage from "../../context/NewBiositePage/NewBiositePage.tsx";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -190,7 +190,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       admin: "Administración",
       profile: "Perfil",
       social: "Social",
-      VCard: "V-Card",
+      VCard: "VCard",
       links: "Links",
       videos: "Videos",
       music: "Music",
@@ -407,7 +407,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <SocialPage />
           </div>
         );
-      case "VCard":
+      case "vcard":
         return (
           <div className="p-4">
             <VCardPage />

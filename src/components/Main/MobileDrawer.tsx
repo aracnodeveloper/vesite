@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { GripVertical, Edit3 } from "lucide-react";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useSectionsContext } from "../../context/SectionsContext.tsx";
@@ -11,7 +10,6 @@ interface SectionsWithDrawerInteractionProps {
 }
 
 const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps> = ({ onSubsectionClick }) => {
-    const navigate = useNavigate();
     const { socialLinks, regularLinks, appLinks, whatsAppLinks, getVideoLinks, getMusicLinks, getSocialPostLinks } = usePreview();
     const { reorderSections, getVisibleSections, loading } = useSectionsContext();
 
@@ -90,7 +88,7 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
             bgColor: '#0EBBAA'
         },
         {
-            key: 'VCard',
+            key: 'vcard',
             title: 'VCard',
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="white">
@@ -100,8 +98,8 @@ const SectionsWithDrawerInteraction: React.FC<SectionsWithDrawerInteractionProps
                     </g>
                 </svg>
             ),
-            bgColor: '#9B59B6', // Cambiado de 'white' a un color púrpura
-            borderColor: '#9B59B6' // Agregado border color consistente
+            bgColor: '#9B59B6',
+            borderColor: '#9B59B6'
         }
     ];
 
