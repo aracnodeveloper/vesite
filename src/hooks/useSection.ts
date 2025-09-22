@@ -99,212 +99,6 @@ export const useSections = () => {
         }
     };
 
-    // Nuevo método principal para verificar y crear todas las secciones
-    const verifyAndCreateAllSections = async (biositeId: string): Promise<Section[]> => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            // Definir todas las secciones requeridas
-            const requiredSections: CreateSectionData[] = [
-                {
-                    biositeId,
-                    titulo: 'Profile',
-                    icon: 'profile',
-                    descripcion: 'User profile section',
-                    orderIndex: 0,
-                },
-                {
-                    biositeId,
-                    titulo: 'Social',
-                    icon: 'social',
-                    descripcion: 'Social media links',
-                    orderIndex: 1,
-                },
-                {
-                    biositeId,
-                    titulo: 'Links',
-                    icon: 'link',
-                    descripcion: 'Enlaces diversos',
-                    orderIndex: 2,
-                },
-                {
-                    biositeId,
-                    titulo: 'Contactame',
-                    icon: 'whatsapp',
-                    descripcion: 'WhatsApp contact',
-                    orderIndex: 3,
-                },
-                {
-                    biositeId,
-                    titulo: 'Link de mi App',
-                    icon: 'app',
-                    descripcion: 'App download links',
-                    orderIndex: 4,
-                },
-                {
-                    biositeId,
-                    titulo: 'VCard',
-                    icon: 'vcard',
-                    descripcion: 'Digital business card',
-                    orderIndex: 5,
-                },
-                {
-                    biositeId,
-                    titulo: 'Video',
-                    icon: 'video',
-                    descripcion: 'YouTube videos',
-                    orderIndex: 6,
-                },
-                {
-                    biositeId,
-                    titulo: 'Music / Podcast',
-                    icon: 'music',
-                    descripcion: 'Audio content',
-                    orderIndex: 7,
-                },
-                {
-                    biositeId,
-                    titulo: 'Social Post',
-                    icon: 'instagram',
-                    descripcion: 'Instagram posts',
-                    orderIndex: 8,
-                },
-            ];
-
-            // Obtener secciones existentes
-            const existingSections = await getSectionsByBiosite(biositeId);
-
-            // Crear un Map para acceso rápido a secciones existentes
-            const existingSectionsMap = new Map(
-                existingSections.map(section => [section.titulo, section])
-            );
-
-            const sectionsToCreate: CreateSectionData[] = [];
-            const sectionsToUpdate: { section: Section; newOrderIndex: number }[] = [];
-
-            // Verificar cada sección requerida
-            for (const requiredSection of requiredSections) {
-                const existingSection = existingSectionsMap.get(requiredSection.titulo);
-
-                if (!existingSection) {
-                    // La sección no existe, necesita ser creada
-                    sectionsToCreate.push(requiredSection);
-                    console.log(`Sección faltante detectada: ${requiredSection.titulo}`);
-                } else if (existingSection.orderIndex !== requiredSection.orderIndex) {
-                    // La sección existe pero tiene un orderIndex incorrecto
-                    sectionsToUpdate.push({
-                        section: existingSection,
-                        newOrderIndex: requiredSection.orderIndex
-                    });
-                    console.log(`Sección con orden incorrecto: ${requiredSection.titulo}, actual: ${existingSection.orderIndex}, esperado: ${requiredSection.orderIndex}`);
-                }
-            }
-
-            // Crear las secciones faltantes
-            const createdSections: Section[] = [];
-            for (const sectionData of sectionsToCreate) {
-                try {
-                    const newSection = await apiService.create<CreateSectionData, Section>(
-                        sectionsApi,
-                        sectionData
-                    );
-                    createdSections.push(newSection);
-                    console.log(`Sección creada exitosamente: ${sectionData.titulo}`);
-                } catch (createError) {
-                    console.error(`Error creando sección ${sectionData.titulo}:`, createError);
-                    // Continuar con las demás secciones incluso si una falla
-                }
-            }
-
-            // Actualizar el orden de las secciones si es necesario
-            if (sectionsToUpdate.length > 0) {
-                const reorderData = sectionsToUpdate.map(item => ({
-                    id: item.section.id,
-                    orderIndex: item.newOrderIndex
-                }));
-
-                try {
-                    await reorderSections(biositeId, reorderData);
-                    console.log(`Orden de secciones actualizado para ${sectionsToUpdate.length} secciones`);
-                } catch (reorderError) {
-                    console.error('Error actualizando orden de secciones:', reorderError);
-                }
-            }
-
-            // Obtener todas las secciones actualizadas
-            const finalSections = await getSectionsByBiosite(biositeId);
-
-            // Verificar que todas las secciones requeridas estén presentes
-            const finalSectionTitles = new Set(finalSections.map(s => s.titulo));
-            const missingSections = requiredSections.filter(
-                req => !finalSectionTitles.has(req.titulo)
-            );
-
-            if (missingSections.length > 0) {
-                console.warn('Algunas secciones aún faltan después de la verificación:',
-                    missingSections.map(s => s.titulo));
-            } else {
-                console.log('Todas las secciones requeridas están presentes y verificadas');
-            }
-
-            return finalSections;
-
-        } catch (error) {
-            const errorMessage = error instanceof Error
-                ? error.message
-                : 'Error verificando y creando secciones';
-            setError(errorMessage);
-            console.error('Error en verifyAndCreateAllSections:', error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Método para verificar la integridad de las secciones
-    const checkSectionsIntegrity = async (biositeId: string): Promise<{
-        isComplete: boolean;
-        missingSections: string[];
-        duplicatedSections: string[];
-        totalSections: number;
-    }> => {
-        try {
-            const existingSections = await getSectionsByBiosite(biositeId);
-
-            const requiredSectionTitles = [
-                'Profile', 'Social', 'Links', 'Contactame', 'Link de mi App',
-                'VCard', 'Video', 'Music / Podcast', 'Social Post'
-            ];
-
-            const existingTitles = existingSections.map(s => s.titulo);
-            const existingTitlesSet = new Set(existingTitles);
-
-            // Verificar secciones faltantes
-            const missingSections = requiredSectionTitles.filter(
-                title => !existingTitlesSet.has(title)
-            );
-
-            // Verificar secciones duplicadas
-            const duplicatedSections = existingTitles.filter(
-                (title, index) => existingTitles.indexOf(title) !== index
-            );
-
-            const isComplete = missingSections.length === 0 && duplicatedSections.length === 0;
-
-            return {
-                isComplete,
-                missingSections,
-                duplicatedSections: [...new Set(duplicatedSections)], // Remove duplicates from duplicated list
-                totalSections: existingSections.length
-            };
-
-        } catch (error) {
-            console.error('Error checking sections integrity:', error);
-            throw error;
-        }
-    };
-
     const createDefaultSections = async (biositeId: string): Promise<Section[]> => {
         const defaultSections: CreateSectionData[] = [
             {
@@ -312,7 +106,7 @@ export const useSections = () => {
                 titulo: 'Profile',
                 icon: 'profile',
                 descripcion: 'User profile section',
-                orderIndex: 0, // Profile
+                orderIndex: 0, // Profile should always be first
             },
             {
                 biositeId,
@@ -434,6 +228,19 @@ export const useSections = () => {
                     await createSection(vCardSection);
                 }
 
+                // Check if Galeria section is missing and add it
+                const hasGaleria = existingSections.some(section => section.titulo === 'Galeria');
+                if (!hasGaleria) {
+                    const galeriaSection: CreateSectionData = {
+                        biositeId,
+                        titulo: 'Galeria',
+                        icon: 'gallery',
+                        descripcion: 'Image carousel gallery',
+                        orderIndex: existingSections.length + 2,
+                    };
+                    await createSection(galeriaSection);
+                }
+
                 return await getSectionsByBiosite(biositeId);
             }
         } catch (err) {
@@ -451,8 +258,6 @@ export const useSections = () => {
         reorderSections,
         createDefaultSections,
         initializeSections,
-        verifyAndCreateAllSections,        // Nuevo método principal
-        checkSectionsIntegrity,            // Nuevo método de verificación
         clearError: () => setError(null),
     };
 };

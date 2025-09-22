@@ -19,15 +19,6 @@ interface SectionsContextType {
         musicLinks?: any[],
         socialPostLinks?: any[]
     ) => Section[];
-    // Nuevos métodos
-    verifyAndCreateAllSections: () => Promise<Section[]>;
-    checkSectionsIntegrity: () => Promise<{
-        isComplete: boolean;
-        missingSections: string[];
-        duplicatedSections: string[];
-        totalSections: number;
-    }>;
-    forceVerificationAndRepair: () => Promise<void>;
 }
 
 const SectionsContext = createContext<SectionsContextType | undefined>(undefined);
@@ -44,68 +35,19 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         getSectionsByBiosite,
         reorderSections: reorderSectionsHook,
         initializeSections: initializeSectionsHook,
-        verifyAndCreateAllSections: verifyAndCreateAllSectionsHook,
-        checkSectionsIntegrity: checkSectionsIntegrityHook,
     } = useSections();
 
-    // Método mejorado de inicialización que usa la verificación completa
     const initializeSections = async () => {
         if (!biositeId || sectionsInitialized || isInitializing) return;
 
         try {
             setIsInitializing(true);
-
-            // Usar el nuevo método de verificación en lugar del anterior
-            await verifyAndCreateAllSectionsHook(biositeId);
+            await initializeSectionsHook(biositeId);
             setSectionsInitialized(true);
-
         } catch (err) {
             console.error('Error initializing sections:', err);
         } finally {
             setIsInitializing(false);
-        }
-    };
-
-    // Método wrapper para verificación completa
-    const verifyAndCreateAllSections = async (): Promise<Section[]> => {
-        if (!biositeId) {
-            throw new Error('Biosite ID not found');
-        }
-
-        return await verifyAndCreateAllSectionsHook(biositeId);
-    };
-
-    // Método wrapper para verificar integridad
-    const checkSectionsIntegrity = async () => {
-        if (!biositeId) {
-            throw new Error('Biosite ID not found');
-        }
-
-        return await checkSectionsIntegrityHook(biositeId);
-    };
-
-    // Método para forzar verificación y recreación (útil para debugging o reparación)
-    const forceVerificationAndRepair = async (): Promise<void> => {
-        if (!biositeId) return;
-
-        try {
-            console.log('Iniciando verificación forzada de secciones...');
-
-            // Verificar integridad actual
-            const integrity = await checkSectionsIntegrityHook(biositeId);
-            console.log('Estado de integridad:', integrity);
-
-            if (!integrity.isComplete) {
-                console.log('Secciones incompletas detectadas, procediendo con reparación...');
-                await verifyAndCreateAllSectionsHook(biositeId);
-                console.log('Reparación completada');
-            } else {
-                console.log('Todas las secciones están presentes y en orden');
-            }
-
-        } catch (error) {
-            console.error('Error en verificación forzada:', error);
-            throw error;
         }
     };
 
@@ -242,9 +184,6 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         reorderSections,
         refreshSections,
         getVisibleSections,
-        verifyAndCreateAllSections,
-        checkSectionsIntegrity,
-        forceVerificationAndRepair,
     };
 
     return (
