@@ -52,6 +52,8 @@ export default function VCardComponent({
             size={120}
             className="w-full h-auto"
             level="M"
+            fgColor={themeConfig?.colors?.primary || "#000000"}
+            bgColor={themeConfig?.colors?.background || "#ffffff"}
             aria-label={`Código QR para descargar la tarjeta de contacto de ${
               cardData.name || "contacto"
             }`}

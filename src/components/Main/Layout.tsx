@@ -18,11 +18,11 @@ import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
 import { useUpdateShareActions } from "../../hooks/useUpdateShareActions.ts";
 
-import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 import PhonePreview from "../Preview/phonePreview.tsx";
 import SettingsModal from "../global/Settings/SettingsModal.tsx";
 import ShareButton from "../ShareButton.tsx";
 import Cookie from "js-cookie";
+import NewBiositePage from "../../context/NewBiositePage/NewBiositePage.tsx";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -93,6 +93,12 @@ const Layout: React.FC = () => {
     localStorage.setItem("drawerOpen", JSON.stringify(isDrawerOpen));
   }, [isDrawerOpen]);
 
+  useEffect(() => {
+    if (hasChanges && biosite) {
+      markAsSaved();
+    }
+  }, [hasChanges, biosite?.id]);
+
   const handleDrawerSectionClick = (section: string) => {
     navigate(section);
     //setSelectedSection(section);
@@ -153,31 +159,6 @@ const Layout: React.FC = () => {
       document.removeEventListener("touchend", handleDragEnd);
     };
   }, [isDragging, dragStartY, currentDrawerHeight]);
-
-  const getDrawerTitle = () => {
-    if (!selectedSection) return "My Site";
-
-    const titles: { [key: string]: string } = {
-      sections: "Secciones",
-      style: "Estilos",
-      analytics: "Estadísticas",
-      admin: "Administración",
-      profile: "Perfil",
-      social: "Social",
-      VCard: "VCard",
-      links: "Links",
-      videos: "Videos",
-      music: "Music",
-      post: "Post",
-      app: "App",
-      whatsapp: "WhatsApp",
-    };
-
-    return (
-      titles[selectedSection] ||
-      selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1)
-    );
-  };
 
   const handleExpoced = () => {
     if (biosite?.slug) {
@@ -419,8 +400,6 @@ const Layout: React.FC = () => {
                 className={`text-xs cursor-pointer rounded-lg px-3 py-2 text-white flex items-center space-x-1.5 transition-all duration-200 ${
                   buttonContent.disabled
                     ? "bg-gray-600/60 cursor-not-allowed"
-                    : hasChanges
-                    ? "bg-[#98C022] hover:bg-[#86A81E]"
                     : "bg-black/20 hover:bg-black/30"
                 } backdrop-blur-sm`}
               >
@@ -449,9 +428,13 @@ const Layout: React.FC = () => {
                 </button>
               </div>
             </div>
-            <PhonePreview>
-              <LivePreviewContent />
-            </PhonePreview>
+            {biosite && (
+              <PhonePreview
+                key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
+              >
+                <NewBiositePage slug={biosite.slug} />
+              </PhonePreview>
+            )}
           </div>
         )}
       </div>
@@ -522,9 +505,13 @@ const Layout: React.FC = () => {
           }`}
           style={{ maxHeight: "calc(100vh - 100px)" }}
         >
-          <PhonePreview className="mobile-view">
-            <LivePreviewContent />
-          </PhonePreview>
+          {biosite && (
+            <PhonePreview
+              key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
+            >
+              <NewBiositePage slug={biosite.slug} />
+            </PhonePreview>
+          )}
         </main>
 
         <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-lg z-50">
