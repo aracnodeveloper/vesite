@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
 import { useBusinessCard } from "../../../../hooks/useVCard.ts";
 import { useUser } from "../../../../hooks/useUser.ts";
-import { ChevronLeft, QrCode, Edit, Save, X } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Edit, Save, X } from "lucide-react";
+import { useParams } from "react-router-dom";
 import Cookies from "js-cookie";
-import { QRCodeSVG } from "qrcode.react";
 import Loading from "../../../shared/Loading.tsx";
 import BackButton from "../../../shared/BackButton.tsx";
-import VCardModal from "../../../../context/NewBiositePage/VCardModal.tsx";
 import VCardComponent from "../../../../context/NewBiositePage/VCardComponent.tsx";
 import type { VCardData } from "../../../../types/V-Card.ts";
-import { getThemeConfig } from "../../../../Utils/biositeUtils.ts";
 import Button from "../../../shared/Button.tsx";
 
 const VCardPage = () => {
-  const navigate = useNavigate();
   const { slug } = useParams<{ slug?: string }>();
   const [isEditing, setIsEditing] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -238,49 +234,11 @@ const VCardPage = () => {
     }
   };
 
-  const handleRegenerateQR = async () => {
-    try {
-      await regenerateQRCode(currentUserId);
-    } catch (error) {
-      console.error("Error regenerating QR code:", error);
-    }
-  };
-
-  const handleShowQR = async () => {
-    try {
-      await regenerateQRCode(currentUserId);
-    } catch (error) {
-      console.error("Error showing QR code:", error);
-    }
-  };
-
   const handleInputChange = (field: string, value: string) => {
     setCardData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const generateVCardString = () => {
-    const vcard = [
-      "BEGIN:VCARD",
-      "VERSION:3.0",
-      `N:${
-        cardData.name
-          ? cardData.name.split(" ").reverse().join(";")
-          : "Sin;nombre"
-      }`,
-      `TITLE:${cardData.title || ""}`,
-      `ORG:${cardData.company || ""}`,
-      `EMAIL;TYPE=INTERNET:${cardData.email || ""}`,
-      `TEL;TYPE=CELL:${cardData.phone || ""}`,
-      `URL:${cardData.website || ""}`,
-      "END:VCARD",
-    ].join("\r\n");
-
-    return vcard;
-  };
-
   const isLoading = loading || userLoading;
-  const hasQRCode = businessCard?.qrCodeUrl;
-  const hasCardButNoQR = businessCard && !businessCard.qrCodeUrl;
 
   if (isLoading && initialLoad) {
     return <Loading />;
