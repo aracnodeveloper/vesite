@@ -46,7 +46,7 @@ const Layout: React.FC = () => {
 
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(() => {
-    const saved = localStorage.getItem('drawerOpen');
+    const saved = localStorage.getItem("drawerOpen");
     return saved ? JSON.parse(saved) : false;
   });
   const [isDragging, setIsDragging] = useState(false);
@@ -90,7 +90,7 @@ const Layout: React.FC = () => {
 
   // Persistir el estado del drawer en localStorage
   useEffect(() => {
-    localStorage.setItem('drawerOpen', JSON.stringify(isDrawerOpen));
+    localStorage.setItem("drawerOpen", JSON.stringify(isDrawerOpen));
   }, [isDrawerOpen]);
 
   const handleDrawerSectionClick = (section: string) => {
@@ -153,6 +153,31 @@ const Layout: React.FC = () => {
       document.removeEventListener("touchend", handleDragEnd);
     };
   }, [isDragging, dragStartY, currentDrawerHeight]);
+
+  const getDrawerTitle = () => {
+    if (!selectedSection) return "My Site";
+
+    const titles: { [key: string]: string } = {
+      sections: "Secciones",
+      style: "Estilos",
+      analytics: "Estadísticas",
+      admin: "Administración",
+      profile: "Perfil",
+      social: "Social",
+      VCard: "VCard",
+      links: "Links",
+      videos: "Videos",
+      music: "Music",
+      post: "Post",
+      app: "App",
+      whatsapp: "WhatsApp",
+    };
+
+    return (
+      titles[selectedSection] ||
+      selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1)
+    );
+  };
 
   const handleExpoced = () => {
     if (biosite?.slug) {

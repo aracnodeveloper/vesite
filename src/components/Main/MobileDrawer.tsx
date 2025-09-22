@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { GripVertical, Edit3 } from "lucide-react";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useSectionsContext } from "../../context/SectionsContext.tsx";
@@ -13,7 +12,6 @@ interface SectionsWithDrawerInteractionProps {
 const SectionsWithDrawerInteraction: React.FC<
   SectionsWithDrawerInteractionProps
 > = ({ onSubsectionClick }) => {
-  const navigate = useNavigate();
   const {
     socialLinks,
     regularLinks,
