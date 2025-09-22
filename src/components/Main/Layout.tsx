@@ -23,6 +23,7 @@ import SettingsModal from "../global/Settings/SettingsModal.tsx";
 import ShareButton from "../ShareButton.tsx";
 import Cookie from "js-cookie";
 import NewBiositePage from "../../context/NewBiositePage/NewBiositePage.tsx";
+import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -432,7 +433,11 @@ const Layout: React.FC = () => {
               <PhonePreview
                 key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
               >
-                <NewBiositePage slug={biosite.slug} />
+                {biosite.slug ? (
+                  <NewBiositePage slug={biosite.slug} />
+                ) : (
+                  <LivePreviewContent />
+                )}
               </PhonePreview>
             )}
           </div>
@@ -509,7 +514,11 @@ const Layout: React.FC = () => {
             <PhonePreview
               key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
             >
-              <NewBiositePage slug={biosite.slug} />
+              {biosite.slug ? (
+                <NewBiositePage slug={biosite.slug} />
+              ) : (
+                <LivePreviewContent />
+              )}
             </PhonePreview>
           )}
         </main>
