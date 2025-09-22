@@ -100,13 +100,10 @@ const Sections = () => {
   }, [biosite, getVideoEmbed]);
 
   return (
-    <div className="flex flex-wrap justify-center w-full p-4 mt-4 h-full">
-      <div className="max-w-2xl transform scale-[0.9] origin-top">
-        <MySite />
-        <Add />
-        <div className="h-20"></div>
-      </div>
-      <div className="h-20"></div>
+    <div className="flex max-w-lg flex-wrap gap-y-5 justify-center w-full h-full">
+      <MySite />
+
+      <Add />
     </div>
   );
 };
