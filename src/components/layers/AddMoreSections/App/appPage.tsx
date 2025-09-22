@@ -15,11 +15,6 @@ const AppPage = () => {
   const { appLinks, updateAppLink, addAppLink, removeAppLink, loading, error } =
       usePreview();
 
-  const DEFAULT_APP_STORE_URL =
-      "https://apps.apple.com/ec/app/visitaecuador-com/id1385161516";
-  const DEFAULT_GOOGLE_PLAY_URL =
-      "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es";
-
   const [appStoreUrl, setAppStoreUrl] = useState("");
   const [googlePlayUrl, setGooglePlayUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -31,8 +26,8 @@ const AppPage = () => {
   const [editUrl, setEditUrl] = useState("");
 
   useEffect(() => {
-    const appStore = appLinks.find((link) => link.store === "appstore");
-    const googlePlay = appLinks.find((link) => link.store === "googleplay");
+    const appStore = appLinks.find((link) => link.store === "appstore" && link.isActive === true);
+    const googlePlay = appLinks.find((link) => link.store === "googleplay" && link.isActive === true);
 
     setAppStoreUrl(appStore?.url || "");
     setGooglePlayUrl(googlePlay?.url || "");
@@ -51,7 +46,7 @@ const AppPage = () => {
     setSaveMessage("");
 
     try {
-      const existingLink = appLinks.find((link) => link.store === editingStore);
+      const existingLink = appLinks.find((link) => link.store === editingStore && link.isActive === true);
 
       if (existingLink && editUrl) {
         await updateAppLink(existingLink.id, { url: editUrl, isActive: true });
@@ -307,10 +302,7 @@ const AppPage = () => {
                   <div className="flex gap-2 justify-center">
                     {!appStoreUrl && (
                         <button
-                            onClick={() => {
-                              setAppStoreUrl(DEFAULT_APP_STORE_URL);
-                              handleEdit("appstore");
-                            }}
+                            onClick={() => handleEdit("appstore")}
                             className="text-white bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer text-sm"
                         >
                           Configurar App Store
@@ -318,10 +310,7 @@ const AppPage = () => {
                     )}
                     {!googlePlayUrl && (
                         <button
-                            onClick={() => {
-                              setGooglePlayUrl(DEFAULT_GOOGLE_PLAY_URL);
-                              handleEdit("googleplay");
-                            }}
+                            onClick={() => handleEdit("googleplay")}
                             className="text-white bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition cursor-pointer text-sm"
                         >
                           Configurar Google Play

@@ -35,7 +35,6 @@ const WhatsApp = () => {
                     </div>
                     <div>
                         <div className="text-black font-medium">Contactame</div>
-                        <div className="text-gray-400 text-sm">WhatsApp</div>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
