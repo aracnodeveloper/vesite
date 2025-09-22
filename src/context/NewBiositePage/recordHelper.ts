@@ -342,7 +342,7 @@ export const groupLinksBySection = (
     .filter((link) => link.isActive)
     .forEach((link) => {
       const linkType = detectLinkType(link);
-      const sectionTitle = findBestSectionMatch(link, linkType, sections);
+      const sectionTitle = getSectionTitle(linkType as keyof typeof LINK_TYPES);
 
       if (sectionTitle && grouped.has(sectionTitle)) {
         grouped.get(sectionTitle)?.push(link);
@@ -351,6 +351,27 @@ export const groupLinksBySection = (
 
   return grouped;
 };
+
+function getSectionTitle(linkType: string): string {
+  switch (linkType) {
+    case "social":
+      return "Social";
+    case "regular":
+      return "Links";
+    case "app":
+      return "Link de mi App";
+    case "whatsapp":
+      return "Contactame";
+    case "music":
+      return "Music / Podcast";
+    case "video":
+      return "Video";
+    case "social_post":
+      return "Social Post";
+    default:
+      return "Links";
+  }
+}
 
 export const findPlatformForLink = (link: SocialLink) => {
   return socialMediaPlatforms.find((platform) => {
@@ -747,6 +768,14 @@ export const createOrderedSectionsRecord = (
     }
   });
 
+  orderedMap.forEach((sectionLinks, sectionType) => {
+    if (sectionType === "Link de mi App") {
+      sectionLinks.forEach((link) => {
+        link.tag = link.url;
+      });
+    }
+  });
+
   if (isPreview) {
     return new Map(
       Array.from(orderedMap.entries()).map(([sectionType, sectionLinks]) => {
@@ -789,8 +818,8 @@ export const createOrderedSectionsRecord = (
             case "Link de mi App":
               return {
                 ...link,
-                url: undefined,
                 tag: link.url,
+                url: undefined,
                 id: undefined,
                 onClick: () => navigate("/app"),
               };
