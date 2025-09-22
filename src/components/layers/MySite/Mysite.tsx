@@ -159,8 +159,8 @@ const MySite = () => {
 
   return (
     <div className="w-full">
-      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        <Droppable droppableId="sections" direction="vertical">
+      <DragDropContext onDragEnd={handleDragEnd} >
+        <Droppable droppableId="sections" >
           {(provided, snapshot) => (
             <div
               {...provided.droppableProps}
@@ -198,7 +198,7 @@ const MySite = () => {
                                                     hover:shadow-sm
                                                     ${
                                                       snapshot.isDragging
-                                                        ? "opacity-50 shadow-lg z-50 "
+                                                        ? "opacity-50 shadow-lg z-50 -ml-30"
                                                         : ""
                                                     }
                                                     ${

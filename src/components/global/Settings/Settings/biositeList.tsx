@@ -94,7 +94,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
     };
 
     const isMainBiosite = (biositeData: BiositeFull): boolean => {
-        const mainUserId = getMainUserId();
+        const mainUserId = getCurrentUserId();
         return biositeData.ownerId === mainUserId;
     };
 

@@ -217,7 +217,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
                   handleUserInfoClick={handleUserInfoClick}
               />
             </div>
-            <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-2 -mt-2">
+            <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-4 -mt-2">
               <>
                 {links &&
                     Array.from(links.entries()).map(([sectionId, sectionLinks]) => (

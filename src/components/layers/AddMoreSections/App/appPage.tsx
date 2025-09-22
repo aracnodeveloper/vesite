@@ -12,8 +12,7 @@ import ElementCard from "../Components/ElementCard";
 
 const AppPage = () => {
 
-  const { appLinks, updateAppLink, addAppLink, removeAppLink, loading, error } =
-      usePreview();
+  const { appLinks, updateAppLink, addAppLink, removeAppLink, loading, error } = usePreview();
 
   const [appStoreUrl, setAppStoreUrl] = useState("");
   const [googlePlayUrl, setGooglePlayUrl] = useState("");
