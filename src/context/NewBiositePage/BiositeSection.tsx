@@ -32,13 +32,13 @@ export interface VCard {
 }
 
 export default function BiositeSection({
-                                         section,
-                                         links,
-                                         themeConfig,
-                                         vcard,
-                                         isPreview = false,
-                                         isPublicView = false,
-                                       }: {
+  section,
+  links,
+  themeConfig,
+  vcard,
+  isPreview = false,
+  isPublicView = false,
+}: {
   section: Section_type;
   links: BiositeLink[];
   themeConfig?: any;
@@ -50,12 +50,12 @@ export default function BiositeSection({
 
   const isVisitaEcuadorApp = (url: string) => {
     return (
-        url?.includes(
-            "https://apps.apple.com/ec/app/visitaecuador-com/id1385161516"
-        ) ||
-        url?.includes(
-            "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es"
-        )
+      url?.includes(
+        "https://apps.apple.com/ec/app/visitaecuador-com/id1385161516"
+      ) ||
+      url?.includes(
+        "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es"
+      )
     );
   };
 
@@ -79,81 +79,83 @@ export default function BiositeSection({
         return <div className="hidden">Profile Section</div>;
       case Section_type.VCard:
         return (
-            <Cardbase
-                icon={QR}
-                onTrack={onTrack}
-                id={""}
-                themeConfig={themeConfig}
-                title={"VCard"}
-                image={vcard.avatar}
-                onClick={!isPreview ? vcard.onClick : () => navigate("/VCard")}
-            />
+          <Cardbase
+            icon={QR}
+            onTrack={onTrack}
+            id={""}
+            themeConfig={themeConfig}
+            title={"VCard"}
+            image={vcard.avatar}
+            onClick={!isPreview ? vcard.onClick : () => navigate("/VCard")}
+          />
         );
       case Section_type.Links:
-        return links.map((link) => (
+        return links
+          .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+          .map((link) => (
             <Cardbase
-                icon={ChevronRight}
-                onTrack={onTrack}
-                url={link.url}
-                image={link.image}
-                onClick={link.onClick}
-                id={link.id}
-                themeConfig={themeConfig}
-                title={link.label}
+              icon={ChevronRight}
+              onTrack={onTrack}
+              url={link.url}
+              image={link.image}
+              onClick={link.onClick}
+              id={link.id}
+              themeConfig={themeConfig}
+              title={link.label}
             />
-        ));
+          ));
       case Section_type.Contactame:
         return links.map((link) => (
-            <Cardbase
-                icon={ChevronRight}
-                url={link.url}
-                image={SVG}
-                onTrack={onTrack}
-                onClick={link.onClick}
-                id={link.id}
-                themeConfig={themeConfig}
-                title={link.label}
-            />
+          <Cardbase
+            icon={ChevronRight}
+            url={link.url}
+            image={SVG}
+            onTrack={onTrack}
+            onClick={link.onClick}
+            id={link.id}
+            themeConfig={themeConfig}
+            title={link.label}
+          />
         ));
       case Section_type.Music_Podcast:
         return (
-            <MusicEmbed
-                onClick={links[0].onClick}
-                onTrack={onTrack}
-                link={links[0]}
-            />
+          <MusicEmbed
+            onClick={links[0].onClick}
+            onTrack={onTrack}
+            link={links[0]}
+          />
         );
       case Section_type.Link_de_mi_App:
         return links.map((link) => (
-            <Cardbase
-                icon={isVisitaEcuadorApp(link.url) ? visitaecuador_com : ""}
-                image={
-                  link.tag?.includes("apps.apple.com") ? AppleStore : GooglePlay
-                }
-                onTrack={onTrack}
-                id={link.id}
-                themeConfig={themeConfig}
-                onClick={link.onClick}
-                url={link.url}
-                title={link.label}
-            />
+          <Cardbase
+            icon={isVisitaEcuadorApp(link.url) ? visitaecuador_com : ""}
+            image={
+              link.tag?.includes("apps.apple.com") ? AppleStore : GooglePlay
+            }
+            onTrack={onTrack}
+            id={link.id}
+            themeConfig={themeConfig}
+            onClick={link.onClick}
+            url={link.url}
+            title={link.label}
+          />
         ));
       case Section_type.Social_Post:
         return (
-            <SocialEmbed
-                onLinkClick={links[0].onClick}
-                onTrack={onTrack}
-                link={links[0]}
-                themeConfig={themeConfig}
-            />
+          <SocialEmbed
+            onLinkClick={links[0].onClick}
+            onTrack={onTrack}
+            link={links[0]}
+            themeConfig={themeConfig}
+          />
         );
       case Section_type.Social:
         return (
-            <SocialLinks
-                onTrack={onTrack}
-                links={links}
-                themeConfig={themeConfig}
-            />
+          <SocialLinks
+            onTrack={onTrack}
+            links={links}
+            themeConfig={themeConfig}
+          />
         );
       case Section_type.Video:
         return <VideoEmbed onClick={links[0].onClick} link={links[0]} />;
