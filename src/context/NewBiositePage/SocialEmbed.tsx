@@ -181,9 +181,9 @@ export default function SocialEmbed({
                 </div>
 
                 {/* Container del embed */}
-
+                <div className="tiktok-embed-container w-full relative bg-white p-4">
                     <blockquote
-                        className=""
+                        className="tiktok-embed"
                         cite={link.url}
                         data-video-id={tikTokVideoId}
                         style={{ width: "100%", minHeight: isExposedRoute ? "600px" : "300px" }}
@@ -201,6 +201,7 @@ export default function SocialEmbed({
                             </div>
                         </section>
                     </blockquote>
+                </div>
 
                 {/* Overlay para capturar clicks */}
                 <div
