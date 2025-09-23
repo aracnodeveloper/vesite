@@ -9,6 +9,8 @@ import {
 } from "../components/global/Analytics/AnalyticsWrapper";
 import analyticsEventManager from "../service/AnalyticsEventManager";
 import jsPDF from "jspdf";
+import NewBiositePage from "../context/NewBiositePage/NewBiositePage.tsx";
+import {usePreview} from "../context/PreviewContext.tsx";
 
 interface DailyActivity {
   day: string;
@@ -41,6 +43,7 @@ const AnalyticsContent = () => {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isDownloading, setIsDownloading] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("last7");
+  const { biosite } = usePreview();
 
   const analyticsContext = useOptionalAnalytics();
 
@@ -950,7 +953,7 @@ const AnalyticsContent = () => {
           <div className="relative flex items-center justify-center mb-16">
             <div
               className="absolute transform rounded-full flex flex-col items-center justify-center"
-              style={{ height: "600px", width: "600px" }}
+              style={{ height: "700px", width: "700px" }}
             >
               <svg
                 width="900"
@@ -1008,29 +1011,27 @@ const AnalyticsContent = () => {
               </svg>
             </div>
 
-            <div className="absolute left-14 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+            <div className="absolute left-24 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
               <div className="text-xs text-black mb-1">VISTAS</div>
               <div className="text-4xl font-bold text-black">{totalViews}</div>
             </div>
 
-            <div className="z-10 overflow-y-hidden">
-              <PhonePreview>
-                <LivePreviewContent />
-              </PhonePreview>
+            <div className="z-10 overflow-y-hidden w-[350px] h-[700px] ">
+                <NewBiositePage slug={biosite.slug} />
             </div>
 
-            <div className="absolute right-20 top-82 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+            <div className="absolute right-30 top-52 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
               <div className="text-xs text-black mb-1">CLICKS</div>
               <div className="text-2xl font-bold text-black">{totalClicks}</div>
             </div>
 
-            <div className="absolute right-26 bottom-60 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+            <div className="absolute right-40 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
               <div className="text-xs text-black mb-1">CTR</div>
               <div className="text-2xl font-bold text-black">{ctr}%</div>
             </div>
             <div className="absolute left-60 top-22 w-13 h-13 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
 
-            <div className="absolute left-64 bottom-48 w-10 h-10 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
+            <div className="absolute left-58 bottom-38 w-10 h-10 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
           </div>
 
           <div className="flex flex-wrap gap-5">

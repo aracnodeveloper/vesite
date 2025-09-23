@@ -332,7 +332,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <Dialog
                 open={isOpen && !showCreateWizard}
                 onClose={onClose}
-                className="fixed inset-0 h-full z-50 flex items-center justify-start bg-black/50"
+                className="fixed inset-0 h-full z-[70] flex items-center justify-start bg-black/50"
             >
                 <Dialog.Panel className="bg-[#FAFFF6] rounded-lg w-full max-w-[320px] h-full text-gray-600 shadow-xl flex flex-col">
                     {/* Header - Fixed */}

@@ -24,7 +24,7 @@ const AdminPanel: React.FC = () => {
   const role = Cookie.get("roleName");
   const userId = Cookie.get("userId");
 
-  const [viewMode, setViewMode] = useState<ViewMode>("all");
+  const [ viewMode, setViewMode] = useState<ViewMode>("all");
 
   const permissions = useMemo(() => {
     const isSpecialUser = userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5";
@@ -674,7 +674,7 @@ const AdminPanel: React.FC = () => {
               <div className="flex bg-gray-100 rounded-lg p-1 mr-2">
                 <button
                   onClick={() => handleViewModeChange("all")}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                     viewMode === "all"
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
@@ -685,7 +685,7 @@ const AdminPanel: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleViewModeChange("children")}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                     viewMode === "children"
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"

@@ -141,13 +141,21 @@ const detectLinkType = (link: BiositeLink): string => {
   }
 
   if (
-    iconIdentifier === "social-post" ||
-    labelLower.includes("social post") ||
-    labelLower.includes("post") ||
-    labelLower.includes("publicacion") ||
-    labelLower.includes("contenido") ||
-    (urlLower.includes("instagram.com") &&
-      (urlLower.includes("/p/") || urlLower.includes("/reel/")))
+      iconIdentifier === "social-post" ||
+      labelLower.includes("social post") ||
+      labelLower.includes("post") ||
+      labelLower.includes("publicacion") ||
+      labelLower.includes("contenido") ||
+      // Instagram posts and reels
+      (urlLower.includes("instagram.com") &&
+          (urlLower.includes("/p/") || urlLower.includes("/reel/"))) ||
+      // TikTok videos - ADDED
+      urlLower.includes("vm.tiktok.com") ||
+      urlLower.includes("tiktok.com/t/") ||
+      (urlLower.includes("tiktok.com") && urlLower.includes("/video/")) ||
+      urlLower.includes("tiktok.com/@") ||
+      // General TikTok video patterns
+      (urlLower.includes("tiktok.com") && !urlLower.match(/tiktok\.com\/?$/))
   ) {
     return LINK_TYPES.SOCIAL_POST;
   }
@@ -192,6 +200,17 @@ const detectLinkType = (link: BiositeLink): string => {
       (urlLower.includes("youtube.com") && !urlLower.includes("/watch"))
     ) {
       return LINK_TYPES.SOCIAL;
+    }
+    if (urlLower.includes("tiktok.com")) {
+      // If it's already detected as social post above, don't override
+      if (
+          urlLower.includes("vm.tiktok.com") ||
+          urlLower.includes("tiktok.com/t/") ||
+          urlLower.includes("/video/") ||
+          (!urlLower.match(/tiktok\.com\/?$/) && !urlLower.includes("/@"))
+      ) {
+        return LINK_TYPES.SOCIAL_POST;
+      }
     }
     return LINK_TYPES.SOCIAL;
   }
