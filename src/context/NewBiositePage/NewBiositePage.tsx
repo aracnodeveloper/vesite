@@ -234,9 +234,9 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
                             }}
                         />
                     ))}
-                {propSlug == null && (
+
                     <ConditionalNavButton themeConfig={themeConfig} />
-                )}
+
               </>
             </div>
           </div>

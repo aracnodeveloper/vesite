@@ -323,8 +323,18 @@ export const useFetchLinks = (biositeId?: string) => {
             labelLower.includes('publicacion') ||
             labelLower.includes('contenido') ||
             labelLower.includes('social post') ||
+            // Instagram posts and reels
             urlLower.includes('instagram.com/p/') ||
-            (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/')))
+            (urlLower.includes('instagram.com') && (urlLower.includes('/p/') || urlLower.includes('/reel/'))) ||
+            // TikTok videos - ADDED
+            urlLower.includes('vm.tiktok.com') ||
+            urlLower.includes('tiktok.com/t/') ||
+            (urlLower.includes('tiktok.com') && urlLower.includes('/video/')) ||
+            // General TikTok video patterns (excluding profile pages)
+            (urlLower.includes('tiktok.com') &&
+                !urlLower.match(/tiktok\.com\/?$/) &&
+                !urlLower.includes('/@') // Exclude profile pages
+            )
         );
     }, []);
 
