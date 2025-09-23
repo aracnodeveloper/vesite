@@ -52,6 +52,7 @@ export interface BiositeLink {
   icon?: string;
   color?: string;
   isActive: boolean;
+  isSelected: boolean;
   orderIndex: number;
   createdAt: string;
   updatedAt: string;
