@@ -68,7 +68,7 @@ export default function BiositeTableRow({
 
   return (
     <>
-      <tr className="hover:bg-gray-50">
+      <tr className="hover:bg-gray-50 sr-only sm:not-sr-only">
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center">
             <div className="bg-green-100 p-2 rounded-full mr-3">

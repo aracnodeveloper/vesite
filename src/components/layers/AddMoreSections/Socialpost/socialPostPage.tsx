@@ -1,4 +1,5 @@
 import { Instagram } from "lucide-react";
+import SVG from "../../../../../public/post.svg"
 import { useState, useEffect } from "react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import BackButton from "../../../shared/BackButton.tsx";
@@ -164,7 +165,7 @@ const PostPage = () => {
     if (hasExistingPost) {
       return (
         <ElementCard
-          icon={Instagram}
+          icon={SVG}
           title={note || "Post Social"}
           subtitle={url}
           onEdit={handleEdit}
