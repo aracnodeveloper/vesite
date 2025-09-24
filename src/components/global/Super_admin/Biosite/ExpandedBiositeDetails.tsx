@@ -238,14 +238,13 @@ export default function ExpandedBiositeDetails({
 
                   {update_profile && (
                       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                        <Button submit disabled={isLoading} className="w-full sm:w-auto">
+                        <Button submit disabled={isLoading}>
                           {isLoading ? "Cargando..." : "Guardar"}
                         </Button>
                         <Button
                             onClick={onCancel}
                             variant="secondary"
                             disabled={isLoading}
-                            className="w-full sm:w-auto"
                         >
                           Cancelar
                         </Button>
