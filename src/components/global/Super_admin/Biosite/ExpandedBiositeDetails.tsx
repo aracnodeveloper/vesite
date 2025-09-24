@@ -67,7 +67,6 @@ export default function ExpandedBiositeDetails({
     }
     setUpdate_profile(true);
   };
-
   const handleImageChange = (fieldName: string) => (file: File | null) => {
     if (fieldName == "avatarImage") {
       setAvatarFile(file);
