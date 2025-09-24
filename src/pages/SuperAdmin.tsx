@@ -24,7 +24,7 @@ const AdminPanel: React.FC = () => {
   const role = Cookie.get("roleName");
   const userId = Cookie.get("userId");
 
-  const [ viewMode, setViewMode] = useState<ViewMode>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
 
   const permissions = useMemo(() => {
     const isSpecialUser = userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5";
@@ -653,7 +653,7 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
+    <div className="h-full max-w-[70wh] text-white px-4 py-2 lg:px-6 lg:py-16">
       {/* Header */}
       <div className="shadow rounded-lg p-6 mb-6">
         <div className="flex flex-wrap items-center justify-between">
