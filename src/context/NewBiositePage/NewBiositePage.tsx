@@ -170,7 +170,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   return (
       <>
         <div
-            className={`w-full min-h-screen flex items-center justify-center`}
+            className={`w-full h-full flex items-center justify-center`}
             style={{
               background: themeConfig.colors.background.startsWith(
                   "linear-gradient"

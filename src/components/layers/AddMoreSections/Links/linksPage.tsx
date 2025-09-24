@@ -7,7 +7,7 @@ import LinkEditForm from "./Components/LinksEditForm.tsx";
 import BackButton from "../../../shared/BackButton.tsx";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
-import LinkCard from "./Components/LinksCard.tsx";
+import AdminLinkCard from "../Components/AdminLinkCard.tsx";
 
 const LinksPage = () => {
   const {
@@ -19,6 +19,11 @@ const LinksPage = () => {
     loading,
     error,
     refreshBiosite,
+    // Admin methods from enhanced hook
+    getUserRole,
+    isAdmin,
+    toggleAdminLink,
+    updateAdminLink,
   } = usePreview();
 
   const [adding, setAdding] = useState(false);
@@ -32,9 +37,11 @@ const LinksPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeLinks = regularLinks.filter((link) => link.isActive);
+  const userRole = getUserRole();
+  const showAdminControls = isAdmin();
 
   const placeholderLinkImage =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
 
   const normalizeUrl = (url: string): string => {
     if (!url || typeof url !== "string") return "";
@@ -48,10 +55,10 @@ const LinksPage = () => {
     }
 
     if (
-      cleanUrl.startsWith("localhost") ||
-      cleanUrl.startsWith("127.0.0.1") ||
-      cleanUrl.match(/^192\.168\.\d+\.\d+/) ||
-      cleanUrl.match(/^10\.\d+\.\d+\.\d+/)
+        cleanUrl.startsWith("localhost") ||
+        cleanUrl.startsWith("127.0.0.1") ||
+        cleanUrl.match(/^192\.168\.\d+\.\d+/) ||
+        cleanUrl.match(/^10\.\d+\.\d+\.\d+/)
     ) {
       return `http://${cleanUrl}`;
     }
@@ -85,9 +92,9 @@ const LinksPage = () => {
       const urlObj = new URL(url);
       const isHttps = ["http:", "https:"].includes(urlObj.protocol);
       const hasValidExtension =
-        /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
-        url.includes("/img/") ||
-        url.includes("image-");
+          /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
+          url.includes("/img/") ||
+          url.includes("image-");
 
       return isHttps && (hasValidExtension || !urlObj.pathname.includes("."));
     } catch (error) {
@@ -106,7 +113,7 @@ const LinksPage = () => {
     ];
     if (!allowedTypes.includes(file.type)) {
       message.error(
-        "Formato de archivo no válido. Solo se permiten: JPG, PNG, WebP, GIF"
+          "Formato de archivo no válido. Solo se permiten: JPG, PNG, WebP, GIF"
       );
       return false;
     }
@@ -118,6 +125,37 @@ const LinksPage = () => {
     }
 
     return true;
+  };
+
+  // Admin link handlers
+  const handleAdminToggle = async (linkId: string, isSelected: boolean) => {
+    try {
+      setIsSubmitting(true);
+      await toggleAdminLink(linkId, isSelected);
+      message.success(
+          isSelected
+              ? "Enlace aplicado a sitios hijos"
+              : "Enlace removido de sitios hijos"
+      );
+    } catch (error) {
+      console.error("Error toggling admin link:", error);
+      message.error("Error al actualizar enlace administrativo");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAdminUpdate = async (linkId: string, linkData: any) => {
+    try {
+      setIsSubmitting(true);
+      await updateAdminLink(linkId, linkData);
+      message.success("Enlace actualizado en sitios hijos");
+    } catch (error) {
+      console.error("Error updating admin link:", error);
+      message.error("Error al actualizar enlace en sitios hijos");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,8 +185,8 @@ const LinksPage = () => {
           setUploadingImage(true);
 
           const loadingMessage = message.loading(
-            "Subiendo imagen del enlace...",
-            0
+              "Subiendo imagen del enlace...",
+              0
           );
 
           const imageUrl = await uploadLinkImage(file, linkToUpdate.id);
@@ -175,7 +213,7 @@ const LinksPage = () => {
             if (typeof reader.result === "string") {
               setEditImage(reader.result);
               message.info(
-                "Imagen cargada localmente (se guardará al confirmar)"
+                  "Imagen cargada localmente (se guardará al confirmar)"
               );
             }
           };
@@ -243,8 +281,8 @@ const LinksPage = () => {
         }
 
         const maxOrderIndex = Math.max(
-          ...activeLinks.map((link) => link.orderIndex),
-          -1
+            ...activeLinks.map((link) => link.orderIndex),
+            -1
         );
 
         const newLink = {
@@ -260,8 +298,8 @@ const LinksPage = () => {
         setNewUrl("");
         setAdding(false);
         console.log(
-          "Link added successfully with normalized URL:",
-          normalizedUrl
+            "Link added successfully with normalized URL:",
+            normalizedUrl
         );
       } catch (error) {
         console.error("Error adding link:", error);
@@ -277,9 +315,9 @@ const LinksPage = () => {
       setIsSubmitting(true);
       await removeRegularLink(id);
       console.log("Link deleted successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting link:", error);
-      message.error("Error al eliminar el enlace");
+      message.error(error?.message || "Error al eliminar el enlace");
     } finally {
       setIsSubmitting(false);
     }
@@ -287,6 +325,13 @@ const LinksPage = () => {
 
   const handleOpenEdit = (index: number) => {
     const link = activeLinks[index];
+
+    // Check if user can edit this link
+    if (link.isSelected && !showAdminControls) {
+      message.warning("Este enlace fue asignado por un administrador y no puede ser editado");
+      return;
+    }
+
     setEditingIndex(index);
     setEditTitle(link.title);
     setEditUrl(link.url);
@@ -325,8 +370,9 @@ const LinksPage = () => {
       setEditImage(editImage);
 
       message.success("Enlace actualizado correctamente");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating link:", error);
+      message.error(error?.message || "Error al actualizar el enlace");
     } finally {
       setIsSubmitting(false);
     }
@@ -372,158 +418,167 @@ const LinksPage = () => {
 
   if (loading && activeLinks.length === 0) {
     return (
-      <div className="max-w-xl mx-auto p-4 text-white flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-400">Cargando enlaces...</p>
+        <div className="max-w-xl mx-auto p-4 text-white flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-400">Cargando enlaces...</p>
+          </div>
         </div>
-      </div>
     );
   }
 
   if (editingIndex !== null) {
     const linkToEdit = activeLinks[editingIndex];
     return (
-      <LinkEditForm
-        link={linkToEdit}
-        editTitle={editTitle}
-        editUrl={editUrl}
-        editImage={editImage}
-        isSubmitting={isSubmitting}
-        onTitleChange={setEditTitle}
-        onUrlChange={setEditUrl}
-        onImageChange={setEditImage}
-        onSave={handleSaveEdit}
-        onCancel={handleCancelEdit}
-      />
+        <LinkEditForm
+            link={linkToEdit}
+            editTitle={editTitle}
+            editUrl={editUrl}
+            editImage={editImage}
+            isSubmitting={isSubmitting}
+            onTitleChange={setEditTitle}
+            onUrlChange={setEditUrl}
+            onImageChange={setEditImage}
+            onSave={handleSaveEdit}
+            onCancel={handleCancelEdit}
+        />
     );
   }
 
   return (
-    <div className="w-full h-full mt mb-10 max-w-md mx-auto rounded-lg">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-700 ">
-        <BackButton text={"Links"} />
-      </div>
+      <div className="w-full h-full mt mb-10 max-w-md mx-auto rounded-lg">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-700">
+          <BackButton text={"Links"} />
+          {showAdminControls && (
+              <p className="text-xs text-blue-600 mt-2">
+                Modo Administrador: Puedes aplicar enlaces a sitios hijos
+              </p>
+          )}
+        </div>
 
-      {/* Main Content */}
-      <div className="p-4">
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          {/* Active Links Section */}
-          {activeLinks.length > 0 && (
-            <div>
-              <h3 className="text-sm text-gray-600 font-semibold mb-3">
-                Enlaces activos ({activeLinks.length})
-              </h3>
-              <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="links-list">
-                  {(provided) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="space-y-2"
-                    >
-                      {activeLinks.map((link, index) => (
-                        <Draggable
-                          key={link.id}
-                          draggableId={link.id}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                            >
-                              <LinkCard
-                                id={link.id}
-                                title={link.title}
-                                url={link.url}
-                                image={link.image}
-                                onEdit={() => handleOpenEdit(index)}
-                                onRemove={() => handleDelete(link.id)}
-                                isSubmitting={isSubmitting}
-                                dragHandleProps={provided.dragHandleProps}
-                                getSafeImageUrl={getSafeImageUrl}
-                              />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            </div>
+        {/* Main Content */}
+        <div className="p-4">
+          {/* Error Message */}
+          {error && (
+              <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
           )}
 
-          {/* Add New Link Section */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-600 mb-3">
-              Agregar enlace
-            </h3>
-
-            {adding ? (
-              <div className="flex items-center space-x-2 p-3 bg-white rounded-lg border border-gray-300">
-                <input
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="Ingresa una URL (ej: visitaecuador.com)"
-                  className="flex-1 bg-transparent text-black placeholder-gray-400 focus:outline-none"
-                  autoFocus
-                  disabled={isSubmitting}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleConfirmAdd();
-                    }
-                  }}
-                />
-                <button
-                  onClick={handleConfirmAdd}
-                  disabled={!newUrl.trim() || isSubmitting}
-                  className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <Check size={20} />
-                </button>
-                <button
-                  onClick={handleCancelAdd}
-                  disabled={isSubmitting}
-                  className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setAdding(true)}
-                disabled={isSubmitting}
-                className="w-full cursor-pointer p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center"
-              >
-                <Plus size={20} className="mb-1" />
-                <span className="text-sm">Agregar enlace</span>
-              </button>
+          <div className="space-y-6">
+            {/* Active Links Section */}
+            {activeLinks.length > 0 && (
+                <div>
+                  <h3 className="text-sm text-gray-600 font-semibold mb-3">
+                    Enlaces activos ({activeLinks.length})
+                  </h3>
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="links-list">
+                      {(provided) => (
+                          <div
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
+                              className="space-y-3"
+                          >
+                            {activeLinks.map((link, index) => (
+                                <Draggable
+                                    key={link.id}
+                                    draggableId={link.id}
+                                    index={index}
+                                >
+                                  {(provided) => (
+                                      <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                      >
+                                        <AdminLinkCard
+                                            id={link.id}
+                                            title={link.title}
+                                            url={link.url}
+                                            image={link.image}
+                                            onEdit={() => handleOpenEdit(index)}
+                                            onRemove={() => handleDelete(link.id)}
+                                            isSubmitting={isSubmitting}
+                                            getSafeImageUrl={getSafeImageUrl}
+                                            isSelected={link.isSelected}
+                                            showAdminControls={showAdminControls || !link.isSelected}
+                                            userRole={userRole}
+                                            onAdminToggle={handleAdminToggle}
+                                            onAdminUpdate={handleAdminUpdate}
+                                        />
+                                      </div>
+                                  )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </div>
             )}
+
+            {/* Add New Link Section */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">
+                Agregar enlace
+              </h3>
+
+              {adding ? (
+                  <div className="flex items-center space-x-2 p-3 bg-white rounded-lg border border-gray-300">
+                    <input
+                        value={newUrl}
+                        onChange={(e) => setNewUrl(e.target.value)}
+                        placeholder="Ingresa una URL (ej: visitaecuador.com)"
+                        className="flex-1 bg-transparent text-black placeholder-gray-400 focus:outline-none"
+                        autoFocus
+                        disabled={isSubmitting}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            handleConfirmAdd();
+                          }
+                        }}
+                    />
+                    <button
+                        onClick={handleConfirmAdd}
+                        disabled={!newUrl.trim() || isSubmitting}
+                        className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Check size={20} />
+                    </button>
+                    <button
+                        onClick={handleCancelAdd}
+                        disabled={isSubmitting}
+                        className="p-2 text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+              ) : (
+                  <button
+                      onClick={() => setAdding(true)}
+                      disabled={isSubmitting}
+                      className="w-full cursor-pointer p-4 border-2 border-dashed border-gray-300 bg-white rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center"
+                  >
+                    <Plus size={20} className="mb-1" />
+                    <span className="text-sm">Agregar enlace</span>
+                  </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Hidden file input for image upload */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-        onChange={handleImageUpload}
-        style={{ display: "none" }}
-        multiple={false}
-      />
-    </div>
+        {/* Hidden file input for image upload */}
+        <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+            multiple={false}
+        />
+      </div>
   );
 };
 

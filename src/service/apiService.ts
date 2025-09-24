@@ -15,6 +15,14 @@ export interface PaginatedResponse<T> {
     totalPages: number;
 }
 
+export interface AdminLinkData {
+    icon: string;
+    url: string;
+    label: string;
+    link_type: string;
+    orderIndex?: number;
+}
+
 const apiService = {
     getAll: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
         const response = await api.get<T>(url, config);
@@ -86,6 +94,20 @@ export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | '
         console.error('Error fetching biosite analytics:', error);
         throw error;
     }
+};
+
+export const adminLinkMethods = {
+    // Update link for admin and all children
+    updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<any> => {
+        try {
+            const response = await api.patch(`/biosites/admin/update-link/${adminId}`, linkData);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating admin link:', error);
+            throw error;
+        }
+    },
+
 };
 
 
