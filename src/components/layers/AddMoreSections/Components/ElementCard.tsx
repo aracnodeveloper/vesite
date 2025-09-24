@@ -3,7 +3,7 @@ import type {LucideIcon} from "lucide-react";
 import React from "react";
 
 interface ElementCardProps {
-    icon?: LucideIcon;
+    icon?: LucideIcon | string ;
     image?: string;
     title: string;
     subtitle: string;
@@ -15,7 +15,7 @@ interface ElementCardProps {
 }
 
 const ElementCard = ({
-                         icon: Icon,
+                         icon,
                          image,
                          title,
                          subtitle,
@@ -31,9 +31,21 @@ const ElementCard = ({
                 <div className={`w-8 h-8 rounded-md overflow-hidden flex-shrink-0 border border-gray-200 flex items-center justify-center ${iconBgColor}`}>
                     {image ? (
                         <img src={image} alt={title} className="w-full h-full object-cover" />
-                    ) : Icon ? (
-                        <Icon size={16} className="text-gray-500" />
-                    ) : null}
+                    ) :typeof icon === "string"? (
+                        <img
+                            src={icon}
+                            alt={title}
+                            onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                            }}
+                        />
+                    ) : icon? (
+                        React.createElement(icon, {
+                            size: 16,
+                            color: 'gray',
+                            className: "transition-colors duration-200 text-gray",
+                        })
+                    ): null}
                 </div>
 
                 <div className="flex-1 min-w-0">

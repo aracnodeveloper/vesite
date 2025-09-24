@@ -165,8 +165,8 @@ const AppPage = () => {
   if (editingStore) {
     return (
         <div className="w-full h-full mt-0 lg:mt-14 mb-10 max-w-md mx-auto rounded-lg">
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-700 sr-only sm:not-sr-only">
+
+          <div className="px-6 py-4 border-b border-gray-700 ">
             <BackButton text={`Editar ${getStoreName(editingStore)}`} />
           </div>
 
@@ -226,7 +226,7 @@ const AppPage = () => {
   return (
       <div className="w-full h-full mt-0 lg:mt-14 mb-10 max-w-md mx-auto rounded-lg">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-700 sr-only sm:not-sr-only">
+        <div className="px-6 py-4 border-b border-gray-700">
           <BackButton text={"Enlaces de Descarga"} />
         </div>
 
