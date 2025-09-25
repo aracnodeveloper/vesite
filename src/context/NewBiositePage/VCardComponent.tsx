@@ -14,11 +14,7 @@ export default function VCardComponent({
       "BEGIN:VCARD",
       "VERSION:3.0",
       `FN:${cardData.name || "Sin nombre"}`,
-      `N:${
-        cardData.name
-          ? cardData.name.split(" ").reverse().join(";")
-          : "Sin;nombre"
-      }`,
+      `N:${cardData.name ? filterName(cardData.name) : "Sin;nombre"}`,
       `TITLE:${cardData.title || ""}`,
       `ORG:${cardData.company || ""}`,
       `EMAIL;TYPE=INTERNET:${cardData.email || ""}`,
@@ -28,6 +24,20 @@ export default function VCardComponent({
     ].join("\r\n");
 
     return vcard;
+  };
+
+  const filterName = (name: string) => {
+    const splitedName = name.split(" ");
+    switch (splitedName.length) {
+      case 1:
+        return `${splitedName[0]};`;
+      case 2:
+        return `${splitedName[1]};${splitedName[0]}`;
+      case 3:
+        return `${splitedName[2]};${splitedName[0]} ${splitedName[1]}`;
+      default:
+        return `${splitedName.join(";")}`;
+    }
   };
 
   const downloadVCard = () => {
