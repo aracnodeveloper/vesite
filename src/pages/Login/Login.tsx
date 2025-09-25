@@ -118,7 +118,7 @@ export const Login: FC = () => {
           setError("Login failed. No token found.");
         }
       } else {
-        setError("Login failed. Please check your email and password.");
+        setError("Login failed. Porfavor revisa tu contraseña o tu usuario.");
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -195,7 +195,7 @@ export const Login: FC = () => {
               className="mb-0 w-full sm:w-auto"
             >
               <Input.Password
-                placeholder="Password"
+                placeholder="Contraseña"
                 className="rounded-xl border-0 px-4 py-3 transition-all duration-300 hover:shadow-md focus:shadow-lg"
                 iconRender={(visible) =>
                   visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />

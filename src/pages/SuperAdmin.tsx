@@ -656,7 +656,7 @@ const AdminPanel: React.FC = () => {
     <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
       {/* Header */}
       <div className="shadow rounded-lg p-6 mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               Panel de {getViewTitle()}
