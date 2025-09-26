@@ -114,10 +114,10 @@ const colorCategories = {
       accentColor: "#FB923C",
     },
     {
-      name: "Azul Marino",
-      value: "#110054",
-      textColor: "#A884F3",
-      accentColor: "#3730A349",
+      name: "Los Gallos",
+      value: "#1B3444",
+      textColor: "#9A7854",
+      accentColor: "#DCD8DE",
     },
     {
       name: "Verde militar",
