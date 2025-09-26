@@ -22,7 +22,7 @@ import SettingsFooter from "./Settings/settingsFooter";
 
 interface Profile {
     id: string;
-    userId: string;
+    userId: string; 
     name: string;
     slug: string;
     avatar?: string;
