@@ -468,7 +468,7 @@ const Layout: React.FC = () => {
             />
             <div className="flex items-center space-x-5">
               <button
-                  className="p-2 text-gray-400 rounded-full hover:bg-black/20 "
+                  className="p-2 text-gray-400 rounded-full hover:bg-black/20 ml-3 "
                   onClick={handleOpenSettings}
               >
                 <svg
@@ -487,7 +487,7 @@ const Layout: React.FC = () => {
                   <circle cx="12" cy="19" r="1" />
                 </svg>
               </button>
-              <div className="absolute top-3.5 right-20">
+              <div className="absolute top-3.5 right-21">
                 <ShareButton />
               </div>
               <button
