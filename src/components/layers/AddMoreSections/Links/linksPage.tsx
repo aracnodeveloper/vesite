@@ -131,7 +131,10 @@ const LinksPage = () => {
   const handleAdminToggle = async (linkId: string, isSelected: boolean) => {
     try {
       setIsSubmitting(true);
+      console.log('Toggling admin link:', { linkId, isSelected });
+
       await toggleAdminLink(linkId, isSelected);
+
       message.success(
           isSelected
               ? "Enlace aplicado a sitios hijos"
@@ -148,7 +151,10 @@ const LinksPage = () => {
   const handleAdminUpdate = async (linkId: string, linkData: any) => {
     try {
       setIsSubmitting(true);
+      console.log('Updating admin link:', { linkId, linkData });
+
       await updateAdminLink(linkId, linkData);
+
       message.success("Enlace actualizado en sitios hijos");
     } catch (error) {
       console.error("Error updating admin link:", error);
@@ -264,6 +270,7 @@ const LinksPage = () => {
         title: link.title,
         image: editImage,
         imageValid: isValidImageUrl(link.image),
+        isSelected: link.isSelected
       });
     });
   }, [activeLinks, editImage]);
@@ -491,6 +498,7 @@ const LinksPage = () => {
                                       <div
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
                                       >
                                         <AdminLinkCard
                                             id={link.id}

@@ -505,7 +505,7 @@ const SocialPage = () => {
                     </div>
                   )}
                   <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-lg flex bg-[#FFFFFF]  items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg flex bg-[#FFFFFF] border border-gray-400  items-center justify-center">
                       <img
                         src={platform.icon}
                         alt={platform.name}

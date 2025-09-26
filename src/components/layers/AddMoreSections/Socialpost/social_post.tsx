@@ -11,7 +11,7 @@ const Post =() =>{
     return (
         <div
             onClick={handleSocialClick}
-            className="bg-[#FAFFF6] rounded-lg p-4  flex items-center justify-between cursor-pointer  transition-colors">
+            className="bg-white/25 rounded-lg p-4  flex items-center justify-between cursor-pointer  transition-colors">
             <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-pink-600 rounded-lg flex items-center justify-center">
                     <svg width="25" height="25" viewBox="0 0 134 119" fill="none" xmlns="http://www.w3.org/2000/svg">

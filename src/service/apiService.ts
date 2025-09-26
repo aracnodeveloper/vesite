@@ -100,7 +100,22 @@ export const adminLinkMethods = {
     // Update link for admin and all children
     updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<any> => {
         try {
+            // Validate required fields before sending
+            if (!linkData.label || typeof linkData.label !== 'string') {
+                throw new Error('label must be a string');
+            }
+            if (!linkData.url || typeof linkData.url !== 'string') {
+                throw new Error('url must be a string');
+            }
+            if (!linkData.icon || typeof linkData.icon !== 'string') {
+                throw new Error('icon must be a string');
+            }
+            if (typeof linkData.orderIndex !== 'number' || !Number.isInteger(linkData.orderIndex)) {
+                throw new Error('orderIndex must be an integer number');
+            }
+
             const response = await api.patch(`/biosites/admin/update-link/${adminId}`, linkData);
+            console.log('Admin link update response:', response.data);
             return response.data;
         } catch (error) {
             console.error('Error updating admin link:', error);

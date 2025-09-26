@@ -8,12 +8,16 @@ import {
   Shield,
   Settings,
   ExternalLink,
-  X, // Importar el icono X para cerrar
+  X,
 } from "lucide-react";
 
 import imgP from "../../../public/img/img.png";
-import imgP2 from "../../../public/img/fondo.svg";
-import imgP6 from "../../../public/img/img_6.png";
+//import imgP2 from "../../../public/img/fondo.svg";
+//import imgP6 from "../../../public/img/img_6.png";
+import ve_logo from "../../../public/img/ve_fondo.svg"
+import ve_fondo from "../../../public/img/ve_logo.svg"
+//import ve_logo_green from "../../../public/img/ve_fondo_green.svg"
+import ve_fondo_green from "../../../public/img/ve_logo_green.svg"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
@@ -90,7 +94,7 @@ const Layout: React.FC = () => {
     };
   }, [isDrawerOpen]);
 
-  // Persistir el estado del drawer en localStorage
+
   useEffect(() => {
     localStorage.setItem("drawerOpen", JSON.stringify(isDrawerOpen));
   }, [isDrawerOpen]);
@@ -374,12 +378,16 @@ const Layout: React.FC = () => {
             <main
                 className="flex w-full justify-center items-center overflow-y-auto p-3 sm:p-6 "
                 style={{
-                  background: `url(${imgP6}) no-repeat center center`,
-                  backgroundSize: "cover",
-                  backgroundColor: "white",
+                  backgroundColor: '#E0EED5',
                 }}
             >
-              <Outlet />
+              {!isAnalyticsRoute && !isAdminRoute && (
+              <div className="absolute z-10  left-1/7 top-1/7 w-[500px] h-[500px] flex flex-col items-center justify-center">
+                      <img src={ve_logo} alt='logo' className='w-full h-full'/>
+              </div>
+              )}
+              <div className='w-full h-full flex justify-center items-center z-20'>
+              <Outlet/></div>
             </main>
           </div>
 
@@ -388,8 +396,7 @@ const Layout: React.FC = () => {
                 <div
                     className="absolute inset-0"
                     style={{
-                      background: `url(${imgP2}) no-repeat center center`,
-                      backgroundSize: "cover",
+                      backgroundColor: `white`,
                       height: "110%",
                       width: "110%",
                       opacity: 0.6,
@@ -430,6 +437,9 @@ const Layout: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                <div className="absolute -left-10 top-1/7 w-[1000px] h-[700px] flex flex-col items-center justify-center">
+                  <img src={ve_fondo_green} alt='logo' className='w-full h-full'/>
+                </div>
                 {biosite && (
                     <PhonePreview
                         key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
@@ -451,8 +461,7 @@ const Layout: React.FC = () => {
                 isDrawerOpen ? "overflow-hidden" : ""
             }`}
             style={{
-              background: `url(${imgP2}) no-repeat center center`,
-              backgroundSize: "cover",
+              backgroundColor: `white`,
               height: "100%",
               width: "100%",
             }}
@@ -514,6 +523,9 @@ const Layout: React.FC = () => {
                 paddingBottom: isDrawerOpen ? "80px" : "0"
               }}
           >
+            <div className="absolute left-10 top-50  flex flex-col items-center justify-center">
+              <img src={ve_fondo_green} alt='logo' className='w-[700px] h-full'/>
+            </div>
             {biosite && (
                 <PhonePreview
                     key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
@@ -581,6 +593,9 @@ const Layout: React.FC = () => {
                   </div>
 
                   <div className="overflow-y-auto flex-1">
+                    <div className="absolute left-1/300 top-1/7 w-[500px] h-[500px] flex flex-col items-center justify-center">
+                      <img src={ve_fondo} alt='logo' className='w-full h-full'/>
+                    </div>
                     <Outlet />
                   </div>
                 </div>
