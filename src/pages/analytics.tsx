@@ -1016,8 +1016,10 @@ const AnalyticsContent = () => {
               <div className="text-4xl font-bold text-black">{totalViews}</div>
             </div>
 
-            <div className="z-10 overflow-y-hidden w-[350px] h-[700px] ">
+            <div className="z-10 overflow-y-hidden w-[370px] h-[700px] ">
+            <PhonePreview>
                 <NewBiositePage slug={biosite.slug} />
+            </PhonePreview>
             </div>
 
             <div className="absolute right-30 top-52 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">

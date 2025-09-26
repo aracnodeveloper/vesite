@@ -487,7 +487,7 @@ const Layout: React.FC = () => {
                   <circle cx="12" cy="19" r="1" />
                 </svg>
               </button>
-              <div className="absolute top-3.5 right-18">
+              <div className="absolute top-3.5 right-20">
                 <ShareButton />
               </div>
               <button
@@ -511,7 +511,7 @@ const Layout: React.FC = () => {
               }`}
               style={{
                 maxHeight: "calc(100vh - 100px)",
-                paddingBottom: isDrawerOpen ? "80px" : "0" // Añadir padding cuando drawer está abierto
+                paddingBottom: isDrawerOpen ? "80px" : "0"
               }}
           >
             {biosite && (

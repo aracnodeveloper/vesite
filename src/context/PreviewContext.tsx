@@ -345,7 +345,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         deleteLink,
         reorderLinks,
         fetchLinks,
-        getIconIdentifier
+        getIconIdentifier,
     });
 
     // Enhanced addAppLink with link_type
@@ -365,7 +365,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 icon,
                 orderIndex: links.length,
                 isActive: link.isActive,
-                link_type: LINK_TYPES.APP // Set the link_type
+                link_type: LINK_TYPES.APP
             };
 
             const newLink = await createLink(linkData);
@@ -649,7 +649,12 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         setWhatsAppLinks: setWhatsAppLinksState,
         addWhatsAppLink,
         removeWhatsAppLink,
-        updateWhatsAppLink
+        updateWhatsAppLink,
+
+        getUserRole: linkOperations.getUserRole,
+        isAdmin: linkOperations.isAdmin,
+        toggleAdminLink: linkOperations.toggleAdminLink,
+        updateAdminLink: linkOperations.updateAdminLink,
     };
 
     return (

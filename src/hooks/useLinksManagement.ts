@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
 import type { SocialLink, RegularLink } from "../interfaces/PreviewContext.ts";
-import type {Link} from "../interfaces/Links.ts";
+import type { Link } from "../interfaces/Links.ts";
+import { adminLinkMethods } from "../service/apiService";
+import Cookie from "js-cookie";
 
 // Link type constants
 const LINK_TYPES = {
@@ -42,6 +44,97 @@ export const useLinkOperations = ({
                                       getIconIdentifier
                                   }: UseLinkOperationsProps) => {
 
+    // Get user role from cookies or context
+    const getUserRole = useCallback((): 'USER' | 'ADMIN' | 'SUPER_ADMIN' => {
+        const role = Cookie.get('roleName');
+        return role as 'USER' | 'ADMIN' | 'SUPER_ADMIN' || 'USER';
+    }, []);
+
+    const getUserId = useCallback((): string | null => {
+        return Cookie.get('userId') || null;
+    }, []);
+
+    const isAdmin = useCallback(() => {
+        const role = getUserRole();
+        return role === 'ADMIN' || role === 'SUPER_ADMIN';
+    }, [getUserRole]);
+
+    // Admin-specific methods
+    const toggleAdminLink = useCallback(async (linkId: string, isSelected: boolean) => {
+        if (!isAdmin() || !biositeData?.id) {
+            throw new Error("No admin permissions or biosite data");
+        }
+
+        const userId = getUserId();
+        if (!userId) {
+            throw new Error("No user ID found");
+        }
+
+        try {
+            const link = links.find(l => l.id === linkId);
+            if (!link) {
+                throw new Error("Link not found");
+            }
+
+            if (isSelected) {
+                // Apply link to children
+                const linkData = {
+                    icon:  'link',
+                    url: link.url,
+                    label: link.label,
+                    link_type: link.link_type || LINK_TYPES.REGULAR,
+                    orderIndex: link.orderIndex || 0,
+                };
+
+                await adminLinkMethods.updateAdminLink(userId, linkData);
+
+                // Update local state to mark as selected
+                await updateLink(linkId, {
+                    ...link,
+                    isSelected: true
+                });
+            } else {
+                // Remove from children - just update local state
+                await updateLink(linkId, {
+                    ...link,
+                    isSelected: false
+                });
+            }
+
+            // Refresh links to get updated state
+            await fetchLinks();
+        } catch (error) {
+            console.error("Error toggling admin link:", error);
+            throw error;
+        }
+    }, [isAdmin, biositeData, links, getUserId, getIconIdentifier, updateLink, fetchLinks]);
+
+    const updateAdminLink = useCallback(async (linkId: string, linkData: any) => {
+        if (!isAdmin() || !biositeData?.id) {
+            throw new Error("No admin permissions or biosite data");
+        }
+
+        const userId = getUserId();
+        if (!userId) {
+            throw new Error("No user ID found");
+        }
+
+        try {
+            // Update the link to children
+            await adminLinkMethods.updateAdminLink(userId, linkData);
+
+            // Update local link
+            await updateLink(linkId, linkData);
+
+            // Refresh links
+            await fetchLinks();
+        } catch (error) {
+            console.error("Error updating admin link:", error);
+            throw error;
+        }
+    }, [isAdmin, biositeData, getUserId, updateLink, fetchLinks]);
+
+    // Original methods with admin checks
     const setSocialLinks = useCallback((links: SocialLink[]) => {
         console.log("Setting social links:", links);
         setSocialLinksState(links);
@@ -64,7 +157,8 @@ export const useLinkOperations = ({
                 icon: iconIdentifier,
                 orderIndex: maxOrderIndex + 1,
                 isActive: true,
-                link_type: LINK_TYPES.SOCIAL // Set link_type
+                link_type: LINK_TYPES.SOCIAL,
+                isSelected: false // New links start as not selected
             });
 
             console.log("Social link added:", newLink);
@@ -78,6 +172,13 @@ export const useLinkOperations = ({
     const removeSocialLink = useCallback(async (linkId: string) => {
         try {
             console.log("Removing social link:", linkId);
+
+            // Check if link is admin-selected
+            const linkToRemove = links.find(l => l.id === linkId);
+            if (linkToRemove?.isSelected && !isAdmin()) {
+                throw new Error("No puedes eliminar un enlace asignado por administrador");
+            }
+
             if (!linkId) {
                 throw new Error("ID del enlace no proporcionado");
             }
@@ -112,11 +213,18 @@ export const useLinkOperations = ({
             }
         } catch (error) {
             console.error("Error removing social link:", error);
+            throw error;
         }
-    }, [deleteLink, socialLinks, fetchLinks, setSocialLinksState, links]);
+    }, [deleteLink, socialLinks, fetchLinks, setSocialLinksState, links, isAdmin]);
 
     const updateSocialLink = useCallback(async (linkId: string, updateData: Partial<SocialLink>) => {
         try {
+            // Check if link is admin-selected
+            const linkToUpdate = links.find(l => l.id === linkId);
+            if (linkToUpdate?.isSelected && !isAdmin()) {
+                throw new Error("No puedes editar un enlace asignado por administrador");
+            }
+
             const updatePayload: any = {
                 label: updateData.label,
                 url: updateData.url,
@@ -135,7 +243,7 @@ export const useLinkOperations = ({
             console.error("Error updating social link:", error);
             throw error;
         }
-    }, [updateLink, getIconIdentifier, fetchLinks]);
+    }, [updateLink, getIconIdentifier, fetchLinks, links, isAdmin]);
 
     const setRegularLinks = useCallback((links: RegularLink[]) => {
         console.log("Setting regular links:", links);
@@ -155,7 +263,8 @@ export const useLinkOperations = ({
                 icon: 'link',
                 orderIndex: link.orderIndex,
                 isActive: link.isActive,
-                link_type: LINK_TYPES.REGULAR
+                link_type: LINK_TYPES.REGULAR,
+                isSelected: false // New links start as not selected
             });
 
             console.log("Regular link added:", newLink);
@@ -168,6 +277,12 @@ export const useLinkOperations = ({
 
     const removeRegularLink = useCallback(async (linkId: string) => {
         try {
+            // Check if link is admin-selected
+            const linkToRemove = links.find(l => l.id === linkId);
+            if (linkToRemove?.isSelected && !isAdmin()) {
+                throw new Error("No puedes eliminar un enlace asignado por administrador");
+            }
+
             console.log("Removing regular link:", linkId);
             await deleteLink(linkId);
             setRegularLinksState((prev: RegularLink[]) => prev.filter(link => link.id !== linkId));
@@ -178,10 +293,16 @@ export const useLinkOperations = ({
             await fetchLinks();
             throw error;
         }
-    }, [deleteLink, fetchLinks, setRegularLinksState]);
+    }, [deleteLink, fetchLinks, setRegularLinksState, links, isAdmin]);
 
     const updateRegularLink = useCallback(async (linkId: string, updateData: Partial<RegularLink>) => {
         try {
+            // Check if link is admin-selected
+            const linkToUpdate = links.find(l => l.id === linkId);
+            if (linkToUpdate?.isSelected && !isAdmin()) {
+                throw new Error("No puedes editar un enlace asignado por administrador");
+            }
+
             const updatePayload: any = {
                 label: updateData.title,
                 url: updateData.url,
@@ -201,7 +322,7 @@ export const useLinkOperations = ({
             console.error("Error updating regular link:", error);
             throw error;
         }
-    }, [updateLink, fetchLinks]);
+    }, [updateLink, fetchLinks, links, isAdmin]);
 
     const reorderRegularLinks = useCallback(async (reorderedLinks: RegularLink[]) => {
         if (!biositeData?.id) {
@@ -222,6 +343,7 @@ export const useLinkOperations = ({
         }
     }, [biositeData?.id, reorderLinks, fetchLinks, setRegularLinksState]);
 
+    // Other methods remain the same...
     const getMusicEmbed = useCallback(() => {
         return links.find(link =>
             (link.link_type === LINK_TYPES.MUSIC || link.icon === 'music-embed') &&
@@ -254,7 +376,8 @@ export const useLinkOperations = ({
                     icon: 'music-embed',
                     orderIndex: maxOrderIndex + 1,
                     isActive: !!url,
-                    link_type: LINK_TYPES.MUSIC
+                    link_type: LINK_TYPES.MUSIC,
+                    isSelected: false
                 });
             }
             await fetchLinks();
@@ -296,7 +419,8 @@ export const useLinkOperations = ({
                     icon: 'social-post',
                     orderIndex: maxOrderIndex + 1,
                     isActive: !!url,
-                    link_type: LINK_TYPES.SOCIAL_POST
+                    link_type: LINK_TYPES.SOCIAL_POST,
+                    isSelected: false
                 });
             }
 
@@ -338,7 +462,8 @@ export const useLinkOperations = ({
                     icon: 'video-embed',
                     orderIndex: maxOrderIndex + 1,
                     isActive: !!url,
-                    link_type: LINK_TYPES.VIDEO
+                    link_type: LINK_TYPES.VIDEO,
+                    isSelected: false
                 });
             }
 
@@ -368,6 +493,11 @@ export const useLinkOperations = ({
         setSocialPost,
         getVideoEmbed,
         setVideoEmbed,
+        // Admin methods
+        toggleAdminLink,
+        updateAdminLink,
+        getUserRole,
+        isAdmin,
         // Constants
         LINK_TYPES
     };
