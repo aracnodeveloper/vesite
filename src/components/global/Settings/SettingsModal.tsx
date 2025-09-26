@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dialog } from "@headlessui/React";
+import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import {
     AlertCircle,
@@ -22,7 +22,7 @@ import SettingsFooter from "./Settings/settingsFooter";
 
 interface Profile {
     id: string;
-    userId: string; 
+    userId: string;
     name: string;
     slug: string;
     avatar?: string;
