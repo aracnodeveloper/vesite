@@ -313,8 +313,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({
 
   const getIconClassName = () => {
     return isDarkTheme()
-      ? "invert brightness-0 contrast-100 ml-auto"
-      : "ml-auto";
+      ? "w-full h-auto invert brightness-0 contrast-100 "
+      : "w-full h-auto";
   };
   return (
     <>
@@ -412,7 +412,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                       <QRCodeSVG
                         value={generateVCardString()}
                         size={120}
-                        className="w-full h-auto"
+                        className={getIconClassName()}
                         level="M"
                       />
                     </div>
