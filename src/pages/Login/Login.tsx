@@ -13,12 +13,11 @@ export const Login: FC = () => {
   const [form] = Form.useForm();
   const { login } = useAuthContext();
 
-  // useEffect para auto-ocultar el error después de 4 segundos
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setError(null);
-      }, 2000); // 4 segundos
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
@@ -37,7 +36,7 @@ export const Login: FC = () => {
 
         const cedula = parsedData?.data?.ci;
         if (!cedula || typeof cedula !== "string") {
-          console.log("No se encontrÃ³ cÃ©dula vÃ¡lida en localStorage");
+          console.log("No se encontro cedula valida en localStorage");
           return;
         }
 
@@ -46,20 +45,17 @@ export const Login: FC = () => {
 
         console.log("Intentando auto-login con:", { email, password: "***" });
 
-        // Llenar el formulario automÃ¡ticamente (opcional, para mostrar al usuario)
         form.setFieldsValue({
           email: email,
           password: password,
         });
 
-        // Ejecutar login automÃ¡ticamente
         handleAutoLogin(email, password);
       } catch (error) {
         console.error("Error en auto-login:", error);
       }
     };
 
-    // Verificar si ya hay un token vÃ¡lido
     const existingToken = Cookies.get("accessToken");
     if (!existingToken) {
       autoLogin();
@@ -80,13 +76,12 @@ export const Login: FC = () => {
         const token = Cookies.get("accessToken");
         if (token) {
           console.log("Auto-login exitoso");
-          // Recargar la pÃ¡gina antes de navegar
           window.location.href = "/sections";
         } else {
-          setError("Auto-login fallÃ³. No se encontrÃ³ token.");
+          setError("Auto-login fallo. No se encontro token.");
         }
       } else {
-        setError("Auto-login fallÃ³. Verifica tus credenciales almacenadas.");
+        setError("Auto-login fallo. Verifica tus credenciales almacenadas.");
       }
     } catch (err) {
       console.error("Auto-login error:", err);

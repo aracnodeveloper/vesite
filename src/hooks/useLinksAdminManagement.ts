@@ -1,3 +1,4 @@
+// hooks/useAdminLinkManagement.ts
 import { useState, useCallback } from 'react';
 import apiService from '../service/apiService';
 import Cookie from 'js-cookie';
@@ -8,6 +9,7 @@ export const useAdminLinkManagement = () => {
 
     const role = Cookie.get("roleName");
     const userId = Cookie.get("userId");
+    const biositeId = Cookie.get("biositeId"); // Get the current biosite ID
 
     const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
 
@@ -16,29 +18,53 @@ export const useAdminLinkManagement = () => {
         url: string;
         label: string;
         link_type: string;
+        orderIndex?: number;
     }) => {
         if (!isAdmin || !userId) {
             throw new Error('Only admins can update parent and children links');
+        }
+
+        if (!biositeId) {
+            throw new Error('BiositeId is required for admin operations');
         }
 
         try {
             setLoading(true);
             setError(null);
 
-            const response = await apiService.patch(
-                `/biosites/admin/update-link/${userId}`,
-                linkData
-            );
+            // Create proper CreateLinkDto structure matching backend expectations
+            const createLinkDto = {
+                biositeId: biositeId,
+                label: linkData.label,
+                url: linkData.url,
+                icon: linkData.icon,
+                link_type: linkData.link_type,
+                orderIndex: linkData.orderIndex || 0,
+                isActive: true,
+                isSelected: true
+            };
 
+            console.log('Sending admin link data:', {
+                adminId: userId,
+                linkData: createLinkDto
+            });
+
+            // Use the specific API method for admin link updates
+            const response = await apiService.updateParentAndChildrenLink
+                ? await apiService.updateParentAndChildrenLink(userId, createLinkDto)
+                : await apiService.patch(`/biosites/admin/update-link/${userId}`, createLinkDto);
+
+            console.log('Admin link update response:', response);
             return response;
         } catch (error: any) {
+            console.error('Admin link update error:', error.response?.data || error);
             const errorMessage = error?.response?.data?.message || error?.message || 'Error updating parent and children links';
             setError(errorMessage);
             throw error;
         } finally {
             setLoading(false);
         }
-    }, [isAdmin, userId]);
+    }, [isAdmin, userId, biositeId]);
 
     const clearError = useCallback(() => setError(null), []);
 
@@ -49,6 +75,7 @@ export const useAdminLinkManagement = () => {
         clearError,
         isAdmin,
         userId,
-        role
+        role,
+        biositeId
     };
 };

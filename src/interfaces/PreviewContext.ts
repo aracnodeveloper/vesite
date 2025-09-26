@@ -53,11 +53,15 @@ export interface CreateBiositeDto {
 }
 
 export interface AdminLinkCreationData {
+    biositeId: string;
     icon: string;
     url: string;
     label: string;
     link_type: string;
-    isSelected: boolean; // This determines if it propagates to children
+    image?: string;
+    orderIndex: number;
+    isActive: boolean;
+    isSelected: boolean;
 }
 
 export interface PreviewContextType {
@@ -115,5 +119,10 @@ export interface PreviewContextType {
     getMusicLinks: () => any[];
     getSocialPostLinks: () => any[];
     clearError: () => void;
-}
 
+    // Admin methods - Add these new methods
+    getUserRole: () => 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+    isAdmin: () => boolean;
+    toggleAdminLink: (linkId: string, isSelected: boolean) => Promise<void>;
+    updateAdminLink: (linkId: string, linkData: any) => Promise<void>;
+}

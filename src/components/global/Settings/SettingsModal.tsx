@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Dialog } from "@headlessui/react";
-import {AlertCircle, ChevronLeft, Loader2} from "lucide-react";
+import { Dialog } from "@headlessui/React";
+import { useNavigate } from "react-router-dom";
+import {
+    AlertCircle,
+    ChevronLeft,
+    Loader2,
+    GanttChart,
+    Palette,
+    BarChartHorizontalBig,
+    Shield
+} from "lucide-react";
 import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useUser } from "../../../hooks/useUser.ts";
 import { useFetchBiosite } from "../../../hooks/useFetchBiosite.ts";
@@ -53,6 +62,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                          onProfileSelect,
                                                          onCreateNewSite
                                                      }) => {
+    const navigate = useNavigate();
     const {
         biosite,
         loading: contextLoading,
@@ -64,6 +74,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const { user, fetchUser } = useUser();
     const role = Cookies.get("roleName");
+    const userId = Cookies.get("userId");
+
+    // Check admin access (same logic as Layout)
+    const hasAdminAccess =
+        role === "SUPER_ADMIN" ||
+        userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5" ||
+        role === "ADMIN";
 
     const {
         fetchCompleteBiositeStructure,
@@ -326,6 +343,59 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const isLoadingState = loading || contextLoading || biositeLoading || isCreating;
 
+    // Navigation menu items (same as Layout)
+    const baseSidebarItems = [
+        {
+            icon: GanttChart,
+            label: "Secciones",
+            id: "sections",
+            to: "/sections",
+            color: "green",
+        },
+        {
+            icon: Palette,
+            label: "Estilos",
+            id: "droplet",
+            to: "/droplet",
+            color: "orange",
+        },
+        {
+            icon: BarChartHorizontalBig,
+            label: "Estadísticas",
+            id: "analytics",
+            to: "/analytics",
+            color: "blue",
+        },
+    ];
+
+    const sidebarItems = hasAdminAccess
+        ? [
+            ...baseSidebarItems,
+            {
+                icon: Shield,
+                label: "Administración",
+                id: "admin",
+                to: "/admin",
+                color: "red",
+            },
+        ]
+        : baseSidebarItems;
+
+    const handleMenuItemClick = (item: any) => {
+        navigate(item.to);
+        onClose(); // Close modal after navigation
+    };
+
+    const getItemStyles = (item: any) => {
+        const colorClasses = {
+            green: "text-[#98C022] bg-[#98C022]/10 border-[#98C022]/20",
+            orange: "text-orange-600 bg-orange-50 border-orange-200",
+            blue: "text-blue-600 bg-blue-50 border-blue-200",
+            red: "text-red-600 bg-red-50 border-red-200",
+        };
+        return `${colorClasses[item.color as keyof typeof colorClasses]} border-l-4`;
+    };
+
     return (
         <>
             {/* Settings Modal */}
@@ -334,16 +404,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClose={onClose}
                 className="fixed inset-0 h-full z-[70] flex items-center justify-start bg-black/50"
             >
-                <Dialog.Panel className="bg-[#FAFFF6] rounded-lg w-full max-w-[320px] h-full text-gray-600 shadow-xl flex flex-col">
+                <Dialog.Panel className="bg-[#FAFFF6] rounded-lg w-full max-w-[320px] lg:max-w-[320px] h-full lg:h-full mx-0 text-gray-600 shadow-xl flex flex-col">
                     {/* Header - Fixed */}
                     <div className="flex items-center justify-between p-4 border-b border-[#E0EED5] flex-shrink-0">
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 text-sm  cursor-pointer font-medium"
+                            className="text-gray-400 hover:text-gray-600 text-sm cursor-pointer font-medium"
                         >
                             <ChevronLeft className="w-5 h-5 mr-1 text-black hover:text-gray-400"/>
                         </button>
-                        <Dialog.Title className="text-black font-medium">
+                        <Dialog.Title className="text-black font-medium text-sm lg:text-base">
                             CONFIGURACIONES
                         </Dialog.Title>
                         <div className="w-16"></div>
@@ -355,14 +425,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         {error && (
                             <div className="p-4 bg-red-50 border-l-4 border-red-400 flex-shrink-0">
                                 <div className="flex items-center">
-                                    <AlertCircle className="h-4 w-4 text-red-400 mr-2"/>
+                                    <AlertCircle className="h-4 w-4 text-red-400 mr-2 flex-shrink-0"/>
                                     <p className="text-sm text-red-700">{error}</p>
                                 </div>
                             </div>
                         )}
-
-                        {/* Biosites Section */}
                         <div className="p-4 space-y-3">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                                MIS VESITES
+                            </h3>
                             {isLoadingState ? (
                                 <div className="flex items-center justify-center py-8">
                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400"/>
@@ -388,6 +459,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 />
                             )}
                         </div>
+                        {/* Navigation Menu - Only visible on mobile */}
+                        <div className="lg:hidden border-b border-[#E0EED5] p-4">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                                NAVEGACIÓN
+                            </h3>
+                            <div className="space-y-2">
+                                {sidebarItems.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => handleMenuItemClick(item)}
+                                        className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 hover:bg-gray-50 ${getItemStyles(item)}`}
+                                    >
+                                        <item.icon size={20} className="flex-shrink-0" />
+                                        <span className="text-sm font-medium">{item.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Biosites Section */}
+
                     </div>
 
                     {/* Footer - Fixed */}
@@ -397,21 +489,25 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 </Dialog.Panel>
             </Dialog>
 
-            {/* Create Biosite Wizard */}
+            {/* Create Biosite Wizard - También responsive */}
             {showCreateWizard && (
-                <CreateBiositeWizard
-                    createForm={createForm}
-                    isLoadingState={isLoadingState}
-                    isCreating={isCreating}
-                    onTitleChange={handleTitleChange}
-                    onSlugChange={handleSlugChange}
-                    onPasswordChange={handlePasswordChange}
-                    onUserNameChange={handleUserNameChange}
-                    onProfileImageChange={handleProfileImageChange}
-                    onCreateBiosite={handleCreateNewBiosite}
-                    onCancel={handleCloseWizard}
-                    createdBiositeUrl={createdBiositeUrl}
-                />
+                <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        <CreateBiositeWizard
+                            createForm={createForm}
+                            isLoadingState={isLoadingState}
+                            isCreating={isCreating}
+                            onTitleChange={handleTitleChange}
+                            onSlugChange={handleSlugChange}
+                            onPasswordChange={handlePasswordChange}
+                            onUserNameChange={handleUserNameChange}
+                            onProfileImageChange={handleProfileImageChange}
+                            onCreateBiosite={handleCreateNewBiosite}
+                            onCancel={handleCloseWizard}
+                            createdBiositeUrl={createdBiositeUrl}
+                        />
+                    </div>
+                </div>
             )}
         </>
     );

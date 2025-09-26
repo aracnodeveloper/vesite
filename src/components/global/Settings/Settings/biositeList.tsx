@@ -47,7 +47,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                                                       clearError
                                                   }) => {
     const [avatarError, setAvatarError] = useState(false);
-    const [showChildBiosites, setShowChildBiosites] = useState(true);
+    const [showChildBiosites, setShowChildBiosites] = useState(false);
     const [hoveredBiosite, setHoveredBiosite] = useState<string | null>(null);
     const [showDeleteMenu, setShowDeleteMenu] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);

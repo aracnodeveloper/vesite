@@ -47,7 +47,7 @@ const ShareButton = () => {
             <button
                 onClick={handleClick}
                 disabled={buttonContent.disabled}
-                className={`px-4 cursor-pointer py-2 text-xs h-8 rounded-lg flex items-center space-x-1.5 transition-colors ${
+                className={`px-2 cursor-pointer py-2 text-xs h-8 rounded-lg flex items-center space-x-1 transition-colors ${
                     buttonContent.disabled
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-transparent lg:bg-gray-100 text-black hover:bg-gray-100'
