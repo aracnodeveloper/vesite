@@ -295,7 +295,7 @@ export const useLinkOperations = ({
                 orderIndex: link.orderIndex,
                 isActive: link.isActive,
                 link_type: LINK_TYPES.REGULAR,
-                isSelected: false // New links start as not selected
+                isSelected: false
             });
 
             console.log("Regular link added:", newLink);
@@ -308,7 +308,7 @@ export const useLinkOperations = ({
 
     const removeRegularLink = useCallback(async (linkId: string) => {
         try {
-            // Check if link is admin-selected
+
             const linkToRemove = links.find(l => l.id === linkId);
             if (linkToRemove?.isSelected && !isAdmin()) {
                 throw new Error("No puedes eliminar un enlace asignado por administrador");
@@ -328,7 +328,7 @@ export const useLinkOperations = ({
 
     const updateRegularLink = useCallback(async (linkId: string, updateData: Partial<RegularLink>) => {
         try {
-            // Check if link is admin-selected
+
             const linkToUpdate = links.find(l => l.id === linkId);
             if (linkToUpdate?.isSelected && !isAdmin()) {
                 throw new Error("No puedes editar un enlace asignado por administrador");
@@ -374,7 +374,6 @@ export const useLinkOperations = ({
         }
     }, [biositeData?.id, reorderLinks, fetchLinks, setRegularLinksState]);
 
-    // Other methods remain the same...
     const getMusicEmbed = useCallback(() => {
         return links.find(link =>
             (link.link_type === LINK_TYPES.MUSIC || link.icon === 'music-embed') &&

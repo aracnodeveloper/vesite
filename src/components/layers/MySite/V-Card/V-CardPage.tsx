@@ -266,7 +266,7 @@ const VCardPage = () => {
   }
 
   return (
-    <div className="w-full max-h-screen bg-transparent">
+      <div className="w-full h-full mb-10 mt-0 lg:mt-20 p-2 max-w-md mx-auto">
       {/* Header - Solo en desktop */}
       <div className="lg:block p-4 flex items-center justify-between">
         <div className="px-6 py-4 border-b border-gray-700">

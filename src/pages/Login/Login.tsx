@@ -4,7 +4,7 @@ import { Alert, Button, Form, Input, Layout, Typography } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
-import imgP6 from "../../../public/img/img_8.png";
+//import imgP6 from "../../../public/img/img_8.png";
 const { Content } = Layout;
 
 export const Login: FC = () => {
@@ -146,7 +146,7 @@ export const Login: FC = () => {
 
       {/* Header with glassmorphism effect */}
       <div
-        className="absolute top-5 left-4 right-4 lg:left-10 lg:right-10 z-10 flex flex-col sm:flex-row justify-between items-center p-2 gap-4 sm:gap-0 bg-white/25"
+        className="absolute top-5 left-4 right-4 lg:left-10 lg:right-10 z-10 flex flex-col sm:flex-row justify-between items-center p-2 gap-4 sm:gap-0 bg-white/50"
         style={{
           backdropFilter: "blur(20px)",
           borderRadius: "20px",
@@ -154,8 +154,8 @@ export const Login: FC = () => {
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
         }}
       >
-          <div className="w-40 h-25">
-            <img src="./public/img/veSite.svg" className="w-40 h-25" />
+          <div className="w-30 h-20">
+            <img src="./public/img/veSite.svg" className="w-30 h-20" />
           </div>
 
         <div className="flex items-center space-x-4 w-full sm:w-auto">
@@ -273,7 +273,7 @@ export const Login: FC = () => {
                   maxWidth: "500px",
                 }}
               >
-                Crea tu marca con nuestros{" "}
+                Crea tu marca con {" "}
                 <div className='flex flex-wrap -ml-9 -mt-1'>
                   <div className="w-30 h-10">
                     <img src="./public/ve.svg" className="w-30 h-10" />

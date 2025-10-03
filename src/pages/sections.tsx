@@ -54,7 +54,6 @@ const Sections = () => {
     }
   };
 
-  // Effect for admin background update
   useEffect(() => {
     const executeAdminBackgroundUpdate = async () => {
       const role = Cookie.get("roleName");
@@ -69,13 +68,11 @@ const Sections = () => {
       }
     };
 
-    // Execute when biosite data is loaded and user is admin
     if (biosite) {
       executeAdminBackgroundUpdate();
     }
   }, [biosite]);
 
-  // Effect for admin video update
   useEffect(() => {
     const executeAdminVideoUpdate = async () => {
       const role = Cookie.get("roleName");
@@ -93,7 +90,6 @@ const Sections = () => {
       }
     };
 
-    // Execute when biosite data is loaded and user is admin
     if (biosite) {
       executeAdminVideoUpdate();
     }

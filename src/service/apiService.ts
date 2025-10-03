@@ -16,6 +16,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface AdminLinkData {
+    biositeId?: string;  // Add this as optional since we'll add it in the method
     icon: string;
     url: string;
     label: string;
@@ -97,24 +98,22 @@ export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | '
 };
 
 export const adminLinkMethods = {
-    // Update link for admin and all children
     updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<any> => {
         try {
-            // Validate required fields before sending
-            if (!linkData.label || typeof linkData.label !== 'string') {
-                throw new Error('label must be a string');
-            }
-            if (!linkData.url || typeof linkData.url !== 'string') {
-                throw new Error('url must be a string');
-            }
-            if (!linkData.icon || typeof linkData.icon !== 'string') {
-                throw new Error('icon must be a string');
-            }
-            if (typeof linkData.orderIndex !== 'number' || !Number.isInteger(linkData.orderIndex)) {
-                throw new Error('orderIndex must be an integer number');
-            }
+            const payload = {
+                label: linkData.label,
+                url: linkData.url,
+                icon: linkData.icon,
+                orderIndex: linkData.orderIndex,
+                link_type: linkData.link_type || 'regular'
+            };
 
-            const response = await api.patch(`/biosites/admin/update-link/${adminId}`, linkData);
+            console.log('Sending payload:', payload);
+
+            const response = await api.patch(
+                `/biosites/admin/update-link/${adminId}`,
+                payload
+            );
             console.log('Admin link update response:', response.data);
             return response.data;
         } catch (error) {
@@ -122,7 +121,6 @@ export const adminLinkMethods = {
             throw error;
         }
     },
-
 };
 
 

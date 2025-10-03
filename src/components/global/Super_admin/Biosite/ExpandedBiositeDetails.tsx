@@ -38,7 +38,7 @@ export default function ExpandedBiositeDetails({
   const [update_background, setUpdate_background] = useState(false);
   const [editableBiosite, setEditableBiosite] = useState(biosite);
   const [isLoading, setIsLoading] = useState(false);
-  const {updateUser, error} = useUser();
+  const { updateUser, error } = useUser();
   const [avatarFile, setAvatarFile] = useState<File>();
   const [backgroundFile, setBackgroundFile] = useState<File>();
   const [formError, setFormError] = useState("");
@@ -48,7 +48,7 @@ export default function ExpandedBiositeDetails({
           HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
       >
   ) => {
-    const {name, value} = e.target;
+    const { name, value } = e.target;
 
     if (name.includes(".")) {
       const [parentKey, childKey] = name.split(".");
@@ -67,6 +67,7 @@ export default function ExpandedBiositeDetails({
     }
     setUpdate_profile(true);
   };
+
   const handleImageChange = (fieldName: string) => (file: File | null) => {
     if (fieldName == "avatarImage") {
       setAvatarFile(file);
@@ -74,7 +75,6 @@ export default function ExpandedBiositeDetails({
     } else if (fieldName == "backgroundImage") {
       setBackgroundFile(file);
       setUpdate_background(true);
-    } else {
     }
     setUpdate_profile(true);
   };
@@ -130,15 +130,15 @@ export default function ExpandedBiositeDetails({
       <tr>
         <td
             colSpan={8}
-            className="px-3 sm:px-6 py-4 bg-gray-50 border-2 border-t-green-600 border-b-green-400"
+            className="px-2 sm:px-6 py-3 sm:py-4 bg-gray-50 border-2 border-t-green-600 border-b-green-400"
         >
-          {/* Mostrar error si existe */}
+          {/* Error Message */}
           {(error || formError) && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
                     <svg
-                        className="h-5 w-5 text-red-400"
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-red-400"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                     >
@@ -149,11 +149,11 @@ export default function ExpandedBiositeDetails({
                       />
                     </svg>
                   </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
+                  <div className="ml-2 sm:ml-3 flex-1">
+                    <h3 className="text-xs sm:text-sm font-medium text-red-800">
                       Error al cargar información del biosite
                     </h3>
-                    <div className="mt-1 text-sm text-red-700">
+                    <div className="mt-1 text-xs sm:text-sm text-red-700 break-words">
                       {error || formError || "Ha ocurrido un error desconocido"}
                     </div>
                   </div>
@@ -161,10 +161,10 @@ export default function ExpandedBiositeDetails({
               </div>
           )}
 
-          <div className="space-y-4 sm:space-y-6">
-            {/* Información del Usuario */}
+          <div className="space-y-3 sm:space-y-6 w-full">
+            {/* User Information */}
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                 Información del Usuario{ischild !== false ? " Hijo" : ""}
                 {error && (
                     <span className="ml-2 text-xs text-red-600 font-normal">
@@ -172,27 +172,24 @@ export default function ExpandedBiositeDetails({
                 </span>
                 )}
               </h4>
-              <div className="p-2 rounded border">
-                <form
-                    onSubmit={onSave}
-                    className="space-y-4"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-lg">
-                    <FomrField title={"Nombre"}>
+              <div className="p-2 sm:p-3 rounded border bg-white">
+                <form onSubmit={onSave} className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 rounded-lg">
+                    <FomrField title="Nombre">
                       <Input
                           name="owner.name"
                           value={editableBiosite.owner?.name ?? ""}
                           onChange={handleChange}
                       />
                     </FomrField>
-                    <FomrField title={"Email"}>
+                    <FomrField title="Email">
                       <Input
                           name="owner.email"
                           value={editableBiosite.owner?.email ?? ""}
                           onChange={handleChange}
                       />
                     </FomrField>
-                    <FomrField title={"Cédula"}>
+                    <FomrField title="Cédula">
                       <Input
                           name="owner.cedula"
                           value={editableBiosite.owner?.cedula ?? ""}
@@ -200,7 +197,7 @@ export default function ExpandedBiositeDetails({
                       />
                     </FomrField>
                     <div>
-                      <p className="text-xs text-gray-600 uppercase">Rol</p>
+                      <p className="text-xs mb-1 text-gray-600 uppercase">Rol</p>
                       <span
                           className={`inline-flex px-2 py-1 text-xs rounded-full ${
                               biosite.owner?.role === "ADMIN"
@@ -215,19 +212,19 @@ export default function ExpandedBiositeDetails({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FomrField title={"Avatar"}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <FomrField title="Avatar">
                       <ImageInput
-                          maxHeight={200}
+                          maxHeight={150}
                           square
                           value={avatarFile}
                           initialSrc={biosite.avatarImage}
                           onChange={handleImageChange("avatarImage")}
                       />
                     </FomrField>
-                    <FomrField title={"Background"}>
+                    <FomrField title="Background">
                       <ImageInput
-                          maxHeight={200}
+                          maxHeight={150}
                           value={backgroundFile}
                           initialSrc={biosite.backgroundImage}
                           onChange={handleImageChange("backgroundImage")}
@@ -254,37 +251,36 @@ export default function ExpandedBiositeDetails({
             </div>
 
             {/* V-Card Information */}
-            <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                <Database className="w-4 h-4 mr-2 flex-shrink-0"/>
-                Tarjeta Digital del Usuario{ischild !== false ? " Hijo" : ""}
+            <div className='w-full'>
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 flex items-center flex-wrap">
+                <Database className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
+                <span>Tarjeta Digital del Usuario{ischild !== false ? " Hijo" : ""}</span>
               </h4>
 
               {isLoadingCard ? (
                   <div className="flex justify-center py-4">
-                    <Loading/>
+                    <Loading />
                   </div>
               ) : userBusinessCard ? (
                   <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                     {/* QR Code Section */}
                     {userBusinessCard.qrCodeUrl && (
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 text-center border-b">
-                          <div
-                              className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 sm:p-4 text-center border-b">
+                          <div className="flex flex-col items-center space-y-3">
                             <img
                                 src={userBusinessCard.qrCodeUrl}
                                 alt="QR Code"
-                                className="w-20 h-20 bg-white p-2 rounded-lg shadow-sm flex-shrink-0"
+                                className="w-16 h-16 sm:w-20 sm:h-20 bg-white p-2 rounded-lg shadow-sm"
                             />
-                            <div className="text-center sm:text-left">
-                              <p className="text-sm font-medium text-gray-700">
+                            <div className="text-center">
+                              <p className="text-xs sm:text-sm font-medium text-gray-700">
                                 QR Code Disponible
                               </p>
                               <p className="text-xs text-gray-500">
                                 Escanea para ver la V-Card
                               </p>
                               {userBusinessCard.slug && (
-                                  <p className="text-xs text-blue-600 mt-1 break-all">
+                                  <p className="text-xs text-blue-600 mt-1 break-all px-2">
                                     /{userBusinessCard.slug}
                                   </p>
                               )}
@@ -294,14 +290,14 @@ export default function ExpandedBiositeDetails({
                     )}
 
                     {/* V-Card Data */}
-                    <div className="p-4">
+                    <div className="p-3 sm:p-4">
                       {(() => {
                         const vCardData = parseVCardData(userBusinessCard);
 
                         if (!vCardData) {
                           return (
                               <div className="text-center py-4">
-                                <p className="text-sm text-gray-500">
+                                <p className="text-xs sm:text-sm text-gray-500">
                                   V-Card sin datos configurados
                                 </p>
                               </div>
@@ -309,34 +305,36 @@ export default function ExpandedBiositeDetails({
                         }
 
                         return (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                               {[
-                                {label: "Nombre", value: vCardData.name},
-                                {label: "Título", value: vCardData.title},
-                                {label: "Empresa", value: vCardData.company},
-                                {label: "Email", value: vCardData.email, isEmail: true},
-                                {label: "Teléfono", value: vCardData.phone, isPhone: true},
-                                {label: "Web", value: vCardData.website, isUrl: true}
+                                { label: "Nombre", value: vCardData.name },
+                                { label: "Título", value: vCardData.title },
+                                { label: "Empresa", value: vCardData.company },
+                                { label: "Email", value: vCardData.email, isEmail: true },
+                                { label: "Teléfono", value: vCardData.phone, isPhone: true },
+                                { label: "Web", value: vCardData.website, isUrl: true },
                               ]
-                                  .filter(item => item.value)
+                                  .filter((item) => item.value)
                                   .map((item, index) => (
-                                      <div key={index}
-                                           className="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 pb-2 last:border-b-0 last:pb-0">
-                              <span className="text-xs text-gray-500 sm:w-20 mb-1 sm:mb-0 font-medium">
+                                      <div
+                                          key={index}
+                                          className="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 pb-2 last:border-b-0 last:pb-0"
+                                      >
+                              <span className="text-xs text-gray-500 sm:w-24 mb-1 sm:mb-0 font-medium">
                                 {item.label}:
                               </span>
                                         <div className="flex-1 min-w-0">
                                           {item.isEmail ? (
                                               <a
                                                   href={`mailto:${item.value}`}
-                                                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
+                                                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
                                               >
                                                 {item.value}
                                               </a>
                                           ) : item.isPhone ? (
                                               <a
                                                   href={`tel:${item.value}`}
-                                                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                                                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline"
                                               >
                                                 {item.value}
                                               </a>
@@ -345,12 +343,12 @@ export default function ExpandedBiositeDetails({
                                                   href={item.value}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
-                                                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
+                                                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
                                               >
                                                 {item.value}
                                               </a>
                                           ) : (
-                                              <span className="text-sm text-gray-800 break-words">
+                                              <span className="text-xs sm:text-sm text-gray-800 break-words">
                                     {item.value}
                                   </span>
                                           )}
@@ -361,9 +359,8 @@ export default function ExpandedBiositeDetails({
                         );
                       })()}
 
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <div
-                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 space-y-2 sm:space-y-0">
+                      <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 space-y-2 sm:space-y-0">
                       <span
                           className={`px-2 py-1 rounded-full text-xs w-fit ${
                               userBusinessCard.isActive
@@ -375,7 +372,7 @@ export default function ExpandedBiositeDetails({
                             ? "V-Card Activa"
                             : "V-Card Inactiva"}
                       </span>
-                          <span className="break-all">
+                          <span className="break-all text-xs">
                         ID: {userBusinessCard.id?.substring(0, 8)}...
                       </span>
                         </div>
@@ -383,60 +380,61 @@ export default function ExpandedBiositeDetails({
                     </div>
                   </div>
               ) : (
-                  <div className="bg-white p-4 rounded border text-center">
+                  <div className="bg-white p-3 sm:p-4 rounded border text-center">
                     <div className="text-gray-400 mb-2">
-                      <Database className="w-8 h-8 mx-auto mb-2"/>
+                      <Database className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
                     </div>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       Este usuario hijo no tiene V-Card configurada
                     </p>
                   </div>
               )}
             </div>
 
-            {/* Enlaces detallados */}
+            {/* Links Section */}
             {(() => {
               const currentBiositeLinks = biositeLinks[biosite.id] || [];
               const isLoadingLinks = loadingBiositeLinks[biosite.id];
 
               return (
                   <div>
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                      <LinkIcon className="w-4 h-4 text-purple-500 mr-2 flex-shrink-0"/>
-                      Enlaces del veSite{ischild !== false ? " Hijo" : ""}
+                    <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3 flex items-center flex-wrap">
+                      <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 mr-2 flex-shrink-0" />
+                      <span>Enlaces del veSite{ischild !== false ? " Hijo" : ""}</span>
                       {isLoadingLinks && (
                           <div className="ml-2">
-                            <Loading/>
+                            <Loading />
                           </div>
                       )}
                     </h4>
 
                     {isLoadingLinks ? (
                         <div className="flex justify-center py-4">
-                          <Loading/>
+                          <Loading />
                         </div>
                     ) : currentBiositeLinks.length > 0 ? (
-                        <div className="max-h-[400px] sm:max-h-[800px] overflow-y-auto space-y-3">
+                        <div className="max-h-[300px] sm:max-h-[600px] overflow-y-auto space-y-2 sm:space-y-3">
                           {currentBiositeLinks
                               .filter((link) => link.isActive)
                               .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
-                              .map((link, index) => {
-                                return (
-                                    <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-                                      <EditableLink
-                                          key={index}
-                                          link={link}
-                                          linkType={getLinkType(link)}
-                                          formatDate={formatDate}
-                                      />
-                                    </div>
-                                );
-                              })}
+                              .map((link, index) => (
+                                  <div
+                                      key={index}
+                                      className="border border-gray-200 rounded-lg overflow-hidden"
+                                  >
+                                    <EditableLink
+                                        key={index}
+                                        link={link}
+                                        linkType={getLinkType(link)}
+                                        formatDate={formatDate}
+                                    />
+                                  </div>
+                              ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8">
-                          <LinkIcon className="w-12 h-12 text-gray-300 mx-auto mb-2"/>
-                          <p className="text-sm text-gray-500">
+                        <div className="text-center py-6 sm:py-8">
+                          <LinkIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-2" />
+                          <p className="text-xs sm:text-sm text-gray-500">
                             Este biosite hijo no tiene enlaces configurados
                           </p>
                         </div>

@@ -10,13 +10,12 @@ import {
   ExternalLink,
   X,
 } from "lucide-react";
-
 import imgP from "../../../public/img/img.png";
 //import imgP2 from "../../../public/img/fondo.svg";
 //import imgP6 from "../../../public/img/img_6.png";
-import ve_logo from "../../../public/img/ve_fondo.svg"
-import ve_fondo from "../../../public/img/ve_logo.svg"
-//import ve_logo_green from "../../../public/img/ve_fondo_green.svg"
+import ve_logo from "../../../public/img/veSite_white.svg"
+//import ve_fondo from "../../../public/img/ve_logo.svg"
+import ve_logo_green from "../../../public/img/ve_fondo_green.svg"
 import ve_fondo_green from "../../../public/img/ve_logo_green.svg"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
@@ -340,11 +339,11 @@ const Layout: React.FC = () => {
         {/* --- VISTA DESKTOP --- */}
         <div className="hidden lg:flex flex-col lg:flex-row h-screen bg-[#E0EED5] p-2 sm:p-4 overflow-x-hidden md:overflow-y-hidden">
           <nav className="w-16 xl:w-14 bg-[#FAFFF6] shadow-lg mt-10 mb-4 flex-col items-center space-y-6 rounded-full mr-4 hidden lg:flex">
-            <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
+            <button className=" p-2 cursor-pointer bg-linear-to-b from-[#CBE6B0] to-white rounded-t-full">
               <img
                   src={getAvatarImage()}
                   onClick={handleOpenSettings}
-                  className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover"
+                  className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover "
                   alt="perfil"
                   onError={handleAvatarError}
               />
@@ -381,11 +380,7 @@ const Layout: React.FC = () => {
                   backgroundColor: '#E0EED5',
                 }}
             >
-              {!isAnalyticsRoute && !isAdminRoute && (
-              <div className="absolute z-10  left-1/7 top-1/7 w-[500px] h-[500px] flex flex-col items-center justify-center">
-                      <img src={ve_logo} alt='logo' className='w-full h-full'/>
-              </div>
-              )}
+
               <div className='w-full h-full flex justify-center items-center z-20'>
               <Outlet/></div>
             </main>
@@ -575,6 +570,9 @@ const Layout: React.FC = () => {
                 >
                   {/* Header del drawer con botón de cerrar */}
                   <div className="flex items-center justify-between pb-2 flex-shrink-0">
+                    <div className=" w-[40px] h-[40px] flex flex-col items-center justify-center">
+                      <img src={ve_logo_green} alt='logo' className='w-full h-full'/>
+                    </div>
                     <div
                         ref={dragHandleRef}
                         onMouseDown={handleDragStart}
@@ -593,10 +591,7 @@ const Layout: React.FC = () => {
                   </div>
 
                   <div className="overflow-y-auto flex-1">
-                    <div className="absolute left-1/300 top-1/7 w-[500px] h-[500px] flex flex-col items-center justify-center">
-                      <img src={ve_fondo} alt='logo' className='w-full h-full'/>
-                    </div>
-                    <Outlet />
+                      <Outlet/>
                   </div>
                 </div>
               </>

@@ -207,7 +207,7 @@ const VideoPage = () => {
   }
 
   return (
-    <div className="w-full h-full mt-0 lg:mt-14 mb-10 max-w-md mx-auto rounded-lg">
+    <div className="w-full h-full mt-0 lg:mt-20 mb-10 max-w-md mx-auto rounded-lg">
       <div className="px-6 py-4 border-b border-gray-700">
         <BackButton text={"Video"} />
       </div>

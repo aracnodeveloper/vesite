@@ -25,7 +25,7 @@ export default function ExpandedAnalytics({
         className="px-6 py-4 bg-blue-50 border-l-4 border-blue-500"
       >
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between">
             <h4 className="text-sm font-semibold text-blue-800 flex items-center">
               <BarChart3 className="w-4 h-4 mr-2" />
               Analytics del Biosite Hijo (
@@ -36,7 +36,7 @@ export default function ExpandedAnalytics({
                 : "Último año"}
               )
             </h4>
-            <div className="mb-4 flex items-center space-x-4">
+            <div className="mb-4 flex items-center space-x-4 flex-wrap">
               <label className="text-sm font-medium text-gray-700">
                 Rango de tiempo para analytics:
               </label>
@@ -121,7 +121,7 @@ export default function ExpandedAnalytics({
                       .map((activity, index) => (
                         <div
                           key={index}
-                          className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
+                          className="flex flex-wrap justify-between items-center py-1 px-2 bg-gray-50 rounded"
                         >
                           <span className="text-sm text-gray-600">
                             {activity.day}
@@ -157,7 +157,7 @@ export default function ExpandedAnalytics({
                       .map((click, index) => (
                         <div
                           key={index}
-                          className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
+                          className="flex  justify-between items-center py-1 px-2 bg-gray-50 rounded"
                         >
                           <span className="text-sm text-gray-600 truncate">
                             {click.label}

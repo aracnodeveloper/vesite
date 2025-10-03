@@ -13,7 +13,7 @@ const fontOptions = [
   { name: "Serif Stack", value: "Georgia, Times New Roman, Times, serif" },
   { name: "Mono Stack", value: "Courier New, Monaco, monospace" },
   { name: "Century Gothic", value: "Century Gothic, Arial, sans-serif" },
-  { name: "Lucida Console", value: "Lucida Console, Courier New, monospace" },
+  { name: "Lucid Console", value: "Lucida Console, Courier New, monospace" },
 ];
 
 const googleFontOptions = [
@@ -93,10 +93,10 @@ const colorCategories = {
       accentColor: "#6B4A3A66",
     },
     {
-      name: "Maldives",
+      name: "VE",
       value:
-          "linear-gradient(180deg, #E8F4F8 0%, #B8E6D3 30%, #7ECAA9 60%, #4A7C59 100%)",
-      textColor: "#2D4A3A",
+          "linear-gradient(180deg, #E8F4F8 0%, #C2D58F 30%, #ABC26E 60%, #96C121 100%)",
+      textColor: "#FFFFFF",
       accentColor: "#4A7C5966",
     },
   ],
@@ -109,7 +109,7 @@ const colorCategories = {
     },
     {
       name: "Naranja",
-      value: "#EB8201",
+      value: "#b66500",
       textColor: "#FFFFFF",
       accentColor: "#FB923C",
     },
@@ -155,6 +155,24 @@ const colorCategories = {
       textColor: "#5D2C20",
       accentColor: "#A0564B4C",
     },
+    {
+      name: "verde Metalico",
+      value:  "#5A8B6B",
+      textColor: "#FFFFFF",
+      accentColor: "#32533CFF",
+    },
+    {
+      name: "Terracota Apagado",
+      value:  "#A0785A",
+      textColor: "#FFFFFF",
+      accentColor: "#70543FFF",
+    },
+    {
+      name: "Rosa empolvado oscuro",
+      value:  "#8B5A6B",
+      textColor: "#FFFFFF",
+      accentColor: "#5E3D48FF",
+    }
   ],
 };
 
@@ -198,14 +216,13 @@ const StylesPage = () => {
     loading,
   } = usePreview();
 
-  const [activeTab, setActiveTab] = useState("light");
+  const [activeTab, setActiveTab] = useState<"light" | "dark" | "custom">("light");
   const [showWarning, setShowWarning] = useState(true);
   const [customColors, setCustomColors] = useState({
     background: "#ffffff",
     text: "#000000",
     accent: "#3b82f6"
   });
-  const [showCustomSelector, setShowCustomSelector] = useState(false);
 
   const handleThemeColorChange = async (
       color: string,
@@ -314,7 +331,7 @@ const StylesPage = () => {
                 {/* Sección superior - Muestra de texto */}
                 <div className="flex flex-col items-center space-y-1 sm:space-y-2">
                   <div
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/30 backdrop-blur-sm flex items-center justify-center shadow-lg"
+                      className="w-8 h-8 sm:w-8 sm:h-8 rounded-full border-2 border-white/30 backdrop-blur-sm flex items-center justify-center shadow-lg"
                       style={{
                         backgroundColor: "rgba(255, 255, 255, 0.15)",
                         color: color.textColor,
@@ -327,7 +344,7 @@ const StylesPage = () => {
 
                   {/* Muestra de link/acento */}
                   <div
-                      className="px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-white/20"
+                      className="px-2 sm:px-3  rounded-full text-xs font-medium backdrop-blur-sm border border-white/20"
                       style={{
                         backgroundColor: color.accentColor.includes('rgb') ? color.accentColor : color.accentColor + '80',
                         color: color.textColor,
@@ -342,15 +359,15 @@ const StylesPage = () => {
 
                 {/* Sección inferior - Nombre del color */}
                 <div
-                    className="text-center mt-2 px-1 py-1 sm:px-2 sm:py-1 rounded-lg backdrop-blur-sm w-full"
+                    className="text-center mt-2 px-1  sm:px-2  rounded-lg backdrop-blur-sm w-full"
                     style={{
                       backgroundColor: "rgba(255, 255, 255, 0.1)",
                       color: color.textColor
                     }}
                 >
                   <div
-                      className="text-xs sm:text-sm font-semibold leading-tight"
-                      style={{ color: color.textColor }}
+                      className="font-semibold leading-tight"
+                      style={{ color: color.textColor, fontSize:'10px' }}
                   >
                     {color.name}
                   </div>
@@ -390,7 +407,7 @@ const StylesPage = () => {
   }
 
   return (
-      <div className="p-6 space-y-8 max-w-150 mx-auto h-full mt-0 lg:mt-20 z-50 ">
+      <div className="p-6 space-y-8 max-w-120 mx-auto h-full mt-0 lg:mt-20 z-50 ">
         {/* Información del biosite */}
         {biosite && (
             <div className="rounded-lg p-3 sm:p-4 mb-0">
@@ -422,10 +439,10 @@ const StylesPage = () => {
                     }`}
                     style={{ fontFamily: font.value }}
                 >
-                  <div className="font-medium text-sm">{font.name}</div>
+                  <div className="font-medium text-xs">{font.name}</div>
                   <div
-                      className="text-xs opacity-60 mt-1"
-                      style={{ fontFamily: font.value }}
+                      className=" opacity-60 mt-1"
+                      style={{ fontFamily: font.value , fontSize: '10px' }}
                   >
                     Ejemplo de texto
                   </div>
@@ -440,7 +457,7 @@ const StylesPage = () => {
             Temas
           </h3>
 
-          {/* Pestañas Light/Dark */}
+          {/* Pestañas Light/Dark/Custom */}
           <div className="flex mb-4 sm:mb-6">
             <button
                 onClick={() => setActiveTab("light")}
@@ -454,7 +471,7 @@ const StylesPage = () => {
             </button>
             <button
                 onClick={() => setActiveTab("dark")}
-                className={`px-4 sm:px-6 py-2 rounded-r-lg cursor-pointer font-medium text-sm transition-all duration-200 ${
+                className={`px-4 sm:px-6 py-2 cursor-pointer font-medium text-sm transition-all duration-200 ${
                     activeTab === "dark"
                         ? "bg-gray-800 text-white border border-gray-800 shadow-sm"
                         : "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-50"
@@ -462,37 +479,42 @@ const StylesPage = () => {
             >
               Dark
             </button>
-          </div>
-
-          {/* Grid de colores según la pestaña activa */}
-          <ColorGrid colors={colorCategories[activeTab]} />
-
-          {/* Botón para mostrar selector personalizado */}
-          <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200">
             <button
-                onClick={() => setShowCustomSelector(!showCustomSelector)}
-                className="group w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 bg-white text-gray-600 cursor-pointer rounded-xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                onClick={() => setActiveTab("custom")}
+                className={`group w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 cursor-pointer rounded-r-lg transition-all duration-300 text-sm font-semibold ${
+                    activeTab === "custom"
+                        ? "bg-white text-gray-400 border border-blue-500 shadow-lg"
+                        : "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-50"
+                }`}
             >
               <div className="relative">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:rotate-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                 </svg>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                {activeTab === "custom" && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                )}
               </div>
-              <span className='text-black text-xs sm:text-sm'>Crear Color Personalizado</span>
-              <svg
-                  className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-300 text-black ${showCustomSelector ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <span className='text-xs sm:text-sm'>Personalizado</span>
+              {activeTab !== "custom" && (
+                  <svg
+                      className="w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+              )}
             </button>
           </div>
 
-          {/* Selector de color personalizado */}
-          {showCustomSelector && (
+          {/* Contenido según el tab activo */}
+          {activeTab === "light" && <ColorGrid colors={colorCategories.light} />}
+
+          {activeTab === "dark" && <ColorGrid colors={colorCategories.dark} />}
+
+          {activeTab === "custom" && (
               <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl border border-gray-200/60 shadow-inner">
                 <div className="flex items-start sm:items-center gap-3 mb-4 sm:mb-6">
                   <div>
@@ -506,145 +528,91 @@ const StylesPage = () => {
                   <div className="space-y-4 sm:space-y-5">
                     {/* Selector de color de fondo */}
                     <div className="group">
-                      <label className="flex items-center gap-2 font-semibold mb-2 sm:mb-3 text-xs text-gray-500 uppercase tracking-wide text-start">
-                        <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.background}}></div>
-                        Color de Fondo
-                      </label>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+                        <label className="flex items-center  gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
+                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.background}}></div>
+                          Color de Fondo
+                        </label>
+                        <div className="relative w-full sm:w-8 h-8">
                         <input
                             type="color"
+                            id="background-color-input"
                             value={customColors.background}
                             onChange={(e) => handleCustomColorChange('background', e.target.value)}
-                            className="w-full sm:w-14 h-12 rounded-lg border-2 border-white cursor-pointer shadow-lg hover:scale-105 transition-transform"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
                         />
-                        <input
-                            type="text"
-                            value={customColors.background}
-                            onChange={(e) => handleCustomColorChange('background', e.target.value)}
-                            className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm border-0 rounded-lg bg-gray-50/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400/50 font-mono font-medium tracking-wide transition-all duration-200"
-                            placeholder="#ffffff"
-                            maxLength={7}
-                        />
+                        <label
+                            htmlFor="background-color-input"
+                            className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
+                            style={{backgroundColor: customColors.background}}
+                        ></label>
                       </div>
+                      </div>
+
+
                     </div>
 
                     {/* Selector de color de texto */}
                     <div className="group">
-                      <label className="flex items-center gap-2 font-semibold mb-2 sm:mb-3 text-xs text-gray-500 uppercase tracking-wide text-start">
-                        <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.text}}></div>
-                        Color de Texto
-                      </label>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
+                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.text}}></div>
+                          Color de Texto
+                        </label>
+                        <div className="relative w-full sm:w-8 h-8">
                         <input
                             type="color"
                             value={customColors.text}
                             onChange={(e) => handleCustomColorChange('text', e.target.value)}
-                            className="w-full sm:w-14 h-12 rounded-lg border-2 border-white cursor-pointer shadow-lg hover:scale-105 transition-transform"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
                         />
-                        <input
-                            type="text"
-                            value={customColors.text}
-                            onChange={(e) => handleCustomColorChange('text', e.target.value)}
-                            className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm border-0 rounded-lg bg-gray-50/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-400/50 font-mono font-medium tracking-wide transition-all duration-200"
-                            placeholder="#000000"
-                            maxLength={7}
-                        />
+                        <label
+                            htmlFor="background-color-input"
+                            className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
+                            style={{backgroundColor: customColors.text}}
+                        ></label>
+                        </div>
                       </div>
                     </div>
 
                     {/* Selector de color de acento/links */}
                     <div className="group">
-                      <label className="flex items-center gap-2 font-semibold mb-2 sm:mb-3 text-xs text-gray-500 uppercase tracking-wide text-start">
-                        <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.accent}}></div>
-                        Color de Links/Acento
-                      </label>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
-                        <input
-                            type="color"
-                            value={customColors.accent}
-                            onChange={(e) => handleCustomColorChange('accent', e.target.value)}
-                            className="w-full sm:w-14 h-12 rounded-lg border-2 border-white cursor-pointer shadow-lg hover:scale-105 transition-transform"
-                        />
-                        <input
-                            type="text"
-                            value={customColors.accent}
-                            onChange={(e) => handleCustomColorChange('accent', e.target.value)}
-                            className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm border-0 rounded-lg bg-gray-50/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-400/50 font-mono font-medium tracking-wide transition-all duration-200"
-                            placeholder="#3b82f6"
-                            maxLength={7}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="space-y-4">
-                  <label className="flex items-center gap-2 font-semibold mb-2 sm:mb-3 text-xs text-gray-500 uppercase tracking-wide text-start">
-                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.background}}></div>
-                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.text}}></div>
-                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.accent}}></div>
-                    Vista Previa en Vivo
-                  </label>
-
-                  {/* Preview mejorado */}
-                  <div
-                      className="relative h-24 sm:h-32 rounded-2xl border-2 border-white shadow-xl overflow-hidden"
-                      style={{ backgroundColor: customColors.background }}
-                  >
-                    {/* Patrón de fondo sutil */}
-                    <div className="absolute inset-0 opacity-5">
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: `radial-gradient(circle at 1px 1px, ${customColors.text} 1px, transparent 0)`,
-                        backgroundSize: '20px 20px'
-                      }}></div>
-                    </div>
-
-                    <div className="relative h-full p-3 sm:p-6 flex flex-col justify-center items-center space-y-2 sm:space-y-3">
-                      <h3
-                          className="text-sm sm:text-lg font-bold text-center"
-                          style={{ color: customColors.text }}
-                      >
-                        Mi Sitio Web
-                      </h3>
-                      <p
-                          className="text-xs sm:text-sm text-center opacity-80"
-                          style={{ color: customColors.text }}
-                      >
-                        Este es un texto de ejemplo
-                      </p>
-                      <div className="flex">
-                        <div
-                            className="px-3 sm:px-4 py-1 sm:py-2 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                            style={{
-                              backgroundColor: customColors.accent,
-                              color: customColors.background
-                            }}
-                        >
-                          Link Principal
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
+                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.accent}}></div>
+                          Color de Links/Acento
+                        </label>
+                        <div className="relative w-full sm:w-8 h-8">
+                          <input
+                              type="color"
+                              value={customColors.accent}
+                              onChange={(e) => handleCustomColorChange('text', e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                          <label
+                              htmlFor="background-color-input"
+                              className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
+                              style={{backgroundColor: customColors.accent}}
+                          ></label>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Información de contraste */}
-                  <div className="p-3 bg-white/60 rounded-lg border border-gray-200/60">
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>Asegúrate de que haya buen contraste entre colores</span>
-                    </div>
-                  </div>
                 </div>
+
+
 
                 {/* Botones de acción */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-gray-200/60">
                   <button
                       onClick={() => {
                         setCustomColors({
-                          background: "#ffffff",
-                          text: "#000000",
-                          accent: "#3b82f6"
+                          background: "#4A7BA8",
+                          text: "#FFFFFF",
+                          accent: "#3E648C"
                         });
                       }}
                       className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-4 sm:px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-white hover:border-gray-300 hover:text-gray-700 transition-all duration-200 font-medium group"
@@ -656,7 +624,7 @@ const StylesPage = () => {
                   </button>
                   <button
                       onClick={applyCustomColors}
-                      className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-4 sm:px-6 py-3 bg-white text-gray-600 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 group"
+                      className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-3 sm:px-3 py-3 text-gray-600 hover:bg-white hover:border-gray-300 hover:text-gray-700 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 group"
                   >
                     <svg className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
