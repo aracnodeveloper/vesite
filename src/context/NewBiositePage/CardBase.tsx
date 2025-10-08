@@ -29,6 +29,73 @@ export default function Cardbase({
     background: themeConfig.colors.accent,
   };
 
+  const isDarkTheme = () => {
+    const backgroundColor = themeConfig.colors.background;
+
+    if (backgroundColor.includes('gradient')) {
+
+      const hexColors = backgroundColor.match(/#[0-9A-Fa-f]{6}/g);
+      const rgbColors = backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/g);
+
+      let colors: { r: number; g: number; b: number }[] = [];
+
+      if (hexColors) {
+        colors = colors.concat(
+            hexColors.map(hex => {
+              const cleanHex = hex.replace('#', '');
+              return {
+                r: parseInt(cleanHex.substr(0, 2), 16),
+                g: parseInt(cleanHex.substr(2, 2), 16),
+                b: parseInt(cleanHex.substr(4, 2), 16)
+              };
+            })
+        );
+      }
+      if (rgbColors) {
+        colors = colors.concat(
+            rgbColors.map(rgb => {
+              const match = rgb.match(/(\d+)/g);
+              if (match && match.length >= 3) {
+                return {
+                  r: parseInt(match[0]),
+                  g: parseInt(match[1]),
+                  b: parseInt(match[2])
+                };
+              }
+              return { r: 255, g: 255, b: 255 };
+            })
+        );
+      }
+
+      if (colors.length === 0) {
+        return false;
+      }
+
+      const avgLuminance = colors.reduce((sum, color) => {
+        const luminance = (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255;
+        return sum + luminance;
+      }, 0) / colors.length;
+
+      return avgLuminance < 0.5;
+    }
+
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance < 0.5;
+  };
+
+  const getIconClassName = () => {
+    return isDarkTheme()
+        ? "invert brightness-0 contrast-100"
+        : "";
+  };
+
+
   const cardContent = (
     <>
       {image && (
@@ -65,6 +132,7 @@ export default function Cardbase({
             <img
               src={icon}
               alt={title}
+              className={getIconClassName()}
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}

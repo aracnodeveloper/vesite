@@ -91,7 +91,7 @@ const AdminLinkCard = ({
     const canRemove = showAdminControls && !isSelected;
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3 w-full">
             <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                 isSelected
                     ? 'bg-blue-50 border-blue-200 hover:bg-blue-100'
