@@ -1159,20 +1159,23 @@ const AnalyticsContent = () => {
                               </p>
                               <div className="space-y-1">
                                 {activity.linkClicks.slice(0, 3).map((linkClick, idx) => (
-                                    <div key={idx} className="flex justify-between text-xs">
-                              <span className="text-gray-600 truncate mr-2">
-                                {linkClick.label}
-                              </span>
-                                      <span className="text-gray-800 font-semibold">
-                                {linkClick.count}
-                              </span>
+                                    <div key={idx} className="flex justify-between text-xs items-center">
+                                        <span className="flex flex-col text-gray-600 font-semibold truncate mr-2">
+                                          {linkClick.label}
+                                          <a className='font-light'>
+                                          {linkClick.url.slice(0, 30)}
+                                          </a>
+                                        </span>
+                                        <span className="text-gray-800 font-semibold">
+                                          {linkClick.count}
+                                        </span>
                                     </div>
-                                ))}
-                                {activity.linkClicks.length > 3 && (
-                                    <p className="text-xs text-gray-500 italic mt-1">
-                                      +{activity.linkClicks.length - 3} enlaces más
-                                    </p>
-                                )}
+                                    ))}
+                                    {activity.linkClicks.length > 3 && (
+                                        <p className="text-xs text-gray-500 italic mt-1">
+                                          +{activity.linkClicks.length - 3} enlaces más
+                                        </p>
+                                    )}
                               </div>
                             </div>
                         )}
@@ -1241,7 +1244,8 @@ const AnalyticsContent = () => {
                                     .filter(c => c.link_type === 'app')
                                     .map((click, index) => (
                                         <tr key={`app-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                          <td className="px-4 py-3 text-black text-sm">{click.label} </td>
+
                                           <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
                                         </tr>
                                     ))}

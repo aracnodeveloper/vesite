@@ -17,7 +17,7 @@ interface AdminLinkCardProps {
     userRole?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
     onAdminToggle?: (linkId: string, isSelected: boolean) => Promise<void>;
     onAdminUpdate?: (linkId: string, linkData: any) => Promise<void>;
-    biositeId?: string; // Add biositeId prop
+    biositeId?: string;
 }
 
 const AdminLinkCard = ({
@@ -39,7 +39,6 @@ const AdminLinkCard = ({
     const [isToggling, setIsToggling] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    // Get role from cookie if not provided as prop
     const getCurrentRole = (): 'USER' | 'ADMIN' | 'SUPER_ADMIN' => {
         if (userRole) return userRole;
         const role = Cookie.get('roleName');
@@ -68,13 +67,14 @@ const AdminLinkCard = ({
         try {
             setIsUpdating(true);
 
-            // Prepare the link data in the format expected by the backend (PathLinkDto)
+            // FIXED: Include linkId in the payload
             const linkData = {
+                linkId: id,  // Add the link ID
                 label: title,
                 url: url,
-                icon: 'link', // Default icon for regular links
-                orderIndex: 0, // Default order
-                link_type: 'regular', // Default link type
+                icon: 'link',
+                orderIndex: 0,
+                link_type: 'regular',
             };
 
             console.log('Updating admin link with data:', linkData);
@@ -86,7 +86,6 @@ const AdminLinkCard = ({
         }
     };
 
-    // Determine if the current user can edit this link
     const canEdit = showAdminControls && (!isSelected || isAdmin);
     const canRemove = showAdminControls && !isSelected;
 
@@ -127,7 +126,6 @@ const AdminLinkCard = ({
                     </div>
                 </div>
 
-                {/* Controls for non-selected links */}
                 {canEdit && !isSelected && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
@@ -149,7 +147,6 @@ const AdminLinkCard = ({
                     </div>
                 )}
 
-                {/* Controls for selected admin links */}
                 {isSelected && isAdmin && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
@@ -164,7 +161,6 @@ const AdminLinkCard = ({
                 )}
             </div>
 
-            {/* Admin Toggle - Only show for admins and existing links */}
             {isAdmin && showAdminControls && (
                 <AdminLinkToggle
                     isSelected={isSelected}

@@ -76,13 +76,17 @@ export const useLinkOperations = ({
                 throw new Error("Link not found");
             }
 
+            console.log('Current link state:', link);
+            console.log('Toggling to isSelected:', isSelected);
+
             if (isSelected) {
                 // Apply link to children - match the PathLinkDto structure exactly
                 const linkData = {
+                    linkId: linkId, // ⬅️ AGREGAR ESTA LÍNEA
                     label: link.label || link.title || 'Link',
                     url: link.url,
                     icon: link.icon || 'link',
-                    orderIndex: parseInt(String(link.orderIndex || 0), 10), // Ensure it's an integer
+                    orderIndex: parseInt(String(link.orderIndex || 0), 10),
                     link_type: link.link_type || LINK_TYPES.REGULAR
                 };
 
@@ -90,26 +94,22 @@ export const useLinkOperations = ({
 
                 // Call the backend endpoint to update all child biosites
                 await adminLinkMethods.updateAdminLink(userId, linkData);
-
-                // Update local state to mark as selected
-                await updateLink(linkId, {
-                    isSelected: true
-                });
-            } else {
-                // Remove from children - just update local state
-                await updateLink(linkId, {
-                    isSelected: false
-                });
             }
 
-            // Refresh links to get updated state
+            // ALWAYS update the local link's isSelected status
+            await updateLink(linkId, {
+                isSelected: isSelected
+            });
+
+            console.log('Link isSelected updated to:', isSelected);
+
+            // Refresh links to get updated state from backend
             await fetchLinks();
         } catch (error) {
             console.error("Error toggling admin link:", error);
             throw error;
         }
     }, [isAdmin, biositeData, links, getUserId, updateLink, fetchLinks]);
-
     const updateAdminLink = useCallback(async (linkId: string, linkData: any) => {
         if (!isAdmin() || !biositeData?.id) {
             throw new Error("No admin permissions or biosite data");

@@ -16,6 +16,10 @@ const AdminLinkToggle = ({
                              label = "Aplicar a sitios hijos",
                              description = "Si está activado, este enlace aparecerá en todos los biosites de tus usuarios y no podrán editarlo ni eliminarlo."
                          }: AdminLinkToggleProps) => {
+
+    // Add this debug log
+    console.log('AdminLinkToggle rendered with isSelected:', isSelected);
+
     return (
         <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -34,13 +38,16 @@ const AdminLinkToggle = ({
                             ? 'bg-blue-600'
                             : 'bg-gray-200'
                     } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    onClick={() => !disabled && onToggle(!isSelected)}
+                    onClick={() => {
+                        console.log('Toggle clicked. Current isSelected:', isSelected, 'Will toggle to:', !isSelected);
+                        !disabled && onToggle(!isSelected);
+                    }}
                 >
-                    <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            isSelected ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                    />
+          <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isSelected ? 'translate-x-6' : 'translate-x-1'
+              }`}
+          />
                 </div>
             </div>
 
@@ -58,5 +65,4 @@ const AdminLinkToggle = ({
         </div>
     );
 };
-
 export default AdminLinkToggle;
