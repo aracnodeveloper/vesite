@@ -5,7 +5,7 @@ import LinkEditForm from "../../../layers/AddMoreSections/Links/Components/Links
 import type { LinkData } from "../../../../interfaces/AdminData";
 import { useFetchLinks } from "../../../../hooks/useFetchLinks";
 import type { UpdateLinkDto } from ".././../../../interfaces/Links";
-import { uploadBiositeAvatar } from "../../../layers/MySite/Profile/lib/uploadImage";
+//import { uploadBiositeAvatar } from "../../../layers/MySite/Profile/lib/uploadImage";
 ///home/adrian/Repos/vesite/src/interfaces/Links.ts
 
 export default function EditableLink({
@@ -24,7 +24,6 @@ export default function EditableLink({
   const [localError, setLocalError] = useState<string | null>(null);
   const { updateLink, loading, error } = useFetchLinks();
 
-  // Sync editLink with the incoming editLink prop changes
   useEffect(() => {
     setEditLink(editLink);
   }, [editLink]);
@@ -35,7 +34,7 @@ export default function EditableLink({
       const updateData: UpdateLinkDto = {
         label: editLink.label,
         url: editLink.url,
-        image: editLink.image, // Fix: use editLink.image instead of undefined
+        image: editLink.image,
         description: editLink.description,
         orderIndex: editLink.orderIndex,
         isActive: editLink.isActive,
@@ -44,7 +43,7 @@ export default function EditableLink({
       const result = await updateLink(editLink.id, updateData);
       if (result) {
         setEdit(false);
-        // Update the editLink state with the result to ensure sync
+
         setEditLink(result);
       } else {
         setLocalError("No se pudo actualizar el enlace");
@@ -62,12 +61,12 @@ export default function EditableLink({
           key={key}
           className="bg-white p-4 rounded border hover:shadow-sm transition-shadow"
         >
-          <div className="flex items-start justify-between">
+          <div className="flex flex-wrap items-start justify-between">
             <div className="flex items-start space-x-3 flex-1">
               <LinkImageDisplay link={editLink} />
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2 mb-1">
+                <div className="flex flex-wrap items-center space-x-2 mb-1">
                   <p className="text-sm font-medium text-gray-900 break-words">
                     {editLink.label || "Sin título"}
                   </p>
@@ -120,9 +119,9 @@ export default function EditableLink({
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-y-2 items-end ml-4">
+            <div className="flex flex-wrap  gap-y-2 items-end ml-4 ">
               <span
-                className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                className={`px-2 py-1 rounded-full text-xs whitespace-nowrap sr-only sm:not-sr-only ${
                   editLink.isActive
                     ? "bg-green-100 text-green-700"
                     : "bg-red-100 text-red-700"
@@ -133,7 +132,7 @@ export default function EditableLink({
 
               <Button
                 onClick={() => {
-                  // Sync editLink with current editLink data when starting edit
+
                   setEditLink(editLink);
                   setEdit(true);
                 }}

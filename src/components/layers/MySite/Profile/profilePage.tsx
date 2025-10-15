@@ -13,6 +13,7 @@ import type {
 import ImageUploadSection from "./ImageUploadSection";
 import apiService from "../../../../service/apiService";
 import BackButton from "../../../shared/BackButton";
+import Loading from "../../../shared/Loading.tsx";
 
 const { TextArea } = Input;
 
@@ -232,7 +233,6 @@ const ProfilePage = () => {
       if (updated) {
         updatePreview(updated);
 
-        // Si es admin y tiene una imagen de fondo válida, actualizar también a los hijos
         if (
           isAdmin &&
           updated.backgroundImage &&
@@ -277,14 +277,7 @@ const ProfilePage = () => {
   };
 
   if (loading && !biosite) {
-    return (
-      <div className="p-6 max-w-xl mx-auto">
-        <div className="text-center text-gray-500 py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p>Cargando perfil...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!biosite) {
@@ -338,7 +331,7 @@ const ProfilePage = () => {
             role={role}
           />
           {isAdmin && (
-            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 z-50">
               <div className="flex items-start gap-2">
                 <svg
                   className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"

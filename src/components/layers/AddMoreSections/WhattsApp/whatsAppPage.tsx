@@ -1,19 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
-  ChevronLeft,
   Loader2,
   CheckCircle,
   AlertCircle,
   Plus,
   Edit2,
   Trash2,
-  Eye,
   Phone,
   MessageCircle,
 } from "lucide-react";
 import { usePreview } from "../../../../context/PreviewContext";
 import { WhatsAppOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 import BackButton from "../../../shared/BackButton";
 
 const WhatsAppPage = () => {
@@ -26,11 +23,6 @@ const WhatsAppPage = () => {
     loading,
     error,
   } = usePreview();
-
-  const navigate = useNavigate();
-  const handleBackClick = () => {
-    navigate("/sections");
-  };
 
   const getActiveApiWhatsAppLinks = () => {
     return whatsAppLinks.filter(

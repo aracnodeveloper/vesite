@@ -17,6 +17,7 @@ interface AdminLinkCardProps {
     userRole?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
     onAdminToggle?: (linkId: string, isSelected: boolean) => Promise<void>;
     onAdminUpdate?: (linkId: string, linkData: any) => Promise<void>;
+    biositeId?: string;
 }
 
 const AdminLinkCard = ({
@@ -33,10 +34,11 @@ const AdminLinkCard = ({
                            userRole,
                            onAdminToggle,
                            onAdminUpdate,
+                           biositeId,
                        }: AdminLinkCardProps) => {
     const [isToggling, setIsToggling] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
-    // Get role from cookie if not provided as prop
     const getCurrentRole = (): 'USER' | 'ADMIN' | 'SUPER_ADMIN' => {
         if (userRole) return userRole;
         const role = Cookie.get('roleName');
@@ -63,22 +65,32 @@ const AdminLinkCard = ({
         if (!onAdminUpdate || !isAdmin || !isSelected) return;
 
         try {
+            setIsUpdating(true);
+
+            // FIXED: Include linkId in the payload
             const linkData = {
-                icon: 'link', // You might want to make this dynamic
-                url,
+                linkId: id,  // Add the link ID
                 label: title,
-                link_type: 'regular',
+                url: url,
+                icon: 'link',
                 orderIndex: 0,
+                link_type: 'regular',
             };
 
+            console.log('Updating admin link with data:', linkData);
             await onAdminUpdate(id, linkData);
         } catch (error) {
             console.error('Error updating admin link:', error);
+        } finally {
+            setIsUpdating(false);
         }
     };
 
+    const canEdit = showAdminControls && (!isSelected || isAdmin);
+    const canRemove = showAdminControls && !isSelected;
+
     return (
-        <div className="space-y-3">
+        <div className="space-y-3 w-full">
             <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
                 isSelected
                     ? 'bg-blue-50 border-blue-200 hover:bg-blue-100'
@@ -114,7 +126,7 @@ const AdminLinkCard = ({
                     </div>
                 </div>
 
-                {showAdminControls && !isSelected && (
+                {canEdit && !isSelected && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
                             onClick={onEdit}
@@ -123,22 +135,24 @@ const AdminLinkCard = ({
                         >
                             <Edit2 className="w-4 h-4" />
                         </button>
-                        <button
-                            onClick={onRemove}
-                            disabled={isSubmitting}
-                            className="text-gray-400 cursor-pointer hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
+                        {canRemove && (
+                            <button
+                                onClick={onRemove}
+                                disabled={isSubmitting}
+                                className="text-gray-400 cursor-pointer hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
                 )}
 
-                {showAdminControls && isSelected && isAdmin && (
+                {isSelected && isAdmin && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
                             onClick={handleAdminUpdate}
-                            className="text-gray-400 cursor-pointer hover:text-blue-400 transition-colors p-1"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isUpdating}
+                            className="text-gray-400 cursor-pointer hover:text-blue-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Actualizar en sitios hijos"
                         >
                             <Edit2 className="w-4 h-4" />
@@ -147,12 +161,11 @@ const AdminLinkCard = ({
                 )}
             </div>
 
-            {/* Admin Toggle - Only show for admins and existing links */}
             {isAdmin && showAdminControls && (
                 <AdminLinkToggle
                     isSelected={isSelected}
                     onToggle={handleAdminToggle}
-                    disabled={isToggling || isSubmitting}
+                    disabled={isToggling || isSubmitting || isUpdating}
                     label="Aplicar a sitios hijos"
                     description="Si está activado, este enlace aparecerá en todos los biosites de tus usuarios y no podrán editarlo ni eliminarlo."
                 />

@@ -12,7 +12,7 @@ import Musics from "../AddMoreSections/Music-Posdcast/music_podcast";
 import Post from "../AddMoreSections/Socialpost/social_post";
 import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useSectionsContext } from "../../../context/SectionsContext.tsx";
-import { GripVertical, Menu, Minus, X, Check } from "lucide-react";
+import { GripVertical, Menu, X, Check } from "lucide-react";
 import Loading from "../../shared/Loading.tsx";
 
 const MySite = () => {
@@ -27,12 +27,9 @@ const MySite = () => {
   } = usePreview();
   const { reorderSections, getVisibleSections, loading } = useSectionsContext();
 
-  // State for visual feedback during drag
   const [isDragging, setIsDragging] = useState(false);
-  // State for mobile reorder mode
   const [isReorderMode, setIsReorderMode] = useState(false);
 
-  // Filter active links
   const activeSocialLinks = socialLinks.filter((link) => {
     if (!link.isActive) return false;
     const labelLower = link.label.toLowerCase();
@@ -73,12 +70,10 @@ const MySite = () => {
           link.message.trim() !== ""
   );
 
-  // Get active links from context
   const activeVideoLinks = getVideoLinks();
   const activeMusicLinks = getMusicLinks();
   const activeSocialPostLinks = getSocialPostLinks();
 
-  // Get visible sections based on active links
   const visibleSections = getVisibleSections(
       activeSocialLinks,
       activeRegularLinks,
@@ -89,7 +84,6 @@ const MySite = () => {
       activeSocialPostLinks
   );
 
-  // Separate Profile section from draggable sections
   const profileSection = visibleSections.find(
       (section) => section.titulo === "Profile"
   );
@@ -97,7 +91,6 @@ const MySite = () => {
       (section) => section.titulo !== "Profile"
   );
 
-  // Component mapping
   const getSectionComponent = (sectionTitle: string) => {
     switch (sectionTitle) {
       case "Profile":
@@ -155,62 +148,10 @@ const MySite = () => {
     setIsDragging(true);
   };
 
-  // Toggle reorder mode
   const toggleReorderMode = () => {
     setIsReorderMode(!isReorderMode);
   };
 
-  // Get section color based on title
-  const getSectionColor = (sectionTitle: string) => {
-    switch (sectionTitle) {
-      case "Profile":
-        return "bg-blue-600";
-      case "Social":
-        return "bg-blue-600";
-      case "Links":
-        return "bg-purple-600";
-      case "Link de mi App":
-        return "bg-green-600";
-      case "Contactame":
-        return "bg-green-600";
-      case "Music / Podcast":
-        return "bg-pink-600";
-      case "Social Post":
-        return "bg-pink-600";
-      case "VCard":
-        return "bg-orange-600";
-      case "Video":
-        return "bg-red-600";
-      default:
-        return "bg-gray-600";
-    }
-  };
-
-  // Get section icon based on title
-  const getSectionIcon = (sectionTitle: string) => {
-    switch (sectionTitle) {
-      case "Profile":
-        return "👤";
-      case "Social":
-        return "📱";
-      case "Links":
-        return "🔗";
-      case "Link de mi App":
-        return "📲";
-      case "Contactame":
-        return "💬";
-      case "Music / Podcast":
-        return "🎵";
-      case "Social Post":
-        return "📄";
-      case "VCard":
-        return "📇";
-      case "Video":
-        return "🎥";
-      default:
-        return "📋";
-    }
-  };
 
   if (loading) {
     return <Loading />;

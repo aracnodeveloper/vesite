@@ -84,7 +84,6 @@ const AdminPanel: React.FC = () => {
   const [filteredData, setFilteredData] = useState<BiositeFull[]>([]);
   const [BioData, setBioData] = useState<BiositeFull[]>([]);
 
-  // Diferentes paginaciones para diferentes vistas
   const allBiositesPagination = usePagination<BiositeFull>({
     initialPage: 1,
     initialSize: 10,
@@ -101,7 +100,7 @@ const AdminPanel: React.FC = () => {
     } else if (permissions.hasChildBiositeAccess) {
       return childBiositesPagination;
     }
-    return allBiositesPagination; // fallback
+    return allBiositesPagination;
   }, [
     permissions.hasFullAccess,
     permissions.hasChildBiositeAccess,
@@ -129,19 +128,17 @@ const AdminPanel: React.FC = () => {
     [permissions.canToggleView]
   );
 
-  // Determinar si debe mostrar todos los biosites o solo hijos
   const shouldShowAllBiosites = useMemo(() => {
     return permissions.hasFullAccess && viewMode === "all";
   }, [permissions.hasFullAccess, viewMode]);
 
-  // Memoizar la función applyFilters para evitar recreaciones innecesarias
   const applyFilters = useCallback(
     async (
       currentPage: number,
       size: number,
       filters: FilterState
     ): Promise<BiositeFull[]> => {
-      // Crear objeto de parámetros que incluya tanto paginación como filtros
+
       const params = {
         ...currentPagination.getPaginationParams(),
         search: filters.search,
@@ -154,20 +151,17 @@ const AdminPanel: React.FC = () => {
         size: size,
       };
 
-      // Filtrar parámetros undefined para enviar solo los necesarios
       const cleanParams = Object.fromEntries(
         Object.entries(params).filter(([_, value]) => value !== undefined)
       );
 
       const response = await fetchAllBiosites(cleanParams);
 
-      // Extract data array from response if it's a paginated response
       return Array.isArray(response) ? response : response?.data || [];
     },
     []
   );
 
-  // Memoizar handleSearch para evitar recreaciones innecesarias
   const handleSearch = useCallback(
     async (filters: FilterState) => {
       setCurrentFilters(filters);
@@ -403,7 +397,6 @@ const AdminPanel: React.FC = () => {
     return categories;
   }, []);
 
-  // Cargar datos según el rol del usuario - FUNCIÓN MEMOIZADA
   const loadData = useCallback(async () => {
     if (!permissions.hasChildBiositeAccess || !userId) return;
 
@@ -416,7 +409,7 @@ const AdminPanel: React.FC = () => {
       let responseBioData: BiositeFull[] = [];
 
       if (shouldShowAllBiosites) {
-        // SUPER_ADMIN viendo todos los biosites
+
         const params = currentPagination.getPaginationParams();
         const response = await fetchAllBiosites(params);
         currentPagination.setPaginatedData(response);
@@ -424,12 +417,11 @@ const AdminPanel: React.FC = () => {
           ? response
           : response?.data || [];
       } else {
-        // ADMIN o SUPER_ADMIN viendo biosites hijos
+
         const childBiosites = await fetchChildBiosites(userId);
         responseBioData = childBiosites;
         setBioData(responseBioData);
 
-        // Para vista de hijos, simular paginación local
         const startIndex =
           (currentPagination.currentPage - 1) * currentPagination.pageSize;
         const endIndex = startIndex + currentPagination.pageSize;
@@ -468,13 +460,12 @@ const AdminPanel: React.FC = () => {
     await loadData();
   }, [loadData]);
 
-  // Efecto principal de inicialización - CORREGIDO
   useEffect(() => {
     const initializeData = async () => {
       if (!permissions.hasChildBiositeAccess || !userId || initialized) return;
 
       try {
-        setInitialized(true); // Marcar como inicializado ANTES de cargar datos
+        setInitialized(true);
         await loadData();
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -483,9 +474,8 @@ const AdminPanel: React.FC = () => {
     };
 
     initializeData();
-  }, [permissions.hasChildBiositeAccess, userId, viewMode]); // Agregar viewMode a las dependencias
+  }, [permissions.hasChildBiositeAccess, userId, viewMode]);
 
-  // Efecto para aplicar filtros cuando cambian los datos - CORREGIDO
   useEffect(() => {
     const applyFiltersAsync = async () => {
       const currentPagination = getCurrentPagination();
@@ -627,7 +617,6 @@ const AdminPanel: React.FC = () => {
   const currentData =
     filteredData.length > 0 ? filteredData : currentPagination.data;
 
-  // Función para obtener el texto del título según la vista actual
   const getViewTitle = () => {
     if (!permissions.canToggleView) {
       return permissions.hasFullAccess
@@ -653,7 +642,7 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="h-full max-w-[70wh] text-white px-4 py-2 lg:px-6 lg:py-16">
+    <div className="h-full lg:w-[1450px]  text-white px-4 py-2 lg:px-6 lg:py-16  transform scale-[0.9]">
       {/* Header */}
       <div className="shadow rounded-lg p-6 mb-6">
         <div className="flex flex-wrap items-center justify-between">
@@ -713,6 +702,7 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Enhanced Stats */}
+      {viewMode === 'all' && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex items-center">
@@ -758,9 +748,8 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Search and Filters - Solo mostrar si hay datos o es SUPER_ADMIN */}
-      {(permissions.hasFullAccess || currentData.length > 0) && (
+      )}
+      {viewMode === 'children' || (permissions.hasFullAccess || currentData.length > 0) && (
         <div className="mb-6">
           <SearchAndFilters
             onSearch={handleSearch}
@@ -791,7 +780,7 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 ">
           {currentPagination.loading && initialized && (
             <div className="flex justify-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -804,7 +793,6 @@ const AdminPanel: React.FC = () => {
             </div>
           )}
 
-          {/* Renderizar tabla correspondiente según el rol y vista seleccionada */}
           {shouldShowAllBiosites ? (
             <BiositesTable
               pagination={{

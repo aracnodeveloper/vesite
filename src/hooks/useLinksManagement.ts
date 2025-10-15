@@ -76,39 +76,40 @@ export const useLinkOperations = ({
                 throw new Error("Link not found");
             }
 
+            console.log('Current link state:', link);
+            console.log('Toggling to isSelected:', isSelected);
+
             if (isSelected) {
-                // Apply link to children
+                // Apply link to children - match the PathLinkDto structure exactly
                 const linkData = {
-                    icon:  'link',
+                    linkId: linkId, // ⬅️ AGREGAR ESTA LÍNEA
+                    label: link.label || link.title || 'Link',
                     url: link.url,
-                    label: link.label,
-                    link_type: link.link_type || LINK_TYPES.REGULAR,
-                    orderIndex: link.orderIndex || 0,
+                    icon: link.icon || 'link',
+                    orderIndex: parseInt(String(link.orderIndex || 0), 10),
+                    link_type: link.link_type || LINK_TYPES.REGULAR
                 };
 
-                await adminLinkMethods.updateAdminLink(userId, linkData);
+                console.log('Sending admin link data:', linkData);
 
-                // Update local state to mark as selected
-                await updateLink(linkId, {
-                    ...link,
-                    isSelected: true
-                });
-            } else {
-                // Remove from children - just update local state
-                await updateLink(linkId, {
-                    ...link,
-                    isSelected: false
-                });
+                // Call the backend endpoint to update all child biosites
+                await adminLinkMethods.updateAdminLink(userId, linkData);
             }
 
-            // Refresh links to get updated state
+            // ALWAYS update the local link's isSelected status
+            await updateLink(linkId, {
+                isSelected: isSelected
+            });
+
+            console.log('Link isSelected updated to:', isSelected);
+
+            // Refresh links to get updated state from backend
             await fetchLinks();
         } catch (error) {
             console.error("Error toggling admin link:", error);
             throw error;
         }
-    }, [isAdmin, biositeData, links, getUserId, getIconIdentifier, updateLink, fetchLinks]);
-
+    }, [isAdmin, biositeData, links, getUserId, updateLink, fetchLinks]);
     const updateAdminLink = useCallback(async (linkId: string, linkData: any) => {
         if (!isAdmin() || !biositeData?.id) {
             throw new Error("No admin permissions or biosite data");
@@ -120,19 +121,42 @@ export const useLinkOperations = ({
         }
 
         try {
-            // Update the link to children
-            await adminLinkMethods.updateAdminLink(userId, linkData);
+            const link = links.find(l => l.id === linkId);
+            if (!link) {
+                throw new Error("Link not found");
+            }
 
-            // Update local link
-            await updateLink(linkId, linkData);
+            // Prepare data in the format expected by the backend PathLinkDto
+            const updateData = {
+                label: linkData.label || link.label || link.title || 'Link',
+                url: linkData.url || link.url,
+                icon: linkData.icon || link.icon || 'link',
+                orderIndex: parseInt(String(linkData.orderIndex !== undefined ? linkData.orderIndex : (link.orderIndex || 0)), 10),
+                link_type: linkData.link_type || link.link_type || LINK_TYPES.REGULAR
+            };
 
-            // Refresh links
+            console.log('Updating admin link with data:', updateData);
+
+            // Update the link for all child biosites
+            await adminLinkMethods.updateAdminLink(userId, updateData);
+
+            // Update local link with the same data
+            await updateLink(linkId, {
+                label: updateData.label,
+                url: updateData.url,
+                icon: updateData.icon,
+                orderIndex: updateData.orderIndex,
+                link_type: updateData.link_type,
+                isSelected: true // Ensure it remains marked as selected
+            });
+
+            // Refresh links to get updated state
             await fetchLinks();
         } catch (error) {
             console.error("Error updating admin link:", error);
             throw error;
         }
-    }, [isAdmin, biositeData, getUserId, updateLink, fetchLinks]);
+    }, [isAdmin, biositeData, getUserId, updateLink, fetchLinks, links]);
 
     // Original methods with admin checks
     const setSocialLinks = useCallback((links: SocialLink[]) => {

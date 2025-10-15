@@ -153,7 +153,7 @@ export const AvatarSection = ({
                 <img
                     src={validAvatarImage }
                     alt="Avatar"
-                    className={`${isExposedRoute ? 'w-26 h-26' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
+                    className={`${isExposedRoute ? 'w-24 h-24' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
                     onLoadStart={() => handleImageLoadStart('avatar')}
                     onLoad={() => handleImageLoad('avatar')}
                     onError={() => handleImageError('avatar', biosite.avatarImage)}
@@ -324,11 +324,53 @@ export const SocialLinksSection = ({
                                    }: any) => {
 
     const isDarkTheme = () => {
-
         const backgroundColor = themeConfig.colors.background;
 
         if (backgroundColor.includes('gradient')) {
-            return false;
+
+            const hexColors = backgroundColor.match(/#[0-9A-Fa-f]{6}/g);
+            const rgbColors = backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/g);
+
+            let colors: { r: number; g: number; b: number }[] = [];
+
+            if (hexColors) {
+                colors = colors.concat(
+                    hexColors.map(hex => {
+                        const cleanHex = hex.replace('#', '');
+                        return {
+                            r: parseInt(cleanHex.substr(0, 2), 16),
+                            g: parseInt(cleanHex.substr(2, 2), 16),
+                            b: parseInt(cleanHex.substr(4, 2), 16)
+                        };
+                    })
+                );
+            }
+            if (rgbColors) {
+                colors = colors.concat(
+                    rgbColors.map(rgb => {
+                        const match = rgb.match(/(\d+)/g);
+                        if (match && match.length >= 3) {
+                            return {
+                                r: parseInt(match[0]),
+                                g: parseInt(match[1]),
+                                b: parseInt(match[2])
+                            };
+                        }
+                        return { r: 255, g: 255, b: 255 };
+                    })
+                );
+            }
+
+            if (colors.length === 0) {
+                return false;
+            }
+
+            const avgLuminance = colors.reduce((sum, color) => {
+                const luminance = (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255;
+                return sum + luminance;
+            }, 0) / colors.length;
+
+            return avgLuminance < 0.5;
         }
 
         const hex = backgroundColor.replace('#', '');
