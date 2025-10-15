@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import { socialMediaPlatforms } from "../../../../media/socialPlataforms.ts";
 import BackButton from "../../../shared/BackButton.tsx";
+import Loading from "../../../shared/Loading.tsx";
 
 interface SocialPlatform {
   id: string;
@@ -339,14 +340,7 @@ const SocialPage = () => {
   };
 
   if (loading && activeSocialLinks.length === 0) {
-    return (
-      <div className="max-w-xl mx-auto p-4 text-white flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-400">Cargando redes sociales...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -505,7 +499,7 @@ const SocialPage = () => {
                     </div>
                   )}
                   <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-lg flex bg-[#FFFFFF]  items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg flex bg-[#FFFFFF] shadow-xl  items-center justify-center">
                       <img
                         src={platform.icon}
                         alt={platform.name}

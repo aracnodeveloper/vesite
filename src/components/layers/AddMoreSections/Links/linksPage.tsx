@@ -7,7 +7,8 @@ import LinkEditForm from "./Components/LinksEditForm.tsx";
 import BackButton from "../../../shared/BackButton.tsx";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
-import AdminLinkCard from "../Components/AdminLinkCard.tsx";
+import LinkCard from "./Components/LinksCard.tsx";
+//import AdminLinkCard from "../Components/AdminLinkCard.tsx";
 
 const LinksPage = () => {
   const {
@@ -20,10 +21,10 @@ const LinksPage = () => {
     error,
     refreshBiosite,
     // Admin methods from enhanced hook
-    getUserRole,
-    isAdmin,
-    toggleAdminLink,
-    updateAdminLink,
+   // getUserRole,
+   // isAdmin,
+   // toggleAdminLink,
+  //  updateAdminLink,
   } = usePreview();
 
   const [adding, setAdding] = useState(false);
@@ -37,8 +38,8 @@ const LinksPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeLinks = regularLinks.filter((link) => link.isActive);
-  const userRole = getUserRole();
-  const showAdminControls = isAdmin();
+  //const userRole = getUserRole();
+ // const showAdminControls = isAdmin();
 
   const placeholderLinkImage =
       "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
@@ -127,11 +128,14 @@ const LinksPage = () => {
     return true;
   };
 
-  // Admin link handlers
+  /*// Admin link handlers
   const handleAdminToggle = async (linkId: string, isSelected: boolean) => {
     try {
       setIsSubmitting(true);
+      console.log('Toggling admin link:', { linkId, isSelected });
+
       await toggleAdminLink(linkId, isSelected);
+      await refreshBiosite();
       message.success(
           isSelected
               ? "Enlace aplicado a sitios hijos"
@@ -148,7 +152,10 @@ const LinksPage = () => {
   const handleAdminUpdate = async (linkId: string, linkData: any) => {
     try {
       setIsSubmitting(true);
+      console.log('Updating admin link:', { linkId, linkData });
+
       await updateAdminLink(linkId, linkData);
+
       message.success("Enlace actualizado en sitios hijos");
     } catch (error) {
       console.error("Error updating admin link:", error);
@@ -157,7 +164,7 @@ const LinksPage = () => {
       setIsSubmitting(false);
     }
   };
-
+*/
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
@@ -264,6 +271,7 @@ const LinksPage = () => {
         title: link.title,
         image: editImage,
         imageValid: isValidImageUrl(link.image),
+        isSelected: link.isSelected
       });
     });
   }, [activeLinks, editImage]);
@@ -326,12 +334,12 @@ const LinksPage = () => {
   const handleOpenEdit = (index: number) => {
     const link = activeLinks[index];
 
-    // Check if user can edit this link
+    /*// Check if user can edit this link
     if (link.isSelected && !showAdminControls) {
       message.warning("Este enlace fue asignado por un administrador y no puede ser editado");
       return;
     }
-
+*/
     setEditingIndex(index);
     setEditTitle(link.title);
     setEditUrl(link.url);
@@ -446,8 +454,8 @@ const LinksPage = () => {
   }
 
   return (
-      <div className="w-full h-full mt mb-10 max-w-md mx-auto rounded-lg">
-        {/* Header */}
+      <div className="w-full h-full mt-0 lg:mt-20 mb-10 max-w-md mx-auto rounded-lg">
+        {/* Header
         <div className="px-6 py-4 border-b border-gray-700">
           <BackButton text={"Links"} />
           {showAdminControls && (
@@ -455,8 +463,10 @@ const LinksPage = () => {
                 Modo Administrador: Puedes aplicar enlaces a sitios hijos
               </p>
           )}
+        </div>*/}
+        <div className="px-6 py-4 border-b border-gray-700 ">
+          <BackButton text={"Links"} />
         </div>
-
         {/* Main Content */}
         <div className="p-4">
           {/* Error Message */}
@@ -473,7 +483,7 @@ const LinksPage = () => {
                   <h3 className="text-sm text-gray-600 font-semibold mb-3">
                     Enlaces activos ({activeLinks.length})
                   </h3>
-                  <DragDropContext onDragEnd={onDragEnd}>
+                  {/*<DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId="links-list">
                       {(provided) => (
                           <div
@@ -491,6 +501,7 @@ const LinksPage = () => {
                                       <div
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
                                       >
                                         <AdminLinkCard
                                             id={link.id}
@@ -514,6 +525,44 @@ const LinksPage = () => {
                             {provided.placeholder}
                           </div>
                       )}
+                    </Droppable>
+                  </DragDropContext>*/}
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="links-list">
+                      {(provided) => (
+                          <div
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
+                              className="space-y-2">
+                              {activeLinks.map((link, index) => (
+                                  <Draggable
+                                      key={link.id}
+                                      draggableId={link.id}
+                                      index={index}
+                                  >
+                                    {(provided) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                        >
+                                          <LinkCard
+                                              id={link.id}
+                                              title={link.title}
+                                              url={link.url}
+                                              image={link.image}
+                                              onEdit={() => handleOpenEdit(index)}
+                                              onRemove={() => handleDelete(link.id)}
+                                              isSubmitting={isSubmitting}
+                                              dragHandleProps={provided.dragHandleProps}
+                                              getSafeImageUrl={getSafeImageUrl}
+                                          />
+                                        </div>
+                                    )}
+                                  </Draggable>
+                              ))}
+                              {provided.placeholder}
+                        </div>
+                        )}
                     </Droppable>
                   </DragDropContext>
                 </div>

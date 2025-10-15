@@ -12,7 +12,7 @@ const Profile = () => {
 
     return (
         <div
-            className="bg-[#FAFFF6] rounded-lg p-4 mb-4  flex items-center justify-between cursor-pointer transition-colors"
+            className="bg-white/25 rounded-lg p-4 mb-4  flex items-center justify-between cursor-pointer transition-colors"
             onClick={handleProfileClick}
         >
             <div className="flex items-center space-x-3">
