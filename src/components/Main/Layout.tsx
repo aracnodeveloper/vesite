@@ -8,12 +8,15 @@ import {
   Shield,
   Settings,
   ExternalLink,
-  X, // Importar el icono X para cerrar
+  X,
 } from "lucide-react";
-
 import imgP from "../../../public/img/img.png";
-import imgP2 from "../../../public/img/fondo.svg";
-import imgP6 from "../../../public/img/img_6.png";
+//import imgP2 from "../../../public/img/fondo.svg";
+//import imgP6 from "../../../public/img/img_6.png";
+import veSite from "../../../public/img/veSite.svg"
+//import ve_fondo from "../../../public/img/ve_logo.svg"
+//import ve_logo_green from "../../../public/img/ve_fondo_green.svg"
+//import ve_fondo_green from "../../../public/img/ve_logo_green.svg"
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
@@ -90,7 +93,7 @@ const Layout: React.FC = () => {
     };
   }, [isDrawerOpen]);
 
-  // Persistir el estado del drawer en localStorage
+
   useEffect(() => {
     localStorage.setItem("drawerOpen", JSON.stringify(isDrawerOpen));
   }, [isDrawerOpen]);
@@ -243,6 +246,26 @@ const Layout: React.FC = () => {
     }
     return imgP;
   };
+  const getBackgroundImage = () => {
+    if (avatarError || !biosite?.backgroundImage) {
+      return imgP;
+    }
+    if (typeof biosite.backgroundImage === "string" && biosite.backgroundImage.trim()) {
+      if (biosite.backgroundImage.startsWith("data:")) {
+        const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
+        return dataUrlRegex.test(biosite.backgroundImage)
+            ? biosite.backgroundImage
+            : imgP;
+      }
+      try {
+        new URL(biosite.backgroundImage);
+        return biosite.backgroundImage;
+      } catch {
+        return imgP;
+      }
+    }
+    return imgP;
+  };
 
   const handleAvatarError = () => {
     setAvatarError(true);
@@ -334,13 +357,13 @@ const Layout: React.FC = () => {
   return (
       <>
         {/* --- VISTA DESKTOP --- */}
-        <div className="hidden lg:flex flex-col lg:flex-row h-screen bg-[#E0EED5] p-2 sm:p-4 overflow-x-hidden md:overflow-y-hidden">
+        <div className="hidden lg:flex flex-col lg:flex-row h-screen bg-[#E0EED5] p-2 sm:p-4 overflow-x-hidden md:overflow-y-hidden ">
           <nav className="w-16 xl:w-14 bg-[#FAFFF6] shadow-lg mt-10 mb-4 flex-col items-center space-y-6 rounded-full mr-4 hidden lg:flex">
-            <button className="p-2 text-gray-600 hover:text-green-600 transition-colors cursor-pointer">
+            <button className=" p-2 cursor-pointer rounded-t-full">
               <img
                   src={getAvatarImage()}
                   onClick={handleOpenSettings}
-                  className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover"
+                  className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover "
                   alt="perfil"
                   onError={handleAvatarError}
               />
@@ -374,12 +397,22 @@ const Layout: React.FC = () => {
             <main
                 className="flex w-full justify-center items-center overflow-y-auto p-3 sm:p-6 "
                 style={{
-                  background: `url(${imgP6}) no-repeat center center`,
-                  backgroundSize: "cover",
-                  backgroundColor: "white",
+                  backgroundColor: '#E0EED5',
                 }}
             >
-              <Outlet />
+              {!isAnalyticsRoute && !isAdminRoute && showPreview && (
+              <div className='relative -top-100 -right-180'>
+                <img
+                    src={getAvatarImage()}
+                    onClick={handleOpenSettings}
+                    className="rounded-full w-10 h-10 xl:w-18 xl:h-16 object-cover "
+                    alt="perfil"
+                    onError={handleAvatarError}
+                />
+              </div>
+                  )}
+              <div className='w-full h-full flex justify-center items-center z-20'>
+                <Outlet/></div>
             </main>
           </div>
 
@@ -388,8 +421,7 @@ const Layout: React.FC = () => {
                 <div
                     className="absolute inset-0"
                     style={{
-                      background: `url(${imgP2}) no-repeat center center`,
-                      backgroundSize: "cover",
+                      backgroundColor: `white`,
                       height: "110%",
                       width: "110%",
                       opacity: 0.6,
@@ -430,6 +462,13 @@ const Layout: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                <div >
+                  <img src={getBackgroundImage()}  alt="Background"
+                       className={`absolute top-27.5 left-0 w-full h-52 object-cover opacity-50`}  style={{
+                    clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
+                  }}
+                  />
+                </div>
                 {biosite && (
                     <PhonePreview
                         key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
@@ -451,8 +490,7 @@ const Layout: React.FC = () => {
                 isDrawerOpen ? "overflow-hidden" : ""
             }`}
             style={{
-              background: `url(${imgP2}) no-repeat center center`,
-              backgroundSize: "cover",
+              backgroundColor: `white`,
               height: "100%",
               width: "100%",
             }}
@@ -514,6 +552,7 @@ const Layout: React.FC = () => {
                 paddingBottom: isDrawerOpen ? "80px" : "0"
               }}
           >
+
             {biosite && (
                 <PhonePreview
                     key={`${biosite.id}-${hasChanges ? "changed" : "unchanged"}`}
@@ -563,6 +602,9 @@ const Layout: React.FC = () => {
                 >
                   {/* Header del drawer con botón de cerrar */}
                   <div className="flex items-center justify-between pb-2 flex-shrink-0">
+                    <div className=" w-[40px] h-[40px] flex flex-col items-center justify-center">
+                      <img src={veSite} alt='logo' className='w-full h-full'/>
+                    </div>
                     <div
                         ref={dragHandleRef}
                         onMouseDown={handleDragStart}
@@ -581,7 +623,7 @@ const Layout: React.FC = () => {
                   </div>
 
                   <div className="overflow-y-auto flex-1">
-                    <Outlet />
+                    <Outlet/>
                   </div>
                 </div>
               </>

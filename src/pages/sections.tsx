@@ -54,7 +54,6 @@ const Sections = () => {
     }
   };
 
-  // Effect for admin background update
   useEffect(() => {
     const executeAdminBackgroundUpdate = async () => {
       const role = Cookie.get("roleName");
@@ -69,13 +68,11 @@ const Sections = () => {
       }
     };
 
-    // Execute when biosite data is loaded and user is admin
     if (biosite) {
       executeAdminBackgroundUpdate();
     }
   }, [biosite]);
 
-  // Effect for admin video update
   useEffect(() => {
     const executeAdminVideoUpdate = async () => {
       const role = Cookie.get("roleName");
@@ -93,14 +90,13 @@ const Sections = () => {
       }
     };
 
-    // Execute when biosite data is loaded and user is admin
     if (biosite) {
       executeAdminVideoUpdate();
     }
   }, [biosite, getVideoEmbed]);
 
   return (
-    <div className="flex max-w-[420px] flex-wrap gap-y-5 justify-center w-full h-full transform scale-[0.9]">
+    <div className="flex max-w-[420px] flex-wrap gap-y-5 justify-center w-full h-full transform scale-[0.85]">
       <MySite />
       <Add />
     </div>

@@ -4,7 +4,7 @@ import { Alert, Button, Form, Input, Layout, Typography } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
 import { useAuthContext } from "../../hooks/useAuthContext.ts";
-import imgP6 from "../../../public/img/img_8.png";
+//import imgP6 from "../../../public/img/img_8.png";
 const { Content } = Layout;
 
 export const Login: FC = () => {
@@ -127,9 +127,8 @@ export const Login: FC = () => {
     <Content
       className="h-screen flex relative overflow-hidden"
       style={{
-        background: `linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%), url(${imgP6}) no-repeat center center`,
-        backgroundSize: "cover",
-        backgroundBlendMode: "overlay",
+
+        backgroundColor: 'rgba(224,238,213,0.7)',
       }}
     >
       {/* Floating particles effect */}
@@ -147,18 +146,18 @@ export const Login: FC = () => {
 
       {/* Header with glassmorphism effect */}
       <div
-        className="absolute top-5 left-4 right-4 lg:left-10 lg:right-10 z-10 flex flex-col sm:flex-row justify-between items-center p-2 gap-4 sm:gap-0"
+        className="absolute top-5 left-4 right-4 lg:left-10 lg:right-10 z-10 flex flex-col sm:flex-row justify-between items-center p-2 gap-4 sm:gap-0 bg-white/50"
         style={{
-          background: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(20px)",
           borderRadius: "20px",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <div className="w-30 h-20">
-          <img src="./img/veosite.png" className="w-30 h-20" />
-        </div>
+          <div className="w-30 h-20">
+            <img src="./public/img/veSite.svg" className="w-30 h-20" />
+          </div>
+
         <div className="flex items-center space-x-4 w-full sm:w-auto">
           <Form
             form={form} // Agregamos la referencia del formulario
@@ -267,17 +266,22 @@ export const Login: FC = () => {
               </div>
 
               <Typography.Text
-                className="block text-gray-600 leading-relaxed"
+                className="block text-gray-600 leading-relaxed flex flex-wrap"
                 style={{
                   fontSize: "clamp(18px, 3vw, 28px)",
                   fontWeight: "400",
                   maxWidth: "500px",
                 }}
               >
-                Crea tu marca con nuestros{" "}
-                <span className="font-semibold bg-gradient-to-r from-[#718C5B] to-[#718C5B] bg-clip-text text-transparent">
-                  VeSites
-                </span>
+                Crea tu marca con {" "}
+                <div className='flex flex-wrap -ml-9 -mt-1'>
+                  <div className="w-30 h-10">
+                    <img src="./public/ve.svg" className="w-30 h-10" />
+                  </div>
+                  <div className="w-20 h-10 py-4 -ml-16">
+                    <img src="./public/esite.svg" className="w-20 h-5" />
+                  </div>
+                </div>
               </Typography.Text>
 
               {/* Decorative elements */}

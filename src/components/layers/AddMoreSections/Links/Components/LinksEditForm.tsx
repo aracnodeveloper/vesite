@@ -39,7 +39,7 @@ const LinkEditForm = ({
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const validateFile = (file: File): boolean => {
-    // Check file type
+
     const allowedTypes = [
       "image/jpeg",
       "image/jpg",
@@ -54,8 +54,7 @@ const LinkEditForm = ({
       return false;
     }
 
-    // Check file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       message.error("El archivo es demasiado grande. Tamaño máximo: 5MB");
       return false;
@@ -73,8 +72,7 @@ const LinkEditForm = ({
       return;
     }
 
-    // Validar tamaño (opcional - máximo 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       console.error("Image size should be less than 5MB");
       alert("El tamaño de la imagen debe ser menor a 5MB");
@@ -90,11 +88,9 @@ const LinkEditForm = ({
         setUploadingImage(true);
         console.log("Uploading image for link ID:", link.id);
 
-        // Subir imagen usando el endpoint específico
         const imageUrl = await uploadLinkImage(file, link.id);
         console.log("Image uploaded successfully:", imageUrl);
 
-        // Actualizar el estado local para mostrar la imagen inmediatamente
         onImageChange(imageUrl);
 
         console.log("Image URL set in edit state:", imageUrl);
@@ -102,7 +98,6 @@ const LinkEditForm = ({
         console.error("Error uploading link image:", error);
         alert("Error al subir la imagen al servidor");
 
-        // Fallback a base64 si falla la subida
         const reader = new FileReader();
         reader.onload = () => {
           if (typeof reader.result === "string") {
@@ -124,7 +119,6 @@ const LinkEditForm = ({
       reader.readAsDataURL(file);
     }
 
-    // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
   };
 
   return (

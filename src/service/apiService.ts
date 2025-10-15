@@ -16,6 +16,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface AdminLinkData {
+    biositeId?: string;  // Add this as optional since we'll add it in the method
     icon: string;
     url: string;
     label: string;
@@ -97,17 +98,29 @@ export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | '
 };
 
 export const adminLinkMethods = {
-    // Update link for admin and all children
     updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<any> => {
         try {
-            const response = await api.patch(`/biosites/admin/update-link/${adminId}`, linkData);
+            const payload = {
+                label: linkData.label,
+                url: linkData.url,
+                icon: linkData.icon,
+                orderIndex: linkData.orderIndex,
+                link_type: linkData.link_type || 'regular'
+            };
+
+            console.log('Sending payload:', payload);
+
+            const response = await api.patch(
+                `/biosites/admin/update-link/${adminId}`,
+                payload
+            );
+            console.log('Admin link update response:', response.data);
             return response.data;
         } catch (error) {
             console.error('Error updating admin link:', error);
             throw error;
         }
     },
-
 };
 
 

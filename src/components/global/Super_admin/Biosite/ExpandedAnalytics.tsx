@@ -24,26 +24,21 @@ export default function ExpandedAnalytics({
         colSpan={8}
         className="px-2 sm:px-3 lg:px-6 py-3 sm:py-4 bg-blue-50 border-l-2 sm:border-l-4 border-blue-500"
       >
-        <div className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
-            <h4 className="text-xs sm:text-sm font-semibold text-blue-800 flex items-center">
-              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-              <span className="truncate">
-                Analytics del Biosite Hijo (
-                {analyticsTimeRange === "last7"
-                  ? "Últimos 7 días"
-                  : analyticsTimeRange === "last30"
-                  ? "Últimos 30 días"
-                  : "Último año"}
-                )
-              </span>
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between">
+            <h4 className="text-sm font-semibold text-blue-800 flex items-center">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics del Biosite Hijo (
+              {analyticsTimeRange === "last7"
+                ? "Últimos 7 días"
+                : analyticsTimeRange === "last30"
+                ? "Últimos 30 días"
+                : "Último año"}
+              )
             </h4>
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <label className="text-xs sm:text-sm font-medium text-gray-700">
-                <span className="hidden sm:inline">
-                  Rango de tiempo para analytics:
-                </span>
-                <span className="sm:hidden">Rango:</span>
+            <div className="mb-4 flex items-center space-x-4 flex-wrap">
+              <label className="text-sm font-medium text-gray-700">
+                Rango de tiempo para analytics:
               </label>
               <select
                 value={analyticsTimeRange}
@@ -129,7 +124,7 @@ export default function ExpandedAnalytics({
                       .map((activity, index) => (
                         <div
                           key={index}
-                          className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
+                          className="flex flex-wrap justify-between items-center py-1 px-2 bg-gray-50 rounded"
                         >
                           <span className="text-xs sm:text-sm text-gray-600 truncate flex-1 min-w-0">
                             {activity.day}
@@ -165,7 +160,7 @@ export default function ExpandedAnalytics({
                       .map((click, index) => (
                         <div
                           key={index}
-                          className="flex justify-between items-center py-1 px-2 bg-gray-50 rounded"
+                          className="flex  justify-between items-center py-1 px-2 bg-gray-50 rounded"
                         >
                           <span className="text-xs sm:text-sm text-gray-600 truncate flex-1 min-w-0 pr-2">
                             {click.label}
