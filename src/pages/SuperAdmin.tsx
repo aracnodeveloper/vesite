@@ -24,7 +24,7 @@ const AdminPanel: React.FC = () => {
   const role = Cookie.get("roleName");
   const userId = Cookie.get("userId");
 
-  const [ viewMode, setViewMode] = useState<ViewMode>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
 
   const permissions = useMemo(() => {
     const isSpecialUser = userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5";

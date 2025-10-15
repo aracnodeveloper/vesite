@@ -15,15 +15,15 @@ import {
 import EditableLink from "./EditableLink";
 
 export default function ExpandedBiositeDetails({
-                                                 biosite,
-                                                 userBusinessCard,
-                                                 isLoadingCard,
-                                                 biositeLinks,
-                                                 loadingBiositeLinks,
-                                                 formatDate,
-                                                 parseVCardData,
-                                                 ischild = false,
-                                               }: {
+  biosite,
+  userBusinessCard,
+  isLoadingCard,
+  biositeLinks,
+  loadingBiositeLinks,
+  formatDate,
+  parseVCardData,
+  ischild = false,
+}: {
   biosite: BiositeFull;
   userBusinessCard;
   isLoadingCard;
@@ -44,9 +44,9 @@ export default function ExpandedBiositeDetails({
   const [formError, setFormError] = useState("");
 
   const handleChange = (
-      e: React.ChangeEvent<
-          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
 
@@ -159,7 +159,9 @@ export default function ExpandedBiositeDetails({
                   </div>
                 </div>
               </div>
-          )}
+            </div>
+          </div>
+        )}
 
           <div className="space-y-3 sm:space-y-6 w-full">
             {/* User Information */}
@@ -209,8 +211,8 @@ export default function ExpandedBiositeDetails({
                       >
                       {biosite.owner?.role || "USER"}
                     </span>
-                    </div>
                   </div>
+                </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <FomrField title="Avatar">
@@ -232,23 +234,27 @@ export default function ExpandedBiositeDetails({
                     </FomrField>
                   </div>
 
-                  {update_profile && (
-                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                        <Button submit disabled={isLoading}>
-                          {isLoading ? "Cargando..." : "Guardar"}
-                        </Button>
-                        <Button
-                            onClick={onCancel}
-                            variant="secondary"
-                            disabled={isLoading}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                  )}
-                </form>
-              </div>
+                {update_profile && (
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 lg:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
+                    <div className="w-full sm:w-auto">
+                      <Button submit disabled={isLoading}>
+                        {isLoading ? "Cargando..." : "Guardar"}
+                      </Button>
+                    </div>
+                    <div className="w-full sm:w-auto">
+                      <Button
+                        onClick={onCancel}
+                        variant="secondary"
+                        disabled={isLoading}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </form>
             </div>
+          </div>
 
             {/* V-Card Information */}
             <div className='w-full'>
@@ -351,32 +357,30 @@ export default function ExpandedBiositeDetails({
                                               <span className="text-xs sm:text-sm text-gray-800 break-words">
                                     {item.value}
                                   </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                  ))}
+                                )}
+                              </div>
                             </div>
-                        );
-                      })()}
+                          ))}
+                      </div>
+                    );
+                  })()}
 
                       <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 space-y-2 sm:space-y-0">
                       <span
-                          className={`px-2 py-1 rounded-full text-xs w-fit ${
-                              userBusinessCard.isActive
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-red-100 text-red-700"
-                          }`}
+                        className={`px-3 py-2 rounded-full text-xs sm:text-sm w-fit font-medium ${
+                          userBusinessCard.isActive
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
                       >
                         {userBusinessCard.isActive
-                            ? "V-Card Activa"
-                            : "V-Card Inactiva"}
+                          ? "V-Card Activa"
+                          : "V-Card Inactiva"}
                       </span>
                           <span className="break-all text-xs">
                         ID: {userBusinessCard.id?.substring(0, 8)}...
                       </span>
-                        </div>
-                      </div>
                     </div>
                   </div>
               ) : (
@@ -440,10 +444,40 @@ export default function ExpandedBiositeDetails({
                         </div>
                     )}
                   </div>
-              );
-            })()}
-          </div>
-        </td>
-      </tr>
+                ) : currentBiositeLinks.length > 0 ? (
+                  <div className="max-h-[300px] sm:max-h-[500px] lg:max-h-[600px] overflow-y-auto space-y-2 sm:space-y-3">
+                    {currentBiositeLinks
+                      .filter((link) => link.isActive)
+                      .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
+                      .map((link, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
+                          >
+                            <EditableLink
+                              key={index}
+                              link={link}
+                              linkType={getLinkType(link)}
+                              formatDate={formatDate}
+                            />
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 sm:py-12">
+                    <LinkIcon className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                    <p className="text-sm sm:text-base text-gray-500">
+                      Este biosite hijo no tiene enlaces configurados
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </td>
+    </tr>
   );
 }
