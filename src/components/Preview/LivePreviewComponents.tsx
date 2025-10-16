@@ -63,7 +63,7 @@ export const BackgroundSection = ({
                                       themeConfig,
                                       handleImageClick
                                   }: any) => (
-    <div className={`relative w-full flex-shrink-0 ${isExposedRoute ? 'h-40' : 'h-40 '} ${!isExposedRoute ? '' : 'cursor-pointer'}`}
+    <div className={`relative w-full flex-shrink-0    ${isExposedRoute ? 'h-40' : 'h-40 '} ${!isExposedRoute ? '' : 'cursor-pointer'}`}
          onClick={handleImageClick}>
         {validBackgroundImage ? (
             <>
@@ -86,7 +86,7 @@ export const BackgroundSection = ({
                 <img
                     src={validBackgroundImage}
                     alt="Background"
-                    className={`w-full object-cover ${isExposedRoute ? 'h-full' : 'h-full '}`}
+                    className={`w-full object-cover ${biosite.avatarImage === null ? 'bg-transparent/50' : '' }  ${isExposedRoute ? 'h-full' : 'h-full '}`}
                     onLoadStart={() => handleImageLoadStart('background')}
                     onLoad={() => handleImageLoad('background')}
                     onError={() => handleImageError('background', biosite.backgroundImage)}
@@ -95,6 +95,15 @@ export const BackgroundSection = ({
                         clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
                     }}
                 />
+                {/* Gradiente difuminado cuando no hay avatar */}
+
+                    <div
+                        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+                        style={{
+                            background: `linear-gradient(to bottom, transparent 30%, ${themeConfig.colors.background} 100%)`,
+                            clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
+                        }}
+                    />
                 {imageLoadStates.background === 'error' && (
                     <div
                         className="w-full h-full flex items-center justify-center"
@@ -139,7 +148,7 @@ export const AvatarSection = ({
                                   handleImageClick
                               }: any) => (
 
-    <div className={`flex justify-center ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? '' : 'cursor-pointer'}`}
+    <div className={`flex justify-center  ${biosite.avatarImage === null ? 'hidden' : '' } ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? '' : 'cursor-pointer'}`}
          onClick={handleImageClick}>
         {validAvatarImage ? (
             <div className="relative">
@@ -153,7 +162,7 @@ export const AvatarSection = ({
                 <img
                     src={validAvatarImage }
                     alt="Avatar"
-                    className={`${isExposedRoute ? 'w-24 h-24' : 'w-24 h-24'} rounded-full border-3 border-white object-cover shadow-lg`}
+                    className={`${isExposedRoute ? 'w-22 h-22' : 'w-22 h-22'} rounded-full border-3 border-white object-cover shadow-lg`}
                     onLoadStart={() => handleImageLoadStart('avatar')}
                     onLoad={() => handleImageLoad('avatar')}
                     onError={() => handleImageError('avatar', biosite.avatarImage)}
@@ -457,9 +466,6 @@ export const RegularLinksSection = ({
     regularLinksData.length > 0 && (
         <div className="px-4 pb-4 space-y-2">
             {regularLinksData.map((link: any) => {
-
-
-
                 return isExposedRoute ? (
                     <button
                         key={link.id}

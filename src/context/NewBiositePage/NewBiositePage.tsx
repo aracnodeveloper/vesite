@@ -4,7 +4,7 @@ import type { Section } from "../../interfaces/sections";
 import { getSectionsByBiositeApi } from "../../constants/EndpointsRoutes";
 import Button from "../../components/shared/Button";
 import { useNavigate, useParams } from "react-router-dom";
-import type { BiositeFull, BiositeLink } from "../../interfaces/Biosite";
+import type { BiositeFull, BiositeLink, BiositeUpdateDto } from "../../interfaces/Biosite";
 import Loading from "../../components/shared/Loading";
 import { getThemeConfig, isValidImageUrl } from "../../Utils/biositeUtils";
 import {
@@ -24,10 +24,12 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const slug = propSlug || paramSlug;
   const { user } = useUser();
   const [biosite, setBiosite] = useState<BiositeFull>();
+  const [parentBiosite, setParentBiosite] = useState<BiositeFull | null>(null);
   const [links, setLinks] = useState<Map<Section_type, BiositeLink[]>>();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showVCard, setShowVCard] = useState(false);
+  const [syncInProgress, setSyncInProgress] = useState(false);
   const navigate = useNavigate();
 
   const [imageLoadStates, setImageLoadStates] = useState<{
@@ -47,6 +49,75 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
   const onNavigate = (route: string) => {
     navigate(route);
+  };
+
+  // Función para sincronizar el biosite hijo con el padre
+  const syncChildWithParent = async (
+      childBiosite: BiositeFull,
+      parentBiosite: BiositeFull
+  ) => {
+    if (syncInProgress) return;
+
+    try {
+      setSyncInProgress(true);
+
+      // Verificar si necesita sincronización
+      const needsSync =
+          childBiosite.backgroundImage !== parentBiosite.backgroundImage ||
+          JSON.stringify(childBiosite.colors) !== JSON.stringify(parentBiosite.colors);
+
+      if (!needsSync) {
+        console.log("Biosite hijo ya está sincronizado con el padre");
+        return;
+      }
+
+      console.log("Sincronizando biosite hijo con padre...");
+
+      // Preparar los colores del padre
+      const parentColors =
+          typeof parentBiosite.colors === "string"
+              ? parentBiosite.colors
+              : JSON.stringify(parentBiosite.colors);
+
+      // Crear el DTO de actualización
+      const updateData: BiositeUpdateDto = {
+        ownerId: childBiosite.ownerId,
+        title: childBiosite.title,
+        slug: childBiosite.slug,
+        themeId: childBiosite.themeId,
+        colors: parentColors,
+        fonts: childBiosite.fonts || "Inter",
+        backgroundImage: parentBiosite.backgroundImage || "",
+        isActive: childBiosite.isActive,
+      };
+
+      // Si el hijo tiene avatar, mantenerlo
+      if (childBiosite.avatarImage) {
+        updateData.avatarImage = childBiosite.avatarImage;
+      }
+
+      // Ejecutar actualización
+      const updatedBiosite = await apiService.update<BiositeUpdateDto>(
+          "/biosites",
+          childBiosite.id,
+          updateData
+      );
+
+      console.log("Sincronización completada exitosamente");
+
+      // Actualizar el estado local con el biosite sincronizado
+      if (updatedBiosite) {
+        const biositeResult = Array.isArray(updatedBiosite)
+            ? updatedBiosite[0]
+            : updatedBiosite;
+
+        setBiosite(biositeResult as BiositeFull);
+      }
+    } catch (error) {
+      console.error("Error al sincronizar biosite hijo con padre:", error);
+    } finally {
+      setSyncInProgress(false);
+    }
   };
 
   useEffect(() => {
@@ -90,16 +161,40 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
 
       try {
-        const biosite = await apiService.getById<BiositeFull>(
+        const initialBiosite = await apiService.getById<BiositeFull>(
             "/biosites/slug",
             slug
         );
 
-        if (!biosite) {
+        if (!initialBiosite) {
           throw new Error("Biosite no encontrado");
         }
 
-        setBiosite(biosite);
+        const shouldIncludeParent = initialBiosite.owner?.parentId != null;
+
+        if (shouldIncludeParent) {
+          const response = await apiService.getAll<BiositeFull[]>(
+              `/biosites/slug/${slug}?include_parent=true`
+          );
+
+          if (Array.isArray(response) && response.length > 0) {
+            const childBiosite = response[0];
+            const parentBiosite = response.length > 1 ? response[1] : null;
+
+            setBiosite(childBiosite);
+            setParentBiosite(parentBiosite);
+
+            // Sincronizar automáticamente si hay padre
+            if (parentBiosite) {
+              await syncChildWithParent(childBiosite, parentBiosite);
+            }
+          } else {
+            setBiosite(initialBiosite);
+          }
+        } else {
+          setBiosite(initialBiosite);
+          setParentBiosite(null);
+        }
       } catch (error: any) {
         const errorMessage =
             error?.response?.data?.message ||
@@ -114,16 +209,30 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     fetchBiositeBySlug();
   }, [slug]);
 
-  const isExposedRoute = propSlug != null || window.location.pathname === `/${biosite?.slug}`;
+  // Efecto adicional para re-sincronizar si el padre cambia
+  useEffect(() => {
+    if (biosite && parentBiosite && !syncInProgress) {
+      const needsSync =
+          biosite.backgroundImage !== parentBiosite.backgroundImage ||
+          JSON.stringify(biosite.colors) !== JSON.stringify(parentBiosite.colors);
+
+      if (needsSync) {
+        syncChildWithParent(biosite, parentBiosite);
+      }
+    }
+  }, [biosite, parentBiosite]);
+
+  const isExposedRoute =
+      propSlug != null || window.location.pathname === `/${biosite?.slug}`;
 
   const handleUserInfoClick = (e: React.MouseEvent) => {
     if (isExposedRoute) {
       e.preventDefault();
-      navigate('/profile');
+      navigate("/profile");
     }
   };
 
-  if (loading) {
+  if (loading || syncInProgress) {
     return <Loading />;
   }
 
@@ -144,13 +253,19 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     );
   }
 
+  // Usar siempre los datos actualizados del biosite (ya sincronizado)
   const themeConfig = getThemeConfig(biosite);
-  const validBackgroundImage = isValidImageUrl(biosite?.backgroundImage)
-      ? biosite?.backgroundImage
-      : null;
+
+  // Usar la imagen de fondo del biosite actual (ya sincronizada)
+  const validBackgroundImage =
+      biosite?.backgroundImage && isValidImageUrl(biosite.backgroundImage)
+          ? biosite.backgroundImage
+          : null;
+
   const validAvatarImage = isValidImageUrl(biosite?.avatarImage)
       ? biosite?.avatarImage
       : null;
+
   const defaultAvatar =
       "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
@@ -172,9 +287,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
         <div
             className={`w-full h-full flex items-center justify-center`}
             style={{
-              background: themeConfig.colors.background.startsWith(
-                  "linear-gradient"
-              )
+              background: themeConfig.colors.background.startsWith("linear-gradient")
                   ? themeConfig.colors.background
                   : themeConfig.colors.background,
               backgroundColor: themeConfig.colors.background.startsWith(
@@ -235,8 +348,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
                         />
                     ))}
 
-                    <ConditionalNavButton themeConfig={themeConfig} />
-
+                <ConditionalNavButton themeConfig={themeConfig} />
               </>
             </div>
           </div>
