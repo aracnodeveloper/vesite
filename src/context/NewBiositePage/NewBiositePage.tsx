@@ -383,6 +383,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
                             links={sectionLinks}
                             vcard={{
                               avatar: validAvatarImage,
+                              background: validBackgroundImage,
                               onClick: () => setShowVCard(true),
                             }}
                         />
