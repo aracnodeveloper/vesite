@@ -31,6 +31,9 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const [showVCard, setShowVCard] = useState(false);
   const [syncInProgress, setSyncInProgress] = useState(false);
   const navigate = useNavigate();
+  const maxReloadAttempts = 2;
+  const storageKey = "biositeReloadAttempts";
+  const [canStartChecking, setCanStartChecking] = useState(false);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -46,6 +49,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       document.body.style.overflow = "";
     };
   }, [showVCard]);
+
 
   const onNavigate = (route: string) => {
     navigate(route);
@@ -221,7 +225,43 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
     }
   }, [biosite, parentBiosite]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCanStartChecking(true);
+    }, 500);
 
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!canStartChecking) return;
+
+    if (!loading && !biosite) {
+      const currentAttempts = parseInt(
+          localStorage.getItem(storageKey) || "0",
+          10
+      );
+
+      if (currentAttempts >= maxReloadAttempts) {
+        console.log("Máximo de recargas alcanzado, navegando a /login");
+        localStorage.removeItem(storageKey);
+        navigate("/login");
+        return;
+      }
+
+      const newAttempts = currentAttempts + 1;
+      localStorage.setItem(storageKey, newAttempts.toString());
+      console.log(`Intento de recarga ${newAttempts} de ${maxReloadAttempts}`);
+
+      const timer = setTimeout(() => {
+        window.location.reload();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    } else if (biosite) {
+      localStorage.removeItem(storageKey);
+    }
+  }, [loading,  biosite, navigate, canStartChecking]);
   const isExposedRoute =
       propSlug != null || window.location.pathname === `/${biosite?.slug}`;
 
