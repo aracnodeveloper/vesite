@@ -31,7 +31,7 @@ export interface BiositeTheme {
 export interface BiositeOwner {
   id: string;
   email: string;
-  cedula?: string; // Añadido campo cedula como opcional
+  cedula?: string;
   name?: string;
   description?: string;
   avatarUrl?: string;
@@ -79,6 +79,7 @@ export interface BiositeFull {
   updatedAt: string;
   links?: BiositeLink[];
   owner?: BiositeOwner;
+  parent?: BiositeFull; // Campo para el biosite padre
 }
 
 export interface BiositeUpdateDto {
