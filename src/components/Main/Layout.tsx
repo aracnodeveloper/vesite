@@ -228,7 +228,7 @@ const Layout: React.FC = () => {
 
   const getAvatarImage = () => {
     if (avatarError || !biosite?.avatarImage) {
-      return imgP;
+      return imgP ;
     }
     if (typeof biosite.avatarImage === "string" && biosite.avatarImage.trim()) {
       if (biosite.avatarImage.startsWith("data:")) {
@@ -401,7 +401,7 @@ const Layout: React.FC = () => {
                 }}
             >
               {!isAnalyticsRoute && !isAdminRoute && showPreview && (
-              <div className='relative -top-100 -right-180'>
+              <div className={`relative -top-100 -right-180 ${getAvatarImage() === null ? 'hidden' : '' }`}>
                 <img
                     src={getAvatarImage()}
                     onClick={handleOpenSettings}
