@@ -155,7 +155,7 @@ export const Login: FC = () => {
         }}
       >
           <div className="w-30 h-20">
-            <img src="./public/img/veSite.svg" className="w-30 h-20" />
+            <img src="./img/veSite.svg" className="w-30 h-20" />
           </div>
 
         <div className="flex items-center space-x-4 w-full sm:w-auto">
@@ -276,10 +276,10 @@ export const Login: FC = () => {
                 Crea tu marca con {" "}
                 <div className='flex flex-wrap -ml-9 -mt-1'>
                   <div className="w-30 h-10">
-                    <img src="./public/ve.svg" className="w-30 h-10" />
+                    <img src="./ve.svg" className="w-30 h-10" />
                   </div>
                   <div className="w-20 h-10 py-4 -ml-16">
-                    <img src="./public/esite.svg" className="w-20 h-5" />
+                    <img src="./esite.svg" className="w-20 h-5" />
                   </div>
                 </div>
               </Typography.Text>
