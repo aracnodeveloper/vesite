@@ -6,6 +6,7 @@ import SocialEmbed from "./SocialEmbed";
 import SocialLinks from "./SocialLink.tsx";
 import SVG from "../../assets/icons/WHATS.svg";
 import QR from "../../assets/icons/QR.svg";
+import linkicon from "../../assets/icons/links.svg";
 import visitaecuador_com from "../../assets/icons/visitaecuador_com.svg";
 import AppleStore from "../../assets/icons/AppleStore.svg";
 import GooglePlay from "../../assets/icons/GooglePLay.svg";
@@ -28,6 +29,7 @@ export enum Section_type {
 
 export interface VCard {
   avatar: string;
+  background: string;
   onClick: () => void;
 }
 
@@ -85,7 +87,7 @@ export default function BiositeSection({
             id={""}
             themeConfig={themeConfig}
             title={"VCard"}
-            image={vcard.avatar}
+            image={vcard.avatar || vcard.background}
             onClick={!isPreview ? vcard.onClick : () => navigate("/VCard")}
           />
         );
@@ -97,7 +99,7 @@ export default function BiositeSection({
               icon={ChevronRight}
               onTrack={onTrack}
               url={link.url}
-              image={link.image}
+              image={link.image || linkicon}
               onClick={link.onClick}
               id={link.id}
               themeConfig={themeConfig}
