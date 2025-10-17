@@ -146,49 +146,54 @@ export const AvatarSection = ({
                                   themeConfig,
                                   defaultAvatar,
                                   handleImageClick
-                              }: any) => (
+                              }: any) => {
+    const defaultAvatars = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
-    <div className={`flex justify-center  ${biosite.avatarImage === null ? 'hidden' : '' } ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? '' : 'cursor-pointer'}`}
-         onClick={handleImageClick}>
-        {validAvatarImage ? (
-            <div className="relative">
-                {imageLoadStates.avatar === 'loading' && (
-                    <div className={`absolute inset-0 flex items-center justify-center rounded-full border-3 border-white ${isExposedRoute ? 'w-16 h-16' : 'w-16 h-16'}`}
-                         style={{ backgroundColor: themeConfig.colors.profileBackground }}>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2"
-                             style={{ borderColor: themeConfig.colors.primary }}></div>
-                    </div>
-                )}
-                <img
-                    src={validAvatarImage }
-                    alt="Avatar"
-                    className={`${isExposedRoute ? 'w-22 h-22' : 'w-22 h-22'} rounded-full border-3 border-white object-cover shadow-lg`}
-                    onLoadStart={() => handleImageLoadStart('avatar')}
-                    onLoad={() => handleImageLoad('avatar')}
-                    onError={() => handleImageError('avatar', biosite.avatarImage)}
-                    style={{
-                        display: imageLoadStates.avatar === 'error' ? 'none' : 'block'
-                    }}
-                />
-                {imageLoadStates.avatar === 'error' && (
+    return (
+
+        <div
+            className={`flex justify-center  ${biosite.avatarImage === null ? 'hidden' : ''} ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? '' : 'cursor-pointer'}`}
+            onClick={handleImageClick}>
+            {validAvatarImage ? (
+                <div className="relative">
+                    {imageLoadStates.avatar === 'loading' && (
+                        <div
+                            className={`absolute inset-0 flex items-center justify-center rounded-full border-3 border-white ${isExposedRoute ? 'w-16 h-16' : 'w-16 h-16'}`}
+                            style={{backgroundColor: themeConfig.colors.profileBackground}}>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2"
+                                 style={{borderColor: themeConfig.colors.primary}}></div>
+                        </div>
+                    )}
                     <img
-                        src={defaultAvatar}
-                        alt="Avatar placeholder"
-                        className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                        src={validAvatarImage}
+                        alt="Avatar"
+                        className={`${isExposedRoute ? 'w-22 h-22' : 'w-22 h-22'} rounded-full border-3 border-white object-cover shadow-lg`}
+                        onLoadStart={() => handleImageLoadStart('avatar')}
+                        onLoad={() => handleImageLoad('avatar')}
+                        onError={() => handleImageError('avatar', biosite.avatarImage)}
+                        style={{
+                            display: imageLoadStates.avatar === 'error' ? 'none' : 'block'
+                        }}
                     />
-                )}
-            </div>
-        ) : (
-            <img
-                src={defaultAvatar}
-                alt="Avatar placeholder"
-                className="w-20 h-20 rounded-full border-3 border-white object-cover shadow-lg mt-5"
-            />
-        )}
+                    {imageLoadStates.avatar === 'error' && (
+                        <img
+                            src={defaultAvatar}
+                            alt="Avatar placeholder"
+                            className="w-16 h-16 rounded-full border-3 border-white object-cover shadow-lg"
+                        />
+                    )}
+                </div>
+            ) : (
+                <img
+                    src={defaultAvatar}
+                    alt="Avatar placeholder"
+                    className="w-20 h-20 rounded-full border-3 border-white object-cover shadow-lg mt-5"
+                />
+            )}
 
-    </div>
-);
-
+        </div>
+    );
+};
 export const TwoSquareImagesSection = ({
                                            isExposedRoute,
                                            validBackgroundImage,

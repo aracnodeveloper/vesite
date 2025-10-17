@@ -16,6 +16,7 @@ import Loading from "../../../shared/Loading";
 import BiositeAnalyticsSummary from "./BiositeAnalyticsSummary";
 import ExpandedAnalytics from "./ExpandedAnalytics";
 import ExpandedBiositeDetails from "./ExpandedBiositeDetails";
+import type { UpdateBusinessCardDto } from "../../../../types/V-Card";
 
 export default function BiositeTableRow({
   biosite,
@@ -36,6 +37,7 @@ export default function BiositeTableRow({
   parseVCardData,
   biositeLinks,
   loadingBiositeLinks,
+  onUpdateVCard,
 }: {
   biosite: BiositeFull;
   isExpanded: boolean;
@@ -59,6 +61,7 @@ export default function BiositeTableRow({
   parseVCardData: (businessCard: any) => any;
   biositeLinks: { [key: string]: LinkData[] };
   loadingBiositeLinks: { [key: string]: boolean };
+  onUpdateVCard: (id: string, data: UpdateBusinessCardDto) => Promise<void>;
 }) {
   const userBusinessCard = businessCards[biosite.ownerId];
   const isLoadingCard = loadingCards[biosite.ownerId];
@@ -220,6 +223,7 @@ export default function BiositeTableRow({
           loadingBiositeLinks={loadingBiositeLinks}
           formatDate={formatDate}
           parseVCardData={parseVCardData}
+          onUpdateVCard={onUpdateVCard}
         />
       )}
     </>

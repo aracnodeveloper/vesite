@@ -40,6 +40,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
   formatDate,
   parseVCardData,
   fetchBusinessCard,
+  onUpdateVCard,
 }) => {
   const handleToggleBiositeExpansion = useCallback(
     (biositeId: string) => {
@@ -287,6 +288,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                         loadingBiositeLinks={loadingBiositeLinks}
                         formatDate={formatDate}
                         parseVCardData={parseVCardData}
+                        onUpdateVCard={onUpdateVCard}
                       />
                     </div>
                   )}
@@ -536,6 +538,7 @@ export const BiositesTable: React.FC<BiositesTableProps> = ({
                       loadingBiositeLinks={loadingBiositeLinks}
                       formatDate={formatDate}
                       parseVCardData={parseVCardData}
+                      onUpdateVCard={onUpdateVCard}
                     />
                   )}
                 </React.Fragment>
