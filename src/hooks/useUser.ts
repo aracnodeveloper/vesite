@@ -21,6 +21,7 @@ interface User {
 export interface UpdateUserDto {
   name?: string;
   cedula?: string;
+  email?: string;
   description?: string;
   avatarUrl?: string;
   site?: string;
