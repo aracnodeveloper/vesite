@@ -17,6 +17,7 @@ import type {
   TimeRange,
   AnalyticsData,
 } from "../interfaces/AdminData.ts";
+import type { UpdateBusinessCardDto } from "../types/V-Card";
 
 type ViewMode = "all" | "children";
 
@@ -541,7 +542,25 @@ const AdminPanel: React.FC = () => {
     },
     [businessCards, loadingCards]
   );
+  const handleUpdateVCard = useCallback(
+      async (id: string, data: UpdateBusinessCardDto) => {
+        try {
+          const updatedCard = await businessCardService.updateBusinessCard(id, data);
 
+          // Actualizar el estado local con la nueva información
+          setBusinessCards((prev) => ({
+            ...prev,
+            [data.ownerId]: updatedCard,
+          }));
+
+          console.log("VCard actualizada exitosamente");
+        } catch (error) {
+          console.error("Error updating VCard:", error);
+          throw error;
+        }
+      },
+      []
+  );
   const parseVCardData = useCallback((businessCard: BusinessCard | null) => {
     if (!businessCard?.data) return null;
 
@@ -820,6 +839,7 @@ const AdminPanel: React.FC = () => {
               formatDate={formatDate}
               parseVCardData={parseVCardData}
               fetchBusinessCard={fetchBusinessCard}
+              onUpdateVCard={handleUpdateVCard}
             />
           ) : (
             <AdminChildBiositesTable
@@ -845,6 +865,7 @@ const AdminPanel: React.FC = () => {
               formatDate={formatDate}
               parseVCardData={parseVCardData}
               fetchBusinessCard={fetchBusinessCard}
+              onUpdateVCard={handleUpdateVCard}
             />
           )}
         </div>

@@ -42,7 +42,7 @@ export const getThemeConfig = (biosite: any) => {
     }
 
     const defaultColors = { primary: '#f3f4f6', secondary: '#f3f4f6' };
-    const parsedColors = biosite.colors
+    const parsedColors = biosite?.colors
         ? (typeof biosite.colors === 'string'
             ? JSON.parse(biosite.colors)
             : biosite.colors)

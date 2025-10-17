@@ -13,6 +13,8 @@ import {
   uploadBiositeBackground,
 } from "../../../layers/MySite/Profile/lib/uploadImage";
 import EditableLink from "./EditableLink";
+import EditableVCardSection from "./EditableVCardSection";
+import type { UpdateBusinessCardDto } from "../../../../types/V-Card";
 
 export default function ExpandedBiositeDetails({
                                                  biosite,
@@ -23,6 +25,7 @@ export default function ExpandedBiositeDetails({
                                                  formatDate,
                                                  parseVCardData,
                                                  ischild = false,
+                                                 onUpdateVCard,
                                                }: {
   biosite: BiositeFull;
   userBusinessCard;
@@ -32,6 +35,7 @@ export default function ExpandedBiositeDetails({
   formatDate;
   parseVCardData;
   ischild?: boolean;
+  onUpdateVCard: (id: string, data: UpdateBusinessCardDto) => Promise<void>;
 }) {
   const [update_profile, setUpdate_profile] = useState(false);
   const [update_avatar, setUpdate_avatar] = useState(false);
@@ -67,6 +71,7 @@ export default function ExpandedBiositeDetails({
     }
     setUpdate_profile(true);
   };
+
   const handleImageChange = (fieldName: string) => (file: File | null) => {
     if (fieldName == "avatarImage") {
       setAvatarFile(file);
@@ -74,7 +79,6 @@ export default function ExpandedBiositeDetails({
     } else if (fieldName == "backgroundImage") {
       setBackgroundFile(file);
       setUpdate_background(true);
-    } else {
     }
     setUpdate_profile(true);
   };
@@ -92,6 +96,7 @@ export default function ExpandedBiositeDetails({
     try {
       const updateUserData: UpdateUserDto = {
         name: editableBiosite.owner?.name,
+        email: editableBiosite.owner?.email,
         cedula: editableBiosite.owner?.cedula,
         description: editableBiosite.owner?.description,
         avatarUrl: editableBiosite.owner?.avatarUrl,
@@ -196,6 +201,13 @@ export default function ExpandedBiositeDetails({
                           onChange={handleChange}
                       />
                     </FomrField>
+                    <FomrField title={"Telefono"}>
+                      <Input
+                          name="owner.phone"
+                          value={editableBiosite.owner?.phone ?? ""}
+                          onChange={handleChange}
+                      />
+                    </FomrField>
                     <div>
                       <p className="text-xs sm:text-sm text-gray-600 uppercase tracking-wide">
                         Rol
@@ -256,157 +268,20 @@ export default function ExpandedBiositeDetails({
               </div>
             </div>
 
-            {/* V-Card Information */}
+            {/* V-Card Information con edición */}
             <div>
               <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 flex items-center">
                 <Database className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" />
                 Tarjeta Digital del Usuario{ischild !== false ? " Hijo" : ""}
               </h4>
 
-              {isLoadingCard ? (
-                  <div className="flex justify-center py-6 sm:py-8">
-                    <Loading />
-                  </div>
-              ) : userBusinessCard ? (
-                  <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                    {/* QR Code Section */}
-                    {userBusinessCard.qrCodeUrl && (
-                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 text-center border-b">
-                          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                            <img
-                                src={userBusinessCard.qrCodeUrl}
-                                alt="QR Code"
-                                className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white p-2 rounded-lg shadow-sm flex-shrink-0"
-                            />
-                            <div className="text-center sm:text-left">
-                              <p className="text-sm sm:text-base font-medium text-gray-700">
-                                QR Code Disponible
-                              </p>
-                              <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                Escanea para ver la V-Card
-                              </p>
-                              {userBusinessCard.slug && (
-                                  <p className="text-xs sm:text-sm text-blue-600 mt-2 break-all font-mono">
-                                    /{userBusinessCard.slug}
-                                  </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                    )}
-
-                    {/* V-Card Data */}
-                    <div className="p-4 sm:p-6">
-                      {(() => {
-                        const vCardData = parseVCardData(userBusinessCard);
-
-                        if (!vCardData) {
-                          return (
-                              <div className="text-center py-6 sm:py-8">
-                                <p className="text-sm sm:text-base text-gray-500">
-                                  V-Card sin datos configurados
-                                </p>
-                              </div>
-                          );
-                        }
-
-                        return (
-                            <div className="space-y-3 sm:space-y-4">
-                              {[
-                                { label: "Nombre", value: vCardData.name },
-                                { label: "Título", value: vCardData.title },
-                                { label: "Empresa", value: vCardData.company },
-                                {
-                                  label: "Email",
-                                  value: vCardData.email,
-                                  isEmail: true,
-                                },
-                                {
-                                  label: "Teléfono",
-                                  value: vCardData.phone,
-                                  isPhone: true,
-                                },
-                                {
-                                  label: "Web",
-                                  value: vCardData.website,
-                                  isUrl: true,
-                                },
-                              ]
-                                  .filter((item) => item.value)
-                                  .map((item, index) => (
-                                      <div
-                                          key={index}
-                                          className="flex flex-col sm:flex-row sm:items-center border-b border-gray-100 pb-2 sm:pb-3 last:border-b-0 last:pb-0"
-                                      >
-                              <span className="text-xs sm:text-sm text-gray-500 sm:w-24 lg:w-28 mb-1 sm:mb-0 font-medium uppercase tracking-wide">
-                                {item.label}:
-                              </span>
-                                        <div className="flex-1 min-w-0">
-                                          {item.isEmail ? (
-                                              <a
-                                                  href={`mailto:${item.value}`}
-                                                  className="text-sm sm:text-base text-blue-600 hover:text-blue-800 hover:underline break-all transition-colors duration-200"
-                                              >
-                                                {item.value}
-                                              </a>
-                                          ) : item.isPhone ? (
-                                              <a
-                                                  href={`tel:${item.value}`}
-                                                  className="text-sm sm:text-base text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200"
-                                              >
-                                                {item.value}
-                                              </a>
-                                          ) : item.isUrl ? (
-                                              <a
-                                                  href={item.value}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-sm sm:text-base text-blue-600 hover:text-blue-800 hover:underline break-all transition-colors duration-200"
-                                              >
-                                                {item.value}
-                                              </a>
-                                          ) : (
-                                              <span className="text-sm sm:text-base text-gray-800 break-words">
-                                    {item.value}
-                                  </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                  ))}
-                            </div>
-                        );
-                      })()}
-
-                      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-500 space-y-2 sm:space-y-0">
-                      <span
-                          className={`px-3 py-2 rounded-full text-xs sm:text-sm w-fit font-medium ${
-                              userBusinessCard.isActive
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-red-100 text-red-700"
-                          }`}
-                      >
-                        {userBusinessCard.isActive
-                            ? "V-Card Activa"
-                            : "V-Card Inactiva"}
-                      </span>
-                          <span className="break-all font-mono text-xs sm:text-sm">
-                        ID: {userBusinessCard.id?.substring(0, 8)}...
-                      </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-              ) : (
-                  <div className="bg-white p-6 sm:p-8 rounded-lg border text-center">
-                    <div className="text-gray-400 mb-3 sm:mb-4">
-                      <Database className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2" />
-                    </div>
-                    <p className="text-sm sm:text-base text-gray-600">
-                      Este usuario hijo no tiene V-Card configurada
-                    </p>
-                  </div>
-              )}
+              <EditableVCardSection
+                  userBusinessCard={userBusinessCard}
+                  isLoadingCard={isLoadingCard}
+                  ownerId={biosite.ownerId}
+                  parseVCardData={parseVCardData}
+                  onUpdateVCard={onUpdateVCard}
+              />
             </div>
 
             {/* Enlaces detallados */}
