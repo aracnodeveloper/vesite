@@ -21,7 +21,7 @@ import { useAuthContext } from "../../hooks/useAuthContext.ts";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useChangeDetection } from "../../hooks/useChangeDetection.ts";
 import { useUpdateShareActions } from "../../hooks/useUpdateShareActions.ts";
-
+import {getThemeConfig} from '../../Utils/biositeUtils.ts';
 import PhonePreview from "../Preview/phonePreview.tsx";
 import SettingsModal from "../global/Settings/SettingsModal.tsx";
 import ShareButton from "../ShareButton.tsx";
@@ -39,7 +39,8 @@ const Layout: React.FC = () => {
       role === "SUPER_ADMIN" ||
       userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5" ||
       role === "ADMIN";
-  const { biosite } = usePreview();
+  const { biosite  } = usePreview();
+  const themeConfig = getThemeConfig(biosite);
   const { hasChanges, markAsSaved, resetChangeDetection } =
       useChangeDetection();
   const { isUpdating, handleUpdate } = useUpdateShareActions();
@@ -357,7 +358,7 @@ const Layout: React.FC = () => {
   return (
       <>
         {/* --- VISTA DESKTOP --- */}
-        <div className="hidden lg:flex flex-col lg:flex-row h-screen bg-[#E0EED5] p-2 sm:p-4 overflow-x-hidden md:overflow-y-hidden ">
+        <div className="hidden lg:flex flex-col lg:flex-row h-screen bg-[#E0EED5]  sm:pl-4 sm:pr-4 overflow-x-hidden md:overflow-y-hidden ">
           <nav className="w-16 xl:w-14 bg-[#FAFFF6] shadow-lg mt-10 mb-4 flex-col items-center space-y-6 rounded-full mr-4 hidden lg:flex">
             <button className=" p-2 cursor-pointer rounded-t-full">
               <img
@@ -401,7 +402,7 @@ const Layout: React.FC = () => {
                 }}
             >
               {!isAnalyticsRoute && !isAdminRoute && showPreview && (
-              <div className={`relative -top-100 -right-180 ${getAvatarImage() === null ? 'hidden' : '' }`}>
+              <div className={`relative -top-100 -right-180 ${biosite?.avatarImage === null  ? 'hidden' : '' }`}>
                 <img
                     src={getAvatarImage()}
                     onClick={handleOpenSettings}
@@ -421,10 +422,9 @@ const Layout: React.FC = () => {
                 <div
                     className="absolute inset-0"
                     style={{
-                      backgroundColor: `white`,
+                      backgroundColor: themeConfig?.colors.profileBackground,
                       height: "110%",
                       width: "110%",
-                      opacity: 0.6,
                     }}
                 />
                 <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between">

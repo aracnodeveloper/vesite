@@ -29,6 +29,7 @@ export const AdminChildBiositesTable: React.FC<
          formatDate,
          parseVCardData,
          fetchBusinessCard,
+        onUpdateVCard
      }) => {
     if (loading) {
         return (
@@ -253,6 +254,7 @@ export const AdminChildBiositesTable: React.FC<
                                 parseVCardData={parseVCardData}
                                 biositeLinks={biositeLinks}
                                 loadingBiositeLinks={loadingBiositeLinks}
+                                onUpdateVCard={onUpdateVCard}
                             />
                         );
                     })}

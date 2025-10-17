@@ -1,5 +1,6 @@
 import type {BusinessCard} from "../types/V-Card.ts";
 import React from "react";
+import type { UpdateBusinessCardDto } from "../types/V-Card";
 
 export interface LinkData {
     id: string;
@@ -101,6 +102,7 @@ export interface BiositesTableProps {
     formatDate: (dateString?: string) => string;
     parseVCardData: (businessCard: BusinessCard | null) => any;
     fetchBusinessCard: (ownerId: string) => void;
+    onUpdateVCard: (id: string, data: UpdateBusinessCardDto) => Promise<void>;
 }
 
 export interface AdminChildBiositesTableProps {
@@ -126,4 +128,5 @@ export interface AdminChildBiositesTableProps {
     parseVCardData: (businessCard: any) => any;
     categorizeLinks: (links: LinkData[]) => any;
     fetchBusinessCard: (ownerId: string) => void;
+    onUpdateVCard: (id: string, data: UpdateBusinessCardDto) => Promise<void>;
 }
