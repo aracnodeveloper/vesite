@@ -196,6 +196,7 @@ export const AdminChildBiositesTable: React.FC<
                                     parseVCardData={parseVCardData}
                                     biositeLinks={biositeLinks}
                                     loadingBiositeLinks={loadingBiositeLinks}
+                                    onUpdateVCard={onUpdateVCard}
                                 />
                             </div>
                         )}
