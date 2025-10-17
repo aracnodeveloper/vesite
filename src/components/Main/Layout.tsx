@@ -362,7 +362,7 @@ const Layout: React.FC = () => {
           <nav className="w-16 xl:w-14 bg-[#FAFFF6] shadow-lg mt-10 mb-4 flex-col items-center space-y-6 rounded-full mr-4 hidden lg:flex">
             <button className=" p-2 cursor-pointer rounded-t-full">
               <img
-                  src={getAvatarImage()}
+                  src={biosite?.avatarImage || biosite?.backgroundImage || imgP}
                   onClick={handleOpenSettings}
                   className="rounded-full w-10 h-10 xl:w-10 xl:h-10 object-cover "
                   alt="perfil"
