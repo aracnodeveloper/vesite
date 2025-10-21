@@ -33,6 +33,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const navigate = useNavigate();
   const maxReloadAttempts = 2;
   const storageKey = "biositeReloadAttempts";
+  const errorStorageKey = "biositeErrorReloadAttempts";
   const [canStartChecking, setCanStartChecking] = useState(false);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
@@ -225,10 +226,11 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
     }
   }, [biosite, parentBiosite]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setCanStartChecking(true);
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -236,6 +238,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   useEffect(() => {
     if (!canStartChecking) return;
 
+    // Lógica para recargar cuando no hay biosite (ya existente)
     if (!loading && !biosite) {
       const currentAttempts = parseInt(
           localStorage.getItem(storageKey) || "0",
@@ -261,7 +264,34 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     } else if (biosite) {
       localStorage.removeItem(storageKey);
     }
-  }, [loading,  biosite, navigate, canStartChecking]);
+
+    // Nueva lógica para recargar cuando hay error
+    if (!loading && error) {
+      const currentErrorAttempts = parseInt(
+          localStorage.getItem(errorStorageKey) || "0",
+          10
+      );
+
+      if (currentErrorAttempts >= maxReloadAttempts) {
+        console.log("Máximo de recargas por error alcanzado");
+        localStorage.removeItem(errorStorageKey);
+        return; // Mostrar el mensaje de error sin más recargas
+      }
+
+      const newErrorAttempts = currentErrorAttempts + 1;
+      localStorage.setItem(errorStorageKey, newErrorAttempts.toString());
+      console.log(`Intento de recarga por error ${newErrorAttempts} de ${maxReloadAttempts}`);
+
+      const timer = setTimeout(() => {
+        window.location.reload();
+      }, 300); // Espera 1 segundo antes de recargar
+
+      return () => clearTimeout(timer);
+    } else if (!error) {
+      localStorage.removeItem(errorStorageKey);
+    }
+  }, [loading, biosite, error, navigate, canStartChecking]);
+
   const isExposedRoute =
       propSlug != null || window.location.pathname === `/${biosite?.slug}`;
 
