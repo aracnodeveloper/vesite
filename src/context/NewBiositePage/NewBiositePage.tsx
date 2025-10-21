@@ -189,7 +189,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
             setBiosite(childBiosite);
             setParentBiosite(parentBiosite);
 
-            // Sincronizar automáticamente si hay padre
             if (parentBiosite) {
               await syncChildWithParent(childBiosite, parentBiosite);
             }
@@ -214,7 +213,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     fetchBiositeBySlug();
   }, [slug]);
 
-  // Efecto adicional para re-sincronizar si el padre cambia
   useEffect(() => {
     if (biosite && parentBiosite && !syncInProgress) {
       const needsSync =
@@ -238,7 +236,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   useEffect(() => {
     if (!canStartChecking) return;
 
-    // Lógica para recargar cuando no hay biosite (ya existente)
     if (!loading && !biosite) {
       const currentAttempts = parseInt(
           localStorage.getItem(storageKey) || "0",
@@ -265,7 +262,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       localStorage.removeItem(storageKey);
     }
 
-    // Nueva lógica para recargar cuando hay error
     if (!loading && error) {
       const currentErrorAttempts = parseInt(
           localStorage.getItem(errorStorageKey) || "0",
@@ -275,7 +271,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       if (currentErrorAttempts >= maxReloadAttempts) {
         console.log("Máximo de recargas por error alcanzado");
         localStorage.removeItem(errorStorageKey);
-        return; // Mostrar el mensaje de error sin más recargas
+        return;
       }
 
       const newErrorAttempts = currentErrorAttempts + 1;
@@ -284,7 +280,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
       const timer = setTimeout(() => {
         window.location.reload();
-      }, 300); // Espera 1 segundo antes de recargar
+      }, 300);
 
       return () => clearTimeout(timer);
     } else if (!error) {
@@ -307,26 +303,11 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   }
 
   if (error) {
-    return (
-        <div className="min-h-screen text-center bg-gray-100 flex items-center justify-center">
-          <div>
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Biosite no encontrado
-            </h1>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => (window.location.href = "/")}>
-              Ir al inicio
-            </Button>
-          </div>
-        </div>
-    );
+    return <Loading />;
   }
 
-  // Usar siempre los datos actualizados del biosite (ya sincronizado)
   const themeConfig = getThemeConfig(biosite);
 
-  // Usar la imagen de fondo del biosite actual (ya sincronizada)
   const validBackgroundImage =
       biosite?.backgroundImage && isValidImageUrl(biosite.backgroundImage)
           ? biosite.backgroundImage
