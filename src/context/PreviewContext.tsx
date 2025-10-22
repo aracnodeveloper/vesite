@@ -278,7 +278,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 url: link.url,
                 image: link.image,
                 orderIndex: link.orderIndex,
-                isActive: link.isActive
+                isActive: link.isActive,
+                isSelected: link.isSelected || false
             }));
 
             // Format app links

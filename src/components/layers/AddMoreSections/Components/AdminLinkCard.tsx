@@ -73,6 +73,7 @@ const AdminLinkCard = ({
                 label: title,
                 url: url,
                 icon: 'link',
+                image: image,
                 orderIndex: 0,
                 link_type: 'regular',
             };

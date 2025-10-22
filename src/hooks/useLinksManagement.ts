@@ -131,6 +131,7 @@ export const useLinkOperations = ({
                 label: linkData.label || link.label || link.title || 'Link',
                 url: linkData.url || link.url,
                 icon: linkData.icon || link.icon || 'link',
+                image: linkData.image || link.image,
                 orderIndex: parseInt(String(linkData.orderIndex !== undefined ? linkData.orderIndex : (link.orderIndex || 0)), 10),
                 link_type: linkData.link_type || link.link_type || LINK_TYPES.REGULAR
             };
@@ -145,6 +146,7 @@ export const useLinkOperations = ({
                 label: updateData.label,
                 url: updateData.url,
                 icon: updateData.icon,
+                image: updateData.image,
                 orderIndex: updateData.orderIndex,
                 link_type: updateData.link_type,
                 isSelected: true // Ensure it remains marked as selected
