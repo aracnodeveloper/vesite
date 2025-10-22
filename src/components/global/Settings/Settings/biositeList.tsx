@@ -7,7 +7,8 @@ import {
     ChevronRight,
     MoreHorizontal,
     Trash2,
-    Loader2
+    Loader2,
+    Crown
 } from "lucide-react";
 import imgP from "../../../../../public/img/img.png";
 import type { BiositeFull } from "../../../../interfaces/Biosite";
@@ -61,7 +62,6 @@ const BiositesList: React.FC<BiositeListProps> = ({
     };
 
     const getMainUserId = (): UUID | null => {
-
         const mainUserId = document.cookie
             .split('; ')
             .find(row => row.startsWith('mainUserId='))
@@ -94,13 +94,17 @@ const BiositesList: React.FC<BiositeListProps> = ({
     };
 
     const isMainBiosite = (biositeData: BiositeFull): boolean => {
-        const mainUserId = getCurrentUserId();
+        const mainUserId = getMainUserId();
         return biositeData.ownerId === mainUserId;
     };
 
     const isChildBiosite = (biositeData: BiositeFull): boolean => {
         const mainUserId = getMainUserId();
         return biositeData.ownerId !== mainUserId;
+    };
+
+    const isCurrentBiosite = (biositeData: BiositeFull): boolean => {
+        return currentBiosite?.id === biositeData.id;
     };
 
     const handleDeleteBiosite = async (biositeData: BiositeFull) => {
@@ -166,12 +170,12 @@ const BiositesList: React.FC<BiositeListProps> = ({
         }
     }, [showDeleteMenu]);
 
-    const renderBiositeItem = (biositeData: BiositeFull, isChild: boolean = false) => (
+    const renderBiositeItem = (biositeData: BiositeFull, isChild: boolean = false, isCurrent: boolean = false) => (
         <div
             key={biositeData.id}
             className={`relative flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer group ${
                 isLoadingState ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            } ${isCurrent ? 'bg-blue-50 border border-blue-200' : ''}`}
             onMouseEnter={() => setHoveredBiosite(biositeData.id)}
             onMouseLeave={() => setHoveredBiosite(null)}
             onClick={() => !isLoadingState && !showDeleteMenu && onProfileSwitch(biositeData)}
@@ -183,17 +187,27 @@ const BiositesList: React.FC<BiositeListProps> = ({
                     className="w-10 h-10 rounded-full object-cover"
                     onError={() => setAvatarError(true)}
                 />
+                {isCurrent && (
+                    <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-1">
+                        <Crown size={10} className="text-white" />
+                    </div>
+                )}
             </div>
             <div className="flex-1">
                 <div className="font-medium text-gray-600 text-sm flex items-center">
                     {biositeData.title}
-                    {isMainBiosite(biositeData) && (
+                    {isCurrent && (
                         <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                             Principal
                         </span>
                     )}
-                    {isChild && (
+                    {isMainBiosite(biositeData) && !isCurrent && (
                         <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                            Principal
+                        </span>
+                    )}
+                    {isChild && !isCurrent && (
+                        <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
                             Hijo
                         </span>
                     )}
@@ -239,27 +253,50 @@ const BiositesList: React.FC<BiositeListProps> = ({
         </div>
     );
 
-    // CORRECCIÓN: Los biosites propios son los que pertenecen directamente al usuario principal
-    const ownBiosites = biositeStructure.ownBiosites.filter(biosite => isMainBiosite(biosite));
+    // Get current biosite - prioritize from all biosites structure
+    const getCurrentBiositeData = (): BiositeFull | null => {
+        if (!currentBiosite) return null;
 
-    // CORRECCIÓN: Los biosites hijos son los que pertenecen a usuarios hijos (diferentes al mainUserId)
-    const childBiosites = biositeStructure.childBiosites.filter(biosite => isChildBiosite(biosite));
+        // Search in all biosites first
+        const foundInAll = biositeStructure.allBiosites.find(biosite => biosite.id === currentBiosite.id);
+        if (foundInAll) return foundInAll;
+
+        // Fallback to current biosite from context
+        return currentBiosite;
+    };
+
+    const currentBiositeData = getCurrentBiositeData();
+
+    // Filter biosites excluding the current one for other sections
+    const ownBiosites = biositeStructure.ownBiosites.filter(biosite =>
+        isMainBiosite(biosite) && biosite.id !== currentBiosite?.id
+    );
+
+    const childBiosites = biositeStructure.childBiosites.filter(biosite =>
+        isChildBiosite(biosite) && biosite.id !== currentBiosite?.id
+    );
 
     return (
         <>
-            {ownBiosites.length > 0 && (
-                <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-gray-600">Mi vesite</h3>
-                    {ownBiosites.map((biositeData) => renderBiositeItem(biositeData))}
+            {/* Current Biosite Section - Always show first if exists */}
+            {currentBiositeData && (
+                <div className="space-y-2 mb-4">
+                    <h3 className="text-sm font-medium text-blue-600 flex items-center">
+                        <Crown className="h-4 w-4 mr-2" />
+                        VeSite Actual
+                    </h3>
+                    {renderBiositeItem(currentBiositeData, isChildBiosite(currentBiositeData), true)}
                 </div>
             )}
 
+
+            {/* Child Biosites Section - Excluding current */}
             {canSeeChildBiosites && childBiosites.length > 0 && (
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-gray-600 flex items-center">
                             <Users className="h-4 w-4 mr-2"/>
-                            vesites Hijos ({childBiosites.length})
+                            VeSites Hijos ({childBiosites.length})
                         </h3>
                         <button
                             onClick={() => setShowChildBiosites(!showChildBiosites)}
@@ -277,6 +314,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                 </div>
             )}
 
+            {/* Empty State */}
             {biositeStructure.allBiosites.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                     <p className="text-sm">No hay vesites disponibles</p>
@@ -286,6 +324,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                 </div>
             )}
 
+            {/* Create New Biosite Button */}
             {canCreateBiosites && (
                 <div
                     onClick={() => !isLoadingState && onCreateNewSite()}
@@ -298,7 +337,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
                     </div>
                     <div className="flex-1">
                         <div className="font-medium text-black group-hover:text-white text-sm">
-                            Crear Nuevo vesite
+                            Crear Nuevo VeSite
                         </div>
                     </div>
                 </div>

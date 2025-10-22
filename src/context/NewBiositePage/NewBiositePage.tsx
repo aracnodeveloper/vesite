@@ -33,6 +33,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const navigate = useNavigate();
   const maxReloadAttempts = 2;
   const storageKey = "biositeReloadAttempts";
+  const errorStorageKey = "biositeErrorReloadAttempts";
   const [canStartChecking, setCanStartChecking] = useState(false);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
@@ -188,7 +189,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
             setBiosite(childBiosite);
             setParentBiosite(parentBiosite);
 
-            // Sincronizar automáticamente si hay padre
             if (parentBiosite) {
               await syncChildWithParent(childBiosite, parentBiosite);
             }
@@ -213,7 +213,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     fetchBiositeBySlug();
   }, [slug]);
 
-  // Efecto adicional para re-sincronizar si el padre cambia
   useEffect(() => {
     if (biosite && parentBiosite && !syncInProgress) {
       const needsSync =
@@ -225,10 +224,11 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
     }
   }, [biosite, parentBiosite]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setCanStartChecking(true);
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, []);
@@ -261,7 +261,33 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     } else if (biosite) {
       localStorage.removeItem(storageKey);
     }
-  }, [loading,  biosite, navigate, canStartChecking]);
+
+    if (!loading && error) {
+      const currentErrorAttempts = parseInt(
+          localStorage.getItem(errorStorageKey) || "0",
+          10
+      );
+
+      if (currentErrorAttempts >= maxReloadAttempts) {
+        console.log("Máximo de recargas por error alcanzado");
+        localStorage.removeItem(errorStorageKey);
+        return;
+      }
+
+      const newErrorAttempts = currentErrorAttempts + 1;
+      localStorage.setItem(errorStorageKey, newErrorAttempts.toString());
+      console.log(`Intento de recarga por error ${newErrorAttempts} de ${maxReloadAttempts}`);
+
+      const timer = setTimeout(() => {
+        window.location.reload();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    } else if (!error) {
+      localStorage.removeItem(errorStorageKey);
+    }
+  }, [loading, biosite, error, navigate, canStartChecking]);
+
   const isExposedRoute =
       propSlug != null || window.location.pathname === `/${biosite?.slug}`;
 
@@ -277,26 +303,11 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   }
 
   if (error) {
-    return (
-        <div className="min-h-screen text-center bg-gray-100 flex items-center justify-center">
-          <div>
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Biosite no encontrado
-            </h1>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => (window.location.href = "/")}>
-              Ir al inicio
-            </Button>
-          </div>
-        </div>
-    );
+    return <Loading />;
   }
 
-  // Usar siempre los datos actualizados del biosite (ya sincronizado)
   const themeConfig = getThemeConfig(biosite);
 
-  // Usar la imagen de fondo del biosite actual (ya sincronizada)
   const validBackgroundImage =
       biosite?.backgroundImage && isValidImageUrl(biosite.backgroundImage)
           ? biosite.backgroundImage

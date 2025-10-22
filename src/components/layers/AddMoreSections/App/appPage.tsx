@@ -92,10 +92,17 @@ const AppPage = () => {
   };
 
   const handleDeleteLink = async (store: "appstore" | "googleplay") => {
+    setIsSaving(true);
+    setSaveStatus("idle");
+    setSaveMessage("");
+
     try {
-      const link = appLinks.find((link) => link.store === store);
+      const link = appLinks.find((link) => link.store === store && link.isActive === true);
+
       if (link) {
-        await removeAppLink(link.id);
+        // En lugar de removeAppLink, usa updateAppLink para marcar como inactivo
+        await updateAppLink(link.id, { ...link, isActive: false });
+
         setSaveStatus("success");
         setSaveMessage(
             `Enlace de ${
@@ -103,6 +110,7 @@ const AppPage = () => {
             } eliminado`
         );
 
+        // Actualizar el estado local inmediatamente
         if (store === "appstore") {
           setAppStoreUrl("");
         } else {
@@ -114,6 +122,7 @@ const AppPage = () => {
           setSaveMessage("");
         }, 3000);
       } else {
+        // Si no existe el link activo, solo limpiar el estado local
         if (store === "appstore") {
           setAppStoreUrl("");
         } else {
@@ -129,9 +138,10 @@ const AppPage = () => {
         setSaveStatus("idle");
         setSaveMessage("");
       }, 5000);
+    } finally {
+      setIsSaving(false);
     }
   };
-
   const isValidUrl = (url: string, type: "appstore" | "googleplay") => {
     if (!url) return true;
 
