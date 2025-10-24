@@ -10,7 +10,7 @@ import {
     Loader2,
     Crown
 } from "lucide-react";
-import imgP from "../../../../../public/img/img.png";
+//import imgP from "../../../../../public/img/img.png";
 import type { BiositeFull } from "../../../../interfaces/Biosite";
 import type { UUID } from "../../../../types/authTypes.ts";
 import apiService from "../../../../service/apiService.ts";
@@ -69,29 +69,6 @@ const BiositesList: React.FC<BiositeListProps> = ({
         return mainUserId as UUID || getCurrentUserId();
     };
 
-    const getAvatarImage = (biositeData?: BiositeFull) => {
-        const targetBiosite = biositeData || currentBiosite;
-
-        if (avatarError || !targetBiosite?.avatarImage) {
-            return imgP;
-        }
-
-        if (typeof targetBiosite.avatarImage === 'string' && targetBiosite.avatarImage.trim()) {
-            if (targetBiosite.avatarImage.startsWith('data:')) {
-                const dataUrlRegex = /^data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/]+=*$/;
-                return dataUrlRegex.test(targetBiosite.avatarImage) ? targetBiosite.avatarImage : imgP;
-            }
-
-            try {
-                new URL(targetBiosite.avatarImage);
-                return targetBiosite.avatarImage;
-            } catch {
-                return imgP;
-            }
-        }
-
-        return imgP;
-    };
 
     const isMainBiosite = (biositeData: BiositeFull): boolean => {
         const mainUserId = getMainUserId();
@@ -103,10 +80,11 @@ const BiositesList: React.FC<BiositeListProps> = ({
         return biositeData.ownerId !== mainUserId;
     };
 
-    const isCurrentBiosite = (biositeData: BiositeFull): boolean => {
-        return currentBiosite?.id === biositeData.id;
-    };
-
+    {/*
+        const isCurrentBiosite = (biositeData: BiositeFull): boolean => {
+            return currentBiosite?.id === biositeData.id;
+        };
+   */ }
     const handleDeleteBiosite = async (biositeData: BiositeFull) => {
         if (!biositeData.id) return;
 
@@ -182,7 +160,7 @@ const BiositesList: React.FC<BiositeListProps> = ({
         >
             <div className="relative">
                 <img
-                    src={getAvatarImage(biositeData)}
+                    src={biositeData?.avatarImage || biositeData?.backgroundImage}
                     alt={biositeData.title}
                     className="w-10 h-10 rounded-full object-cover"
                     onError={() => setAvatarError(true)}
@@ -268,9 +246,11 @@ const BiositesList: React.FC<BiositeListProps> = ({
     const currentBiositeData = getCurrentBiositeData();
 
     // Filter biosites excluding the current one for other sections
-    const ownBiosites = biositeStructure.ownBiosites.filter(biosite =>
-        isMainBiosite(biosite) && biosite.id !== currentBiosite?.id
-    );
+    {/*
+        const ownBiosites = biositeStructure.ownBiosites.filter(biosite =>
+            isMainBiosite(biosite) && biosite.id !== currentBiosite?.id
+        );
+   */ }
 
     const childBiosites = biositeStructure.childBiosites.filter(biosite =>
         isChildBiosite(biosite) && biosite.id !== currentBiosite?.id

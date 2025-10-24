@@ -8,7 +8,7 @@ import BackButton from "../../../shared/BackButton.tsx";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import AdminLinkCard from "../Components/AdminLinkCard.tsx";
-import LinkCard from "../Components/LinkCard.tsx";
+//import LinkCard from "../Components/LinkCard.tsx";
 
 const LinksPage = () => {
   const {
@@ -141,9 +141,10 @@ const LinksPage = () => {
               ? "Enlace aplicado a sitios hijos"
               : "Enlace removido de sitios hijos"
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error toggling admin link:", error);
-      message.error("Error al actualizar enlace administrativo");
+      // ✅ Mostrar el mensaje de error específico
+      message.error(error?.message || "Error al actualizar enlace administrativo");
     } finally {
       setIsSubmitting(false);
     }
@@ -434,6 +435,7 @@ const LinksPage = () => {
         </div>
     );
   }
+  const isSelected = regularLinks.filter((link) => link.isSelected);
 
   if (editingIndex !== null) {
     const linkToEdit = activeLinks[editingIndex];
@@ -447,7 +449,7 @@ const LinksPage = () => {
             onTitleChange={setEditTitle}
             onUrlChange={setEditUrl}
             onImageChange={setEditImage}
-            onSave={handleSaveEdit}
+            onSave={isSelected && isAdmin ? handleAdminUpdate && handleSaveEdit : handleSaveEdit}
             onCancel={handleCancelEdit}
         />
     );

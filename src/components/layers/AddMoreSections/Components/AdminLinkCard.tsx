@@ -67,9 +67,8 @@ const AdminLinkCard = ({
         try {
             setIsUpdating(true);
 
-            // FIXED: Include linkId in the payload
             const linkData = {
-                linkId: id,  // Add the link ID
+                linkId: id,
                 label: title,
                 url: url,
                 icon: 'link',
@@ -151,18 +150,26 @@ const AdminLinkCard = ({
                 {isSelected && isAdmin && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
-                            onClick={handleAdminUpdate}
+                            onClick={onEdit}
                             disabled={isSubmitting || isUpdating}
                             className="text-gray-400 cursor-pointer hover:text-blue-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Actualizar en sitios hijos"
                         >
                             <Edit2 className="w-4 h-4" />
                         </button>
+                        <button
+                            onClick={onRemove}
+                            disabled={isSubmitting}
+                            className="text-gray-400 cursor-pointer hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
             </div>
 
-            {isAdmin && showAdminControls && (
+            {/* ✅ SOLO mostrar el toggle si este link está seleccionado */}
+            {isAdmin && showAdminControls && !isSelected &&(
                 <AdminLinkToggle
                     isSelected={isSelected}
                     onToggle={handleAdminToggle}
@@ -174,5 +181,4 @@ const AdminLinkCard = ({
         </div>
     );
 };
-
 export default AdminLinkCard;
