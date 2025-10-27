@@ -1,6 +1,7 @@
 import { Upload, Image, message } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
-import type { BiositeFull, BiositeUpdateDto } from "../../../../interfaces/Biosite";
+import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
+import { useState } from "react";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -19,6 +20,8 @@ const ImageUploadSection = ({
                                 updatePreview,
                                 role
                             }: ImageUploadSectionProps) => {
+
+    const [hoveredImage, setHoveredImage] = useState<'avatar' | 'background' | null>(null);
 
     const placeholderAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23e5e7eb'/%3E%3Cpath d='M40 20c-6 0-10 4-10 10s4 10 10 10 10-4 10-10-4-10-10-10zM20 60c0-10 9-15 20-15s20 5 20 15v5H20v-5z' fill='%239ca3af'/%3E%3C/svg%3E";
 
@@ -44,7 +47,6 @@ const ImageUploadSection = ({
                 url.includes('/img/') ||
                 url.includes('image-');
 
-
             return isHttps && (hasValidExtension || !urlObj.pathname.includes('.'));
         } catch (error) {
             console.warn('Invalid URL:', url, error);
@@ -53,7 +55,6 @@ const ImageUploadSection = ({
     };
 
     const validateFile = (file: File): boolean => {
-
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
         if (!allowedTypes.includes(file.type)) {
             message.error('Formato de archivo no válido. Solo se permiten: JPG, PNG, WebP, GIF');
@@ -70,30 +71,18 @@ const ImageUploadSection = ({
     };
 
     const handleUpload = async (info: any, key: "avatarImage" | "backgroundImage") => {
-        console.log(`=== HANDLE UPLOAD DEBUG (${key}) ===`);
-        console.log('Upload info:', info);
-        console.log('File object:', info.file);
-        console.log('File status:', info.file?.status);
-
         if (!info.file) {
-            console.log("No file in info object, upload was likely cancelled");
             return;
         }
 
         if (info.file.status === 'removed' || info.file.status === 'error') {
-            console.log(`Upload ${info.file.status} for ${key}`);
             return;
         }
 
         const fileToUpload = info.file.originFileObj || info.file;
 
-        console.log("File to upload:", fileToUpload);
-        console.log("File instanceof File:", fileToUpload instanceof File);
-        console.log("File type:", typeof fileToUpload);
-
         if (!fileToUpload || !(fileToUpload instanceof File)) {
-            console.error("Invalid file object:", fileToUpload);
-            message.error("Error: Archivo no valido");
+            message.error("Error: Archivo no válido");
             return;
         }
 
@@ -101,27 +90,17 @@ const ImageUploadSection = ({
             return;
         }
 
-        console.log("Valid file details:", {
-            name: fileToUpload.name,
-            type: fileToUpload.type,
-            size: fileToUpload.size,
-            lastModified: fileToUpload.lastModified
-        });
-
         if (!biosite?.id) {
-            console.error("Biosite ID is missing");
             message.error("Error: ID del biosite no disponible");
             return;
         }
 
         if (!userId) {
-            console.error("User ID is missing");
             message.error("Error: ID de usuario no disponible");
             return;
         }
 
         try {
-            console.log(`Starting upload for ${key}...`);
             const loadingMessage = message.loading(
                 `Subiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
                 0
@@ -135,7 +114,6 @@ const ImageUploadSection = ({
                 imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
             }
 
-            console.log("Upload completed successfully. URL:", imageUrl);
             loadingMessage();
 
             if (!imageUrl) {
@@ -143,8 +121,7 @@ const ImageUploadSection = ({
             }
 
             if (!isValidImageUrl(imageUrl)) {
-                console.error("Uploaded image URL is invalid:", imageUrl);
-                throw new Error("La URL de la imagen subida no es valida");
+                throw new Error("La URL de la imagen subida no es válida");
             }
 
             const previewUpdate = {
@@ -154,14 +131,8 @@ const ImageUploadSection = ({
             updatePreview(previewUpdate);
 
             message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
-            console.log(`${key} updated successfully with URL: ${imageUrl}`);
 
         } catch (error: any) {
-            console.error(`=== ${key.toUpperCase()} UPLOAD ERROR ===`);
-            console.error("Upload error:", error);
-            console.error("Error message:", error?.message);
-            console.error("Error response:", error?.response?.data);
-
             let errorMessage = "Error al subir la imagen";
 
             if (error?.message) {
@@ -174,13 +145,94 @@ const ImageUploadSection = ({
         }
     };
 
+    const handleRemoveImage = async (key: "avatarImage" | "backgroundImage", e: React.MouseEvent) => {
+        // CRÍTICO: Detener la propagación del evento
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log('handleRemoveImage called with key:', key);
+        console.log('Current biosite:', biosite);
+
+
+
+        try {
+            const loadingMessage = message.loading('Eliminando imagen...', 0);
+
+            console.log('Preparing update data...');
+
+            const ensureColorsAsString = (
+                colors: string | BiositeColors | null | undefined
+            ): string => {
+                if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                if (typeof colors === 'string') {
+                    try {
+                        JSON.parse(colors);
+                        return colors;
+                    } catch {
+                        return '{"primary":"#3B82F6","secondary":"#1F2937"}';
+                    }
+                }
+                return JSON.stringify(colors);
+            };
+
+            const updateData: BiositeUpdateDto = {
+                ownerId: biosite.ownerId || userId!,
+                title: biosite.title,
+                slug: biosite.slug,
+                themeId: biosite.themeId,
+                colors: ensureColorsAsString(biosite.colors),
+                fonts: biosite.fonts || "Inter",
+                backgroundImage: key === 'backgroundImage' ? null : (biosite.backgroundImage || null),
+                isActive: biosite.isActive ?? true,
+            };
+
+            if (key === 'avatarImage') {
+                updateData.avatarImage = null;
+                console.log('Removing avatar image');
+            }
+
+            console.log('Update data prepared:', updateData);
+            console.log('Calling updateBiosite...');
+
+            const updated = await updateBiosite(updateData);
+
+            console.log('Update response:', updated);
+
+            if (updated) {
+                const previewUpdate: Partial<BiositeFull> = {};
+
+                if (key === 'avatarImage') {
+                    previewUpdate.avatarImage = null;
+                } else {
+                    previewUpdate.backgroundImage = null;
+                }
+
+                updatePreview(previewUpdate);
+
+                loadingMessage();
+                message.success('Imagen eliminada correctamente');
+
+                console.log('Image removed successfully, reloading page...');
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } else {
+                throw new Error('No se recibió respuesta del servidor');
+            }
+        } catch (error: any) {
+            console.error('Error removing image:', error);
+            console.error('Error details:', {
+                message: error?.message,
+                response: error?.response,
+                stack: error?.stack
+            });
+            message.error(`Error al eliminar la imagen: ${error?.message || 'Error desconocido'}`);
+        }
+    };
+
     const customUpload = (options: any, key: "avatarImage" | "backgroundImage") => {
         const { file, onSuccess, onError } = options;
-
-        console.log(`=== CUSTOM UPLOAD (${key}) ===`);
-        console.log('File in customUpload:', file);
-        console.log('File type:', file.type);
-        console.log('File size:', file.size);
 
         if (!validateFile(file)) {
             onError(new Error('Invalid file'));
@@ -202,98 +254,147 @@ const ImageUploadSection = ({
             });
     };
 
-    const canEditCover =  role === "SUPER_ADMIN" || role === "ADMIN";
+    const canEditCover = role === "SUPER_ADMIN" || role === "ADMIN";
 
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
+    const hasRealAvatar = isValidImageUrl(biosite.avatarImage);
+    const hasRealBackground = isValidImageUrl(biosite.backgroundImage);
+
     return (
-        <div className="flex gap-1">
+        <div className="flex gap-3">
             {/* Avatar Section */}
             <div className="flex-1">
-                <Upload
-                    showUploadList={false}
-                    customRequest={(options) => customUpload(options, "avatarImage")}
-                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                    disabled={loading}
-                    multiple={false}
-                    maxCount={1}
+                <div
+                    className="relative group"
+                    onMouseEnter={() => setHoveredImage('avatar')}
+                    onMouseLeave={() => setHoveredImage(null)}
                 >
-                    <div className="relative group cursor-pointer">
-                        <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden">
+                    <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden">
+                        <Image
+                            width={100}
+                            height={100}
+                            src={safeAvatarImage}
+                            className="object-cover"
+                            fallback={placeholderAvatar}
+                            preview={false}
+                            onError={(e) => {
+                                const img = e.target as HTMLImageElement;
+                                if (img.src !== placeholderAvatar) {
+                                    img.src = placeholderAvatar;
+                                }
+                            }}
+                        />
+
+
+                    {/* Action Buttons */}
+                    {hoveredImage === 'avatar' && !loading && (
+                        <div className="absolute inset-0 bg-black/50 rounded-xl flex flex-col items-center justify-center gap-2 transition-opacity">
+                            <Upload
+                                showUploadList={false}
+                                customRequest={(options) => customUpload(options, "avatarImage")}
+                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                disabled={loading}
+                                multiple={false}
+                                maxCount={1}
+                            >
+                                <button className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    REMPLAZAR
+                                </button>
+                            </Upload>
+
+                                {hasRealAvatar && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => handleRemoveImage('avatarImage', e)}
+                                        className="flex items-center gap-2 px-1 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        REMOVER
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {(loading ) && (
+                        <div className="absolute w-26 h-24 inset-0 bg-black/70 flex items-center justify-center rounded-xl">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Background Image Section */}
+            {canEditCover && (
+                <div className="flex-1">
+                    <div
+                        className="relative group"
+                        onMouseEnter={() => setHoveredImage('background')}
+                        onMouseLeave={() => setHoveredImage(null)}
+                    >
+                        <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400 border flex items-center justify-center overflow-hidden">
                             <Image
-                                width={100}
+                                width={340}
                                 height={100}
-                                src={safeAvatarImage}
-                                className="object-cover "
-                                fallback={placeholderAvatar}
+                                src={safeBackgroundImage}
+                                className="rounded-lg object-cover"
+                                fallback={placeholderBackground}
                                 preview={false}
                                 onError={(e) => {
-                                    console.warn('Avatar image failed to load:', biosite.avatarImage);
                                     const img = e.target as HTMLImageElement;
-                                    if (img.src !== placeholderAvatar) {
-                                        img.src = placeholderAvatar;
+                                    if (img.src !== placeholderBackground) {
+                                        img.src = placeholderBackground;
                                     }
                                 }}
                             />
                         </div>
-                        {/* Upload overlay */}
-                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </div>
+
+                        {/* Action Buttons */}
+                        {hoveredImage === 'background' && !loading && (
+                            <div className="absolute inset-0 bg-black bg-opacity-70 rounded-lg flex flex-col items-center justify-center gap-2 transition-opacity">
+                                <Upload
+                                    showUploadList={false}
+                                    customRequest={(options) => customUpload(options, "backgroundImage")}
+                                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                    disabled={loading}
+                                    multiple={false}
+                                    maxCount={1}
+                                >
+                                    <button className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors">
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        REPLACE
+                                    </button>
+                                </Upload>
+
+                                {hasRealBackground && (
+                                    <button
+                                        onClick={(e) => handleRemoveImage('backgroundImage',e)}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors"
+                                    >
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        REMOVER
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
                         {loading && (
                             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                             </div>
                         )}
                     </div>
-                </Upload>
-            </div>
-
-            {/* Background Image Section */}
-            {canEditCover && (
-                <div className="flex-1">
-                    <Upload
-                        showUploadList={false}
-                        customRequest={(options) => customUpload(options, "backgroundImage")}
-                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                        disabled={loading}
-                        multiple={false}
-                        maxCount={1}
-                    >
-                        <div className="relative group cursor-pointer">
-                            <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400  border  flex items-center justify-center overflow-hidden">
-                                <Image
-                                    width={340}
-                                    height={100}
-                                    src={safeBackgroundImage}
-                                    className="rounded-lg object-cover"
-                                    fallback={placeholderBackground}
-                                    preview={false}
-                                    onError={(e) => {
-                                        console.warn('Background image failed to load:', biosite.backgroundImage);
-                                        const img = e.target as HTMLImageElement;
-                                        if (img.src !== placeholderBackground) {
-                                            img.src = placeholderBackground;
-                                        }
-                                    }}
-                                />
-                            </div>
-                            {/* Upload overlay */}
-                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                            </div>
-                            {loading && (
-                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                </div>
-                            )}
-                        </div>
-                    </Upload>
                 </div>
             )}
         </div>
