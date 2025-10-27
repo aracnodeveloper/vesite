@@ -1,4 +1,4 @@
-import { Upload, Image, message } from "antd";
+import { Upload, Image, message, Modal } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
 import { useState } from "react";
@@ -70,32 +70,33 @@ const ImageUploadSection = ({
         return true;
     };
 
-    const handleUpload = async (info: any, key: "avatarImage" | "backgroundImage") => {
-        if (!info.file) {
-            return;
-        }
+    const handleUpload = async (file: File, key: "avatarImage" | "backgroundImage") => {
+        console.log('=== handleUpload called ===');
+        console.log('File:', file);
+        console.log('Key:', key);
+        console.log('File type:', file.type);
+        console.log('File size:', file.size);
+        console.log('File instanceof File:', file instanceof File);
 
-        if (info.file.status === 'removed' || info.file.status === 'error') {
-            return;
-        }
-
-        const fileToUpload = info.file.originFileObj || info.file;
-
-        if (!fileToUpload || !(fileToUpload instanceof File)) {
+        if (!file || !(file instanceof File)) {
+            console.error('Invalid file object:', file);
             message.error("Error: Archivo no válido");
             return;
         }
 
-        if (!validateFile(fileToUpload)) {
+        if (!validateFile(file)) {
+            console.error('File validation failed');
             return;
         }
 
         if (!biosite?.id) {
+            console.error('Biosite ID missing');
             message.error("Error: ID del biosite no disponible");
             return;
         }
 
         if (!userId) {
+            console.error('User ID missing');
             message.error("Error: ID de usuario no disponible");
             return;
         }
@@ -106,14 +107,16 @@ const ImageUploadSection = ({
                 0
             );
 
+            console.log('Starting upload...');
             let imageUrl: string;
 
             if (key === 'avatarImage') {
-                imageUrl = await uploadBiositeAvatar(fileToUpload, biosite.id);
+                imageUrl = await uploadBiositeAvatar(file, biosite.id);
             } else {
-                imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
+                imageUrl = await uploadBiositeBackground(file, biosite.id);
             }
 
+            console.log('Upload completed. URL:', imageUrl);
             loadingMessage();
 
             if (!imageUrl) {
@@ -132,7 +135,13 @@ const ImageUploadSection = ({
 
             message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
 
+            console.log('Upload successful, reloading page...');
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+
         } catch (error: any) {
+            console.error('Upload error:', error);
             let errorMessage = "Error al subir la imagen";
 
             if (error?.message) {
@@ -232,24 +241,53 @@ const ImageUploadSection = ({
     };
 
     const customUpload = (options: any, key: "avatarImage" | "backgroundImage") => {
+        console.log('=== customUpload called ===');
+        console.log('Options:', options);
+        console.log('Key:', key);
+
         const { file, onSuccess, onError } = options;
 
-        if (!validateFile(file)) {
-            onError(new Error('Invalid file'));
+        console.log('File from options:', file);
+        console.log('File type:', typeof file);
+        console.log('File is File instance:', file instanceof File);
+        console.log('File is Blob instance:', file instanceof Blob);
+
+        // En algunos casos en Mac/Safari, el file puede venir como Blob
+        // Necesitamos asegurarnos de que sea un File válido
+        let fileToUpload: File;
+
+        if (file instanceof File) {
+            fileToUpload = file;
+        } else if (file instanceof Blob) {
+            // Convertir Blob a File
+            const fileName =  `image-${Date.now()}.jpg`;
+            fileToUpload = new File([file], fileName, { type: file.type || 'image/jpeg' });
+            console.log('Converted Blob to File:', fileToUpload);
+        } else {
+            console.error('Invalid file type:', file);
+            onError(new Error('Tipo de archivo no válido'));
             return;
         }
 
-        const uploadInfo = {
-            file: file,
-            fileList: [file]
-        };
+        if (!validateFile(fileToUpload)) {
+            console.error('File validation failed');
+            onError(new Error('Validación de archivo falló'));
+            return;
+        }
 
-        handleUpload(uploadInfo, key)
+        console.log('Valid file, starting upload:', {
+            name: fileToUpload.name,
+            type: fileToUpload.type,
+            size: fileToUpload.size
+        });
+
+        handleUpload(fileToUpload, key)
             .then(() => {
-                onSuccess({}, file);
+                console.log('Upload successful');
+                onSuccess({ status: 'done' }, fileToUpload);
             })
             .catch((error) => {
-                console.error('Custom upload error:', error);
+                console.error('Upload failed:', error);
                 onError(error);
             });
     };
@@ -286,11 +324,11 @@ const ImageUploadSection = ({
                                 }
                             }}
                         />
-
+                    </div>
 
                     {/* Action Buttons */}
                     {hoveredImage === 'avatar' && !loading && (
-                        <div className="absolute inset-0 bg-black/50 rounded-xl flex flex-col items-center justify-center gap-2 transition-opacity">
+                        <div className="absolute inset-0 bg-black bg-opacity-70 rounded-xl flex flex-col items-center justify-center gap-2 transition-opacity">
                             <Upload
                                 showUploadList={false}
                                 customRequest={(options) => customUpload(options, "avatarImage")}
@@ -299,32 +337,30 @@ const ImageUploadSection = ({
                                 multiple={false}
                                 maxCount={1}
                             >
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer">
+                                <button className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors">
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                     </svg>
-                                    REMPLAZAR
+                                    REPLACE
                                 </button>
                             </Upload>
 
-                                {hasRealAvatar && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => handleRemoveImage('avatarImage', e)}
-                                        className="flex items-center gap-2 px-1 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        REMOVER
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                            {hasRealAvatar && (
+                                <button
+                                    onClick={(e) => handleRemoveImage('avatarImage',e)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors"
+                                >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    REMOVE
+                                </button>
+                            )}
+                        </div>
+                    )}
 
-                    {(loading ) && (
-                        <div className="absolute w-26 h-24 inset-0 bg-black/70 flex items-center justify-center rounded-xl">
+                    {loading && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                         </div>
                     )}
@@ -366,8 +402,21 @@ const ImageUploadSection = ({
                                     disabled={loading}
                                     multiple={false}
                                     maxCount={1}
+                                    beforeUpload={(file) => {
+                                        console.log('beforeUpload called with:', file);
+                                        const isValid = validateFile(file);
+                                        console.log('File validation result:', isValid);
+                                        return isValid || Upload.LIST_IGNORE;
+                                    }}
                                 >
-                                    <button className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors">
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors"
+                                        onClick={(e) => {
+                                            console.log('REPLACE button clicked for background');
+                                            e.stopPropagation();
+                                        }}
+                                    >
                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
@@ -383,7 +432,7 @@ const ImageUploadSection = ({
                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                        REMOVER
+                                        REMOVE
                                     </button>
                                 )}
                             </div>
