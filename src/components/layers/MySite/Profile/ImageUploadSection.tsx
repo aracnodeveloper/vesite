@@ -1,4 +1,4 @@
-import { Upload, Image, message, Modal } from "antd";
+import { Upload, Image, message, Button } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
 import { useState } from "react";
@@ -26,6 +26,8 @@ const ImageUploadSection = ({
     const placeholderAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23e5e7eb'/%3E%3Cpath d='M40 20c-6 0-10 4-10 10s4 10 10 10 10-4 10-10-4-10-10-10zM20 60c0-10 9-15 20-15s20 5 20 15v5H20v-5z' fill='%239ca3af'/%3E%3C/svg%3E";
 
     const placeholderBackground = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='120' viewBox='0 0 200 120'%3E%3Crect width='200' height='120' fill='%23f3f4f6'/%3E%3Cpath d='M40 40h120v40H40z' fill='%23d1d5db'/%3E%3Ccircle cx='60' cy='50' r='8' fill='%239ca3af'/%3E%3Cpath d='M80 65l20-15 40 25H80z' fill='%239ca3af'/%3E%3C/svg%3E";
+
+    const DEFAULT_BACKGROUND = "https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg";
 
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
@@ -70,33 +72,32 @@ const ImageUploadSection = ({
         return true;
     };
 
-    const handleUpload = async (file: File, key: "avatarImage" | "backgroundImage") => {
-        console.log('=== handleUpload called ===');
-        console.log('File:', file);
-        console.log('Key:', key);
-        console.log('File type:', file.type);
-        console.log('File size:', file.size);
-        console.log('File instanceof File:', file instanceof File);
+    const handleUpload = async (info: any, key: "avatarImage" | "backgroundImage") => {
+        if (!info.file) {
+            return;
+        }
 
-        if (!file || !(file instanceof File)) {
-            console.error('Invalid file object:', file);
+        if (info.file.status === 'removed' || info.file.status === 'error') {
+            return;
+        }
+
+        const fileToUpload = info.file.originFileObj || info.file;
+
+        if (!fileToUpload || !(fileToUpload instanceof File)) {
             message.error("Error: Archivo no válido");
             return;
         }
 
-        if (!validateFile(file)) {
-            console.error('File validation failed');
+        if (!validateFile(fileToUpload)) {
             return;
         }
 
         if (!biosite?.id) {
-            console.error('Biosite ID missing');
             message.error("Error: ID del biosite no disponible");
             return;
         }
 
         if (!userId) {
-            console.error('User ID missing');
             message.error("Error: ID de usuario no disponible");
             return;
         }
@@ -107,16 +108,14 @@ const ImageUploadSection = ({
                 0
             );
 
-            console.log('Starting upload...');
             let imageUrl: string;
 
             if (key === 'avatarImage') {
-                imageUrl = await uploadBiositeAvatar(file, biosite.id);
+                imageUrl = await uploadBiositeAvatar(fileToUpload, biosite.id);
             } else {
-                imageUrl = await uploadBiositeBackground(file, biosite.id);
+                imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
             }
 
-            console.log('Upload completed. URL:', imageUrl);
             loadingMessage();
 
             if (!imageUrl) {
@@ -135,13 +134,7 @@ const ImageUploadSection = ({
 
             message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
 
-            console.log('Upload successful, reloading page...');
-            setTimeout(() => {
-                window.location.reload();
-            }, 800);
-
         } catch (error: any) {
-            console.error('Upload error:', error);
             let errorMessage = "Error al subir la imagen";
 
             if (error?.message) {
@@ -154,26 +147,21 @@ const ImageUploadSection = ({
         }
     };
 
-    const handleRemoveImage = async (key: "avatarImage" | "backgroundImage", e: React.MouseEvent) => {
-        // CRÍTICO: Detener la propagación del evento
-        e.preventDefault();
-        e.stopPropagation();
-
-        console.log('handleRemoveImage called with key:', key);
-        console.log('Current biosite:', biosite);
-
-
+    const handleRemoveImage = async (key: "avatarImage" | "backgroundImage") => {
+        if (!biosite?.id) {
+            message.error("Error: ID del biosite no disponible");
+            return;
+        }
 
         try {
-            const loadingMessage = message.loading('Eliminando imagen...', 0);
+            const loadingMessage = message.loading(
+                `Removiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
+                0
+            );
 
-            console.log('Preparing update data...');
-
-            const ensureColorsAsString = (
-                colors: string | BiositeColors | null | undefined
-            ): string => {
+            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
                 if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                if (typeof colors === 'string') {
+                if (typeof colors === "string") {
                     try {
                         JSON.parse(colors);
                         return colors;
@@ -190,8 +178,8 @@ const ImageUploadSection = ({
                 slug: biosite.slug,
                 themeId: biosite.themeId,
                 colors: ensureColorsAsString(biosite.colors),
-                fonts: biosite.fonts || "Inter",
-                backgroundImage: key === 'backgroundImage' ? null : (biosite.backgroundImage || null),
+                fonts: biosite.fonts || "",
+                backgroundImage: key === 'backgroundImage' ? DEFAULT_BACKGROUND : (biosite.backgroundImage || DEFAULT_BACKGROUND),
                 isActive: biosite.isActive ?? true,
             };
 
@@ -200,94 +188,44 @@ const ImageUploadSection = ({
                 console.log('Removing avatar image');
             }
 
-            console.log('Update data prepared:', updateData);
-            console.log('Calling updateBiosite...');
-
             const updated = await updateBiosite(updateData);
 
-            console.log('Update response:', updated);
+            loadingMessage();
 
             if (updated) {
-                const previewUpdate: Partial<BiositeFull> = {};
-
-                if (key === 'avatarImage') {
-                    previewUpdate.avatarImage = null;
-                } else {
-                    previewUpdate.backgroundImage = null;
-                }
-
-                updatePreview(previewUpdate);
-
-                loadingMessage();
-                message.success('Imagen eliminada correctamente');
-
-                console.log('Image removed successfully, reloading page...');
+                updatePreview({ [key]: key === 'avatarImage' ? null : DEFAULT_BACKGROUND });
+                message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} removida correctamente`);
 
                 setTimeout(() => {
                     window.location.reload();
                 }, 500);
-            } else {
-                throw new Error('No se recibió respuesta del servidor');
             }
+
         } catch (error: any) {
-            console.error('Error removing image:', error);
-            console.error('Error details:', {
-                message: error?.message,
-                response: error?.response,
-                stack: error?.stack
-            });
-            message.error(`Error al eliminar la imagen: ${error?.message || 'Error desconocido'}`);
+            message.error("Error al remover la imagen");
+            console.error(error);
         }
     };
 
     const customUpload = (options: any, key: "avatarImage" | "backgroundImage") => {
-        console.log('=== customUpload called ===');
-        console.log('Options:', options);
-        console.log('Key:', key);
-
         const { file, onSuccess, onError } = options;
 
-        console.log('File from options:', file);
-        console.log('File type:', typeof file);
-        console.log('File is File instance:', file instanceof File);
-        console.log('File is Blob instance:', file instanceof Blob);
-
-        // En algunos casos en Mac/Safari, el file puede venir como Blob
-        // Necesitamos asegurarnos de que sea un File válido
-        let fileToUpload: File;
-
-        if (file instanceof File) {
-            fileToUpload = file;
-        } else if (file instanceof Blob) {
-            // Convertir Blob a File
-            const fileName =  `image-${Date.now()}.jpg`;
-            fileToUpload = new File([file], fileName, { type: file.type || 'image/jpeg' });
-            console.log('Converted Blob to File:', fileToUpload);
-        } else {
-            console.error('Invalid file type:', file);
-            onError(new Error('Tipo de archivo no válido'));
+        if (!validateFile(file)) {
+            onError(new Error('Invalid file'));
             return;
         }
 
-        if (!validateFile(fileToUpload)) {
-            console.error('File validation failed');
-            onError(new Error('Validación de archivo falló'));
-            return;
-        }
+        const uploadInfo = {
+            file: file,
+            fileList: [file]
+        };
 
-        console.log('Valid file, starting upload:', {
-            name: fileToUpload.name,
-            type: fileToUpload.type,
-            size: fileToUpload.size
-        });
-
-        handleUpload(fileToUpload, key)
+        handleUpload(uploadInfo, key)
             .then(() => {
-                console.log('Upload successful');
-                onSuccess({ status: 'done' }, fileToUpload);
+                onSuccess({}, file);
             })
             .catch((error) => {
-                console.error('Upload failed:', error);
+                console.error('Custom upload error:', error);
                 onError(error);
             });
     };
@@ -296,9 +234,6 @@ const ImageUploadSection = ({
 
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
-
-    const hasRealAvatar = isValidImageUrl(biosite.avatarImage);
-    const hasRealBackground = isValidImageUrl(biosite.backgroundImage);
 
     return (
         <div className="flex gap-3">
@@ -326,8 +261,8 @@ const ImageUploadSection = ({
                         />
                     </div>
 
-                    {/* Action Buttons */}
-                    {hoveredImage === 'avatar' && !loading && (
+                    {/* Overlay con botones */}
+                    {hoveredImage === 'avatar' && (
                         <div className="absolute inset-0 bg-black bg-opacity-70 rounded-xl flex flex-col items-center justify-center gap-2 transition-opacity">
                             <Upload
                                 showUploadList={false}
@@ -337,25 +272,29 @@ const ImageUploadSection = ({
                                 multiple={false}
                                 maxCount={1}
                             >
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors">
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    REPLACE
-                                </button>
-                            </Upload>
-
-                            {hasRealAvatar && (
-                                <button
-                                    onClick={(e) => handleRemoveImage('avatarImage',e)}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors"
+                                <Button
+                                    size="small"
+                                    className="bg-white text-black hover:bg-gray-200 border-none flex items-center gap-1 px-3 py-1 text-xs"
+                                    disabled={loading}
                                 >
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                     </svg>
-                                    REMOVE
-                                </button>
-                            )}
+                                    REPLACE
+                                </Button>
+                            </Upload>
+
+                            <Button
+                                size="small"
+                                className="bg-white text-black hover:bg-gray-200 border-none flex items-center gap-1 px-3 py-1 text-xs"
+                                onClick={() => handleRemoveImage('avatarImage')}
+                                disabled={loading}
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                REMOVE
+                            </Button>
                         </div>
                     )}
 
@@ -392,8 +331,8 @@ const ImageUploadSection = ({
                             />
                         </div>
 
-                        {/* Action Buttons */}
-                        {hoveredImage === 'background' && !loading && (
+                        {/* Overlay con botones */}
+                        {hoveredImage === 'background' && (
                             <div className="absolute inset-0 bg-black bg-opacity-70 rounded-lg flex flex-col items-center justify-center gap-2 transition-opacity">
                                 <Upload
                                     showUploadList={false}
@@ -402,39 +341,30 @@ const ImageUploadSection = ({
                                     disabled={loading}
                                     multiple={false}
                                     maxCount={1}
-                                    beforeUpload={(file) => {
-                                        console.log('beforeUpload called with:', file);
-                                        const isValid = validateFile(file);
-                                        console.log('File validation result:', isValid);
-                                        return isValid || Upload.LIST_IGNORE;
-                                    }}
                                 >
-                                    <button
-                                        type="button"
-                                        className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors"
-                                        onClick={(e) => {
-                                            console.log('REPLACE button clicked for background');
-                                            e.stopPropagation();
-                                        }}
+                                    <Button
+                                        size="small"
+                                        className="bg-white text-black hover:bg-gray-200 border-none flex items-center gap-1 px-3 py-1 text-xs"
+                                        disabled={loading}
                                     >
                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                         </svg>
                                         REPLACE
-                                    </button>
+                                    </Button>
                                 </Upload>
 
-                                {hasRealBackground && (
-                                    <button
-                                        onClick={(e) => handleRemoveImage('backgroundImage',e)}
-                                        className="flex items-center gap-2 px-3 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors"
-                                    >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        REMOVE
-                                    </button>
-                                )}
+                                <Button
+                                    size="small"
+                                    className="bg-white text-black hover:bg-gray-200 border-none flex items-center gap-1 px-3 py-1 text-xs"
+                                    onClick={() => handleRemoveImage('backgroundImage')}
+                                    disabled={loading}
+                                >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    REMOVE
+                                </Button>
                             </div>
                         )}
 
