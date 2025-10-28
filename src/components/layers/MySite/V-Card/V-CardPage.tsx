@@ -80,6 +80,7 @@ const VCardPage = () => {
             ...parsedData,
             name: parsedData.name || user.name || "",
             phone: user.phone || parsedData.phone || "",
+            email: user.email || parsedData.email || "",
             website: parsedData.website || user.site || "",
           };
 
@@ -118,6 +119,7 @@ const VCardPage = () => {
     user?.phone,
     user?.name,
     user?.site,
+    user?.email,
     businessCard?.id,
     slug,
     isEditing,
@@ -204,6 +206,9 @@ const VCardPage = () => {
       }
       if (cardData.website && cardData.website !== user?.site) {
         userUpdateData.site = cardData.website;
+      }
+      if (cardData.email && cardData.email !== user?.email) {
+        userUpdateData.email = cardData.email;
       }
 
       if (Object.keys(userUpdateData).length > 0 && !slug) {

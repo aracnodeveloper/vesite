@@ -4,6 +4,7 @@ import Cookie from "js-cookie";
 import apiService from "../service/apiService.ts";
 import { useEffect } from "react";
 import { usePreview } from "../context/PreviewContext.tsx";
+//import {FirstOne} from "../components/global/Page/FirstOne.tsx"
 
 const Sections = () => {
   const { biosite, getVideoEmbed } = usePreview();

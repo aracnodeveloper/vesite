@@ -464,7 +464,7 @@ const Layout: React.FC = () => {
                 </div>
                 <div >
                   <img src={getBackgroundImage()}  alt="Background"
-                       className={`absolute top-27.5 left-0 w-full h-52 object-cover opacity-50`}  style={{
+                       className={`absolute top-27.5 left-0 w-full h-52 object-cover opacity-50 ${getBackgroundImage().startsWith('data')? 'hidden' : ''} ${biosite?.backgroundImage === null ? 'hidden' : ''}`}  style={{
                     clipPath: 'polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)',
                   }}
                   />
