@@ -1,7 +1,7 @@
-import { Upload, Image, message, Button, Modal } from "antd";
+import { Upload, Image, message } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -22,6 +22,23 @@ const ImageUploadSection = ({
                             }: ImageUploadSectionProps) => {
 
     const [showModal, setShowModal] = useState<'avatar' | 'background' | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setShowModal(null);
+            }
+        };
+
+        if (showModal) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showModal]);
 
     const placeholderAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23e5e7eb'/%3E%3Cpath d='M40 20c-6 0-10 4-10 10s4 10 10 10 10-4 10-10-4-10-10-10zM20 60c0-10 9-15 20-15s20 5 20 15v5H20v-5z' fill='%239ca3af'/%3E%3C/svg%3E";
 
@@ -238,28 +255,14 @@ const ImageUploadSection = ({
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
-    const handleImageClick = (type: 'avatar' | 'background', e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setShowModal(type);
-    };
-
     return (
-        <>
+        <div ref={containerRef}>
             <div className="flex gap-3">
                 {/* Avatar Section */}
-                <div className="flex-1">
+                <div className="flex-1 flex gap-2 items-start">
                     <div
                         className="relative cursor-pointer"
-                        onClick={(e) => handleImageClick('avatar', e)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                setShowModal('avatar');
-                            }
-                        }}
+                        onClick={() => setShowModal(showModal === 'avatar' ? null : 'avatar')}
                     >
                         <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
                             <Image
@@ -284,22 +287,48 @@ const ImageUploadSection = ({
                             </div>
                         )}
                     </div>
+
+                    {showModal === 'avatar' && (
+                        <div className="absolute flex flex-col gap-1 bg-neutral-800 rounded-lg p-2 z-50">
+                            <Upload
+                                showUploadList={false}
+                                customRequest={(options) => customUpload(options, "avatarImage")}
+                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                disabled={loading}
+                                multiple={false}
+                                maxCount={1}
+                            >
+                                <button
+                                    disabled={loading}
+                                    className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span className="font-medium">REPLACE</span>
+                                </button>
+                            </Upload>
+
+                            <button
+                                onClick={() => handleRemoveImage('avatarImage')}
+                                disabled={loading}
+                                className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span className="font-medium">REMOVE</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Background Image Section */}
                 {canEditCover && (
-                    <div className="flex-1">
+                    <div className="flex-1 flex gap-2 items-start">
                         <div
                             className="relative cursor-pointer"
-                            onClick={(e) => handleImageClick('background', e)}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    setShowModal('background');
-                                }
-                            }}
+                            onClick={() => setShowModal(showModal === 'background' ? null : 'background')}
                         >
                             <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400 border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
                                 <Image
@@ -324,132 +353,44 @@ const ImageUploadSection = ({
                                 </div>
                             )}
                         </div>
+
+                        {showModal === 'background' && (
+                            <div className="absolute flex flex-col gap-1 bg-neutral-800 rounded-lg p-2 z-50">
+                                <Upload
+                                    showUploadList={false}
+                                    customRequest={(options) => customUpload(options, "backgroundImage")}
+                                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                    disabled={loading}
+                                    multiple={false}
+                                    maxCount={1}
+                                >
+                                    <button
+                                        disabled={loading}
+                                        className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span className="font-medium">REPLACE</span>
+                                    </button>
+                                </Upload>
+
+                                <button
+                                    onClick={() => handleRemoveImage('backgroundImage')}
+                                    disabled={loading}
+                                    className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span className="font-medium">REMOVE</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
-
-            {/* Modal para Avatar */}
-            <Modal
-                open={showModal === 'avatar'}
-                onCancel={() => setShowModal(null)}
-                footer={null}
-                centered
-                width={300}
-                closable={true}
-                maskClosable={true}
-                styles={{
-                    body: { padding: '16px' },
-                    mask: { backgroundColor: 'rgba(0, 0, 0, 0.45)' }
-                }}
-            >
-                <div className="flex flex-col gap-2">
-                    <Upload
-                        showUploadList={false}
-                        customRequest={(options) => customUpload(options, "avatarImage")}
-                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                        disabled={loading}
-                        multiple={false}
-                        maxCount={1}
-                    >
-                        <Button
-                            block
-                            size="large"
-                            className="bg-white text-black hover:bg-gray-100 border border-gray-300 flex items-center justify-start gap-2 h-12"
-                            disabled={loading}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'flex-start'
-                            }}
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span className="font-medium">REPLACE</span>
-                        </Button>
-                    </Upload>
-
-                    <Button
-                        block
-                        size="large"
-                        className="bg-white text-black hover:bg-gray-100 border border-gray-300 flex items-center justify-start gap-2 h-12"
-                        onClick={() => handleRemoveImage('avatarImage')}
-                        disabled={loading}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-start'
-                        }}
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span className="font-medium">REMOVE</span>
-                    </Button>
-                </div>
-            </Modal>
-
-            {/* Modal para Background */}
-            <Modal
-                open={showModal === 'background'}
-                onCancel={() => setShowModal(null)}
-                footer={null}
-                centered
-                width={300}
-                closable={true}
-                maskClosable={true}
-                styles={{
-                    body: { padding: '16px' },
-                    mask: { backgroundColor: 'rgba(0, 0, 0, 0.45)' }
-                }}
-            >
-                <div className="flex flex-col gap-2">
-                    <Upload
-                        showUploadList={false}
-                        customRequest={(options) => customUpload(options, "backgroundImage")}
-                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                        disabled={loading}
-                        multiple={false}
-                        maxCount={1}
-                    >
-                        <Button
-                            block
-                            size="large"
-                            className="bg-white text-black hover:bg-gray-100 border border-gray-300 flex items-center justify-start gap-2 h-12"
-                            disabled={loading}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'flex-start'
-                            }}
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span className="font-medium">REPLACE</span>
-                        </Button>
-                    </Upload>
-
-                    <Button
-                        block
-                        size="large"
-                        className="bg-white text-black hover:bg-gray-100 border border-gray-300 flex items-center justify-start gap-2 h-12"
-                        onClick={() => handleRemoveImage('backgroundImage')}
-                        disabled={loading}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-start'
-                        }}
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span className="font-medium">REMOVE</span>
-                    </Button>
-                </div>
-            </Modal>
-        </>
+        </div>
     );
 };
 
