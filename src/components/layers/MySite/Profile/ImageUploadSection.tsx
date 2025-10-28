@@ -27,6 +27,7 @@ const ImageUploadSection = ({
     const [imageToEdit, setImageToEdit] = useState<string>("");
     const [editingType, setEditingType] = useState<"avatarImage" | "backgroundImage" | null>(null);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -98,25 +99,37 @@ const ImageUploadSection = ({
         if (!validateFile(file)) return;
 
         const reader = new FileReader();
+
+        reader.onerror = () => {
+            message.error('Error al leer el archivo');
+        };
+
         reader.onload = (e) => {
             const imageUrl = e.target?.result as string;
+
+            if (!imageUrl || imageUrl.trim() === '') {
+                message.error('Error: La imagen no se pudo cargar correctamente');
+                return;
+            }
+
             setImageToEdit(imageUrl);
             setEditingType(key);
             setPendingFile(file);
             setShowEditor(true);
             setShowModal(null);
         };
+
         reader.readAsDataURL(file);
     };
 
     const handleEditorSave = async (croppedBlob: Blob) => {
-        if (!editingType || !biosite?.id || !userId) {
+        if (!editingType || !biosite?.id || !userId || isUploading) {
             message.error("Error: Información no disponible");
             return;
         }
 
         try {
-            setShowEditor(false);
+            setIsUploading(true);
 
             const loadingMessage = message.loading(
                 `Subiendo ${editingType === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
@@ -155,6 +168,8 @@ const ImageUploadSection = ({
 
             message.success(`${editingType === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
 
+            // Limpiar estados
+            setShowEditor(false);
             setPendingFile(null);
             setEditingType(null);
             setImageToEdit("");
@@ -169,6 +184,8 @@ const ImageUploadSection = ({
             }
 
             message.error(errorMessage);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -390,13 +407,15 @@ const ImageUploadSection = ({
 
             {/* Image Editor Modal */}
             <ImageEditorModal
-                visible={showEditor}
+                visible={showEditor && !isUploading}
                 imageUrl={imageToEdit}
                 onCancel={() => {
-                    setShowEditor(false);
-                    setPendingFile(null);
-                    setEditingType(null);
-                    setImageToEdit("");
+                    if (!isUploading) {
+                        setShowEditor(false);
+                        setPendingFile(null);
+                        setEditingType(null);
+                        setImageToEdit("");
+                    }
                 }}
                 onSave={handleEditorSave}
                 aspectRatio={editingType === 'avatarImage' ? 1 : 16 / 9}

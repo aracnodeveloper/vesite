@@ -1,5 +1,5 @@
 import { Modal, Button, Slider } from "antd";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 
 // Definir tipos localmente
@@ -33,7 +33,20 @@ const ImageEditorModal = ({
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [rotation, setRotation] = useState(0);
+    const [isSaving, setIsSaving] = useState(false);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+    const [key, setKey] = useState(0);
+
+    // Reset automático cuando se abre el modal
+    useEffect(() => {
+        if (visible) {
+            setCrop({ x: 0, y: 0 });
+            setZoom(1);
+            setRotation(0);
+            setCroppedAreaPixels(null);
+            setKey(prev => prev + 1); // Forzar re-render del Cropper
+        }
+    }, [visible]);
 
     const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
         setCroppedAreaPixels(croppedAreaPixels);
@@ -88,27 +101,50 @@ const ImageEditorModal = ({
             Math.round(0 - safeArea / 2 + image.height * 0.5 - pixelCrop.y)
         );
 
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             canvas.toBlob((blob) => {
                 if (blob) {
                     resolve(blob);
+                } else {
+                    reject(new Error('Canvas is empty'));
                 }
-            }, "image/jpeg");
+            }, "image/jpeg", 0.95);
         });
     };
 
     const handleSave = async () => {
-        if (!croppedAreaPixels) return;
+        if (!croppedAreaPixels || isSaving) {
+            console.warn('Cannot save: missing data or already saving');
+            return;
+        }
 
         try {
+            setIsSaving(true);
+
+            // Validar que tenemos una URL de imagen válida
+            if (!imageUrl || imageUrl.trim() === '') {
+                throw new Error('Invalid image URL');
+            }
+
             const croppedImage = await getCroppedImg(
                 imageUrl,
                 croppedAreaPixels,
                 rotation
             );
-            onSave(croppedImage);
-        } catch (error) {
+
+            // Validar que el blob es válido
+            if (!croppedImage || croppedImage.size === 0) {
+                throw new Error('Failed to generate cropped image');
+            }
+
+            await onSave(croppedImage);
+
+        } catch (error: any) {
             console.error("Error cropping image:", error);
+            // Aquí podrías mostrar un mensaje de error al usuario
+            alert(`Error al procesar la imagen: ${error?.message || 'Error desconocido'}`);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -116,6 +152,14 @@ const ImageEditorModal = ({
         setCrop({ x: 0, y: 0 });
         setZoom(1);
         setRotation(0);
+        setCroppedAreaPixels(null);
+        setKey(prev => prev + 1); // Forzar re-render del Cropper
+    };
+
+    const handleCancel = () => {
+        handleReset();
+        setIsSaving(false);
+        onCancel();
     };
 
     return (
@@ -134,23 +178,38 @@ const ImageEditorModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
                     <button
-                        onClick={onCancel}
-                        className="text-white hover:text-gray-300 text-sm font-medium"
+                        onClick={handleCancel}
+                        disabled={isSaving}
+                        className={`text-white hover:text-gray-300 text-sm font-medium ${
+                            isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        }`}
                     >
-                        CANCELAR
+                        CANCEL
                     </button>
-                    <h2 className="text-white text-base font-medium">Imagen Editor</h2>
+                    <h2 className="text-white text-base font-medium">Image Editor</h2>
                     <button
                         onClick={handleSave}
-                        className="text-white hover:text-gray-300 text-sm font-medium"
+                        disabled={isSaving || !croppedAreaPixels}
+                        className={`text-white hover:text-gray-300 text-sm font-medium ${
+                            isSaving || !croppedAreaPixels ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        }`}
                     >
-                        GUARDAR
+                        {isSaving ? 'SAVING...' : 'SAVE'}
                     </button>
                 </div>
 
                 {/* Cropper Area */}
                 <div className="relative flex-1 bg-black">
+                    {isSaving && (
+                        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-50">
+                            <div className="text-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-3"></div>
+                                <p className="text-white text-sm">Procesando imagen...</p>
+                            </div>
+                        </div>
+                    )}
                     <Cropper
+                        key={key}
                         image={imageUrl}
                         crop={crop}
                         zoom={zoom}
@@ -189,7 +248,7 @@ const ImageEditorModal = ({
                     {/* Rotation Control */}
                     <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-white text-xs font-medium">ROTACIÓN</span>
+                            <span className="text-white text-xs font-medium">ROTATION</span>
                             <span className="text-gray-400 text-xs">{rotation}°</span>
                         </div>
                         <Slider
@@ -206,16 +265,19 @@ const ImageEditorModal = ({
                     <div className="flex gap-2 mt-4">
                         <Button
                             onClick={handleReset}
-                            className="flex-1 bg-gray-700 text-white border-none hover:bg-gray-600"
+                            disabled={isSaving}
+                            className="flex-1 bg-gray-700 text-white border-none hover:bg-gray-600 disabled:opacity-50"
                         >
                             Reset
                         </Button>
                         <Button
                             onClick={handleSave}
                             type="primary"
-                            className="flex-1 bg-blue-600 border-none hover:bg-blue-700"
+                            loading={isSaving}
+                            disabled={isSaving || !croppedAreaPixels}
+                            className="flex-1 bg-blue-600 border-none hover:bg-blue-700 disabled:opacity-50"
                         >
-                            Aplicar Cambios
+                            {isSaving ? 'Processing...' : 'Apply Changes'}
                         </Button>
                     </div>
                 </div>
