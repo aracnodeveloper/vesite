@@ -2,6 +2,7 @@ import { Upload, Image, message } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
 import { useState, useEffect, useRef } from "react";
+import ImageEditorModal from "./ImageEditorModal";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -22,6 +23,10 @@ const ImageUploadSection = ({
                             }: ImageUploadSectionProps) => {
 
     const [showModal, setShowModal] = useState<'avatar' | 'background' | null>(null);
+    const [showEditor, setShowEditor] = useState(false);
+    const [imageToEdit, setImageToEdit] = useState<string>("");
+    const [editingType, setEditingType] = useState<"avatarImage" | "backgroundImage" | null>(null);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -89,50 +94,47 @@ const ImageUploadSection = ({
         return true;
     };
 
-    const handleUpload = async (info: any, key: "avatarImage" | "backgroundImage") => {
-        if (!info.file) {
-            return;
-        }
+    const handleFileSelect = (file: File, key: "avatarImage" | "backgroundImage") => {
+        if (!validateFile(file)) return;
 
-        if (info.file.status === 'removed' || info.file.status === 'error') {
-            return;
-        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target?.result as string;
+            setImageToEdit(imageUrl);
+            setEditingType(key);
+            setPendingFile(file);
+            setShowEditor(true);
+            setShowModal(null);
+        };
+        reader.readAsDataURL(file);
+    };
 
-        const fileToUpload = info.file.originFileObj || info.file;
-
-        if (!fileToUpload || !(fileToUpload instanceof File)) {
-            message.error("Error: Archivo no válido");
-            return;
-        }
-
-        if (!validateFile(fileToUpload)) {
-            return;
-        }
-
-        if (!biosite?.id) {
-            message.error("Error: ID del biosite no disponible");
-            return;
-        }
-
-        if (!userId) {
-            message.error("Error: ID de usuario no disponible");
+    const handleEditorSave = async (croppedBlob: Blob) => {
+        if (!editingType || !biosite?.id || !userId) {
+            message.error("Error: Información no disponible");
             return;
         }
 
         try {
-            setShowModal(null);
+            setShowEditor(false);
 
             const loadingMessage = message.loading(
-                `Subiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
+                `Subiendo ${editingType === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
                 0
+            );
+
+            const croppedFile = new File(
+                [croppedBlob],
+                pendingFile?.name || 'edited-image.jpg',
+                { type: 'image/jpeg' }
             );
 
             let imageUrl: string;
 
-            if (key === 'avatarImage') {
-                imageUrl = await uploadBiositeAvatar(fileToUpload, biosite.id);
+            if (editingType === 'avatarImage') {
+                imageUrl = await uploadBiositeAvatar(croppedFile, biosite.id);
             } else {
-                imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
+                imageUrl = await uploadBiositeBackground(croppedFile, biosite.id);
             }
 
             loadingMessage();
@@ -146,12 +148,16 @@ const ImageUploadSection = ({
             }
 
             const previewUpdate = {
-                [key]: imageUrl
+                [editingType]: imageUrl
             };
 
             updatePreview(previewUpdate);
 
-            message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
+            message.success(`${editingType === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
+
+            setPendingFile(null);
+            setEditingType(null);
+            setImageToEdit("");
 
         } catch (error: any) {
             let errorMessage = "Error al subir la imagen";
@@ -206,7 +212,6 @@ const ImageUploadSection = ({
 
             if (key === 'avatarImage') {
                 updateData.avatarImage = null;
-                console.log('Removing avatar image');
             }
 
             const updated = await updateBiosite(updateData);
@@ -236,19 +241,8 @@ const ImageUploadSection = ({
             return;
         }
 
-        const uploadInfo = {
-            file: file,
-            fileList: [file]
-        };
-
-        handleUpload(uploadInfo, key)
-            .then(() => {
-                onSuccess({}, file);
-            })
-            .catch((error) => {
-                console.error('Custom upload error:', error);
-                onError(error);
-            });
+        handleFileSelect(file, key);
+        onSuccess({}, file);
     };
 
     const canEditCover = role === "SUPER_ADMIN" || role === "ADMIN";
@@ -257,109 +251,44 @@ const ImageUploadSection = ({
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
     return (
-        <div ref={containerRef}>
-            <div className="flex gap-3">
-                {/* Avatar Section */}
-                <div className="flex-1 flex gap-2 items-start">
-                    <div
-                        className="relative cursor-pointer"
-                        onClick={() => setShowModal(showModal === 'avatar' ? null : 'avatar')}
-                    >
-                        <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
-                            <Image
-                                width={100}
-                                height={100}
-                                src={safeAvatarImage}
-                                className="object-cover"
-                                fallback={placeholderAvatar}
-                                preview={false}
-                                onError={(e) => {
-                                    const img = e.target as HTMLImageElement;
-                                    if (img.src !== placeholderAvatar) {
-                                        img.src = placeholderAvatar;
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        {loading && (
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl pointer-events-none">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            </div>
-                        )}
-                    </div>
-
-                    {showModal === 'avatar' && (
-                        <div className="absolute flex flex-col gap-1 bg-neutral-800 rounded-lg p-2 z-50">
-                            <Upload
-                                showUploadList={false}
-                                customRequest={(options) => customUpload(options, "avatarImage")}
-                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                                disabled={loading}
-                                multiple={false}
-                                maxCount={1}
-                            >
-                                <button
-                                    disabled={loading}
-                                    className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    <span className="font-medium">REPLACE</span>
-                                </button>
-                            </Upload>
-
-                            <button
-                                onClick={() => handleRemoveImage('avatarImage')}
-                                disabled={loading}
-                                className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                <span className="font-medium">REMOVE</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Background Image Section */}
-                {canEditCover && (
+        <>
+            <div ref={containerRef}>
+                <div className="flex gap-3">
+                    {/* Avatar Section */}
                     <div className="flex-1 flex gap-2 items-start">
                         <div
                             className="relative cursor-pointer"
-                            onClick={() => setShowModal(showModal === 'background' ? null : 'background')}
+                            onClick={() => setShowModal(showModal === 'avatar' ? null : 'avatar')}
                         >
-                            <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400 border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
+                            <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
                                 <Image
-                                    width={340}
+                                    width={100}
                                     height={100}
-                                    src={safeBackgroundImage}
-                                    className="rounded-lg object-cover"
-                                    fallback={placeholderBackground}
+                                    src={safeAvatarImage}
+                                    className="object-cover"
+                                    fallback={placeholderAvatar}
                                     preview={false}
                                     onError={(e) => {
                                         const img = e.target as HTMLImageElement;
-                                        if (img.src !== placeholderBackground) {
-                                            img.src = placeholderBackground;
+                                        if (img.src !== placeholderAvatar) {
+                                            img.src = placeholderAvatar;
                                         }
                                     }}
                                 />
                             </div>
 
                             {loading && (
-                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg pointer-events-none">
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl pointer-events-none">
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                 </div>
                             )}
                         </div>
 
-                        {showModal === 'background' && (
-                            <div className="absolute flex flex-col gap-1 bg-neutral-800 rounded-lg p-2 z-50">
+                        {showModal === 'avatar' && (
+                            <div className="absolute flex flex-col gap-1 bg-white rounded-lg p-2 z-50">
                                 <Upload
                                     showUploadList={false}
-                                    customRequest={(options) => customUpload(options, "backgroundImage")}
+                                    customRequest={(options) => customUpload(options, "avatarImage")}
                                     accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                     disabled={loading}
                                     multiple={false}
@@ -367,31 +296,112 @@ const ImageUploadSection = ({
                                 >
                                     <button
                                         disabled={loading}
-                                        className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
+                                        className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
-                                        <span className="font-medium">REPLACE</span>
+                                        <span className="font-medium">REMPLAZAR</span>
                                     </button>
                                 </Upload>
 
                                 <button
-                                    onClick={() => handleRemoveImage('backgroundImage')}
+                                    onClick={() => handleRemoveImage('avatarImage')}
                                     disabled={loading}
-                                    className="px-3 py-2 text-left text-white bg-transparent hover:bg-gray-700 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap"
+                                    className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    <span className="font-medium">REMOVE</span>
+                                    <span className="font-medium">REMOVER</span>
                                 </button>
                             </div>
                         )}
                     </div>
-                )}
+
+                    {/* Background Image Section */}
+                    {canEditCover && (
+                        <div className="flex-1 flex gap-2 items-start">
+                            <div
+                                className="relative cursor-pointer"
+                                onClick={() => setShowModal(showModal === 'background' ? null : 'background')}
+                            >
+                                <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400 border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
+                                    <Image
+                                        width={340}
+                                        height={100}
+                                        src={safeBackgroundImage}
+                                        className="rounded-lg object-cover"
+                                        fallback={placeholderBackground}
+                                        preview={false}
+                                        onError={(e) => {
+                                            const img = e.target as HTMLImageElement;
+                                            if (img.src !== placeholderBackground) {
+                                                img.src = placeholderBackground;
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {loading && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg pointer-events-none">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {showModal === 'background' && (
+                                <div className="absolute flex flex-col gap-1 bg-white rounded-lg p-2 z-50">
+                                    <Upload
+                                        showUploadList={false}
+                                        customRequest={(options) => customUpload(options, "backgroundImage")}
+                                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                        disabled={loading}
+                                        multiple={false}
+                                        maxCount={1}
+                                    >
+                                        <button
+                                            disabled={loading}
+                                            className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            <span className="font-medium">REMPLAZAR</span>
+                                        </button>
+                                    </Upload>
+
+                                    <button
+                                        onClick={() => handleRemoveImage('backgroundImage')}
+                                        disabled={loading}
+                                        className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        <span className="font-medium">REMOVER</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+
+            {/* Image Editor Modal */}
+            <ImageEditorModal
+                visible={showEditor}
+                imageUrl={imageToEdit}
+                onCancel={() => {
+                    setShowEditor(false);
+                    setPendingFile(null);
+                    setEditingType(null);
+                    setImageToEdit("");
+                }}
+                onSave={handleEditorSave}
+                aspectRatio={editingType === 'avatarImage' ? 1 : 16 / 9}
+            />
+        </>
     );
 };
 
