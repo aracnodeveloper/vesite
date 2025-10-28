@@ -1,12 +1,11 @@
-import { ChevronLeft, Edit2, X, Video } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {  Video } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import BackButton from "../../../shared/BackButton.tsx";
 import ElementCard from "../Components/ElementCard.tsx";
 
 const VideoPage = () => {
-  const navigate = useNavigate();
+
   const { getVideoEmbed, setVideoEmbed, loading } = usePreview();
 
   const [url, setUrl] = useState("");
@@ -28,10 +27,6 @@ const VideoPage = () => {
       setHasExistingVideo(false);
     }
   }, [getVideoEmbed]);
-
-  const handleBackClick = () => {
-    navigate("/sections");
-  };
 
   const handleEdit = () => {
     setEditUrl(url);

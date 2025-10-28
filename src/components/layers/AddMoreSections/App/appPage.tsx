@@ -1,3 +1,5 @@
+// appPage.tsx - Modificaciones necesarias
+
 import { useState, useEffect } from "react";
 import {
   CheckCircle,
@@ -9,6 +11,8 @@ import BackButton from "../../../shared/BackButton";
 import SVGAPPLE from '../../../../assets/icons/AppleStore.svg'
 import SVGGOO from '../../../../assets/icons/GooglePLay.svg'
 import ElementCard from "../Components/ElementCard";
+import Cookie from "js-cookie";
+import apiService from "../../../../service/apiService";
 
 const AppPage = () => {
 
@@ -17,9 +21,7 @@ const AppPage = () => {
   const [appStoreUrl, setAppStoreUrl] = useState("");
   const [googlePlayUrl, setGooglePlayUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
-      "idle"
-  );
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
   const [saveMessage, setSaveMessage] = useState("");
   const [editingStore, setEditingStore] = useState<"appstore" | "googleplay" | null>(null);
   const [editUrl, setEditUrl] = useState("");
@@ -31,6 +33,30 @@ const AppPage = () => {
     setAppStoreUrl(appStore?.url || "");
     setGooglePlayUrl(googlePlay?.url || "");
   }, [appLinks]);
+
+  // 🔥 FUNCIÓN: Actualizar app en biosites hijos
+  const updateAdminAndChildrenApp = async (type: "appstore" | "googleplay", appUrl: string) => {
+    const role = Cookie.get("roleName");
+    const userId = Cookie.get("userId");
+    const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+
+    if (!isAdmin || !userId) {
+      console.log("Not admin or no userId, skipping children update");
+      return;
+    }
+
+    try {
+      console.log(`Updating ${type} for admin and children with URL:`, appUrl);
+      await apiService.patch(
+          `/biosites/admin/update-app/${userId}?type=${type}&appUrl=${encodeURIComponent(appUrl)}`,
+          {}
+      );
+      console.log(`${type} updated for admin and children successfully`);
+    } catch (error) {
+      console.error(`Error updating ${type} for admin and children:`, error);
+      throw error;
+    }
+  };
 
   const handleEdit = (store: "appstore" | "googleplay") => {
     setEditingStore(store);
@@ -47,6 +73,7 @@ const AppPage = () => {
     try {
       const existingLink = appLinks.find((link) => link.store === editingStore && link.isActive === true);
 
+      // Primero actualizar o crear el link localmente
       if (existingLink && editUrl) {
         await updateAppLink(existingLink.id, { url: editUrl, isActive: true });
       } else if (!existingLink && editUrl) {
@@ -57,10 +84,20 @@ const AppPage = () => {
         });
       }
 
+      // Actualizar estado local
       if (editingStore === "appstore") {
         setAppStoreUrl(editUrl);
       } else {
         setGooglePlayUrl(editUrl);
+      }
+
+      // 🔥 IMPORTANTE: Actualizar app en biosites hijos DESPUÉS de actualizar localmente
+      const role = Cookie.get("roleName");
+      const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+
+      if (isAdmin && editUrl) {
+        console.log(`Admin detected, updating ${editingStore} for children`);
+        await updateAdminAndChildrenApp(editingStore, editUrl);
       }
 
       setEditingStore(null);
@@ -100,7 +137,6 @@ const AppPage = () => {
       const link = appLinks.find((link) => link.store === store && link.isActive === true);
 
       if (link) {
-        // En lugar de removeAppLink, usa updateAppLink para marcar como inactivo
         await updateAppLink(link.id, { ...link, isActive: false });
 
         setSaveStatus("success");
@@ -117,12 +153,20 @@ const AppPage = () => {
           setGooglePlayUrl("");
         }
 
+        // 🔥 NUEVO: Si es admin, también eliminar de los hijos
+        const role = Cookie.get("roleName");
+        const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+
+        if (isAdmin) {
+          console.log(`Admin detected, removing ${store} from children`);
+          await updateAdminAndChildrenApp(store, "");
+        }
+
         setTimeout(() => {
           setSaveStatus("idle");
           setSaveMessage("");
         }, 3000);
       } else {
-        // Si no existe el link activo, solo limpiar el estado local
         if (store === "appstore") {
           setAppStoreUrl("");
         } else {
@@ -142,6 +186,7 @@ const AppPage = () => {
       setIsSaving(false);
     }
   };
+
   const isValidUrl = (url: string, type: "appstore" | "googleplay") => {
     if (!url) return true;
 
