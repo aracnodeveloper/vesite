@@ -18,6 +18,7 @@ interface AdminLinkCardProps {
     onAdminToggle?: (linkId: string, isSelected: boolean) => Promise<void>;
     onAdminUpdate?: (linkId: string, linkData: any) => Promise<void>;
     biositeId?: string;
+    allready?: number;
 }
 
 const AdminLinkCard = ({
@@ -35,6 +36,7 @@ const AdminLinkCard = ({
                            onAdminToggle,
                            onAdminUpdate,
                            biositeId,
+                           allready
                        }: AdminLinkCardProps) => {
     const [isToggling, setIsToggling] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -126,7 +128,7 @@ const AdminLinkCard = ({
                     </div>
                 </div>
 
-                {canEdit && !isSelected && (
+                {canEdit && !isSelected  && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
                             onClick={onEdit}
@@ -168,8 +170,8 @@ const AdminLinkCard = ({
                 )}
             </div>
 
-            {/* ✅ SOLO mostrar el toggle si este link está seleccionado */}
-            {isAdmin && showAdminControls && !isSelected &&(
+
+            {isAdmin && showAdminControls && !isSelected  && allready === 0  && (
                 <AdminLinkToggle
                     isSelected={isSelected}
                     onToggle={handleAdminToggle}

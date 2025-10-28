@@ -38,8 +38,16 @@ const LinksPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeLinks = regularLinks.filter((link) => link.isActive);
+  const selectedLinks = regularLinks.filter ((link) => link.isActive === true && link.isSelected === true);
+  const allready = () =>{
+      if (selectedLinks.length > 0){return 1}
+      else if(selectedLinks.length === 2 ){ return 2}
+      else {
+        return 0
+      }
+  };
   const userRole = getUserRole();
-  const showAdminControls = isAdmin();
+
 
   const placeholderLinkImage =
       "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23f3f4f6' rx='6'/%3E%3Cpath d='M10 10h20v20H10z' fill='%23d1d5db'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%239ca3af'/%3E%3Cpath d='M12 28l8-6 8 6H12z' fill='%239ca3af'/%3E%3C/svg%3E";
@@ -149,7 +157,7 @@ const LinksPage = () => {
       setIsSubmitting(false);
     }
   };
-
+  const showAdminControls = isAdmin();
   const handleAdminUpdate = async (linkId: string, linkData: any) => {
     try {
       setIsSubmitting(true);
@@ -513,10 +521,11 @@ const LinksPage = () => {
                                             isSubmitting={isSubmitting}
                                             getSafeImageUrl={getSafeImageUrl}
                                             isSelected={link.isSelected}
-                                            showAdminControls={showAdminControls || !link.isSelected}
+                                            showAdminControls={showAdminControls || !link.isSelected }
                                             userRole={userRole}
                                             onAdminToggle={handleAdminToggle}
                                             onAdminUpdate={handleAdminUpdate}
+                                            allready={allready()}
                                         />
                                       </div>
                                   )}
