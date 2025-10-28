@@ -16,9 +16,10 @@ export interface PaginatedResponse<T> {
 }
 
 export interface AdminLinkData {
-    biositeId?: string;  // Add this as optional since we'll add it in the method
+    linkId : string;
     icon: string;
     url: string;
+    image?: string;
     label: string;
     link_type: string;
     orderIndex?: number;
@@ -101,9 +102,11 @@ export const adminLinkMethods = {
     updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<any> => {
         try {
             const payload = {
+                linkId: linkData.linkId,
                 label: linkData.label,
                 url: linkData.url,
                 icon: linkData.icon,
+                image: linkData.image,
                 orderIndex: linkData.orderIndex,
                 link_type: linkData.link_type || 'regular'
             };

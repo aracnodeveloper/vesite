@@ -80,12 +80,20 @@ export const useLinkOperations = ({
             console.log('Toggling to isSelected:', isSelected);
 
             if (isSelected) {
+                // ✅ NUEVO: Verificar si ya existe otro link con isSelected = true
+                const currentSelectedLink = links.find(l => l.isSelected && l.id !== linkId && l.isActive === true);
+
+                if (currentSelectedLink) {
+                    throw new Error("Ya existe un enlace seleccionado. Debes desactivarlo primero.");
+                }
+
                 // Apply link to children - match the PathLinkDto structure exactly
                 const linkData = {
-                    linkId: linkId, // ⬅️ AGREGAR ESTA LÍNEA
+                    linkId: linkId,
                     label: link.label || link.title || 'Link',
                     url: link.url,
                     icon: link.icon || 'link',
+                    image: link.image,
                     orderIndex: parseInt(String(link.orderIndex || 0), 10),
                     link_type: link.link_type || LINK_TYPES.REGULAR
                 };
@@ -128,9 +136,11 @@ export const useLinkOperations = ({
 
             // Prepare data in the format expected by the backend PathLinkDto
             const updateData = {
+                linkId: linkData.id || link.id,
                 label: linkData.label || link.label || link.title || 'Link',
                 url: linkData.url || link.url,
                 icon: linkData.icon || link.icon || 'link',
+                image: linkData.image || link.image,
                 orderIndex: parseInt(String(linkData.orderIndex !== undefined ? linkData.orderIndex : (link.orderIndex || 0)), 10),
                 link_type: linkData.link_type || link.link_type || LINK_TYPES.REGULAR
             };
@@ -145,6 +155,7 @@ export const useLinkOperations = ({
                 label: updateData.label,
                 url: updateData.url,
                 icon: updateData.icon,
+                image: updateData.image,
                 orderIndex: updateData.orderIndex,
                 link_type: updateData.link_type,
                 isSelected: true // Ensure it remains marked as selected
