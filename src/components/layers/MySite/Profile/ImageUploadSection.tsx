@@ -205,7 +205,8 @@ const ImageUploadSection = ({
             };
 
             if (key === 'avatarImage') {
-                delete (updateData as any).avatarImage;
+                updateData.avatarImage = null;
+                console.log('Removing avatar image');
             }
 
             const updated = await updateBiosite(updateData);
