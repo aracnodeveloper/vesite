@@ -589,7 +589,7 @@ const StylesPage = () => {
                           <input
                               type="color"
                               value={customColors.accent}
-                              onChange={(e) => handleCustomColorChange('text', e.target.value)}
+                              onChange={(e) => handleCustomColorChange('accent', e.target.value)}
                               className="absolute inset-0 opacity-0 cursor-pointer"
                           />
                           <label
