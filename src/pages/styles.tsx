@@ -109,9 +109,9 @@ const colorCategories = {
     },
     {
       name: "Naranja",
-      value: "#b66500",
+      value: "#1198a3",
       textColor: "#FFFFFF",
-      accentColor: "#FB923C",
+      accentColor: "#fa781a",
     },
     {
       name: "Los Gallos",
@@ -246,16 +246,73 @@ const StylesPage = () => {
     }
   };
 
-  const handleCustomColorChange = (colorType: 'background' | 'text' | 'accent', value: string) => {
-    setCustomColors(prev => ({
-      ...prev,
-      [colorType]: value
-    }));
-  };
+    const handleCustomColorChange = (colorType: 'background' | 'text' | 'accent', value: string) => {
+        // Validar que el valor sea un color hexadecimal válido
+        const isValidHex = /^#[0-9A-F]{6}$/i.test(value);
 
+        if (!isValidHex) {
+            console.warn('Color hexadecimal inválido:', value);
+            return;
+        }
+
+        setCustomColors(prev => {
+            const newColors = {
+                ...prev,
+                [colorType]: value
+            };
+
+            // Auto-ajustar colores relacionados para mejor contraste
+            if (colorType === 'background') {
+                // Si cambia el fondo, sugerir un color de texto con buen contraste
+                const isLight = isLightColor(value);
+                newColors.text = isLight ? '#000000' : '#FFFFFF';
+
+                // Generar un color de acento basado en el nuevo fondo
+                newColors.accent = generateAccentColor(value);
+            }
+
+            // Si cambia el texto o acento, verificar contraste con el fondo
+            if (colorType === 'text' || colorType === 'accent') {
+                const contrast = calculateContrast(value, prev.background);
+
+                // Advertir si el contraste es bajo (menor a 4.5:1 según WCAG AA)
+                if (contrast < 4.5) {
+                    console.warn(`Contraste bajo detectado (${contrast.toFixed(2)}:1). Se recomienda un mínimo de 4.5:1`);
+
+                    // Opcional: Mostrar una advertencia visual al usuario
+                    // setContrastWarning(true);
+                }
+            }
+
+            return newColors;
+        });
+    };
+
+// Función auxiliar para calcular el contraste entre dos colores
+    const calculateContrast = (color1: string, color2: string): number => {
+        const getLuminance = (hex: string): number => {
+            const rgb = parseInt(hex.slice(1), 16);
+            const r = ((rgb >> 16) & 0xff) / 255;
+            const g = ((rgb >> 8) & 0xff) / 255;
+            const b = (rgb & 0xff) / 255;
+
+            const [rs, gs, bs] = [r, g, b].map(c =>
+                c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+            );
+
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+        };
+
+        const lum1 = getLuminance(color1);
+        const lum2 = getLuminance(color2);
+        const lighter = Math.max(lum1, lum2);
+        const darker = Math.min(lum1, lum2);
+
+        return (lighter + 0.05) / (darker + 0.05);
+    };
   const applyCustomColors = async () => {
     try {
-      // Aplicar los colores exactamente como el usuario los configuró
+
       await handleThemeColorChange(
           customColors.background,
           customColors.text,
@@ -346,7 +403,7 @@ const StylesPage = () => {
                   <div
                       className="px-2 sm:px-3  rounded-full text-xs font-medium backdrop-blur-sm border border-white/20"
                       style={{
-                        backgroundColor: color.accentColor.includes('rgb') ? color.accentColor : color.accentColor + '80',
+                        backgroundColor: color.accentColor.includes('rgb') ? color.accentColor : color.accentColor ,
                         color: color.textColor,
                         fontSize: "9px",
                         minWidth: "40px",
@@ -589,7 +646,7 @@ const StylesPage = () => {
                           <input
                               type="color"
                               value={customColors.accent}
-                              onChange={(e) => handleCustomColorChange('text', e.target.value)}
+                              onChange={(e) => handleCustomColorChange('accent', e.target.value)}
                               className="absolute inset-0 opacity-0 cursor-pointer"
                           />
                           <label
