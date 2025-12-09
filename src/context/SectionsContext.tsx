@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useSections} from '../hooks/useSection.ts';
-import type {Section} from '../interfaces/sections.ts'
+import { useSections } from '../hooks/useSection.ts';
+import type { Section } from '../interfaces/sections.ts'
 import Cookie from "js-cookie";
 
 interface SectionsContextType {
@@ -157,7 +157,7 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const excludedKeywords = [
                 'open.spotify.com/embed', 'music', 'apple music', 'soundcloud', 'audio',
                 'youtube.com/watch', 'video', 'vimeo', 'tiktok video',
-                'post', 'publicacion', 'contenido','api.whatsapp.com',
+                'post', 'publicacion', 'contenido', 'api.whatsapp.com',
                 'music embed', 'video embed', 'social post'
             ];
             const isExcluded = excludedKeywords.some(keyword =>
@@ -219,6 +219,9 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     break;
                 case 'Social Post':
                     shouldShow = activeSocialPostLinks.length > 0;
+                    break;
+                case 'Galeria':
+                    shouldShow = true;
                     break;
                 default:
                     shouldShow = false;

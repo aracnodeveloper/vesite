@@ -537,9 +537,8 @@ const LivePreviewContent = () => {
       }}
     >
       <div
-        className={`w-full ${
-          isExposedRoute ? "max-w-full" : "max-w-sm"
-        } min-h-screen mx-auto`}
+        className={`w-full ${isExposedRoute ? "max-w-full" : "max-w-sm"
+          } min-h-screen mx-auto`}
       >
         {isSecondTemplate ? (
           <>
@@ -593,9 +592,8 @@ const LivePreviewContent = () => {
 
         {/* Main content */}
         <div
-          className={`w-full ${
-            isExposedRoute ? "max-w-md" : "max-w-sm"
-          } mx-auto`}
+          className={`w-full ${isExposedRoute ? "max-w-md" : "max-w-sm"
+            } mx-auto`}
         >
           {/* User info section */}
           <UserInfoSection

@@ -5,7 +5,7 @@ import {
     getSectionsByBiositeApi,
     reorderSectionsApi
 } from '../constants/EndpointsRoutes';
-import type {CreateSectionData,ReorderSectionData,Section} from '../interfaces/sections.ts'
+import type { CreateSectionData, ReorderSectionData, Section } from '../interfaces/sections.ts'
 
 export const useSections = () => {
     const [sections, setSections] = useState<Section[]>([]);
@@ -164,6 +164,12 @@ export const useSections = () => {
                     icon: 'instagram',
                     descripcion: 'Instagram posts',
                 },
+                {
+                    biositeId,
+                    titulo: 'Gallery',
+                    icon: 'gallery',
+                    descripcion: 'Galleria de imagenes',
+                }
             ];
 
             // Crear un Map para acceso rápido a secciones existentes
@@ -355,6 +361,13 @@ export const useSections = () => {
                 descripcion: 'Instagram posts',
                 orderIndex: 8,
             },
+            {
+                biositeId,
+                titulo: 'Gallery',
+                icon: 'gallery',
+                descripcion: 'galeria de imagenes',
+                orderIndex: 9,
+            }
         ];
 
         try {

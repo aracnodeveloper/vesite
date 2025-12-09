@@ -14,6 +14,7 @@ import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useSectionsContext } from "../../../context/SectionsContext.tsx";
 import { GripVertical, Menu, X, Check } from "lucide-react";
 import Loading from "../../shared/Loading.tsx";
+import Text_blocks from "./Text_blocks/text_block.tsx";
 
 const MySite = () => {
   const {
@@ -111,6 +112,8 @@ const MySite = () => {
         return <V_Card key="vcard" />;
       case "Video":
         return <Videos key="video" />;
+        case "Galeria":
+            return <Text_blocks key="galeria" />;
       default:
         return null;
     }
