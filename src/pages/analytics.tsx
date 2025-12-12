@@ -1122,12 +1122,12 @@ const AnalyticsContent = () => {
               <div className="absolute left-58 bottom-38 w-10 h-10 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
             </div>
 
-            <div className="flex flex-wrap gap-5">
+            <div className="flex  gap-5">
               <div className="bg-white rounded-3xl p-10">
                 <h2 className="text-xl text-gray-600 font-semibold mb-6">
                   Actividad {timeRange === "lastYear" ? "Mensual" : "Diaria"}
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-col-2 xl:grid-cols-3 gap-6">
                   {analyticsData.dailyActivity.map((activity, index) => (
                       <div
                           key={index}

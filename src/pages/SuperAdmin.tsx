@@ -751,13 +751,13 @@ const AdminPanel: React.FC = () => {
                 {shouldShowAllBiosites ? "Total veSites" : "veSites Hijos"}
               </p>
               <p className="text-2xl font-semibold text-gray-900">
-                {viewMode === "children" || role === "ADMIN"
+                {viewMode === "children" || role === "ADMIN" && !permissions.isSpecialUser
                   ? BioData.length 
                   : currentPagination.totalItems || 0}
               </p>
               <p className="text-xs text-gray-400">
-                {viewMode === "children" || role === "ADMIN" ? BioData.length : currentData.filter((biosite) => biosite.isActive).length}{" "}
-                activos
+                {viewMode === "children" || role === "ADMIN" && !permissions.isSpecialUser ? BioData.length : currentPagination.totalItems || 0}
+                 activos
               </p>
             </div>
           </div>
@@ -783,7 +783,7 @@ const AdminPanel: React.FC = () => {
                 {shouldShowAllBiosites ? "Usuarios Únicos" : "Usuarios Hijos"}
               </p>
               <p className="text-2xl font-semibold text-gray-900">
-              {viewMode === "children" || role === "ADMIN"
+              {viewMode === "children" || role === "ADMIN" && !permissions.isSpecialUser
                   ? BioData.length 
                   : currentPagination.totalItems || 0}
               </p>
