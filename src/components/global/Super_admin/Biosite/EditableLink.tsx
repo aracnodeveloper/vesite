@@ -120,15 +120,7 @@ export default function EditableLink({
               </div>
             </div>
             <div className="flex flex-wrap  gap-y-2 items-end ml-4 ">
-              <span
-                className={`px-2 py-1 rounded-full text-xs whitespace-nowrap sr-only sm:not-sr-only ${
-                  editLink.isActive
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {editLink.isActive ? "Activo" : "Inactivo"}
-              </span>
+              
 
               <Button
                 onClick={() => {

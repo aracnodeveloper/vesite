@@ -527,6 +527,7 @@ const ProfilePage = () => {
                   <span className="text-blue-600">
                     visitaecuador.com/vesite/{form.getFieldValue("slug")}
                   </span>
+
                 </div>
               )}
               {form.getFieldValue("cedula") && (

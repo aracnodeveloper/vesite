@@ -1,7 +1,8 @@
 import { Upload, Image, message } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import ImageEditorModal from "./ImageEditorModal";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -21,12 +22,35 @@ const ImageUploadSection = ({
                                 role
                             }: ImageUploadSectionProps) => {
 
-    const [hoveredImage, setHoveredImage] = useState<'avatar' | 'background' | null>(null);
-    const [isRemoving, setIsRemoving] = useState(false);
+    const [showModal, setShowModal] = useState<'avatar' | 'background' | null>(null);
+    const [showEditor, setShowEditor] = useState(false);
+    const [imageToEdit, setImageToEdit] = useState<string>("");
+    const [editingType, setEditingType] = useState<"avatarImage" | "backgroundImage" | null>(null);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setShowModal(null);
+            }
+        };
+
+        if (showModal) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showModal]);
 
     const placeholderAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='120' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23e5e7eb'/%3E%3Cpath d='M40 20c-6 0-10 4-10 10s4 10 10 10 10-4 10-10-4-10-10-10zM20 60c0-10 9-15 20-15s20 5 20 15v5H20v-5z' fill='%239ca3af'/%3E%3C/svg%3E";
 
     const placeholderBackground = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='120' viewBox='0 0 200 120'%3E%3Crect width='200' height='120' fill='%23f3f4f6'/%3E%3Cpath d='M40 40h120v40H40z' fill='%23d1d5db'/%3E%3Ccircle cx='60' cy='50' r='8' fill='%239ca3af'/%3E%3Cpath d='M80 65l20-15 40 25H80z' fill='%239ca3af'/%3E%3C/svg%3E";
+
+    const DEFAULT_BACKGROUND = "https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg";
 
     const isValidImageUrl = (url: string | null | undefined): boolean => {
         if (!url || typeof url !== 'string') return false;
@@ -44,7 +68,11 @@ const ImageUploadSection = ({
         try {
             const urlObj = new URL(url);
             const isHttps = ['http:', 'https:'].includes(urlObj.protocol);
-            return isHttps;
+            const hasValidExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url) ||
+                url.includes('/img/') ||
+                url.includes('image-');
+
+            return isHttps && (hasValidExtension || !urlObj.pathname.includes('.'));
         } catch (error) {
             console.warn('Invalid URL:', url, error);
             return false;
@@ -67,48 +95,59 @@ const ImageUploadSection = ({
         return true;
     };
 
-    const handleUpload = async (info: any, key: "avatarImage" | "backgroundImage") => {
-        if (!info.file) {
-            return;
-        }
+    const handleFileSelect = (file: File, key: "avatarImage" | "backgroundImage") => {
+        if (!validateFile(file)) return;
 
-        if (info.file.status === 'removed' || info.file.status === 'error') {
-            return;
-        }
+        const reader = new FileReader();
 
-        const fileToUpload = info.file.originFileObj || info.file;
+        reader.onerror = () => {
+            message.error('Error al leer el archivo');
+        };
 
-        if (!fileToUpload || !(fileToUpload instanceof File)) {
-            message.error("Error: Archivo no válido");
-            return;
-        }
+        reader.onload = (e) => {
+            const imageUrl = e.target?.result as string;
 
-        if (!validateFile(fileToUpload)) {
-            return;
-        }
+            if (!imageUrl || imageUrl.trim() === '') {
+                message.error('Error: La imagen no se pudo cargar correctamente');
+                return;
+            }
 
-        if (!biosite?.id) {
-            message.error("Error: ID del biosite no disponible");
-            return;
-        }
+            setImageToEdit(imageUrl);
+            setEditingType(key);
+            setPendingFile(file);
+            setShowEditor(true);
+            setShowModal(null);
+        };
 
-        if (!userId) {
-            message.error("Error: ID de usuario no disponible");
+        reader.readAsDataURL(file);
+    };
+
+    const handleEditorSave = async (croppedBlob: Blob) => {
+        if (!editingType || !biosite?.id || !userId || isUploading) {
+            message.error("Error: Información no disponible");
             return;
         }
 
         try {
+            setIsUploading(true);
+
             const loadingMessage = message.loading(
-                `Subiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
+                `Subiendo ${editingType === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
                 0
+            );
+
+            const croppedFile = new File(
+                [croppedBlob],
+                pendingFile?.name || 'edited-image.jpg',
+                { type: 'image/jpeg' }
             );
 
             let imageUrl: string;
 
-            if (key === 'avatarImage') {
-                imageUrl = await uploadBiositeAvatar(fileToUpload, biosite.id);
+            if (editingType === 'avatarImage') {
+                imageUrl = await uploadBiositeAvatar(croppedFile, biosite.id);
             } else {
-                imageUrl = await uploadBiositeBackground(fileToUpload, biosite.id);
+                imageUrl = await uploadBiositeBackground(croppedFile, biosite.id);
             }
 
             loadingMessage();
@@ -122,12 +161,18 @@ const ImageUploadSection = ({
             }
 
             const previewUpdate = {
-                [key]: imageUrl
+                [editingType]: imageUrl
             };
 
             updatePreview(previewUpdate);
 
-            message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
+            message.success(`${editingType === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} actualizada correctamente`);
+
+            // Limpiar estados
+            setShowEditor(false);
+            setPendingFile(null);
+            setEditingType(null);
+            setImageToEdit("");
 
         } catch (error: any) {
             let errorMessage = "Error al subir la imagen";
@@ -139,33 +184,28 @@ const ImageUploadSection = ({
             }
 
             message.error(errorMessage);
+        } finally {
+            setIsUploading(false);
         }
     };
 
-    const handleRemoveImage = async (key: "avatarImage" | "backgroundImage", e: React.MouseEvent) => {
-        // CRÍTICO: Detener la propagación del evento
-        e.preventDefault();
-        e.stopPropagation();
-
-        console.log('handleRemoveImage called with key:', key);
-        console.log('Current biosite:', biosite);
-
-        if (isRemoving) {
-            console.log('Already removing, skipping');
+    const handleRemoveImage = async (key: "avatarImage" | "backgroundImage") => {
+        if (!biosite?.id) {
+            message.error("Error: ID del biosite no disponible");
             return;
         }
 
         try {
-            setIsRemoving(true);
-            const loadingMessage = message.loading('Eliminando imagen...', 0);
+            setShowModal(null);
 
-            console.log('Preparing update data...');
+            const loadingMessage = message.loading(
+                `Removiendo ${key === 'avatarImage' ? 'avatar' : 'imagen de portada'}...`,
+                0
+            );
 
-            const ensureColorsAsString = (
-                colors: string | BiositeColors | null | undefined
-            ): string => {
+            const ensureColorsAsString = (colors: string | BiositeColors | null | undefined): string => {
                 if (!colors) return '{"primary":"#3B82F6","secondary":"#1F2937"}';
-                if (typeof colors === 'string') {
+                if (typeof colors === "string") {
                     try {
                         JSON.parse(colors);
                         return colors;
@@ -182,55 +222,31 @@ const ImageUploadSection = ({
                 slug: biosite.slug,
                 themeId: biosite.themeId,
                 colors: ensureColorsAsString(biosite.colors),
-                fonts: biosite.fonts || "Inter",
-                backgroundImage: key === 'backgroundImage' ? null : (biosite.backgroundImage || null),
+                fonts: biosite.fonts || "",
+                backgroundImage: key === 'backgroundImage' ? DEFAULT_BACKGROUND : (biosite.backgroundImage || DEFAULT_BACKGROUND),
                 isActive: biosite.isActive ?? true,
             };
 
             if (key === 'avatarImage') {
                 updateData.avatarImage = null;
-                console.log('Removing avatar image');
             }
-
-            console.log('Update data prepared:', updateData);
-            console.log('Calling updateBiosite...');
 
             const updated = await updateBiosite(updateData);
 
-            console.log('Update response:', updated);
+            loadingMessage();
 
             if (updated) {
-                const previewUpdate: Partial<BiositeFull> = {};
-
-                if (key === 'avatarImage') {
-                    previewUpdate.avatarImage = null;
-                } else {
-                    previewUpdate.backgroundImage = null;
-                }
-
-                updatePreview(previewUpdate);
-
-                loadingMessage();
-                message.success('Imagen eliminada correctamente');
-
-                console.log('Image removed successfully, reloading page...');
+                updatePreview({ [key]: key === 'avatarImage' ? null : DEFAULT_BACKGROUND });
+                message.success(`${key === 'avatarImage' ? 'Avatar' : 'Imagen de portada'} removida correctamente`);
 
                 setTimeout(() => {
                     window.location.reload();
                 }, 500);
-            } else {
-                throw new Error('No se recibió respuesta del servidor');
             }
+
         } catch (error: any) {
-            console.error('Error removing image:', error);
-            console.error('Error details:', {
-                message: error?.message,
-                response: error?.response,
-                stack: error?.stack
-            });
-            message.error(`Error al eliminar la imagen: ${error?.message || 'Error desconocido'}`);
-        } finally {
-            setIsRemoving(false);
+            message.error("Error al remover la imagen");
+            console.error(error);
         }
     };
 
@@ -242,19 +258,8 @@ const ImageUploadSection = ({
             return;
         }
 
-        const uploadInfo = {
-            file: file,
-            fileList: [file]
-        };
-
-        handleUpload(uploadInfo, key)
-            .then(() => {
-                onSuccess({}, file);
-            })
-            .catch((error) => {
-                console.error('Custom upload error:', error);
-                onError(error);
-            });
+        handleFileSelect(file, key);
+        onSuccess({}, file);
     };
 
     const canEditCover = role === "SUPER_ADMIN" || role === "ADMIN";
@@ -262,150 +267,160 @@ const ImageUploadSection = ({
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
-    const hasRealAvatar = isValidImageUrl(biosite.avatarImage);
-    const hasRealBackground = isValidImageUrl(biosite.backgroundImage);
-
     return (
-        <div className="flex gap-1">
-            {/* Avatar Section */}
-            <div className="flex-1">
-                <div
-                    className="relative group"
-                    onMouseEnter={() => setHoveredImage('avatar')}
-                    onMouseLeave={() => setHoveredImage(null)}
-                >
-                    <div className="w-26 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden">
-                        <Image
-                            width={120}
-                            height={100}
-                            src={safeAvatarImage}
-                            className="object-cover"
-                            fallback={placeholderAvatar}
-                            preview={false}
-                            onError={(e) => {
-                                const img = e.target as HTMLImageElement;
-                                if (img.src !== placeholderAvatar) {
-                                    img.src = placeholderAvatar;
-                                }
-                            }}
-                        />
-                        {hoveredImage === 'avatar' && !loading && !isRemoving && (
-                            <div className="absolute inset-0 w-26 h-24 bg-black/50 rounded-xl flex flex-col items-center justify-center gap-2 transition-opacity">
+        <>
+            <div ref={containerRef}>
+                <div className="flex gap-3">
+                    {/* Avatar Section */}
+                    <div className="flex-1 flex gap-2 items-start">
+                        <div
+                            className="relative cursor-pointer"
+                            onClick={() => setShowModal(showModal === 'avatar' ? null : 'avatar')}
+                        >
+                            <div className="w-24 h-24 border-gray-400 rounded-xl border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
+                                <Image
+                                    width={100}
+                                    height={100}
+                                    src={safeAvatarImage}
+                                    className="object-cover"
+                                    fallback={placeholderAvatar}
+                                    preview={false}
+                                    onError={(e) => {
+                                        const img = e.target as HTMLImageElement;
+                                        if (img.src !== placeholderAvatar) {
+                                            img.src = placeholderAvatar;
+                                        }
+                                    }}
+                                />
+                            </div>
+
+                            {loading && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl pointer-events-none">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                </div>
+                            )}
+                        </div>
+
+                        {showModal === 'avatar' && (
+                            <div className="absolute flex flex-col gap-1 bg-white rounded-lg p-2 z-50">
                                 <Upload
                                     showUploadList={false}
                                     customRequest={(options) => customUpload(options, "avatarImage")}
                                     accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                                    disabled={loading || isRemoving}
+                                    disabled={loading}
                                     multiple={false}
                                     maxCount={1}
                                 >
                                     <button
-                                        type="button"
-                                        className="flex items-center gap-2 px-1 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer"
+                                        disabled={loading}
+                                        className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
                                     >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
-                                        REPLACE
+                                        <span className="font-medium">REMPLAZAR</span>
                                     </button>
                                 </Upload>
 
-                                {hasRealAvatar && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => handleRemoveImage('avatarImage', e)}
-                                        disabled={isRemoving}
-                                        className="flex items-center gap-2 px-1 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        {isRemoving ? 'ELIMINANDO...' : 'REMOVE'}
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => handleRemoveImage('avatarImage')}
+                                    disabled={loading}
+                                    className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span className="font-medium">REMOVER</span>
+                                </button>
                             </div>
                         )}
                     </div>
 
-                    {(loading || isRemoving) && (
-                        <div className="absolute w-26 h-24 inset-0 bg-black/70 flex items-center justify-center rounded-xl">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    {/* Background Image Section */}
+                    {canEditCover && (
+                        <div className="flex-1 flex gap-2 items-start">
+                            <div
+                                className="relative cursor-pointer"
+                                onClick={() => setShowModal(showModal === 'background' ? null : 'background')}
+                            >
+                                <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400 border flex items-center justify-center overflow-hidden transition-opacity hover:opacity-80">
+                                    <Image
+                                        width={340}
+                                        height={100}
+                                        src={safeBackgroundImage}
+                                        className="rounded-lg object-cover"
+                                        fallback={placeholderBackground}
+                                        preview={false}
+                                        onError={(e) => {
+                                            const img = e.target as HTMLImageElement;
+                                            if (img.src !== placeholderBackground) {
+                                                img.src = placeholderBackground;
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {loading && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg pointer-events-none">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {showModal === 'background' && (
+                                <div className="absolute flex flex-col gap-1 bg-white rounded-lg p-2 z-50">
+                                    <Upload
+                                        showUploadList={false}
+                                        customRequest={(options) => customUpload(options, "backgroundImage")}
+                                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                                        disabled={loading}
+                                        multiple={false}
+                                        maxCount={1}
+                                    >
+                                        <button
+                                            disabled={loading}
+                                            className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            <span className="font-medium">REMPLAZAR</span>
+                                        </button>
+                                    </Upload>
+
+                                    <button
+                                        onClick={() => handleRemoveImage('backgroundImage')}
+                                        disabled={loading}
+                                        className="px-3 py-2 text-left text-gray-600 bg-transparent hover:bg-gray-200 rounded transition-colors flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        <span className="font-medium">REMOVER</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Background Image Section */}
-            {canEditCover && (
-                <div className="flex-1">
-                    <div
-                        className="relative group"
-                        onMouseEnter={() => setHoveredImage('background')}
-                        onMouseLeave={() => setHoveredImage(null)}
-                    >
-                        <div className="w-59 h-24 bg-gray-100 rounded-lg border-gray-400 border flex items-center justify-center overflow-hidden">
-                            <Image
-                                width={340}
-                                height={100}
-                                src={safeBackgroundImage}
-                                className="rounded-lg object-cover"
-                                fallback={placeholderBackground}
-                                preview={false}
-                                onError={(e) => {
-                                    const img = e.target as HTMLImageElement;
-                                    if (img.src !== placeholderBackground) {
-                                        img.src = placeholderBackground;
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        {hoveredImage === 'background' && !loading && !isRemoving && (
-                            <div className="absolute inset-0 bg-black/50 rounded-lg flex flex-col items-center justify-center gap-2 transition-opacity">
-                                <Upload
-                                    showUploadList={false}
-                                    customRequest={(options) => customUpload(options, "backgroundImage")}
-                                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                                    disabled={loading || isRemoving}
-                                    multiple={false}
-                                    maxCount={1}
-                                >
-                                    <button
-                                        type="button"
-                                        className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-md text-xs font-medium hover:bg-gray-100 transition-colors cursor-pointer"
-                                    >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        REPLACE
-                                    </button>
-                                </Upload>
-
-                                {hasRealBackground && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => handleRemoveImage('backgroundImage', e)}
-                                        disabled={isRemoving}
-                                        className="flex items-center gap-2 px-3 py-1.5 bg-red-500 rounded-md text-xs font-medium text-white hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        {isRemoving ? 'ELIMINANDO...' : 'REMOVE'}
-                                    </button>
-                                )}
-                            </div>
-                        )}
-
-                        {(loading || isRemoving) && (
-                            <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
+            {/* Image Editor Modal */}
+            <ImageEditorModal
+                visible={showEditor && !isUploading}
+                imageUrl={imageToEdit}
+                onCancel={() => {
+                    if (!isUploading) {
+                        setShowEditor(false);
+                        setPendingFile(null);
+                        setEditingType(null);
+                        setImageToEdit("");
+                    }
+                }}
+                onSave={handleEditorSave}
+                aspectRatio={editingType === 'avatarImage' ? 1 : 16 / 9}
+            />
+        </>
     );
 };
 

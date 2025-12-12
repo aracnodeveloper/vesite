@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dialog } from "@headlessui/React";
+import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import {
     AlertCircle,

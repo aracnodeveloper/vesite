@@ -205,10 +205,10 @@ const CreateBiositeWizard: React.FC<CreateBiositeWizardProps> = ({
                         <ArrowLeft className="h-4 w-4 mr-1" />
                         BACK
                     </button>
-                    <h2 className="font-medium text-gray-900">
-                        {currentStep === 'username' && 'CREATE A FREE BIO SITE'}
-                        {currentStep === 'profile' && 'PROFILE'}
-                        {currentStep === 'success' && 'SUCCESS'}
+                    <h2 className="font-medium text-gray-900 uppercase">
+                        {currentStep === 'username' && 'Crea un veSite'}
+                        {currentStep === 'profile' && 'Perfil'}
+                        {currentStep === 'success' && 'Hechoo'}
                     </h2>
                     <div className="w-16"></div>
                 </div>

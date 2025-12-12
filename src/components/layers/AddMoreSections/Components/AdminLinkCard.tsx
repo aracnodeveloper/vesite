@@ -18,6 +18,7 @@ interface AdminLinkCardProps {
     onAdminToggle?: (linkId: string, isSelected: boolean) => Promise<void>;
     onAdminUpdate?: (linkId: string, linkData: any) => Promise<void>;
     biositeId?: string;
+    allready?: number;
 }
 
 const AdminLinkCard = ({
@@ -35,6 +36,7 @@ const AdminLinkCard = ({
                            onAdminToggle,
                            onAdminUpdate,
                            biositeId,
+                           allready
                        }: AdminLinkCardProps) => {
     const [isToggling, setIsToggling] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -67,12 +69,12 @@ const AdminLinkCard = ({
         try {
             setIsUpdating(true);
 
-            // FIXED: Include linkId in the payload
             const linkData = {
-                linkId: id,  // Add the link ID
+                linkId: id,
                 label: title,
                 url: url,
                 icon: 'link',
+                image: image,
                 orderIndex: 0,
                 link_type: 'regular',
             };
@@ -126,7 +128,7 @@ const AdminLinkCard = ({
                     </div>
                 </div>
 
-                {canEdit && !isSelected && (
+                {canEdit && !isSelected  && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
                             onClick={onEdit}
@@ -150,18 +152,26 @@ const AdminLinkCard = ({
                 {isSelected && isAdmin && (
                     <div className="flex items-center space-x-2 flex-shrink-0">
                         <button
-                            onClick={handleAdminUpdate}
+                            onClick={onEdit}
                             disabled={isSubmitting || isUpdating}
                             className="text-gray-400 cursor-pointer hover:text-blue-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Actualizar en sitios hijos"
                         >
                             <Edit2 className="w-4 h-4" />
                         </button>
+                        <button
+                            onClick={onRemove}
+                            disabled={isSubmitting}
+                            className="text-gray-400 cursor-pointer hover:text-red-400 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
             </div>
 
-            {isAdmin && showAdminControls && (
+
+            {isAdmin && showAdminControls && !isSelected  && allready === 0  && (
                 <AdminLinkToggle
                     isSelected={isSelected}
                     onToggle={handleAdminToggle}
@@ -173,5 +183,4 @@ const AdminLinkCard = ({
         </div>
     );
 };
-
 export default AdminLinkCard;

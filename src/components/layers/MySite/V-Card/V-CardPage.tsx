@@ -46,6 +46,23 @@ const VCardPage = () => {
 
   const currentUserId = Cookies.get("userId");
 
+  // Función auxiliar para obtener el email correcto
+  const getUserEmail = (user: any): string => {
+    if (!user) return "";
+    
+    // Verificar si el campo email contiene un email válido
+    if (user.email && user.email.includes("@")) {
+      return user.email;
+    }
+    
+    // Si no, verificar si cedula contiene el email
+    if (user.cedula && user.cedula.includes("@")) {
+      return user.cedula;
+    }
+    
+    return "";
+  };
+
   useEffect(() => {
     const loadData = async () => {
       if (slug) {
@@ -76,10 +93,14 @@ const VCardPage = () => {
               ? JSON.parse(businessCard.data)
               : businessCard.data || {};
 
+          // Obtener el email correcto del usuario
+          const userEmail = getUserEmail(user);
+
           const syncedData = {
             ...parsedData,
             name: parsedData.name || user.name || "",
             phone: user.phone || parsedData.phone || "",
+            email: parsedData.email || userEmail,
             website: parsedData.website || user.site || "",
           };
 
@@ -118,6 +139,8 @@ const VCardPage = () => {
     user?.phone,
     user?.name,
     user?.site,
+    user?.email,
+    user?.cedula, // Agregado para detectar cambios en cedula
     businessCard?.id,
     slug,
     isEditing,
@@ -204,6 +227,22 @@ const VCardPage = () => {
       }
       if (cardData.website && cardData.website !== user?.site) {
         userUpdateData.site = cardData.website;
+      }
+      
+      // Actualizar el email en el campo correcto
+      if (cardData.email && cardData.email !== getUserEmail(user)) {
+        // Si el usuario tiene email en el campo email, actualizar ahí
+        if (user?.email && user.email.includes("@")) {
+          userUpdateData.email = cardData.email;
+        } 
+        // Si el usuario tiene email en cedula, actualizar ahí
+        else if (user?.cedula && user.cedula.includes("@")) {
+          userUpdateData.cedula = cardData.email;
+        }
+        // Si no tiene email en ninguno, usar el campo email por defecto
+        else {
+          userUpdateData.email = cardData.email;
+        }
       }
 
       if (Object.keys(userUpdateData).length > 0 && !slug) {

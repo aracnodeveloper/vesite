@@ -410,7 +410,6 @@ const AdminPanel: React.FC = () => {
       let responseBioData: BiositeFull[] = [];
 
       if (shouldShowAllBiosites) {
-
         const params = currentPagination.getPaginationParams();
         const response = await fetchAllBiosites(params);
         currentPagination.setPaginatedData(response);
@@ -418,10 +417,21 @@ const AdminPanel: React.FC = () => {
           ? response
           : response?.data || [];
       } else {
-
         const childBiosites = await fetchChildBiosites(userId);
         responseBioData = childBiosites;
         setBioData(responseBioData);
+
+        // Cargar analytics y links para cada biosite hijo
+        for (const biosite of responseBioData) {
+          // Cargar analytics automáticamente
+          if (biosite.id && biosite.ownerId) {
+            fetchBiositeAnalytics(biosite.id, biosite.ownerId);
+          }
+          // Cargar links automáticamente
+          if (biosite.id) {
+            fetchBiositeLinks(biosite.id);
+          }
+        }
 
         const startIndex =
           (currentPagination.currentPage - 1) * currentPagination.pageSize;
@@ -455,6 +465,8 @@ const AdminPanel: React.FC = () => {
     getCurrentPagination,
     applyFilters,
     currentFilters,
+    fetchBiositeAnalytics,
+    fetchBiositeLinks,
   ]);
 
   const handleRefreshData = useCallback(async () => {
@@ -496,6 +508,7 @@ const AdminPanel: React.FC = () => {
     getCurrentPagination().currentPage,
     getCurrentPagination().pageSize,
   ]);
+
   const toggleBiositeExpansion = useCallback(
     (biositeId: string) => {
       const wasExpanded = expandedBiosite === biositeId;
@@ -542,25 +555,27 @@ const AdminPanel: React.FC = () => {
     },
     [businessCards, loadingCards]
   );
+
   const handleUpdateVCard = useCallback(
-      async (id: string, data: UpdateBusinessCardDto) => {
-        try {
-          const updatedCard = await businessCardService.updateBusinessCard(id, data);
+    async (id: string, data: UpdateBusinessCardDto) => {
+      try {
+        const updatedCard = await businessCardService.updateBusinessCard(id, data);
 
-          // Actualizar el estado local con la nueva información
-          setBusinessCards((prev) => ({
-            ...prev,
-            [data.ownerId]: updatedCard,
-          }));
+        // Actualizar el estado local con la nueva información
+        setBusinessCards((prev) => ({
+          ...prev,
+          [data.ownerId]: updatedCard,
+        }));
 
-          console.log("VCard actualizada exitosamente");
-        } catch (error) {
-          console.error("Error updating VCard:", error);
-          throw error;
-        }
-      },
-      []
+        console.log("VCard actualizada exitosamente");
+      } catch (error) {
+        console.error("Error updating VCard:", error);
+        throw error;
+      }
+    },
+    []
   );
+
   const parseVCardData = useCallback((businessCard: BusinessCard | null) => {
     if (!businessCard?.data) return null;
 
@@ -633,8 +648,14 @@ const AdminPanel: React.FC = () => {
     (sum, links) => sum + (links?.length || 0),
     0
   );
-  const currentData =
-    filteredData.length > 0 ? filteredData : currentPagination.data;
+  
+  // Determinar qué datos usar según el modo de vista
+  const currentData = useMemo(() => {
+    if (viewMode === "children") {
+      return BioData;
+    }
+    return filteredData.length > 0 ? filteredData : currentPagination.data;
+  }, [viewMode, BioData, filteredData, currentPagination.data]);
 
   const getViewTitle = () => {
     if (!permissions.canToggleView) {
@@ -721,7 +742,6 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Enhanced Stats */}
-      {viewMode === 'all' && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex items-center">
@@ -731,17 +751,19 @@ const AdminPanel: React.FC = () => {
                 {shouldShowAllBiosites ? "Total veSites" : "veSites Hijos"}
               </p>
               <p className="text-2xl font-semibold text-gray-900">
-                {currentPagination.totalItems || 0}
+                {viewMode === "children" || role === "ADMIN"
+                  ? BioData.length 
+                  : currentPagination.totalItems || 0}
               </p>
               <p className="text-xs text-gray-400">
-                {currentData.filter((biosite) => biosite.isActive).length}{" "}
+                {viewMode === "children" || role === "ADMIN" ? BioData.length : currentData.filter((biosite) => biosite.isActive).length}{" "}
                 activos
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow border">
+        <div className={`bg-white p-6 rounded-lg shadow border ${role === 'SUPER_ADMIN' ? 'hidden' : '' }`}>
           <div className="flex items-center">
             <LinkIcon className="w-8 h-8 text-purple-500" />
             <div className="ml-4">
@@ -761,20 +783,22 @@ const AdminPanel: React.FC = () => {
                 {shouldShowAllBiosites ? "Usuarios Únicos" : "Usuarios Hijos"}
               </p>
               <p className="text-2xl font-semibold text-gray-900">
-                {new Set(currentData.map((biosite) => biosite.ownerId)).size}
+              {viewMode === "children" || role === "ADMIN"
+                  ? BioData.length 
+                  : currentPagination.totalItems || 0}
               </p>
             </div>
           </div>
         </div>
       </div>
-      )}
-      {viewMode === 'children' || (permissions.hasFullAccess || currentData.length > 0) && (
+
+      {(viewMode === 'children' || viewMode === 'all') && currentData.length > 0 && (
         <div className="mb-6">
           <SearchAndFilters
             onSearch={handleSearch}
             onReset={handleResetFilters}
             loading={currentPagination.loading}
-            totalResults={filteredData.length}
+            totalResults={viewMode === "children" ? BioData.length : filteredData.length}
           />
         </div>
       )}
