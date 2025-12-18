@@ -1,6 +1,6 @@
 import type { BiositeLink } from "../../interfaces/Biosite";
 import Cardbase from "./CardBase";
-import { ChevronRight } from "lucide-react";
+
 import MusicEmbed from "./MusicEmbed";
 import SocialEmbed from "./SocialEmbed";
 import SocialLinks from "./SocialLink.tsx";
@@ -14,6 +14,7 @@ import VideoEmbed from "./VideoEmbed.tsx";
 import { useAnalytics } from "../../hooks/useAnalytics.ts";
 import { useBusinessCard } from "../../hooks/useVCard.ts";
 import { useNavigate } from "react-router-dom";
+import { ImageGallerySection } from "../../components/Preview/LivePreviewComponents";
 
 export enum Section_type {
   Profile = "Profile",
@@ -25,6 +26,7 @@ export enum Section_type {
   Social_Post = "Social Post",
   Social = "Social",
   Video = "Video",
+  Gallery = "Gallery", // Sección de galería de imágenes
 }
 
 export interface VCard {
@@ -36,13 +38,15 @@ export interface VCard {
 export default function BiositeSection({
   section,
   links,
+  textBlocks, // Bloques de texto con imágenes para Gallery
   themeConfig,
   vcard,
   isPreview = false,
   isPublicView = false,
 }: {
   section: Section_type;
-  links: BiositeLink[];
+  links?: BiositeLink[]; // Opcional: usado por Social, Links, Music, etc.
+  textBlocks?: any[]; // Opcional: usado por Gallery
   themeConfig?: any;
   vcard?: VCard;
   isPreview?: boolean;
@@ -63,7 +67,8 @@ export default function BiositeSection({
 
   let analytics;
 
-  if (links[0] && links[0].biositeId) {
+  // Solo inicializar analytics si hay links
+  if (links && links[0] && links[0].biositeId) {
     analytics = useAnalytics({
       biositeId: links[0].biositeId,
       isPublicView: isPublicView,
@@ -72,7 +77,9 @@ export default function BiositeSection({
   }
 
   const onTrack = (id: string) => {
-    analytics.trackLinkClick(id);
+    if (analytics) {
+      analytics.trackLinkClick(id);
+    }
   };
 
   const renderSection = () => {
@@ -93,10 +100,10 @@ export default function BiositeSection({
         );
       case Section_type.Links:
         return links
-          .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+          ?.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
           .map((link) => (
             <Cardbase
-              icon={ChevronRight}
+              icon={undefined}
               onTrack={onTrack}
               url={link.url}
               image={link.image || linkicon}
@@ -107,9 +114,9 @@ export default function BiositeSection({
             />
           ));
       case Section_type.Contactame:
-        return links.map((link) => (
+        return links?.map((link) => (
           <Cardbase
-            icon={ChevronRight}
+            icon={undefined}
             url={link.url}
             image={SVG}
             onTrack={onTrack}
@@ -120,15 +127,15 @@ export default function BiositeSection({
           />
         ));
       case Section_type.Music_Podcast:
-        return (
+        return links && links[0] ? (
           <MusicEmbed
             onClick={links[0].onClick}
             onTrack={onTrack}
             link={links[0]}
           />
-        );
+        ) : null;
       case Section_type.Link_de_mi_App:
-        return links.map((link) => (
+        return links?.map((link) => (
           <Cardbase
             icon={isVisitaEcuadorApp(link.url) ? visitaecuador_com : ""}
             image={
@@ -143,24 +150,40 @@ export default function BiositeSection({
           />
         ));
       case Section_type.Social_Post:
-        return (
+        return links && links[0] ? (
           <SocialEmbed
             onLinkClick={links[0].onClick}
             onTrack={onTrack}
             link={links[0]}
             themeConfig={themeConfig}
           />
-        );
+        ) : null;
       case Section_type.Social:
-        return (
+        return links ? (
           <SocialLinks
             onTrack={onTrack}
             links={links}
             themeConfig={themeConfig}
           />
-        );
+        ) : null;
       case Section_type.Video:
-        return <VideoEmbed onClick={links[0].onClick} link={links[0]} />;
+        return links && links[0] ? (
+          <VideoEmbed onClick={links[0].onClick} link={links[0]} />
+        ) : null;
+      case Section_type.Gallery:
+        // Renderiza el carrusel de imágenes con los textBlocks
+        return (
+          <ImageGallerySection
+            key="gallery-section"
+            textBlocks={textBlocks || []}
+            isExposedRoute={isPublicView}
+            themeConfig={themeConfig}
+            // Mismo patrón que VCard (línea 98)
+            // Si !isPreview (público) → undefined (ImageGallerySection maneja el modal)
+            // Si isPreview (dueño) → navega al editor
+            handleGalleryClick={!isPreview ? undefined : () => navigate('/gallery')}
+          />
+        );
       default:
         return null;
     }

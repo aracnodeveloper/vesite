@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import apiService from "../../service/apiService";
 import type { Section } from "../../interfaces/sections";
 import { getSectionsByBiositeApi } from "../../constants/EndpointsRoutes";
@@ -18,6 +18,7 @@ import BiositeSection, { Section_type } from "./BiositeSection";
 import ConditionalNavButton from "../../components/ConditionalNavButton";
 import VCardModal from "./VCardModal";
 import type { VCardData } from "../../types/V-Card";
+import { useTextBlocks } from "../../hooks/useTextBlocks.ts"; // Hook para obtener imágenes de galería
 
 export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -35,6 +36,10 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const storageKey = "biositeReloadAttempts";
   const errorStorageKey = "biositeErrorReloadAttempts";
   const [canStartChecking, setCanStartChecking] = useState(false);
+
+  // Estados para Gallery
+  const [fetchedSections, setFetchedSections] = useState<Section[]>([]); // Guardar secciones para acceder al orderIndex
+  const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks(); // Hook para obtener imágenes de galería
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -58,8 +63,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
   // Función para sincronizar el biosite hijo con el padre
   const syncChildWithParent = async (
-      childBiosite: BiositeFull,
-      parentBiosite: BiositeFull
+    childBiosite: BiositeFull,
+    parentBiosite: BiositeFull
   ) => {
     if (syncInProgress) return;
 
@@ -68,8 +73,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
       // Verificar si necesita sincronización
       const needsSync =
-          childBiosite.backgroundImage !== parentBiosite.backgroundImage ||
-          JSON.stringify(childBiosite.colors) !== JSON.stringify(parentBiosite.colors);
+        childBiosite.backgroundImage !== parentBiosite.backgroundImage ||
+        JSON.stringify(childBiosite.colors) !== JSON.stringify(parentBiosite.colors);
 
       if (!needsSync) {
         console.log("Biosite hijo ya está sincronizado con el padre");
@@ -80,9 +85,9 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
       // Preparar los colores del padre
       const parentColors =
-          typeof parentBiosite.colors === "string"
-              ? parentBiosite.colors
-              : JSON.stringify(parentBiosite.colors);
+        typeof parentBiosite.colors === "string"
+          ? parentBiosite.colors
+          : JSON.stringify(parentBiosite.colors);
 
       // Crear el DTO de actualización
       const updateData: BiositeUpdateDto = {
@@ -103,9 +108,9 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
       // Ejecutar actualización
       const updatedBiosite = await apiService.update<BiositeUpdateDto>(
-          "/biosites",
-          childBiosite.id,
-          updateData
+        "/biosites",
+        childBiosite.id,
+        updateData
       );
 
       console.log("Sincronización completada exitosamente");
@@ -113,8 +118,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       // Actualizar el estado local con el biosite sincronizado
       if (updatedBiosite) {
         const biositeResult = Array.isArray(updatedBiosite)
-            ? updatedBiosite[0]
-            : updatedBiosite;
+          ? updatedBiosite[0]
+          : updatedBiosite;
 
         setBiosite(biositeResult as BiositeFull);
       }
@@ -131,15 +136,19 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
         setLoading(true);
         if (biosite?.id) {
           const fetchedSections = await apiService.getAll<Section[]>(
-              `${getSectionsByBiositeApi}/${biosite.id}`
+            `${getSectionsByBiositeApi}/${biosite.id}`
           );
+
+          // Guardar secciones para acceder al orderIndex de Gallery
+          setFetchedSections(fetchedSections);
+
           let links: Map<Section_type, BiositeLink[]>;
 
           links = createOrderedSectionsRecord(
-              biosite.links,
-              fetchedSections,
-              propSlug != null,
-              onNavigate
+            biosite.links,
+            fetchedSections,
+            propSlug != null,
+            onNavigate
           );
 
           setLinks(links);
@@ -156,6 +165,13 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     }
   }, [biosite, propSlug]);
 
+  // Cargar textBlocks (imágenes de galería) cuando se carga el biosite
+  useEffect(() => {
+    if (biosite?.id) {
+      getBlocksByBiosite(biosite.id);
+    }
+  }, [biosite?.id, getBlocksByBiosite]);
+
   useEffect(() => {
     const fetchBiositeBySlug = async () => {
       setLoading(true);
@@ -167,8 +183,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
       try {
         const initialBiosite = await apiService.getById<BiositeFull>(
-            "/biosites/slug",
-            slug
+          "/biosites/slug",
+          slug
         );
 
         if (!initialBiosite) {
@@ -179,7 +195,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
         if (shouldIncludeParent) {
           const response = await apiService.getAll<BiositeFull[]>(
-              `/biosites/slug/${slug}?include_parent=true`
+            `/biosites/slug/${slug}?include_parent=true`
           );
 
           if (Array.isArray(response) && response.length > 0) {
@@ -201,9 +217,9 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
         }
       } catch (error: any) {
         const errorMessage =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Error al cargar el biosite";
+          error?.response?.data?.message ||
+          error?.message ||
+          "Error al cargar el biosite";
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -216,8 +232,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   useEffect(() => {
     if (biosite && parentBiosite && !syncInProgress) {
       const needsSync =
-          biosite.backgroundImage !== parentBiosite.backgroundImage ||
-          JSON.stringify(biosite.colors) !== JSON.stringify(parentBiosite.colors);
+        biosite.backgroundImage !== parentBiosite.backgroundImage ||
+        JSON.stringify(biosite.colors) !== JSON.stringify(parentBiosite.colors);
 
       if (needsSync) {
         syncChildWithParent(biosite, parentBiosite);
@@ -238,8 +254,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
     if (!loading && !biosite) {
       const currentAttempts = parseInt(
-          localStorage.getItem(storageKey) || "0",
-          10
+        localStorage.getItem(storageKey) || "0",
+        10
       );
 
       if (currentAttempts >= maxReloadAttempts) {
@@ -264,8 +280,8 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
 
     if (!loading && error) {
       const currentErrorAttempts = parseInt(
-          localStorage.getItem(errorStorageKey) || "0",
-          10
+        localStorage.getItem(errorStorageKey) || "0",
+        10
       );
 
       if (currentErrorAttempts >= maxReloadAttempts) {
@@ -289,7 +305,16 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   }, [loading, biosite, error, navigate, canStartChecking]);
 
   const isExposedRoute =
-      propSlug != null || window.location.pathname === `/${biosite?.slug}`;
+    propSlug != null || window.location.pathname === `/${biosite?.slug}`;
+
+  // Función helper para obtener el orderIndex de Gallery
+  const getGalleryOrderIndex = (): number => {
+    const gallerySection = fetchedSections.find(
+      (s) => s.titulo.toLowerCase() === "gallery" ||
+        s.titulo.toLowerCase() === "galeria"
+    );
+    return gallerySection?.orderIndex || 999; // 999 = al final si no existe
+  };
 
   const handleUserInfoClick = (e: React.MouseEvent) => {
     if (isExposedRoute) {
@@ -309,16 +334,16 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const themeConfig = getThemeConfig(biosite);
 
   const validBackgroundImage =
-      biosite?.backgroundImage && isValidImageUrl(biosite.backgroundImage)
-          ? biosite.backgroundImage
-          : null;
-
-  const validAvatarImage = isValidImageUrl(biosite?.avatarImage)
-      ? biosite?.avatarImage
+    biosite?.backgroundImage && isValidImageUrl(biosite.backgroundImage)
+      ? biosite.backgroundImage
       : null;
 
+  const validAvatarImage = isValidImageUrl(biosite?.avatarImage)
+    ? biosite?.avatarImage
+    : null;
+
   const defaultAvatar =
-      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
   const description = biosite?.owner?.description;
 
@@ -334,84 +359,128 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   };
 
   return (
-      <>
-        <div
-            className={`w-full h-full flex items-center justify-center`}
-            style={{
-              background: themeConfig.colors.background.startsWith("linear-gradient")
-                  ? themeConfig.colors.background
-                  : themeConfig.colors.background,
-              backgroundColor: themeConfig.colors.background.startsWith(
-                  "linear-gradient"
-              )
-                  ? undefined
-                  : themeConfig.colors.background,
-              fontFamily: themeConfig.fonts.primary,
-              color: themeConfig.colors.text,
-            }}
-        >
-          <div className={`w-full max-w-full min-h-screen mx-auto`}>
-            <BackgroundSection
-                isExposedRoute={isExposedRoute}
-                validBackgroundImage={validBackgroundImage}
-                imageLoadStates={imageLoadStates}
-                handleImageLoad={setImageLoadStates}
-                biosite={biosite}
-                themeConfig={themeConfig}
-                handleImageClick={handleUserInfoClick}
-            />
+    <>
+      <div
+        className={`w-full h-full flex items-center justify-center`}
+        style={{
+          background: themeConfig.colors.background.startsWith("linear-gradient")
+            ? themeConfig.colors.background
+            : themeConfig.colors.background,
+          backgroundColor: themeConfig.colors.background.startsWith(
+            "linear-gradient"
+          )
+            ? undefined
+            : themeConfig.colors.background,
+          fontFamily: themeConfig.fonts.primary,
+          color: themeConfig.colors.text,
+        }}
+      >
+        <div className={`w-full max-w-full min-h-screen mx-auto`}>
+          <BackgroundSection
+            isExposedRoute={isExposedRoute}
+            validBackgroundImage={validBackgroundImage}
+            imageLoadStates={imageLoadStates}
+            handleImageLoad={setImageLoadStates}
+            biosite={biosite}
+            themeConfig={themeConfig}
+            handleImageClick={handleUserInfoClick}
+          />
 
-            <AvatarSection
-                isExposedRoute={isExposedRoute}
-                validAvatarImage={validAvatarImage}
-                imageLoadStates={imageLoadStates}
-                handleImageLoad={setImageLoadStates}
-                biosite={biosite}
-                themeConfig={themeConfig}
-                defaultAvatar={defaultAvatar}
-                handleImageClick={handleUserInfoClick}
-            />
+          <AvatarSection
+            isExposedRoute={isExposedRoute}
+            validAvatarImage={validAvatarImage}
+            imageLoadStates={imageLoadStates}
+            handleImageLoad={setImageLoadStates}
+            biosite={biosite}
+            themeConfig={themeConfig}
+            defaultAvatar={defaultAvatar}
+            handleImageClick={handleUserInfoClick}
+          />
 
-            <div className={`w-full max-w-md mx-auto`}>
-              <UserInfoSection
-                  biosite={biosite}
-                  user={user}
-                  description={description}
-                  themeConfig={themeConfig}
-                  handleUserInfoClick={handleUserInfoClick}
-              />
-            </div>
-            <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-4 -mt-2">
-              <>
-                {links &&
-                    Array.from(links.entries()).map(([sectionId, sectionLinks]) => (
+          <div className={`w-full max-w-md mx-auto`}>
+            <UserInfoSection
+              biosite={biosite}
+              user={user}
+              description={description}
+              themeConfig={themeConfig}
+              handleUserInfoClick={handleUserInfoClick}
+            />
+          </div>
+          <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-4 -mt-2">
+            <>
+              {(() => {
+                // Crear array de todas las secciones con su orderIndex
+                const allSections: Array<{
+                  key: string;
+                  orderIndex: number;
+                  component: JSX.Element;
+                }> = [];
+
+                // Agregar secciones del Map (Social, Links, Music, etc.)
+                if (links) {
+                  Array.from(links.entries()).forEach(([sectionId, sectionLinks]) => {
+                    const section = fetchedSections?.find(s => s.titulo === sectionId);
+                    allSections.push({
+                      key: sectionId,
+                      orderIndex: section?.orderIndex || 999,
+                      component: (
                         <BiositeSection
-                            isPreview={isExposedRoute}
-                            isPublicView={!isExposedRoute}
-                            themeConfig={themeConfig}
-                            key={sectionId}
-                            section={sectionId}
-                            links={sectionLinks}
-                            vcard={{
-                              avatar: validAvatarImage,
-                              background: validBackgroundImage,
-                              onClick: () => setShowVCard(true),
-                            }}
+                          isPreview={isExposedRoute}
+                          isPublicView={!isExposedRoute}
+                          themeConfig={themeConfig}
+                          section={sectionId}
+                          links={sectionLinks}
+                          vcard={{
+                            avatar: validAvatarImage,
+                            background: validBackgroundImage,
+                            onClick: () => setShowVCard(true),
+                          }}
                         />
-                    ))}
+                      ),
+                    });
+                  });
+                }
 
-                <ConditionalNavButton themeConfig={themeConfig} />
-              </>
-            </div>
+                // Agregar Gallery si hay imágenes
+                if (textBlocks && textBlocks.length > 0) {
+                  const blocksWithImages = textBlocks.filter((block) => block.image);
+                  if (blocksWithImages.length > 0) {
+                    allSections.push({
+                      key: "gallery",
+                      orderIndex: getGalleryOrderIndex(),
+                      component: (
+                        <BiositeSection
+                          isPreview={isExposedRoute}
+                          isPublicView={!isExposedRoute}
+                          themeConfig={themeConfig}
+                          section={Section_type.Gallery}
+                          textBlocks={textBlocks}
+                        />
+                      ),
+                    });
+                  }
+                }
+
+                // Ordenar todas las secciones por orderIndex y renderizar
+                return allSections
+                  .sort((a, b) => a.orderIndex - b.orderIndex)
+                  .map((section) => (
+                    <div key={section.key}>{section.component}</div>
+                  ));
+              })()}
+
+              <ConditionalNavButton themeConfig={themeConfig} />
+            </>
           </div>
         </div>
-        {showVCard && (
-            <VCardModal
-                cardData={getCardData()}
-                themeConfig={themeConfig}
-                onClose={() => setShowVCard(false)}
-            />
-        )}
-      </>
+      </div>
+      {showVCard && (
+        <VCardModal
+          cardData={getCardData()}
+          themeConfig={themeConfig}
+          onClose={() => setShowVCard(false)}
+        />
+      )}
+    </>
   );
 }

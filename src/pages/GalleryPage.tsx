@@ -10,6 +10,7 @@ import { useTextBlocks } from '../hooks/useTextBlocks';
 import GalleryGrid from '../components/Gallery/GalleryGrid';
 import type { TextBlock } from '../interfaces/textBlocks';
 import Loading from '../components/shared/Loading';
+import BackButton from '../components/shared/BackButton';
 
 const GalleryPage = () => {
     const navigate = useNavigate();
@@ -143,16 +144,8 @@ const GalleryPage = () => {
 
             <div className="relative z-10 max-w-md mx-auto h-full min-h-screen flex flex-col p-6">
                 {/* Header */}
-                <div className="flex items-center mb-8 relative">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="absolute left-0 p-2 hover:bg-black/5 rounded-full transition-colors"
-                    >
-                        <ChevronLeft size={24} className="text-gray-800" />
-                    </button>
-                    <h1 className="w-full text-center text-xl font-bold text-gray-800">
-                        Gallery
-                    </h1>
+                <div className="px-6 py-4 border-b border-gray-700">
+                    <BackButton text={"Galería de imágenes"} />
                 </div>
 
                 {/* Main Content */}

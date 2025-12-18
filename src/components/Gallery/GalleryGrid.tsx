@@ -228,7 +228,7 @@ const GalleryGrid: React.FC<GalleryGridProps> = ({
                 <div className="flex justify-between items-center mb-3">
                     {!readOnly && (
                         <p className="text-sm text-gray-700 font-medium">
-                            {isReordering ? 'Grid de reordenamiento' : 'Galería de imágenes'}
+                            {isReordering ? 'Grid de reordenamiento' : ''}
                         </p>
                     )}
 
