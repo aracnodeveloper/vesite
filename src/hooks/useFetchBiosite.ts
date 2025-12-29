@@ -22,6 +22,7 @@ export interface PaginationParams {
   search?: string;
   sortBy?: string;
   sortOrder?: string;
+  slugSearch?:string;
   hasSlug?: string;
   status?: string;
   dateRange?: string;
@@ -94,72 +95,80 @@ export const useFetchBiosite = (userId?: string) => {
   );
 
   const fetchAllBiosites = useCallback(
-    async (
-      params?: PaginationParams
-    ): Promise<BiositeFull[] | PaginatedResponse<BiositeFull>> => {
-      try {
-        setLoading(true);
-        setError(null);
+      async (
+          params?: PaginationParams
+      ): Promise<BiositeFull[] | PaginatedResponse<BiositeFull>> => {
+        try {
+          setLoading(true);
+          setError(null);
 
-        let url = getALLBiositesApi;
+          let url = getALLBiositesApi;
 
-        if (params?.page && params?.size) {
-          url = getBiositesApi;
-          const searchParams = new URLSearchParams({
-            page: params.page.toString(),
-            size: params.size.toString(),
-          });
+          if (params?.page && params?.size) {
+            url = getBiositesApi;
+            const searchParams = new URLSearchParams({
+              page: params.page.toString(),
+              size: params.size.toString(),
+            });
 
-          // Mapeo de parámetros para agregar solo los que tienen valor
-          const paramMap = {
-            search: params.search,
-            orderBy: params.sortBy,
-            orderMode: params.sortOrder,
-            slug: params.hasSlug,
-            status: params.status,
-            dateRange: params.dateRange,
-          };
+            // IMPORTANTE: Manejar la prioridad de slug
+            const paramMap: Record<string, string | undefined> = {
+              search: params.search,
+              orderBy: params.sortBy,
+              orderMode: params.sortOrder,
+              status: params.status,
+              dateRange: params.dateRange,
+            };
 
-          Object.entries(paramMap).forEach(([key, value]) => {
-            if (value) {
-              searchParams.append(key, value);
+            // Lógica de prioridad para slug
+            if (params.slugSearch?.trim()) {
+              // Si hay búsqueda específica, usarla
+              paramMap.slug = params.slugSearch.trim();
+            } else if (params.hasSlug && params.hasSlug !== 'all') {
+              // Si no hay búsqueda específica, usar el filtro de estado
+              paramMap.slug = params.hasSlug;
             }
-          });
 
-          url += `?${searchParams.toString()}`;
+            Object.entries(paramMap).forEach(([key, value]) => {
+              if (value) {
+                searchParams.append(key, value);
+              }
+            });
+
+            url += `?${searchParams.toString()}`;
+          }
+
+          const response = await apiService.getAll<
+              BiositeFull[] | PaginatedResponse<BiositeFull>
+          >(url);
+
+          if (Array.isArray(response)) {
+            return response;
+          }
+
+          return response as PaginatedResponse<BiositeFull>;
+        } catch (error: any) {
+          const errorMessage =
+              error?.response?.data?.message ||
+              error?.message ||
+              "Error al cargar todos los biosites";
+          setError(errorMessage);
+
+          if (params?.page && params?.size) {
+            return {
+              data: [],
+              total: 0,
+              page: params.page,
+              size: params.size,
+              totalPages: 0,
+            };
+          }
+          return [];
+        } finally {
+          setLoading(false);
         }
-
-        const response = await apiService.getAll<
-          BiositeFull[] | PaginatedResponse<BiositeFull>
-        >(url);
-
-        if (Array.isArray(response)) {
-          return response;
-        }
-
-        return response as PaginatedResponse<BiositeFull>;
-      } catch (error: any) {
-        const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          "Error al cargar todos los biosites";
-        setError(errorMessage);
-
-        if (params?.page && params?.size) {
-          return {
-            data: [],
-            total: 0,
-            page: params.page,
-            size: params.size,
-            totalPages: 0,
-          };
-        }
-        return [];
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
+      },
+      []
   );
 
   const fetchUserBiosites = useCallback(async (): Promise<BiositeFull[]> => {

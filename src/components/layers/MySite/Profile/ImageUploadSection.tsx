@@ -2,7 +2,7 @@ import { Upload, Image, message } from "antd";
 import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../../../../interfaces/Biosite";
 import { useState, useEffect, useRef } from "react";
-import ImageEditorModal from "./ImageEditorModal";
+import ImageEditorModal from "../../../global/ImagenesModal/ImageEditorModal.tsx";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
