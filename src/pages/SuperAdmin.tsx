@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useFetchBiosite } from "../hooks/useFetchBiosite";
+import {type PaginationParams, useFetchBiosite} from "../hooks/useFetchBiosite";
 import { usePagination } from "../hooks/usePagination";
 import SearchAndFilters from "../components/global/Super_admin/SearchAndFilters";
 import type { FilterState } from "../components/global/Super_admin/SearchAndFilters";
