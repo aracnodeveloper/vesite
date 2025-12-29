@@ -1,4 +1,4 @@
-import { Database, LinkIcon } from "lucide-react";
+import { Database, Edit, LinkIcon } from "lucide-react";
 import Input from "../../../shared/Input";
 import { getLinkType } from "../SharedLinksComponents";
 import FomrField from "../../../shared/FomrField";
@@ -170,7 +170,7 @@ export default function ExpandedBiositeDetails({
             {/* Información del Usuario */}
             <div>
               <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">
-                Información del Usuario{ischild !== false ? " Hijo" : ""}
+                Información del Usuario {biosite.title}
                 {error && (
                     <span className="ml-2 text-xs sm:text-sm text-red-600 font-normal">
                   (Error al cargar datos)
@@ -178,6 +178,7 @@ export default function ExpandedBiositeDetails({
                 )}
               </h4>
               <div className="p-3 sm:p-4 lg:p-6 rounded-lg border bg-white shadow-sm">
+                <span className="flex items-center text-black font-bold mb-3 gap-2">     <Edit  className="w-4 h-4" /> EDITOR</span>
                 <form onSubmit={onSave} className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                     <FomrField title={"Nombre"}>

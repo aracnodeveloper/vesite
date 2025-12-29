@@ -44,6 +44,23 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     [key: string]: "loading" | "loaded" | "error";
   }>({});
 
+  // Función auxiliar para obtener el email correcto del owner
+  const getOwnerEmail = (owner: any): string => {
+    if (!owner) return "";
+    
+    // Primero intenta obtener del campo email
+    if (owner.email && owner.email.includes("@")) {
+      return owner.email;
+    }
+    
+    // Si no, intenta obtener del campo cedula
+    if (owner.cedula && owner.cedula.includes("@")) {
+      return owner.cedula;
+    }
+    
+    return "";
+  };
+
   useEffect(() => {
     if (showVCard) {
       document.body.style.overflow = "hidden";
@@ -54,7 +71,6 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       document.body.style.overflow = "";
     };
   }, [showVCard]);
-
 
   const onNavigate = (route: string) => {
     navigate(route);
@@ -347,13 +363,16 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const description = biosite?.owner?.description;
 
   const getCardData = (): VCardData => {
+    const owner = biosite?.owner;
+    const ownerEmail = getOwnerEmail(owner);
+    
     return {
-      name: biosite?.owner?.name || "",
-      title: biosite?.owner?.description || "",
-      company: biosite?.owner?.site || "",
-      email: biosite?.owner?.email || "",
-      phone: biosite?.owner?.phone || "",
-      website: biosite?.owner?.site || "",
+      name: owner?.name || "",
+      title: owner?.description || "",
+      company: owner?.site || "",
+      email: ownerEmail,
+      phone: owner?.phone || "",
+      website: owner?.site || "",
     };
   };
 

@@ -21,7 +21,7 @@ export default function Input({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="w-full h-10 bg-[#FAFFF6] text-xs text-black px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 "
+      className="w-full h-10 bg-[#FAFFF6] text-xs text-black px-4 py-2 rounded-md focus:outline-none ring-1 ring-black focus:ring-2 focus:ring-purple-500 "
     />
   );
 }
