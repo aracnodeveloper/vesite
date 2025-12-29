@@ -112,8 +112,8 @@ const MySite = () => {
         return <V_Card key="vcard" />;
       case "Video":
         return <Videos key="video" />;
-      case "Galeria":
-        return <Text_blocks key="galeria" />;
+      case "Gallery":
+        return <Text_blocks key="gallery" />;
       default:
         return null;
     }

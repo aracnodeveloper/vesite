@@ -25,7 +25,7 @@ import VCardPage from "./components/layers/MySite/V-Card/V-CardPage.tsx";
 import WhatsAppPage from "./components/layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
 import AdminPanel from "./pages/SuperAdmin.tsx";
 import NewBiositePage from "./context/NewBiositePage/NewBiositePage.tsx";
-import GalleryPage from "./pages/GalleryPage.tsx"; // ← NUEVA LÍNEA
+import GalleryPage from "./components/layers/MySite/Text_blocks/GalleryPage.tsx"; // ← NUEVA LÍNEA
 
 // Componente wrapper para rutas privadas con Layout
 const PrivateLayout = () => (

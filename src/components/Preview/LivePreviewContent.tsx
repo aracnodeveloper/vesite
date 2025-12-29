@@ -10,8 +10,8 @@ import {
   SocialLinksSection,
   RegularLinksSection,
   TwoSquareImagesSection,
-  ImageGallerySection,
 } from "./LivePreviewComponents";
+import {ImageGallerySection} from "../../context/NewBiositePage/ImageGallerySection.tsx";
 import VCardButton from "../global/VCard/VCard.tsx";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
 import { useTemplates } from "../../hooks/useTemplates.ts";

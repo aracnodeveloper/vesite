@@ -18,6 +18,7 @@ import type {
   AnalyticsData,
 } from "../interfaces/AdminData.ts";
 import type { UpdateBusinessCardDto } from "../types/V-Card";
+import { buildBiositeQueryParams, cleanParams } from '../Utils/filterUtils.ts';
 
 type ViewMode = "all" | "children";
 
@@ -78,6 +79,7 @@ const AdminPanel: React.FC = () => {
     search: "",
     status: "all",
     hasSlug: "all",
+    slugSearch: "",
     dateRange: "all",
     sortBy: "createdAt",
     sortOrder: "desc",
@@ -119,6 +121,7 @@ const AdminPanel: React.FC = () => {
         search: "",
         status: "all",
         hasSlug: "all",
+        slugSearch: "",
         dateRange: "all",
         sortBy: "createdAt",
         sortOrder: "desc",
@@ -134,33 +137,61 @@ const AdminPanel: React.FC = () => {
   }, [permissions.hasFullAccess, viewMode]);
 
   const applyFilters = useCallback(
-    async (
-      currentPage: number,
-      size: number,
-      filters: FilterState
-    ): Promise<BiositeFull[]> => {
+      async (
+          currentPage: number,
+          size: number,
+          filters: FilterState
+      ): Promise<BiositeFull[]> => {
+        try {
+          // Construir parámetros usando la interfaz PaginationParams
+          const params: PaginationParams = {
+            page: currentPage,
+            size: size,
+          };
 
-      const params = {
-        ...currentPagination.getPaginationParams(),
-        search: filters.search,
-        status: filters.status !== "all" ? filters.status : undefined,
-        hasSlug: filters.hasSlug !== "all" ? filters.hasSlug : undefined,
-        dateRange: filters.dateRange !== "all" ? filters.dateRange : undefined,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-        page: currentPage,
-        size: size,
-      };
+          // Búsqueda general
+          if (filters.search?.trim()) {
+            params.search = filters.search.trim();
+          }
 
-      const cleanParams = Object.fromEntries(
-        Object.entries(params).filter(([_, value]) => value !== undefined)
-      );
+          // Ordenamiento
+          if (filters.sortBy) {
+            params.sortBy = filters.sortBy;
+          }
+          if (filters.sortOrder) {
+            params.sortOrder = filters.sortOrder;
+          }
 
-      const response = await fetchAllBiosites(cleanParams);
+          // Estado
+          if (filters.status !== "all") {
+            params.status = filters.status;
+          }
 
-      return Array.isArray(response) ? response : response?.data || [];
-    },
-    []
+          // Fecha
+          if (filters.dateRange !== "all") {
+            params.dateRange = filters.dateRange;
+          }
+
+          // LÓGICA DE SLUG CON PRIORIDAD
+          if (filters.slugSearch?.trim()) {
+            // Prioridad 1: Búsqueda específica de slug
+            params.slugSearch = filters.slugSearch.trim();
+          } else if (filters.hasSlug !== "all") {
+            // Prioridad 2: Filtro de estado del slug
+            params.hasSlug = filters.hasSlug;
+          }
+
+          console.log('Parámetros antes de enviar:', params);
+
+          const response = await fetchAllBiosites(params);
+
+          return Array.isArray(response) ? response : response?.data || [];
+        } catch (error) {
+          console.error('Error en applyFilters:', error);
+          return [];
+        }
+      },
+      [fetchAllBiosites]
   );
 
   const handleSearch = useCallback(
@@ -187,6 +218,7 @@ const AdminPanel: React.FC = () => {
       search: "",
       status: "all",
       hasSlug: "all",
+      slugSearch: "",
       dateRange: "all",
       sortBy: "createdAt",
       sortOrder: "desc",

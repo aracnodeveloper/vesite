@@ -7,6 +7,7 @@ import { BlockImageApi } from '../constants/EndpointsRoutes';
 import type { TextBlock, CreateTextBlockDto, UpdateTextBlockDto } from '../interfaces/textBlocks';
 
 const TEXT_BLOCKS_ENDPOINT = '/texts-blocks';
+const TEXT_BLOCKS_ENDPOINTGet = '/texts-blocks/biosite';
 
 
 export const useTextBlocks = () => {
@@ -21,15 +22,10 @@ export const useTextBlocks = () => {
             setError(null);
 
             // Primero intentar obtener todos los bloques
-            const allBlocks = await apiService.getAll<TextBlock[]>(TEXT_BLOCKS_ENDPOINT);
+            const allBlocks = await apiService.getById<TextBlock[]>(TEXT_BLOCKS_ENDPOINTGet,biositeId);
 
-            // Filtrar por biositeId localmente
-            const filteredBlocks = allBlocks
-                .filter(block => block.biositeId === biositeId && block.isActive !== false)
-                .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
-
-            setBlocks(filteredBlocks);
-            return filteredBlocks;
+            setBlocks(allBlocks);
+            return allBlocks;
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Error al obtener bloques';
             setError(errorMsg);

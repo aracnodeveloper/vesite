@@ -12,9 +12,9 @@ import AppleStore from "../../assets/icons/AppleStore.svg";
 import GooglePlay from "../../assets/icons/GooglePLay.svg";
 import VideoEmbed from "./VideoEmbed.tsx";
 import { useAnalytics } from "../../hooks/useAnalytics.ts";
-import { useBusinessCard } from "../../hooks/useVCard.ts";
+//import { useBusinessCard } from "../../hooks/useVCard.ts";
 import { useNavigate } from "react-router-dom";
-import { ImageGallerySection } from "../../components/Preview/LivePreviewComponents";
+import { ImageGallerySection } from "../../context/NewBiositePage/ImageGallerySection.tsx";
 
 export enum Section_type {
   Profile = "Profile",

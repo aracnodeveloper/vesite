@@ -22,7 +22,7 @@ const Text_blocks = () => {
     };
 
     // Contar imágenes reales (que tengan URL)
-    const activeImagesCount = blocks.filter(b => b.image).length;
+    const activeImagesCount = blocks.filter(b => b.image && b.isActive).length;
 
     return (
         <div
@@ -30,7 +30,7 @@ const Text_blocks = () => {
             onClick={handleGalleryClick}
         >
             <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-[#ddda73] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#4A7BA8] rounded-lg flex items-center justify-center">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"

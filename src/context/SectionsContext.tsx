@@ -220,7 +220,7 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 case 'Social Post':
                     shouldShow = activeSocialPostLinks.length > 0;
                     break;
-                case 'Galeria':
+                case 'Gallery':
                     shouldShow = true;
                     break;
                 default:

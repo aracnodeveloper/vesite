@@ -2,7 +2,6 @@ import { useEffect, useState, type JSX } from "react";
 import apiService from "../../service/apiService";
 import type { Section } from "../../interfaces/sections";
 import { getSectionsByBiositeApi } from "../../constants/EndpointsRoutes";
-import Button from "../../components/shared/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BiositeFull, BiositeLink, BiositeUpdateDto } from "../../interfaces/Biosite";
 import Loading from "../../components/shared/Loading";
@@ -454,7 +453,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
                           isPublicView={!isExposedRoute}
                           themeConfig={themeConfig}
                           section={Section_type.Gallery}
-                          textBlocks={textBlocks}
+                          textBlocks={textBlocks.filter(b => b.isActive === true)}
                         />
                       ),
                     });
