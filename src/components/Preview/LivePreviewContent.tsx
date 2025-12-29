@@ -11,6 +11,7 @@ import {
   RegularLinksSection,
   TwoSquareImagesSection,
 } from "./LivePreviewComponents";
+import {ImageGallerySection} from "../../context/NewBiositePage/ImageGallerySection.tsx";
 import VCardButton from "../global/VCard/VCard.tsx";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
 import { useTemplates } from "../../hooks/useTemplates.ts";
@@ -19,6 +20,7 @@ import AppDownloadButtons from "../layers/AddMoreSections/App/AppDownloadButtons
 import WhatsAppButton from "../layers/AddMoreSections/WhattsApp/whatsAppButton.tsx";
 import { useNavigate } from "react-router-dom";
 import { useSectionsContext } from "../../context/SectionsContext.tsx";
+import { useTextBlocks } from "../../hooks/useTextBlocks.ts";
 
 const LivePreviewContent = () => {
   const navigate = useNavigate();
@@ -28,6 +30,10 @@ const LivePreviewContent = () => {
 
   // Get sections from context
   const { sections: contextSections } = useSectionsContext();
+
+  // Get text blocks for gallery
+  const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks();
+  const biositeId = Cookie.get('biositeId');
 
   const {
     biosite,
@@ -70,6 +76,13 @@ const LivePreviewContent = () => {
 
   const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } =
     useTemplates();
+
+  // Load text blocks for gallery
+  useEffect(() => {
+    if (biositeId) {
+      getBlocksByBiosite(biositeId);
+    }
+  }, [biositeId, getBlocksByBiosite]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -467,6 +480,30 @@ const LivePreviewContent = () => {
       });
     }
 
+    // Gallery Section
+    if (textBlocks.length > 0) {
+      const blocksWithImages = textBlocks.filter((block) => block.image);
+      if (blocksWithImages.length > 0) {
+        sections.push({
+          type: "gallery",
+          orderIndex: getSectionOrderIndex("Galeria"),
+          component: (
+            <ImageGallerySection
+              key="gallery-section"
+              textBlocks={textBlocks}
+              isExposedRoute={isExposedRoute}
+              themeConfig={themeConfig}
+              handleGalleryClick={() => {
+                if (!isExposedRoute) {
+                  navigate('/gallery');
+                }
+              }}
+            />
+          ),
+        });
+      }
+    }
+
     // Sort sections by orderIndex
     return sections.sort((a, b) => a.orderIndex - b.orderIndex);
   }, [
@@ -475,6 +512,7 @@ const LivePreviewContent = () => {
     musicEmbed,
     socialPost,
     videoEmbed,
+    textBlocks,
     isExposedRoute,
     themeConfig,
     findPlatformForLink,
@@ -493,6 +531,7 @@ const LivePreviewContent = () => {
     contextSections,
     getSectionOrderIndex,
     user?.id,
+    navigate,
   ]);
 
   if (loading || userLoading || !isTemplatesLoaded) {
@@ -537,9 +576,8 @@ const LivePreviewContent = () => {
       }}
     >
       <div
-        className={`w-full ${
-          isExposedRoute ? "max-w-full" : "max-w-sm"
-        } min-h-screen mx-auto`}
+        className={`w-full ${isExposedRoute ? "max-w-full" : "max-w-sm"
+          } min-h-screen mx-auto`}
       >
         {isSecondTemplate ? (
           <>
@@ -593,9 +631,8 @@ const LivePreviewContent = () => {
 
         {/* Main content */}
         <div
-          className={`w-full ${
-            isExposedRoute ? "max-w-md" : "max-w-sm"
-          } mx-auto`}
+          className={`w-full ${isExposedRoute ? "max-w-md" : "max-w-sm"
+            } mx-auto`}
         >
           {/* User info section */}
           <UserInfoSection

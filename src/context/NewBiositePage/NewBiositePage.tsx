@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import apiService from "../../service/apiService";
 import type { Section } from "../../interfaces/sections";
 import { getSectionsByBiositeApi } from "../../constants/EndpointsRoutes";
-import Button from "../../components/shared/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import type { BiositeFull, BiositeLink, BiositeUpdateDto } from "../../interfaces/Biosite";
 import Loading from "../../components/shared/Loading";
@@ -18,6 +17,7 @@ import BiositeSection, { Section_type } from "./BiositeSection";
 import ConditionalNavButton from "../../components/ConditionalNavButton";
 import VCardModal from "./VCardModal";
 import type { VCardData } from "../../types/V-Card";
+import { useTextBlocks } from "../../hooks/useTextBlocks.ts"; // Hook para obtener imágenes de galería
 
 export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -35,6 +35,10 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const storageKey = "biositeReloadAttempts";
   const errorStorageKey = "biositeErrorReloadAttempts";
   const [canStartChecking, setCanStartChecking] = useState(false);
+
+  // Estados para Gallery
+  const [fetchedSections, setFetchedSections] = useState<Section[]>([]); // Guardar secciones para acceder al orderIndex
+  const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks(); // Hook para obtener imágenes de galería
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -149,6 +153,10 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
           const fetchedSections = await apiService.getAll<Section[]>(
             `${getSectionsByBiositeApi}/${biosite.id}`
           );
+
+          // Guardar secciones para acceder al orderIndex de Gallery
+          setFetchedSections(fetchedSections);
+
           let links: Map<Section_type, BiositeLink[]>;
 
           links = createOrderedSectionsRecord(
@@ -171,6 +179,13 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       fetchSections();
     }
   }, [biosite, propSlug]);
+
+  // Cargar textBlocks (imágenes de galería) cuando se carga el biosite
+  useEffect(() => {
+    if (biosite?.id) {
+      getBlocksByBiosite(biosite.id);
+    }
+  }, [biosite?.id, getBlocksByBiosite]);
 
   useEffect(() => {
     const fetchBiositeBySlug = async () => {
@@ -307,6 +322,15 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const isExposedRoute =
     propSlug != null || window.location.pathname === `/${biosite?.slug}`;
 
+  // Función helper para obtener el orderIndex de Gallery
+  const getGalleryOrderIndex = (): number => {
+    const gallerySection = fetchedSections.find(
+      (s) => s.titulo.toLowerCase() === "gallery" ||
+        s.titulo.toLowerCase() === "galeria"
+    );
+    return gallerySection?.orderIndex || 999; // 999 = al final si no existe
+  };
+
   const handleUserInfoClick = (e: React.MouseEvent) => {
     if (isExposedRoute) {
       e.preventDefault();
@@ -402,22 +426,66 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
           </div>
           <div className="flex flex-col gap-y-2 max-w-[550px] mx-auto justify-center p-4 -mt-2">
             <>
-              {links &&
-                Array.from(links.entries()).map(([sectionId, sectionLinks]) => (
-                  <BiositeSection
-                    isPreview={isExposedRoute}
-                    isPublicView={!isExposedRoute}
-                    themeConfig={themeConfig}
-                    key={sectionId}
-                    section={sectionId}
-                    links={sectionLinks}
-                    vcard={{
-                      avatar: validAvatarImage,
-                      background: validBackgroundImage,
-                      onClick: () => setShowVCard(true),
-                    }}
-                  />
-                ))}
+              {(() => {
+                // Crear array de todas las secciones con su orderIndex
+                const allSections: Array<{
+                  key: string;
+                  orderIndex: number;
+                  component: JSX.Element;
+                }> = [];
+
+                // Agregar secciones del Map (Social, Links, Music, etc.)
+                if (links) {
+                  Array.from(links.entries()).forEach(([sectionId, sectionLinks]) => {
+                    const section = fetchedSections?.find(s => s.titulo === sectionId);
+                    allSections.push({
+                      key: sectionId,
+                      orderIndex: section?.orderIndex || 999,
+                      component: (
+                        <BiositeSection
+                          isPreview={isExposedRoute}
+                          isPublicView={!isExposedRoute}
+                          themeConfig={themeConfig}
+                          section={sectionId}
+                          links={sectionLinks}
+                          vcard={{
+                            avatar: validAvatarImage,
+                            background: validBackgroundImage,
+                            onClick: () => setShowVCard(true),
+                          }}
+                        />
+                      ),
+                    });
+                  });
+                }
+
+                // Agregar Gallery si hay imágenes
+                if (textBlocks && textBlocks.length > 0) {
+                  const blocksWithImages = textBlocks.filter((block) => block.image);
+                  if (blocksWithImages.length > 0) {
+                    allSections.push({
+                      key: "gallery",
+                      orderIndex: getGalleryOrderIndex(),
+                      component: (
+                        <BiositeSection
+                          isPreview={isExposedRoute}
+                          isPublicView={!isExposedRoute}
+                          themeConfig={themeConfig}
+                          section={Section_type.Gallery}
+                          textBlocks={textBlocks.filter(b => b.isActive === true)}
+                        />
+                      ),
+                    });
+                  }
+                }
+
+                // Ordenar todas las secciones por orderIndex y renderizar
+                return allSections
+                  .sort((a, b) => a.orderIndex - b.orderIndex)
+                  .map((section) => (
+                    <div key={section.key}>{section.component}</div>
+                  ));
+              })()}
 
               <ConditionalNavButton themeConfig={themeConfig} />
             </>

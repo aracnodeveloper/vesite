@@ -21,6 +21,7 @@ export interface FilterState {
   search: string;
   status: "all" | "active" | "inactive";
   hasSlug: "all" | "with-slug" | "without-slug";
+  slugSearch: string; // NUEVO: para búsqueda específica de slug
   dateRange: "all" | "last7" | "last30" | "last90";
   sortBy: "createdAt" | "title" | "updatedAt";
   sortOrder: "asc" | "desc";
@@ -30,17 +31,18 @@ const defaultFilters: FilterState = {
   search: "",
   status: "all",
   hasSlug: "all",
+  slugSearch: "", // NUEVO
   dateRange: "all",
   sortBy: "createdAt",
   sortOrder: "desc",
 };
 
 const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
-  onSearch,
-  onReset,
-  loading = false,
-  totalResults = 0,
-}) => {
+                                                             onSearch,
+                                                             onReset,
+                                                             loading = false,
+                                                             totalResults = 0,
+                                                           }) => {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTimeout, setSearchTimeout] = useState<number | null>(null);
@@ -62,8 +64,8 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   }, [filters]);
 
   const updateFilter = <K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K]
+      key: K,
+      value: FilterState[K]
   ) => {
     setFilters((prev) => ({
       ...prev,
@@ -81,299 +83,339 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
     if (filters.search.trim()) count++;
     if (filters.status !== "all") count++;
     if (filters.hasSlug !== "all") count++;
+    if (filters.slugSearch.trim()) count++; // NUEVO
     if (filters.dateRange !== "all") count++;
-    if (filters.sortBy !== "createdAt" || filters.sortOrder !== "asc") count++;
+    if (filters.sortBy !== "createdAt" || filters.sortOrder !== "desc") count++;
     return count;
   };
 
   const activeFiltersCount = getActiveFiltersCount();
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-      {/* Search Bar */}
-      <div className="p-3 sm:p-4 border-b border-gray-200">
-        <div className="flex flex-col gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Buscar por título, slug, email..."
-              value={filters.search}
-              onChange={(e) => updateFilter("search", e.target.value)}
-              className="w-full pl-10 pr-10 sm:pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-              style={{ color: "black" }}
-            />
-            {filters.search && (
-              <button
-                onClick={() => updateFilter("search", "")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-4 h-4 cursor-pointer" />
-              </button>
-            )}
-          </div>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        {/* Search Bar */}
+        <div className="p-3 sm:p-4 border-b border-gray-200">
+          <div className="flex flex-col gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                  type="text"
+                  placeholder="Buscar por título, email..."
+                  value={filters.search}
+                  onChange={(e) => updateFilter("search", e.target.value)}
+                  className="w-full pl-10 pr-10 sm:pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  style={{ color: "black" }}
+              />
+              {filters.search && (
+                  <button
+                      onClick={() => updateFilter("search", "")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4 cursor-pointer" />
+                  </button>
+              )}
+            </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className={`flex items-center justify-center gap-2 px-3 py-2 text-xs sm:text-sm border rounded-md transition-colors cursor-pointer ${
-                isExpanded
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <Filter className="w-4 h-4 cursor-pointer flex-shrink-0" />
-              <span className="hidden sm:inline">Filtros</span>
-              <span className="sm:hidden">Filtrar</span>
-              {activeFiltersCount > 0 && (
-                <span className="bg-indigo-600 text-white rounded-full px-2 py-0.5 text-xs min-w-[20px] text-center">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className={`flex items-center justify-center gap-2 px-3 py-2 text-xs sm:text-sm border rounded-md transition-colors cursor-pointer ${
+                      isExpanded
+                          ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+              >
+                <Filter className="w-4 h-4 cursor-pointer flex-shrink-0" />
+                <span className="hidden sm:inline">Filtros</span>
+                <span className="sm:hidden">Filtrar</span>
+                {activeFiltersCount > 0 && (
+                    <span className="bg-indigo-600 text-white rounded-full px-2 py-0.5 text-xs min-w-[20px] text-center">
                   {activeFiltersCount}
                 </span>
-              )}
-              <ChevronDown
-                className={`w-4 h-4 transition-transform flex-shrink-0 ${
-                  isExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={handleReset}
-                className="flex items-center justify-center gap-1 px-3 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                <RefreshCw className="w-4 h-4 cursor-pointer flex-shrink-0" />
-                <span className="hidden sm:inline">Limpiar</span>
-                <span className="sm:hidden">Reset</span>
+                )}
+                <ChevronDown
+                    className={`w-4 h-4 transition-transform flex-shrink-0 ${
+                        isExpanded ? "rotate-180" : ""
+                    }`}
+                />
               </button>
-            )}
-          </div>
-        </div>
 
-        {/* Results info */}
-        <div className="mt-3 flex items-center justify-between text-xs sm:text-sm text-gray-600">
-          <div className="flex-1 min-w-0">
-            {loading ? (
-              <span className="flex items-center">
+              {activeFiltersCount > 0 && (
+                  <button
+                      onClick={handleReset}
+                      className="flex items-center justify-center gap-1 px-3 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4 cursor-pointer flex-shrink-0" />
+                    <span className="hidden sm:inline">Limpiar</span>
+                    <span className="sm:hidden">Reset</span>
+                  </button>
+              )}
+            </div>
+          </div>
+
+          {/* Results info */}
+          <div className="mt-3 flex items-center justify-between text-xs sm:text-sm text-gray-600">
+            <div className="flex-1 min-w-0">
+              {loading ? (
+                  <span className="flex items-center">
                 <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-indigo-600 mr-2 flex-shrink-0"></div>
                 <span className="truncate">Buscando...</span>
               </span>
-            ) : (
-              <span className="truncate">
+              ) : (
+                  <span className="truncate">
                 {totalResults > 0
-                  ? `${totalResults} resultado${
-                      totalResults !== 1 ? "s" : ""
+                    ? `${totalResults} resultado${
+                        totalResults !== 1 ? "s" : ""
                     } encontrado${totalResults !== 1 ? "s" : ""}`
-                  : "No se encontraron resultados"}
+                    : "No se encontraron resultados"}
               </span>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Expanded Filters */}
-      {isExpanded && (
-        <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {/* Status Filter */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                <Eye className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
-                Estado
-              </label>
-              <select
-                value={filters.status}
-                onChange={(e) =>
-                  updateFilter(
-                    "status",
-                    e.target.value as FilterState["status"]
-                  )
-                }
-                className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                style={{ color: "black" }}
-              >
-                <option value="all">Todos los estados</option>
-                <option value="active">Solo activos</option>
-                <option value="inactive">Solo inactivos</option>
-              </select>
-            </div>
+        {/* Expanded Filters */}
+        {isExpanded && (
+            <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    <Eye className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                    Estado
+                  </label>
+                  <select
+                      value={filters.status}
+                      onChange={(e) =>
+                          updateFilter(
+                              "status",
+                              e.target.value as FilterState["status"]
+                          )
+                      }
+                      className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                      style={{ color: "black" }}
+                  >
+                    <option value="all">Todos los estados</option>
+                    <option value="active">Solo activos</option>
+                    <option value="inactive">Solo inactivos</option>
+                  </select>
+                </div>
 
-            {/* Slug Filter */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                <Link className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
-                Estado del Slug
-              </label>
-              <select
-                value={filters.hasSlug}
-                onChange={(e) =>
-                  updateFilter(
-                    "hasSlug",
-                    e.target.value as FilterState["hasSlug"]
-                  )
-                }
-                className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                style={{ color: "black" }}
-              >
-                <option value="all">Todos</option>
-                <option value="with-slug">Con slug configurado</option>
-                <option value="without-slug">Sin slug</option>
-              </select>
-            </div>
+                {/* Slug Filter */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    <Link className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                    Estado del Slug
+                  </label>
+                  <select
+                      value={filters.hasSlug}
+                      onChange={(e) =>
+                          updateFilter(
+                              "hasSlug",
+                              e.target.value as FilterState["hasSlug"]
+                          )
+                      }
+                      className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                      style={{ color: "black" }}
+                  >
+                    <option value="all">Todos</option>
+                    <option value="with-slug">Con slug configurado</option>
+                    <option value="without-slug">Sin slug</option>
+                  </select>
+                </div>
 
-            {/* Date Range Filter */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
-                Fecha de creación
-              </label>
-              <select
-                value={filters.dateRange}
-                onChange={(e) =>
-                  updateFilter(
-                    "dateRange",
-                    e.target.value as FilterState["dateRange"]
-                  )
-                }
-                className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                style={{ color: "black" }}
-              >
-                <option value="all">Cualquier fecha</option>
-                <option value="last7">Últimos 7 días</option>
-                <option value="last30">Últimos 30 días</option>
-                <option value="last90">Últimos 90 días</option>
-              </select>
-            </div>
+                {/* NUEVO: Slug Search Input */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    <Link className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                    Buscar Slug Específico
+                  </label>
+                  <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="ej: john-doe"
+                        value={filters.slugSearch}
+                        onChange={(e) => updateFilter("slugSearch", e.target.value)}
+                        className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        style={{ color: "black" }}
+                    />
+                    {filters.slugSearch && (
+                        <button
+                            onClick={() => updateFilter("slugSearch", "")}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-3 h-3 cursor-pointer" />
+                        </button>
+                    )}
+                  </div>
+                </div>
 
-            {/* Sort Options */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Ordenar por
-              </label>
-              <div className="space-y-1 sm:space-y-2">
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) =>
-                    updateFilter(
-                      "sortBy",
-                      e.target.value as FilterState["sortBy"]
-                    )
-                  }
-                  className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                  style={{ color: "black" }}
-                >
-                  <option value="createdAt">Fecha</option>
-                  <option value="title">Título</option>
-                  <option value="updatedAt">Última actualización</option>
-                </select>
-                <select
-                  value={filters.sortOrder}
-                  onChange={(e) =>
-                    updateFilter(
-                      "sortOrder",
-                      e.target.value as FilterState["sortOrder"]
-                    )
-                  }
-                  className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
-                  style={{ color: "black" }}
-                >
-                  <option value="desc">Descendente</option>
-                  <option value="asc">Ascendente</option>
-                </select>
+                {/* Date Range Filter */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
+                    Fecha de creación
+                  </label>
+                  <select
+                      value={filters.dateRange}
+                      onChange={(e) =>
+                          updateFilter(
+                              "dateRange",
+                              e.target.value as FilterState["dateRange"]
+                          )
+                      }
+                      className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                      style={{ color: "black" }}
+                  >
+                    <option value="all">Cualquier fecha</option>
+                    <option value="last7">Últimos 7 días</option>
+                    <option value="last30">Últimos 30 días</option>
+                    <option value="last90">Últimos 90 días</option>
+                  </select>
+                </div>
+
+                {/* Sort Options */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                    Ordenar por
+                  </label>
+                  <div className="space-y-1 sm:space-y-2">
+                    <select
+                        value={filters.sortBy}
+                        onChange={(e) =>
+                            updateFilter(
+                                "sortBy",
+                                e.target.value as FilterState["sortBy"]
+                            )
+                        }
+                        className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                        style={{ color: "black" }}
+                    >
+                      <option value="createdAt">Fecha</option>
+                      <option value="title">Título</option>
+                      <option value="updatedAt">Última actualización</option>
+                    </select>
+                    <select
+                        value={filters.sortOrder}
+                        onChange={(e) =>
+                            updateFilter(
+                                "sortOrder",
+                                e.target.value as FilterState["sortOrder"]
+                            )
+                        }
+                        className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                        style={{ color: "black" }}
+                    >
+                      <option value="desc">Descendente</option>
+                      <option value="asc">Ascendente</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Active Filters Display */}
-          {activeFiltersCount > 0 && (
-            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
-              <div className="flex flex-wrap gap-1 sm:gap-2">
+              {/* Active Filters Display */}
+              {activeFiltersCount > 0 && (
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
                 <span className="text-xs sm:text-sm text-gray-600 mr-1 sm:mr-2 flex-shrink-0">
                   Filtros activos:
                 </span>
 
-                {filters.search && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {filters.search && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     Búsqueda: "{filters.search}"
                     <button
-                      onClick={() => updateFilter("search", "")}
-                      className="ml-1 hover:text-blue-600 "
+                        onClick={() => updateFilter("search", "")}
+                        className="ml-1 hover:text-blue-600"
                     >
-                      <X className="w-3 h-3 " />
+                      <X className="w-3 h-3" />
                     </button>
                   </span>
-                )}
+                      )}
 
-                {filters.status !== "all" && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      {/* NUEVO: Mostrar filtro de slug específico */}
+                      {filters.slugSearch && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                    Slug: "{filters.slugSearch}"
+                    <button
+                        onClick={() => updateFilter("slugSearch", "")}
+                        className="ml-1 hover:text-indigo-600"
+                    >
+                      <X className="w-3 h-3 cursor-pointer" />
+                    </button>
+                  </span>
+                      )}
+
+                      {filters.status !== "all" && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Estado:{" "}
-                    {filters.status === "active" ? "Activo" : "Inactivo"}
-                    <button
-                      onClick={() => updateFilter("status", "all")}
-                      className="ml-1 hover:text-green-600 "
-                    >
+                            {filters.status === "active" ? "Activo" : "Inactivo"}
+                            <button
+                                onClick={() => updateFilter("status", "all")}
+                                className="ml-1 hover:text-green-600"
+                            >
                       <X className="w-3 h-3 cursor-pointer" />
                     </button>
                   </span>
-                )}
+                      )}
 
-                {filters.hasSlug !== "all" && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      {filters.hasSlug !== "all" && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                     Slug:{" "}
-                    {filters.hasSlug === "with-slug" ? "Con slug" : "Sin slug"}
-                    <button
-                      onClick={() => updateFilter("hasSlug", "all")}
-                      className="ml-1 hover:text-purple-600"
-                    >
+                            {filters.hasSlug === "with-slug" ? "Con slug" : "Sin slug"}
+                            <button
+                                onClick={() => updateFilter("hasSlug", "all")}
+                                className="ml-1 hover:text-purple-600"
+                            >
                       <X className="w-3 h-3 cursor-pointer" />
                     </button>
                   </span>
-                )}
+                      )}
 
-                {filters.dateRange !== "all" && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      {filters.dateRange !== "all" && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                     Fecha:{" "}
-                    {filters.dateRange === "last7"
-                      ? "Últimos 7 días"
-                      : filters.dateRange === "last30"
-                      ? "Últimos 30 días"
-                      : "Últimos 90 días"}
+                            {filters.dateRange === "last7"
+                                ? "Últimos 7 días"
+                                : filters.dateRange === "last30"
+                                    ? "Últimos 30 días"
+                                    : "Últimos 90 días"}
+                            <button
+                                onClick={() => updateFilter("dateRange", "all")}
+                                className="ml-1 hover:text-yellow-600"
+                            >
+                      <X className="w-3 h-3 cursor-pointer" />
+                    </button>
+                  </span>
+                      )}
+
+                      {(filters.sortBy !== "createdAt" ||
+                          filters.sortOrder !== "desc") && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    Orden:{" "}
+                            {filters.sortBy === "createdAt"
+                                ? "Fecha"
+                                : filters.sortBy === "title"
+                                    ? "Título"
+                                    : "Actualización"}{" "}
+                            ({filters.sortOrder === "desc" ? "desc" : "asc"})
                     <button
-                      onClick={() => updateFilter("dateRange", "all")}
-                      className="ml-1 hover:text-yellow-600"
+                        onClick={() => {
+                          updateFilter("sortBy", "createdAt");
+                          updateFilter("sortOrder", "desc");
+                        }}
+                        className="ml-1 hover:text-gray-600"
                     >
                       <X className="w-3 h-3 cursor-pointer" />
                     </button>
                   </span>
-                )}
-
-                {(filters.sortBy !== "createdAt" ||
-                  filters.sortOrder !== "desc") && (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    Orden:{" "}
-                    {filters.sortBy === "createdAt"
-                      ? "Fecha"
-                      : filters.sortBy === "title"
-                      ? "Título"
-                      : "Actualización"}{" "}
-                    ({filters.sortOrder === "desc" ? "desc" : "asc"})
-                    <button
-                      onClick={() => {
-                        updateFilter("sortBy", "createdAt");
-                        updateFilter("sortOrder", "desc");
-                      }}
-                      className="ml-1 hover:text-gray-600"
-                    >
-                      <X className="w-3 h-3  cursor-pointer" />
-                    </button>
-                  </span>
-                )}
-              </div>
+                      )}
+                    </div>
+                  </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
   );
 };
 

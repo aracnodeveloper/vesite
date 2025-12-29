@@ -14,6 +14,7 @@ import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useSectionsContext } from "../../../context/SectionsContext.tsx";
 import { GripVertical, Menu, X, Check } from "lucide-react";
 import Loading from "../../shared/Loading.tsx";
+import Text_blocks from "./Text_blocks/text_block.tsx";
 
 const MySite = () => {
   const {
@@ -54,7 +55,7 @@ const MySite = () => {
       "social post",
     ];
     const isExcluded = excludedKeywords.some(
-        (keyword) => labelLower.includes(keyword) || urlLower.includes(keyword)
+      (keyword) => labelLower.includes(keyword) || urlLower.includes(keyword)
     );
     return !isExcluded;
   });
@@ -62,12 +63,12 @@ const MySite = () => {
   const activeRegularLinks = regularLinks.filter((link) => link.isActive);
   const activeAppLinks = appLinks.filter((link) => link.isActive);
   const activeWhatsAppLinks = whatsAppLinks.filter(
-      (link) =>
-          link.isActive &&
-          link.phone &&
-          link.message &&
-          link.phone.trim() !== "" &&
-          link.message.trim() !== ""
+    (link) =>
+      link.isActive &&
+      link.phone &&
+      link.message &&
+      link.phone.trim() !== "" &&
+      link.message.trim() !== ""
   );
 
   const activeVideoLinks = getVideoLinks();
@@ -75,20 +76,20 @@ const MySite = () => {
   const activeSocialPostLinks = getSocialPostLinks();
 
   const visibleSections = getVisibleSections(
-      activeSocialLinks,
-      activeRegularLinks,
-      activeAppLinks,
-      activeWhatsAppLinks,
-      activeVideoLinks,
-      activeMusicLinks,
-      activeSocialPostLinks
+    activeSocialLinks,
+    activeRegularLinks,
+    activeAppLinks,
+    activeWhatsAppLinks,
+    activeVideoLinks,
+    activeMusicLinks,
+    activeSocialPostLinks
   );
 
   const profileSection = visibleSections.find(
-      (section) => section.titulo === "Profile"
+    (section) => section.titulo === "Profile"
   );
   const draggableSections = visibleSections.filter(
-      (section) => section.titulo !== "Profile"
+    (section) => section.titulo !== "Profile"
   );
 
   const getSectionComponent = (sectionTitle: string) => {
@@ -111,6 +112,8 @@ const MySite = () => {
         return <V_Card key="vcard" />;
       case "Video":
         return <Videos key="video" />;
+      case "Gallery":
+        return <Text_blocks key="gallery" />;
       default:
         return null;
     }
@@ -158,143 +161,137 @@ const MySite = () => {
   }
 
   return (
-      <div className="w-full">
-        <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-          <Droppable droppableId="sections" direction="vertical">
-            {(provided, snapshot) => (
-                <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className={`space-y-5 ${
-                        snapshot.isDraggingOver ? "bg-blue-50/30" : ""
-                    }`}
-                >
-                  {/* Header with reorder button for mobile */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-800 uppercase tracking-wide text-start">
-                      My VeSite
-                    </h3>
-                    <div className="lg:hidden flex items-center space-x-2">
-                      <button
-                          onClick={toggleReorderMode}
-                          className={`p-2 rounded-lg transition-colors ${
-                              isReorderMode
-                                  ? "bg-teal-600 text-white"
-                                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                          }`}
-                          title={isReorderMode ? "Finalizar reordenamiento" : "Reordenar secciones"}
-                      >
-                        {isReorderMode ? <Check size={20} /> : <Menu size={20} />}
-                      </button>
-                      {isReorderMode && (
-                          <button
-                              onClick={toggleReorderMode}
-                              className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
-                              title="Cancelar"
-                          >
-                            <X size={20} />
-                          </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Profile section - always first, not draggable */}
-                  {profileSection && (
-                      <div className="transition-all duration-200">
-                        {getSectionComponent(profileSection.titulo)}
-                      </div>
+    <div className="w-full">
+      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+        <Droppable droppableId="sections" direction="vertical">
+          {(provided, snapshot) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className={`space-y-5 ${snapshot.isDraggingOver ? "bg-blue-50/30" : ""
+                }`}
+            >
+              {/* Header with reorder button for mobile */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-gray-800 uppercase tracking-wide text-start">
+                  My VeSite
+                </h3>
+                <div className="lg:hidden flex items-center space-x-2">
+                  <button
+                    onClick={toggleReorderMode}
+                    className={`p-2 rounded-lg transition-colors ${isReorderMode
+                        ? "bg-teal-600 text-white"
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                      }`}
+                    title={isReorderMode ? "Finalizar reordenamiento" : "Reordenar secciones"}
+                  >
+                    {isReorderMode ? <Check size={20} /> : <Menu size={20} />}
+                  </button>
+                  {isReorderMode && (
+                    <button
+                      onClick={toggleReorderMode}
+                      className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                      title="Cancelar"
+                    >
+                      <X size={20} />
+                    </button>
                   )}
+                </div>
+              </div>
 
-                  {/* Draggable sections */}
-                  {draggableSections.map((section, index) => {
-                    const component = getSectionComponent(section.titulo);
-                    if (!component) return null;
+              {/* Profile section - always first, not draggable */}
+              {profileSection && (
+                <div className="transition-all duration-200">
+                  {getSectionComponent(profileSection.titulo)}
+                </div>
+              )}
 
-                    return (
-                        <Draggable
-                            key={section.id}
-                            draggableId={section.id.toString()}
-                            index={index}
-                            isDragDisabled={!isReorderMode && window.innerWidth < 1024}
-                        >
-                          {(provided, snapshot) => (
-                              <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  className={`
+              {/* Draggable sections */}
+              {draggableSections.map((section, index) => {
+                const component = getSectionComponent(section.titulo);
+                if (!component) return null;
+
+                return (
+                  <Draggable
+                    key={section.id}
+                    draggableId={section.id.toString()}
+                    index={index}
+                    isDragDisabled={!isReorderMode && window.innerWidth < 1024}
+                  >
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`
                           group relative
                           hover:shadow-sm
-                          ${
-                                      snapshot.isDragging
-                                          ? "opacity-50 shadow-lg z-50  lg:-ml-30 -mt-50 lg:mt-0 "
-                                          : ""
-                                  }
-                          ${
-                                      snapshot.isDropAnimating
-                                          ? "transition-transform duration-200"
-                                          : ""
-                                  }
-                          ${
-                                      isDragging && !snapshot.isDragging
-                                          ? "opacity-75"
-                                          : ""
-                                  }
+                          ${snapshot.isDragging
+                            ? "opacity-50 shadow-lg z-50  lg:-ml-30 -mt-50 lg:mt-0 "
+                            : ""
+                          }
+                          ${snapshot.isDropAnimating
+                            ? "transition-transform duration-200"
+                            : ""
+                          }
+                          ${isDragging && !snapshot.isDragging
+                            ? "opacity-75"
+                            : ""
+                          }
                         `}
-                              >
-                                {/* Desktop drag handle - Always visible on hover for desktop */}
-                                {!isReorderMode && (
-                                    <div
-                                        {...provided.dragHandleProps}
-                                        className={`
+                      >
+                        {/* Desktop drag handle - Always visible on hover for desktop */}
+                        {!isReorderMode && (
+                          <div
+                            {...provided.dragHandleProps}
+                            className={`
                               hidden lg:flex
                               absolute -left-10 top-1/2 transform -translate-y-1/2 z-50
                               w-8 h-8 items-center justify-center
                               bg-white shadow-md border border-gray-200 rounded-lg
-                              ${
-                                            snapshot.isDragging || isDragging
-                                                ? "opacity-100"
-                                                : "opacity-0 group-hover:opacity-100"
-                                        }
+                              ${snapshot.isDragging || isDragging
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100"
+                              }
                               transition-all duration-200
                               cursor-grab active:cursor-grabbing
                               hover:bg-gray-50 hover:shadow-lg
                             `}
-                                        title="Arrastrar para reordenar"
-                                    >
-                                      <GripVertical size={16} className="text-gray-500" />
-                                    </div>
-                                )}
+                            title="Arrastrar para reordenar"
+                          >
+                            <GripVertical size={16} className="text-gray-500" />
+                          </div>
+                        )}
 
-                                {/* Mobile/Desktop content */}
-                                {isReorderMode ? (
-                                    <div className="flex items-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg pr-1">
-                                      <div className="transition-all duration-200 w-full">
-                                        {component}
-                                      </div>
-                                      <div
-                                          {...provided.dragHandleProps}
-                                          className="p-2 bg-white border border-gray-300 rounded-lg cursor-grab active:cursor-grabbing hover:bg-gray-100 transition-colors z-50"
-                                          title="Arrastrar"
-                                      >
-                                        <GripVertical size={16} className="text-gray-600" />
-                                      </div>
-                                    </div>
-                                ) : (
-                                    <div className="transition-all duration-200">
-                                      {component}
-                                    </div>
-                                )}
-                              </div>
-                          )}
-                        </Draggable>
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </div>
+                        {/* Mobile/Desktop content */}
+                        {isReorderMode ? (
+                          <div className="flex items-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg pr-1">
+                            <div className="transition-all duration-200 w-full">
+                              {component}
+                            </div>
+                            <div
+                              {...provided.dragHandleProps}
+                              className="p-2 bg-white border border-gray-300 rounded-lg cursor-grab active:cursor-grabbing hover:bg-gray-100 transition-colors z-50"
+                              title="Arrastrar"
+                            >
+                              <GripVertical size={16} className="text-gray-600" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="transition-all duration-200">
+                            {component}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   );
 };
 

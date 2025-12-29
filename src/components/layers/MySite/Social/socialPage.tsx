@@ -116,7 +116,7 @@ const SocialPage = () => {
         (platformIdLower.length > 2 && labelLower.includes(platformIdLower)) ||
         link.icon === p.icon ||
         labelLower.replace(/[^a-z0-9]/g, "") ===
-          platformNameLower.replace(/[^a-z0-9]/g, "") ||
+        platformNameLower.replace(/[^a-z0-9]/g, "") ||
         (platformNameLower.includes("/") &&
           platformNameLower
             .split("/")
@@ -168,7 +168,7 @@ const SocialPage = () => {
           linkLabelLower.includes(platformIdLower)) ||
         link.icon === platform.icon ||
         linkLabelLower.replace(/[^a-z0-9]/g, "") ===
-          platformNameLower.replace(/[^a-z0-9]/g, "") ||
+        platformNameLower.replace(/[^a-z0-9]/g, "") ||
         (platformNameLower.includes("/") &&
           platformNameLower
             .split("/")
@@ -299,7 +299,7 @@ const SocialPage = () => {
           linkLabelLower.includes(platformIdLower)) ||
         link.icon === platform.icon ||
         linkLabelLower.replace(/[^a-z0-9]/g, "") ===
-          platformNameLower.replace(/[^a-z0-9]/g, "") ||
+        platformNameLower.replace(/[^a-z0-9]/g, "") ||
         (platformNameLower.includes("/") &&
           platformNameLower
             .split("/")
@@ -486,11 +486,10 @@ const SocialPage = () => {
                   className={`
                                         relative p-5 rounded-lg transition-all duration-200 
                                         ${isActive ? "" : " hover:bg-gray-700"}
-                                        ${
-                                          isSubmitting
-                                            ? "opacity-50 cursor-not-allowed"
-                                            : "cursor-pointer"
-                                        }
+                                        ${isSubmitting
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                    }
                                     `}
                 >
                   {isActive && (
