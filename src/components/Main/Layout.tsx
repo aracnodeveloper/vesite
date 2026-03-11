@@ -214,7 +214,7 @@ const handleBlackCardClick = async () => {
       window.open(url, "_blank");
     }
 */
-     const url = `http://localhost:5173/vesite/blackcard/${member.memberId}
+     const url = `https://visitaecuador.com/vesite/blackcard/${member.memberId}
           `;
       window.open(url, "_blank");
     setActiveItem("blackcard");
