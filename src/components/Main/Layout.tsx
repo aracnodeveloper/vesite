@@ -10,6 +10,7 @@ import {
   Settings,
   ExternalLink,
   X,
+  CreditCard
 } from "lucide-react";
 import imgP from "../../../public/img/img.png";
 //import imgP2 from "../../../public/img/fondo.svg";
@@ -29,6 +30,7 @@ import ShareButton from "../ShareButton.tsx";
 import Cookie from "js-cookie";
 import NewBiositePage from "../../context/NewBiositePage/NewBiositePage.tsx";
 import LivePreviewContent from "../Preview/LivePreviewContent.tsx";
+import { blackCardService } from '../../service/Blackcardservice.ts';
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -40,6 +42,8 @@ const Layout: React.FC = () => {
     role === "SUPER_ADMIN" ||
     userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5" ||
     role === "ADMIN";
+
+  const hasUltraAccess = userId === "b54a0f07-be56-48b4-8592-8d92dad6e7f2";
   const { biosite } = usePreview();
   const themeConfig = getThemeConfig(biosite);
   const { hasChanges, markAsSaved, resetChangeDetection } =
@@ -106,12 +110,16 @@ const Layout: React.FC = () => {
     }
   }, [hasChanges, biosite?.id]);
 
-  const handleDrawerSectionClick = (section: string) => {
-    navigate(section);
-    setSelectedSection(section);
-    setIsDrawerOpen(true);
-    setCurrentDrawerHeight(85);
-  };
+const handleDrawerSectionClick = (section: string) => {
+  if (section === 'blackcard') {
+    handleBlackCardClick();
+    return;
+  }
+  navigate(section);
+  setSelectedSection(section);
+  setIsDrawerOpen(true);
+  setCurrentDrawerHeight(85);
+};
 
   const closeDrawer = () => {
     setIsDrawerOpen(false);
@@ -190,6 +198,33 @@ const Layout: React.FC = () => {
     }
   }, [biosite?.id]);
 
+const handleBlackCardClick = async () => {
+  const uid = Cookie.get("userId");
+  if (!uid) return;
+
+  try {
+    const member = await blackCardService.getMemberByUserId(uid);
+  /*  if(location.pathname.includes('localhost') || location.pathname.includes('5173')){
+  const url = `http://localhost:5173/vesite/blackcard/${member.memberId}
+          `;
+      window.open(url, "_blank");
+    }else{
+      const url = `https://visitaecuador.com/vesite/blackcard/${member.memberId}
+          `;
+      window.open(url, "_blank");
+    }
+*/
+     const url = `http://localhost:5173/vesite/blackcard/${member.memberId}
+          `;
+      window.open(url, "_blank");
+    setActiveItem("blackcard");
+    setIsDrawerOpen(true);
+  } catch {
+    // Si no tiene member, podrías mostrar un mensaje o ir a una página de registro
+    console.warn("Este usuario no tiene Black Card asignada");
+  }
+};
+
   const baseSidebarItems = [
     {
       icon: GanttChart,
@@ -212,9 +247,10 @@ const Layout: React.FC = () => {
       to: "/analytics",
       color: "blue",
     },
+ 
   ];
 
-  const sidebarItems = hasAdminAccess
+  const adminsidebarItems = hasAdminAccess
     ? [
       ...baseSidebarItems,
       {
@@ -226,6 +262,19 @@ const Layout: React.FC = () => {
       },
     ]
     : baseSidebarItems;
+
+    const sidebarItems = hasUltraAccess 
+    ? [
+      ...adminsidebarItems,
+       {
+      icon: CreditCard,
+      label: "Black Card",
+      id: "blackcard",
+      to: `/blackcard/${userId}`,
+      color: "amber",
+      },
+    ]
+    : adminsidebarItems
 
   const getAvatarImage = () => {
     if (avatarError || !biosite?.avatarImage) {
@@ -314,11 +363,15 @@ const Layout: React.FC = () => {
     setAvatarError(false);
   }, [biosite?.avatarImage]);
 
-  const handleItemClick = (item: any) => {
-    setActiveItem(item.id);
-    navigate(item.to);
-    setIsDrawerOpen(true);
-  };
+ const handleItemClick = (item: any) => {
+  if (item.id === 'blackcard') {
+    handleBlackCardClick();
+    return;
+  }
+  setActiveItem(item.id);
+  navigate(item.to);
+  setIsDrawerOpen(true);
+};
 
   const getItemStyles = (item: any) => {
     if (activeItem === item.id) {
@@ -327,6 +380,7 @@ const Layout: React.FC = () => {
         orange: "text-orange-600 border-l-4 border-orange-300 lg:border-l-4",
         blue: "text-blue-600 border-l-4 border-blue-300 lg:border-l-4",
         red: "text-red-600 border-l-4 border-red-300 lg:border-l-4",
+         amber: "text-amber-500 border-l-4 border-amber-400 lg:border-l-4", 
       };
       return colorClasses[item.color as keyof typeof colorClasses] + " ";
     }

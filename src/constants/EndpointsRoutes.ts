@@ -54,3 +54,11 @@ export const registerLinkClickApi = "/links-clicks/register-parser"; // POST
 
 // ANALYTICS - BIOSITE ANALYTICS
 export const biositeAnalyticsApi = "/biosites/analytics"; // GET /:userId
+
+// BLACK CARD - MEMBERS
+export const membersApi = "/members";
+export const blackCardApi = "/blackcard";              // GET /:memberId (público)
+export const googleWalletApi = "/passes/google";       // GET /:memberId
+export const appleWalletApi = "/passes/apple";         // GET /:memberId.pkpass
+export const contactVcardApi = "/contacts";            // GET /:memberId.vcf
+export const memberByUserApi = "/members/user";        // GET /:userId

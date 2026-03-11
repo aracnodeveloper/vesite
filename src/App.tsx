@@ -26,6 +26,7 @@ import WhatsAppPage from "./components/layers/AddMoreSections/WhattsApp/whatsApp
 import AdminPanel from "./pages/SuperAdmin.tsx";
 import NewBiositePage from "./context/NewBiositePage/NewBiositePage.tsx";
 import GalleryPage from "./components/layers/MySite/Text_blocks/GalleryPage.tsx"; // ← NUEVA LÍNEA
+import BlackCardLanding from "./pages/BlackCardLanding.tsx";
 
 // Componente wrapper para rutas privadas con Layout
 const PrivateLayout = () => (
@@ -45,6 +46,14 @@ const App = () => {
                             <Route path="/" element={<Navigate to="/sections" />} />
                             <Route path="/login" element={<Login />} />
 
+                            <Route
+                                path="/blackcard/:memberId"
+                                element={
+                                    <div className="min-h-screen">
+                                        <BlackCardLanding />
+                                    </div>
+                                }
+                            />
                             {/* Ruta pública para ver biosite por slug */}
                             <Route
                                 path="/:slug"
