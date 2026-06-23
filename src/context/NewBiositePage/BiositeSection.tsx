@@ -95,6 +95,8 @@ export default function BiositeSection({
             themeConfig={themeConfig}
             title={"VCard"}
             image={vcard.avatar || vcard.background}
+            showBorder
+            useAccentText
             onClick={!isPreview ? vcard.onClick : () => navigate("/VCard")}
           />
         );
@@ -111,6 +113,8 @@ export default function BiositeSection({
               id={link.id}
               themeConfig={themeConfig}
               title={link.label}
+              showBorder
+              useAccentText
             />
           ));
       case Section_type.Contactame:

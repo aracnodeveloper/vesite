@@ -1,5 +1,5 @@
 import { usePreview } from "../context/PreviewContext";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const fontOptions = [
   { name: "Arial", value: "Arial, sans-serif" },
@@ -226,6 +226,54 @@ const StylesPage = () => {
     accentText: "#000000"
   });
 
+  // Define qué colores se envían al aplicar. Si un color está en `false`,
+  // no se manda: se conserva el valor que el biosite ya tenía.
+  // Border y accentText arrancan apagados (son opcionales).
+  const [sendColors, setSendColors] = useState({
+    background: true,
+    text: true,
+    accent: true,
+    border: false,
+    accentText: false
+  });
+
+  type CustomColorKey = keyof typeof customColors;
+
+  // Inicializar la paleta personalizada con los colores actuales del biosite
+  useEffect(() => {
+    if (!biosite?.colors) return;
+    let parsed: any;
+    try {
+      parsed =
+        typeof biosite.colors === "string"
+          ? JSON.parse(biosite.colors)
+          : biosite.colors;
+    } catch {
+      return;
+    }
+    if (!parsed || typeof parsed !== "object") return;
+
+    const hasBorder = !!parsed.border && parsed.border !== "transparent";
+    const hasAccentText = !!parsed.accentText;
+
+    setCustomColors((prev) => ({
+      background: parsed.background || prev.background,
+      text: parsed.text || prev.text,
+      accent: parsed.accent || prev.accent,
+      border: hasBorder ? parsed.border : prev.border,
+      accentText: hasAccentText ? parsed.accentText : parsed.text || prev.accentText,
+    }));
+    setSendColors((prev) => ({
+      ...prev,
+      border: hasBorder,
+      accentText: hasAccentText,
+    }));
+  }, [biosite?.id]);
+
+  const toggleSendColor = (colorKey: CustomColorKey) => {
+    setSendColors((prev) => ({ ...prev, [colorKey]: !prev[colorKey] }));
+  };
+
   const handleThemeColorChange = async (
       color: string,
       textColor: string,
@@ -252,7 +300,7 @@ const StylesPage = () => {
     }
   };
 
-  const handleCustomColorChange = (colorType: 'background' | 'text' | 'accent' | 'border' | 'accentText', value: string) => {
+  const handleCustomColorChange = (colorType: CustomColorKey, value: string) => {
     setCustomColors(prev => ({
       ...prev,
       [colorType]: value
@@ -261,14 +309,33 @@ const StylesPage = () => {
 
   const applyCustomColors = async () => {
     try {
-      // Aplicar los colores exactamente como el usuario los configuró
-      await handleThemeColorChange(
-          customColors.background,
-          customColors.text,
-          customColors.accent,
-          customColors.border,
-          customColors.accentText
-      );
+      // Colores actuales del biosite (para conservar los que no se envían)
+      let current: any = {};
+      try {
+        current =
+          typeof biosite?.colors === "string"
+            ? JSON.parse(biosite.colors)
+            : biosite?.colors || {};
+      } catch {
+        current = {};
+      }
+
+      // Base requerida: si está apagado, se conserva el valor actual
+      const background = sendColors.background
+        ? customColors.background
+        : current.background ?? customColors.background;
+      const text = sendColors.text
+        ? customColors.text
+        : current.text ?? customColors.text;
+      const accent = sendColors.accent
+        ? customColors.accent
+        : current.accent ?? customColors.accent;
+
+      // Opcionales: si está apagado, se manda undefined -> no se sobreescribe
+      const border = sendColors.border ? customColors.border : undefined;
+      const accentText = sendColors.accentText ? customColors.accentText : undefined;
+
+      await handleThemeColorChange(background, text, accent, border, accentText);
     } catch (error) {
       console.error("Error applying custom colors:", error);
       alert("Error al aplicar los colores personalizados.");
@@ -399,6 +466,102 @@ const StylesPage = () => {
       </div>
   );
 
+  // Fila de selector de un color con interruptor "incluir / no enviar".
+  // Se invoca como función (no como <Componente/>) para no perder el foco
+  // del input de texto al escribir.
+  const renderColorRow = ({
+    colorKey,
+    label,
+    optional = false,
+  }: {
+    colorKey: CustomColorKey;
+    label: string;
+    optional?: boolean;
+  }) => {
+    const enabled = sendColors[colorKey];
+    const value = customColors[colorKey];
+    const validHex = /^#[0-9A-Fa-f]{6}$/.test(value);
+
+    return (
+      <div className="group" key={colorKey}>
+        <div
+          className={`flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200 ${
+            enabled ? "" : "opacity-60"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {/* Interruptor incluir / no enviar */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={enabled}
+              onClick={() => toggleSendColor(colorKey)}
+              title={
+                enabled
+                  ? "Se enviará este color"
+                  : "No se enviará — se mantiene el actual"
+              }
+              className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors cursor-pointer ${
+                enabled ? "bg-blue-500" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  enabled ? "translate-x-4" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+
+            <div className="flex flex-col text-start">
+              <span className="flex items-center gap-2 font-semibold text-xs text-gray-500 uppercase tracking-wide">
+                <span
+                  className="w-3 h-3 rounded-full border border-gray-200"
+                  style={{ backgroundColor: value }}
+                ></span>
+                {label}
+                {optional && (
+                  <span className="text-[9px] text-blue-400 normal-case tracking-normal">
+                    opcional
+                  </span>
+                )}
+              </span>
+              <span className="text-[10px] normal-case tracking-normal text-gray-400 mt-0.5">
+                {enabled ? value.toUpperCase() : "No se enviará — se mantiene el actual"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 justify-end">
+            <input
+              type="text"
+              value={value}
+              disabled={!enabled}
+              onChange={(e) => handleCustomColorChange(colorKey, e.target.value)}
+              className="w-20 px-2 py-1 text-xs font-mono rounded-md border border-gray-200 text-gray-600 disabled:bg-gray-100 disabled:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            />
+            <div className="relative w-8 h-8">
+              <input
+                type="color"
+                value={validHex ? value : "#000000"}
+                disabled={!enabled}
+                onChange={(e) => handleCustomColorChange(colorKey, e.target.value)}
+                className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+              />
+              <span
+                className={`w-8 h-8 rounded-full border-4 border-white shadow-lg block ${
+                  enabled
+                    ? "hover:scale-105 transition-transform cursor-pointer"
+                    : "cursor-not-allowed"
+                }`}
+                style={{ backgroundColor: value }}
+              ></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
         <div className="p-4 sm:p-6 space-y-8">
@@ -523,144 +686,89 @@ const StylesPage = () => {
           {activeTab === "dark" && <ColorGrid colors={colorCategories.dark} />}
 
           {activeTab === "custom" && (
-              <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl border border-gray-200/60 shadow-inner">
-                <div className="flex items-start sm:items-center gap-3 mb-4 sm:mb-6">
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide text-start">Paleta Personalizada</h4>
-                    <p className="text-xs text-gray-500 ml-2 uppercase tracking-wide">Crea tu combinación única de colores</p>
+              <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gradient-to-br from-gray-50 to-blue-50/40 rounded-2xl border border-gray-200/70 shadow-inner">
+                {/* Encabezado */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 shadow-md flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                    </svg>
+                  </div>
+                  <div className="text-start">
+                    <h4 className="text-sm font-bold text-gray-800">Paleta personalizada</h4>
+                    <p className="text-xs text-gray-500">Crea tu combinación única de colores</p>
                   </div>
                 </div>
 
-                <div className="mb-4 sm:mb-6">
-                  {/* Panel de controles de color */}
-                  <div className="space-y-4 sm:space-y-5">
-                    {/* Selector de color de fondo */}
-                    <div className="group">
-
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
-                        <label className="flex items-center  gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
-                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.background}}></div>
-                          Color de Fondo
-                        </label>
-                        <div className="relative w-full sm:w-8 h-8">
-                        <input
-                            type="color"
-                            id="background-color-input"
-                            value={customColors.background}
-                            onChange={(e) => handleCustomColorChange('background', e.target.value)}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                        />
-                        <label
-                            htmlFor="background-color-input"
-                            className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
-                            style={{backgroundColor: customColors.background}}
-                        ></label>
-                      </div>
-                      </div>
-
-
+                {/* Vista previa en vivo */}
+                <div
+                    className="mb-5 rounded-xl p-4 border border-gray-200/60 transition-colors duration-300"
+                    style={{ background: customColors.background }}
+                >
+                  <p
+                      className="text-[10px] uppercase tracking-widest mb-3 font-semibold"
+                      style={{ color: customColors.text, opacity: 0.55 }}
+                  >
+                    Vista previa
+                  </p>
+                  <div className="space-y-2">
+                    {/* Link de ejemplo */}
+                    <div
+                        className="w-full flex items-center gap-3 p-2 rounded-lg shadow-sm transition-all duration-300"
+                        style={{
+                          background: customColors.accent,
+                          border: `1.5px solid ${sendColors.border ? customColors.border : "transparent"}`,
+                        }}
+                    >
+                      <div className="w-8 h-8 rounded-md bg-white/80 flex-shrink-0"></div>
+                      <span
+                          className="text-xs font-semibold truncate"
+                          style={{ color: sendColors.accentText ? customColors.accentText : customColors.text }}
+                      >
+                        Mi link de ejemplo
+                      </span>
                     </div>
-
-                    {/* Selector de color de texto */}
-                    <div className="group">
-
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
-                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
-                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.text}}></div>
-                          Color de Texto
-                        </label>
-                        <div className="relative w-full sm:w-8 h-8">
-                        <input
-                            type="color"
-                            value={customColors.text}
-                            onChange={(e) => handleCustomColorChange('text', e.target.value)}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                        />
-                        <label
-                            htmlFor="background-color-input"
-                            className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
-                            style={{backgroundColor: customColors.text}}
-                        ></label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Selector de color de acento/links */}
-                    <div className="group">
-
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
-                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
-                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.accent}}></div>
-                          Color de Links/Acento
-                        </label>
-                        <div className="relative w-full sm:w-8 h-8">
-                          <input
-                              type="color"
-                              value={customColors.accent}
-                              onChange={(e) => handleCustomColorChange('accent', e.target.value)}
-                              className="absolute inset-0 opacity-0 cursor-pointer"
-                          />
-                          <label
-                              htmlFor="background-color-input"
-                              className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
-                              style={{backgroundColor: customColors.accent}}
-                          ></label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Selector de color de borde (links y VCard) */}
-                    <div className="group">
-
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
-                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
-                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.border}}></div>
-                          Color de Borde (links / VCard)
-                        </label>
-                        <div className="relative w-full sm:w-8 h-8">
-                          <input
-                              type="color"
-                              value={customColors.border}
-                              onChange={(e) => handleCustomColorChange('border', e.target.value)}
-                              className="absolute inset-0 opacity-0 cursor-pointer"
-                          />
-                          <label
-                              className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
-                              style={{backgroundColor: customColors.border}}
-                          ></label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Selector de color del texto de los links */}
-                    <div className="group">
-
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
-                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
-                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.accentText}}></div>
-                          Color de Texto de Links
-                        </label>
-                        <div className="relative w-full sm:w-8 h-8">
-                          <input
-                              type="color"
-                              value={customColors.accentText}
-                              onChange={(e) => handleCustomColorChange('accentText', e.target.value)}
-                              className="absolute inset-0 opacity-0 cursor-pointer"
-                          />
-                          <label
-                              className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
-                              style={{backgroundColor: customColors.accentText}}
-                          ></label>
-                        </div>
-                      </div>
+                    {/* VCard de ejemplo */}
+                    <div
+                        className="w-full flex items-center justify-center gap-2 p-2 rounded-lg shadow-sm transition-all duration-300"
+                        style={{
+                          background: customColors.accent,
+                          border: `1.5px solid ${sendColors.border ? customColors.border : "transparent"}`,
+                        }}
+                    >
+                      <div className="w-7 h-7 rounded-md bg-white/80 flex-shrink-0"></div>
+                      <span
+                          className="text-xs font-bold"
+                          style={{ color: sendColors.accentText ? customColors.accentText : customColors.text }}
+                      >
+                        VCard
+                      </span>
                     </div>
                   </div>
                 </div>
 
+                {/* Ayuda */}
+                <div className="flex items-start gap-2 mb-4 px-1">
+                  <svg className="w-3.5 h-3.5 text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">
+                    Usa el interruptor de cada color para decidir si se envía. Si lo
+                    apagas, ese color no se modifica y conserva el valor actual.
+                  </p>
+                </div>
 
+                {/* Panel de controles de color */}
+                <div className="space-y-2.5">
+                  {renderColorRow({ colorKey: "background", label: "Color de Fondo" })}
+                  {renderColorRow({ colorKey: "text", label: "Color de Texto" })}
+                  {renderColorRow({ colorKey: "accent", label: "Color de Links/Acento" })}
+                  {renderColorRow({ colorKey: "border", label: "Color de Borde (links / VCard)", optional: true })}
+                  {renderColorRow({ colorKey: "accentText", label: "Color de Texto de Links", optional: true })}
+                </div>
 
                 {/* Botones de acción */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-gray-200/60">
+                <div className="flex flex-col sm:flex-row gap-3 pt-5 mt-5 border-t border-gray-200/70">
                   <button
                       onClick={() => {
                         setCustomColors({
@@ -670,22 +778,29 @@ const StylesPage = () => {
                           border: "#4A7BA8",
                           accentText: "#FFFFFF"
                         });
+                        setSendColors({
+                          background: true,
+                          text: true,
+                          accent: true,
+                          border: false,
+                          accentText: false
+                        });
                       }}
-                      className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-4 sm:px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-white hover:border-gray-300 hover:text-gray-700 transition-all duration-200 font-medium group"
+                      className="flex items-center justify-center cursor-pointer gap-2 px-4 py-2.5 border border-gray-300 text-gray-600 rounded-xl bg-white hover:bg-gray-50 hover:text-gray-800 transition-all duration-200 font-medium group"
                   >
-                    <svg className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     <span className="text-xs sm:text-sm">Restablecer</span>
                   </button>
                   <button
                       onClick={applyCustomColors}
-                      className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-3 sm:px-3 py-3 text-gray-600 hover:bg-white hover:border-gray-300 hover:text-gray-700 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 group"
+                      className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-4 py-2.5 text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 rounded-xl transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] group"
                   >
-                    <svg className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span className="text-xs sm:text-sm">Aplicar Colores</span>
+                    <span className="text-xs sm:text-sm">Aplicar colores</span>
                   </button>
                 </div>
               </div>

@@ -11,6 +11,8 @@ export default function Cardbase({
   onClick,
   onTrack,
   children,
+  showBorder = false,
+  useAccentText = false,
 }: {
   themeConfig: any;
   title?: string;
@@ -21,12 +23,19 @@ export default function Cardbase({
   onClick?: () => void;
   onTrack?: (id: string) => void;
   children?: any;
+  // Aplica el color de borde (border) — solo para links rectangulares y VCard
+  showBorder?: boolean;
+  // Usa el color exclusivo del texto de links (accentText) en el título
+  useAccentText?: boolean;
 }) {
   const commonClasses =
-    "w-full p-1 h-[55px] rounded-lg shadow-lg transition-all flex items-center duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]";
+    "w-full p-1 mt-2 h-[55px] rounded-lg shadow-lg transition-all flex items-center duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]";
   const commonStyles = {
     backgroundColor: themeConfig.colors.accent,
     background: themeConfig.colors.accent,
+    ...(showBorder
+      ? { border: `1px solid ${themeConfig.colors.border || "transparent"}` }
+      : {}),
   };
 
   const isDarkTheme = () => {
@@ -41,29 +50,29 @@ export default function Cardbase({
 
       if (hexColors) {
         colors = colors.concat(
-            hexColors.map(hex => {
-              const cleanHex = hex.replace('#', '');
-              return {
-                r: parseInt(cleanHex.substr(0, 2), 16),
-                g: parseInt(cleanHex.substr(2, 2), 16),
-                b: parseInt(cleanHex.substr(4, 2), 16)
-              };
-            })
+          hexColors.map(hex => {
+            const cleanHex = hex.replace('#', '');
+            return {
+              r: parseInt(cleanHex.substr(0, 2), 16),
+              g: parseInt(cleanHex.substr(2, 2), 16),
+              b: parseInt(cleanHex.substr(4, 2), 16)
+            };
+          })
         );
       }
       if (rgbColors) {
         colors = colors.concat(
-            rgbColors.map(rgb => {
-              const match = rgb.match(/(\d+)/g);
-              if (match && match.length >= 3) {
-                return {
-                  r: parseInt(match[0]),
-                  g: parseInt(match[1]),
-                  b: parseInt(match[2])
-                };
-              }
-              return { r: 255, g: 255, b: 255 };
-            })
+          rgbColors.map(rgb => {
+            const match = rgb.match(/(\d+)/g);
+            if (match && match.length >= 3) {
+              return {
+                r: parseInt(match[0]),
+                g: parseInt(match[1]),
+                b: parseInt(match[2])
+              };
+            }
+            return { r: 255, g: 255, b: 255 };
+          })
         );
       }
 
@@ -91,8 +100,8 @@ export default function Cardbase({
 
   const getIconClassName = () => {
     return isDarkTheme()
-        ? "invert brightness-0 contrast-100"
-        : "";
+      ? "invert brightness-0 contrast-100"
+      : "";
   };
 
 
@@ -116,7 +125,9 @@ export default function Cardbase({
         <span
           className="text-sm font-semibold line-clamp-2"
           style={{
-            color: themeConfig.colors.text,
+            color: useAccentText
+              ? themeConfig.colors.accentText
+              : themeConfig.colors.text,
             fontFamily:
               themeConfig.fonts.secondary || themeConfig.fonts.primary,
           }}

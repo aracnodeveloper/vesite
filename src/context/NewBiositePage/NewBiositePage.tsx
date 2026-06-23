@@ -47,17 +47,17 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   // Función auxiliar para obtener el email correcto del owner
   const getOwnerEmail = (owner: any): string => {
     if (!owner) return "";
-    
+
     // Primero intenta obtener del campo email
     if (owner.email && owner.email.includes("@")) {
       return owner.email;
     }
-    
+
     // Si no, intenta obtener del campo cedula
     if (owner.cedula && owner.cedula.includes("@")) {
       return owner.cedula;
     }
-    
+
     return "";
   };
 
@@ -365,7 +365,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const getCardData = (): VCardData => {
     const owner = biosite?.owner;
     const ownerEmail = getOwnerEmail(owner);
-    
+
     return {
       name: owner?.name || "",
       title: owner?.description || "",
