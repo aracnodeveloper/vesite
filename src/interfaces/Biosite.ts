@@ -7,6 +7,12 @@ export interface BiositeColors {
   background?: string;
   text?: string;
   profileBackground?: string;
+  // Color del borde de los links rectangulares y la VCard.
+  // Fallback a 'transparent' para no afectar biosites ya configurados.
+  border?: string;
+  // Color exclusivo del texto de los links (independiente de `text`).
+  // Fallback a `text` para no afectar biosites ya configurados.
+  accentText?: string;
 }
 
 export interface BiositeThemeConfig {

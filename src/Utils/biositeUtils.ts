@@ -30,7 +30,9 @@ export const getThemeConfig = (biosite: any) => {
                 accent: biosite.theme.config.colors.accent,
                 background: biosite.theme.config.colors.background || '#ffffff',
                 text: biosite.theme.config.colors.text || '#000000',
-                profileBackground: biosite.theme.config.colors.profileBackground || '#ffffff'
+                profileBackground: biosite.theme.config.colors.profileBackground || '#ffffff',
+                border: biosite.theme.config.colors.border || 'transparent',
+                accentText: biosite.theme.config.colors.accentText || biosite.theme.config.colors.text || '#000000'
             },
             fonts: {
                 primary: biosite.theme.config.fonts.primary || biosite?.fonts || 'Inter',
@@ -55,7 +57,9 @@ export const getThemeConfig = (biosite: any) => {
             accent: parsedColors.accent,
             background: parsedColors.background || '#ffffff',
             text: parsedColors.text || '#000000',
-            profileBackground: parsedColors.profileBackground || '#ffffff'
+            profileBackground: parsedColors.profileBackground || '#ffffff',
+            border: parsedColors.border || 'transparent',
+            accentText: parsedColors.accentText || parsedColors.text || '#000000'
         },
         fonts: {
             primary: biosite?.fonts || 'Inter',

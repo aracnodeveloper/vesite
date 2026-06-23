@@ -221,21 +221,27 @@ const StylesPage = () => {
   const [customColors, setCustomColors] = useState({
     background: "#ffffff",
     text: "#000000",
-    accent: "#3b82f6"
+    accent: "#3b82f6",
+    border: "#000000",
+    accentText: "#000000"
   });
 
   const handleThemeColorChange = async (
       color: string,
       textColor: string,
-      accentColor: string
+      accentColor: string,
+      border?: string,
+      accentText?: string
   ) => {
     try {
       console.log("Changing theme color to:", {
         color,
         textColor,
         accentColor,
+        border,
+        accentText,
       });
-      await setThemeColor(color, textColor, accentColor);
+      await setThemeColor(color, textColor, accentColor, border, accentText);
 
       setTimeout(() => {
         console.log("Theme color change completed");
@@ -246,7 +252,7 @@ const StylesPage = () => {
     }
   };
 
-  const handleCustomColorChange = (colorType: 'background' | 'text' | 'accent', value: string) => {
+  const handleCustomColorChange = (colorType: 'background' | 'text' | 'accent' | 'border' | 'accentText', value: string) => {
     setCustomColors(prev => ({
       ...prev,
       [colorType]: value
@@ -259,7 +265,9 @@ const StylesPage = () => {
       await handleThemeColorChange(
           customColors.background,
           customColors.text,
-          customColors.accent
+          customColors.accent,
+          customColors.border,
+          customColors.accentText
       );
     } catch (error) {
       console.error("Error applying custom colors:", error);
@@ -600,6 +608,52 @@ const StylesPage = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Selector de color de borde (links y VCard) */}
+                    <div className="group">
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
+                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.border}}></div>
+                          Color de Borde (links / VCard)
+                        </label>
+                        <div className="relative w-full sm:w-8 h-8">
+                          <input
+                              type="color"
+                              value={customColors.border}
+                              onChange={(e) => handleCustomColorChange('border', e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                          <label
+                              className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
+                              style={{backgroundColor: customColors.border}}
+                          ></label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Selector de color del texto de los links */}
+                    <div className="group">
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/60 group-hover:shadow-md transition-all duration-200">
+                        <label className="flex items-center gap-2 font-semibold  text-xs text-gray-500 uppercase tracking-wide text-start">
+                          <div className="w-3 h-3 rounded-full" style={{backgroundColor: customColors.accentText}}></div>
+                          Color de Texto de Links
+                        </label>
+                        <div className="relative w-full sm:w-8 h-8">
+                          <input
+                              type="color"
+                              value={customColors.accentText}
+                              onChange={(e) => handleCustomColorChange('accentText', e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                          <label
+                              className="w-8 h-8 rounded-full border-4 border-white shadow-lg hover:scale-105 transition-transform cursor-pointer block"
+                              style={{backgroundColor: customColors.accentText}}
+                          ></label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -612,7 +666,9 @@ const StylesPage = () => {
                         setCustomColors({
                           background: "#4A7BA8",
                           text: "#FFFFFF",
-                          accent: "#3E648C"
+                          accent: "#3E648C",
+                          border: "#4A7BA8",
+                          accentText: "#FFFFFF"
                         });
                       }}
                       className="flex-1 flex items-center justify-center cursor-pointer gap-2 px-4 sm:px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-xl hover:bg-white hover:border-gray-300 hover:text-gray-700 transition-all duration-200 font-medium group"

@@ -46,7 +46,9 @@ export const useLivePreviewLogic = () => {
                     accent: biosite.theme.config.colors.accent,
                     background: biosite.theme.config.colors.background || themeColor || '#ffffff',
                     text: biosite.theme.config.colors.text || '#000000',
-                    profileBackground: biosite.theme.config.colors.profileBackground || themeColor || '#ffffff'
+                    profileBackground: biosite.theme.config.colors.profileBackground || themeColor || '#ffffff',
+                    border: biosite.theme.config.colors.border || 'transparent',
+                    accentText: biosite.theme.config.colors.accentText || biosite.theme.config.colors.text || '#000000'
                 },
                 fonts: {
                     primary: biosite.theme.config.fonts.primary || biosite?.fonts || fontFamily || 'Inter',
@@ -66,7 +68,9 @@ export const useLivePreviewLogic = () => {
                 accent: colors.accent ,
                 background: colors.background || themeColor || '#ffffff',
                 text: colors.text || themeColor || '#000000',
-                profileBackground: colors.profileBackground || colors.background || themeColor || '#ffffff'
+                profileBackground: colors.profileBackground || colors.background || themeColor || '#ffffff',
+                border: colors.border || 'transparent',
+                accentText: colors.accentText || colors.text || themeColor || '#000000'
             },
             fonts: {
                 primary: biosite?.fonts || fontFamily || 'Inter',

@@ -55,12 +55,22 @@ export const useBiositeOperations = ({
         }
     }, [biositeData, setBiosite]);
 
-    const setThemeColor = useCallback(async (color: string, textColor:string, accentColor: string) => {
+    const setThemeColor = useCallback(async (color: string, textColor:string, accentColor: string, border?: string, accentText?: string) => {
         if (!biositeData?.id) {
             throw new Error("No biosite available");
         }
         try {
             setThemeColorState(color);
+
+            // Preservar border/accentText previos cuando no se envían (ej: al elegir un tema predefinido)
+            let currentColors: Partial<BiositeColors> = {};
+            try {
+                currentColors = typeof biositeData.colors === 'string'
+                    ? JSON.parse(biositeData.colors)
+                    : (biositeData.colors as BiositeColors) || {};
+            } catch {
+                currentColors = {};
+            }
 
             const colorsObject: BiositeColors = {
                 primary: color,
@@ -68,7 +78,10 @@ export const useBiositeOperations = ({
                 background: color,
                 text: textColor,
                 accent: accentColor,
-                profileBackground: color
+                profileBackground: color,
+                // Fallbacks que conservan la apariencia de biosites ya configurados
+                border: border !== undefined ? border : (currentColors.border ?? 'transparent'),
+                accentText: accentText !== undefined ? accentText : (currentColors.accentText ?? textColor)
             };
             const updateData: BiositeUpdateDto = {
                 ownerId: biositeData.ownerId,

@@ -530,7 +530,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }, [biositeData, themeColor, themetextColor,themeBackColor]);
 
-    const setThemeColor = useCallback(async (color: string,textColor:string, accentColor: string) => {
+    const setThemeColor = useCallback(async (color: string,textColor:string, accentColor: string, border?: string, accentText?: string) => {
         try {
             setThemeColorState(color);
             setThemeColortextState(textColor)
@@ -550,7 +550,9 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                     ...currentColors,
                     background: color,
                     text: textColor,
-                    accent: accentColor
+                    accent: accentColor,
+                    border: border !== undefined ? border : (currentColors.border ?? 'transparent'),
+                    accentText: accentText !== undefined ? accentText : (currentColors.accentText ?? textColor)
                 };
 
                 const updateData = {

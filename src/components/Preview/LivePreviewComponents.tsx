@@ -480,7 +480,8 @@ export const RegularLinksSection = ({
                         style={{
                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                             backgroundColor: themeConfig.colors.accent,
-                            background: themeConfig.colors.accent
+                            background: themeConfig.colors.accent,
+                            border: `1px solid ${themeConfig.colors.border || 'transparent'}`
                         }}
                     >
                         {link.image && (
@@ -503,7 +504,10 @@ export const RegularLinksSection = ({
                         )}
                         <div className="flex flex-col justify-center ml-2 flex-1 text-left ">
                             <div className="flex items-center">
-                                <span className="font-medium text-xs truncate">
+                                <span
+                                    className="font-medium text-xs truncate"
+                                    style={{ color: themeConfig.colors.accentText }}
+                                >
                                     {link.title}
                                 </span>
                             </div>
@@ -520,7 +524,8 @@ export const RegularLinksSection = ({
                         style={{
                             transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                             backgroundColor: themeConfig.colors.accent,
-                            background: themeConfig.colors.accent
+                            background: themeConfig.colors.accent,
+                            border: `1px solid ${themeConfig.colors.border || 'transparent'}`
                         }}
                     >
                         {link.image && (
@@ -544,7 +549,10 @@ export const RegularLinksSection = ({
                         )}
                         <div className="flex flex-col justify-center ml-2 flex-1 text-left ">
                             <div className="flex items-center">
-                                <span className="font-medium text-md truncate">
+                                <span
+                                    className="font-medium text-md truncate"
+                                    style={{ color: themeConfig.colors.accentText }}
+                                >
                                     {link.title}
                                 </span>
                             </div>
