@@ -1,4 +1,4 @@
-import {createContext, useContext, useEffect, useState, useCallback, useRef} from "react";
+import {createContext, useContext, useEffect, useState, useCallback} from "react";
 import type { BiositeFull } from "../interfaces/Biosite";
 import type {PreviewContextType, SocialLink, RegularLink, AppLink, WhatsAppLink} from "../interfaces/PreviewContext";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
@@ -16,7 +16,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         biositeData,
         loading: biositeLoading,
         error: biositeError,
-        fetchBiosite,
         fetchUserBiosites,
         createBiosite,
         updateBiosite: updateBiositeHook,
@@ -56,7 +55,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
     const [themetextColor, setThemeColortextState] = useState<string>('#ffffff');
     const [fontFamily, setFontFamilyState] = useState<string>('Inter');
     const [initialized, setInitialized] = useState(false);
-    const initializationRef = useRef<{ [key: string]: boolean }>({});
 
     const loading = biositeLoading || linksLoading;
     const error = biositeError || linksError;
@@ -189,15 +187,8 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
             setThemeColortextState('#000000');
             setFontFamilyState('Inter');
             resetState();
-            initializationRef.current = {};
-            return;
         }
-
-        if (biositeId && !initializationRef.current[biositeId]) {
-            initializationRef.current[biositeId] = true;
-            fetchBiosite();
-        }
-    }, [biositeId, fetchBiosite, resetState]);
+    }, [biositeId, resetState]);
 
     useEffect(() => {
         const initializeBiosite = async () => {
@@ -207,7 +198,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
                 const biositeId = Cookie.get('biositeId');
 
                 if (biositeId) {
-                    await loadBiositeById(biositeId);
+                    await switchBiosite(biositeId);
                 } else {
                     const userBiosites = await fetchUserBiosites();
                     if (userBiosites && userBiosites.length > 0) {
@@ -225,7 +216,7 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         };
 
         initializeBiosite();
-    }, [userId, initialized, fetchUserBiosites]);
+    }, [userId, initialized, fetchUserBiosites, switchBiosite]);
 
     useEffect(() => {
         if (biositeData) {
@@ -332,8 +323,6 @@ export const PreviewProvider = ({ children }: { children: React.ReactNode }) => 
         fetchChildBiosites,
         resetState
     });
-
-    const { loadBiositeById } = biositeOperations;
 
     const linkOperations = useLinkOperations({
         biositeData,

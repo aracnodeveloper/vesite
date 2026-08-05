@@ -11,7 +11,8 @@ import {
   RegularLinksSection,
   TwoSquareImagesSection,
 } from "./LivePreviewComponents";
-import {ImageGallerySection} from "../../context/NewBiositePage/ImageGallerySection.tsx";
+import { ImageGallerySection } from "../../context/NewBiositePage/ImageGallerySection.tsx";
+import HistoriesPreview from "./HistoriesPreview";
 import VCardButton from "../global/VCard/VCard.tsx";
 import ConditionalNavButton from "../ConditionalNavButton.tsx";
 import { useTemplates } from "../../hooks/useTemplates.ts";
@@ -33,7 +34,7 @@ const LivePreviewContent = () => {
 
   // Get text blocks for gallery
   const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks();
-  const biositeId = Cookie.get('biositeId');
+  const biositeId = Cookie.get("biositeId");
 
   const {
     biosite,
@@ -98,7 +99,7 @@ const LivePreviewContent = () => {
     if (!loading && !userLoading && !biosite) {
       const currentAttempts = parseInt(
         localStorage.getItem(storageKey) || "0",
-        10
+        10,
       );
 
       if (currentAttempts >= maxReloadAttempts) {
@@ -495,7 +496,7 @@ const LivePreviewContent = () => {
               themeConfig={themeConfig}
               handleGalleryClick={() => {
                 if (!isExposedRoute) {
-                  navigate('/gallery');
+                  navigate("/gallery");
                 }
               }}
             />
@@ -567,7 +568,7 @@ const LivePreviewContent = () => {
           ? themeConfig.colors.background
           : themeConfig.colors.background,
         backgroundColor: themeConfig.colors.background.startsWith(
-          "linear-gradient"
+          "linear-gradient",
         )
           ? undefined
           : themeConfig.colors.background,
@@ -576,8 +577,9 @@ const LivePreviewContent = () => {
       }}
     >
       <div
-        className={`w-full ${isExposedRoute ? "max-w-full" : "max-w-sm"
-          } min-h-screen mx-auto`}
+        className={`w-full ${
+          isExposedRoute ? "max-w-full" : "max-w-sm"
+        } min-h-screen mx-auto`}
       >
         {isSecondTemplate ? (
           <>
@@ -625,14 +627,23 @@ const LivePreviewContent = () => {
               themeConfig={themeConfig}
               defaultAvatar={defaultAvatar}
               handleImageClick={handleImageClick}
+              historyIndicator={
+                <HistoriesPreview
+                  biositeId={biosite?.id}
+                  accentColor={themeConfig.colors.accent}
+                  textColor={themeConfig.colors.text}
+                  display="avatar-trigger"
+                />
+              }
             />
           </>
         )}
 
         {/* Main content */}
         <div
-          className={`w-full ${isExposedRoute ? "max-w-md" : "max-w-sm"
-            } mx-auto`}
+          className={`w-full ${
+            isExposedRoute ? "max-w-md" : "max-w-sm"
+          } mx-auto`}
         >
           {/* User info section */}
           <UserInfoSection

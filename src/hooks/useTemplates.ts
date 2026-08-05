@@ -19,6 +19,9 @@ interface UseTemplatesReturn {
     isTemplatesLoaded: boolean;
 }
 
+let templatesCache: Platilla[] | null = null;
+let templatesRequest: Promise<Platilla[]> | null = null;
+
 export const useTemplates = (): UseTemplatesReturn => {
     const [templates, setTemplates] = useState<Platilla[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,8 +34,16 @@ export const useTemplates = (): UseTemplatesReturn => {
             setLoading(true);
             setError(null);
 
+            if (templatesCache) {
+                setTemplates(templatesCache);
+                setIsTemplatesLoaded(true);
+                return templatesCache;
+            }
 
-            const data = await apiService.getAll<Platilla[]>(plantillasApi);
+            if (!templatesRequest) {
+                templatesRequest = apiService.getAll<Platilla[]>(plantillasApi);
+            }
+            const data = await templatesRequest;
 
             if (!Array.isArray(data)) {
                 throw new Error('La respuesta del servidor no es válida');
@@ -56,6 +67,8 @@ export const useTemplates = (): UseTemplatesReturn => {
                     isActive: template.isActive !== false
                 }));
 
+
+            templatesCache = processedTemplates;
 
             if (isMountedRef.current) {
                 setTemplates(processedTemplates);
@@ -87,6 +100,7 @@ export const useTemplates = (): UseTemplatesReturn => {
 
             return [];
         } finally {
+            templatesRequest = null;
             if (isMountedRef.current) {
                 setLoading(false);
             }
@@ -121,6 +135,7 @@ export const useTemplates = (): UseTemplatesReturn => {
             if (isMountedRef.current) {
                 setTemplates(prev => [...prev, newTemplate].sort((a, b) => (a.index || 0) - (b.index || 0)));
             }
+            templatesCache = [...(templatesCache ?? []), newTemplate].sort((a, b) => (a.index || 0) - (b.index || 0));
 
             message.success('Plantilla creada exitosamente');
             return newTemplate;
@@ -145,6 +160,9 @@ export const useTemplates = (): UseTemplatesReturn => {
                     ).sort((a, b) => (a.index || 0) - (b.index || 0))
                 );
             }
+            templatesCache = (templatesCache ?? []).map(template =>
+                template.id === id ? { ...template, ...updatedTemplate } as Platilla : template
+            );
 
             message.success('Plantilla actualizada exitosamente');
             return updatedTemplate as Platilla;
@@ -165,6 +183,7 @@ export const useTemplates = (): UseTemplatesReturn => {
             if (isMountedRef.current) {
                 setTemplates(prev => prev.filter(template => template.id !== id));
             }
+            templatesCache = (templatesCache ?? []).filter(template => template.id !== id);
 
             message.success('Plantilla eliminada exitosamente');
         } catch (error) {
@@ -176,6 +195,11 @@ export const useTemplates = (): UseTemplatesReturn => {
             setLoading(false);
         }
     }, []);
+
+    const refetch = useCallback(() => {
+        templatesCache = null;
+        return fetchTemplates();
+    }, [fetchTemplates]);
 
     useEffect(() => {
         isMountedRef.current = true;
@@ -193,7 +217,7 @@ export const useTemplates = (): UseTemplatesReturn => {
         fetchTemplates,
         getTemplateById,
         getActiveTemplates,
-        refetch: fetchTemplates,
+        refetch,
         createTemplate,
         updateTemplate,
         deleteTemplate,

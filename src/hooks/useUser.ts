@@ -29,6 +29,9 @@ export interface UpdateUserDto {
   isActive?: boolean;
 }
 
+const userCache = new Map<string, User>();
+const userRequests = new Map<string, Promise<User>>();
+
 export const useUser = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,7 +63,19 @@ export const useUser = () => {
       setError(null);
 
       try {
-        const userData = await apiService.getById<User>("/users", userId);
+        const cachedUser = userCache.get(userId);
+        if (cachedUser) {
+          setUser(cachedUser);
+          return cachedUser;
+        }
+
+        let request = userRequests.get(userId);
+        if (!request) {
+          request = apiService.getById<User>("/users", userId);
+          userRequests.set(userId, request);
+        }
+        const userData = await request;
+        userCache.set(userId, userData);
         setUser(userData);
         return userData;
       } catch (err) {
@@ -70,6 +85,7 @@ export const useUser = () => {
         console.error("Error fetching user:", err);
         return null;
       } finally {
+        userRequests.delete(userId);
         setLoading(false);
       }
     },
@@ -89,6 +105,7 @@ export const useUser = () => {
           userId,
           updateData
         );
+        userCache.set(userId, updatedUser as User);
         setUser(updatedUser as User);
         return updatedUser as User;
       } catch (err) {

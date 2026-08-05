@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Phone, Mail, Globe, X, User, Building } from "lucide-react";
 import Cookies from "js-cookie";
 import { useBusinessCard } from "../../../hooks/useVCard";
-import imgP from "../../../../public/img/img.png";
+import imgP from "../../../assets/img/img.png";
 import { usePreview } from "../../../context/PreviewContext.tsx";
 import { useParams } from "react-router-dom";
 import { useUser } from "../../../hooks/useUser.ts";
@@ -117,7 +117,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
         "Skipping load - userId:",
         validUserId,
         "isDataLoaded:",
-        isDataLoaded
+        isDataLoaded,
       );
       return;
     }
@@ -193,7 +193,7 @@ const VCardButton: React.FC<VCardButtonProps> = ({
             email: "",
             phone: "",
             website: "",
-          }
+          },
         );
       }
     }
@@ -343,7 +343,8 @@ const VCardButton: React.FC<VCardButtonProps> = ({
                 className="text-black font-bold text-base ml-1"
                 style={{
                   fontFamily: themeConfig.fonts.primary,
-                  color: themeConfig.colors.accentText || themeConfig.colors.text,
+                  color:
+                    themeConfig.colors.accentText || themeConfig.colors.text,
                 }}
               >
                 VCard

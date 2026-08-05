@@ -1,6 +1,7 @@
 import api from "./api";
 import type { AxiosRequestConfig } from "axios";
 import {biositeAnalyticsApi} from "../constants/EndpointsRoutes.ts";
+import type { AnalyticsData } from "../interfaces/Analytics.ts";
 
 export interface PaginationParams {
     page?: number;
@@ -25,10 +26,28 @@ export interface AdminLinkData {
     orderIndex?: number;
 }
 
+const pendingGetRequests = new Map<string, Promise<unknown>>();
+
+const getRequestKey = (url: string, config?: AxiosRequestConfig) =>
+    `${url}::${JSON.stringify(config?.params ?? {})}`;
+
+const getDeduplicated = async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+    const key = getRequestKey(url, config);
+    const pendingRequest = pendingGetRequests.get(key);
+    if (pendingRequest) {
+        return pendingRequest as Promise<T>;
+    }
+
+    const request = api.get<T>(url, config)
+        .then(response => response.data)
+        .finally(() => pendingGetRequests.delete(key));
+    pendingGetRequests.set(key, request);
+    return request;
+};
+
 const apiService = {
     getAll: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-        const response = await api.get<T>(url, config);
-        return response.data;
+        return getDeduplicated<T>(url, config);
     },
 
     getAllPaginated: async <T>(
@@ -48,13 +67,11 @@ const apiService = {
             url += `${separator}${searchParams.toString()}`;
         }
 
-        const response = await api.get<T[] | PaginatedResponse<T>>(url, config);
-        return response.data;
+        return getDeduplicated<T[] | PaginatedResponse<T>>(url, config);
     },
 
     getById: async <T>(endpoint: string, id: string): Promise<T> => {
-        const response = await api.get<T>(`${endpoint}/${id}`);
-        return response.data;
+        return getDeduplicated<T>(`${endpoint}/${id}`);
     },
 
     create: async <T extends object, R>(endpoint: string, data: T): Promise<R> => {
@@ -86,12 +103,14 @@ const apiService = {
 
 };
 
-export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | 'last30' | 'lastYear' = 'last7') => {
+export const getBiositeAnalytics = async (
+    userId: string,
+    timeRange: 'last7' | 'last30' | 'lastYear' = 'last7'
+): Promise<AnalyticsData | string> => {
     try {
-        const response = await api.get(`${biositeAnalyticsApi}/${userId}`, {
+        return await getDeduplicated<AnalyticsData | string>(`${biositeAnalyticsApi}/${userId}`, {
             params: { timeRange },
         });
-        return response.data;
     } catch (error) {
         console.error('Error fetching biosite analytics:', error);
         throw error;
@@ -99,7 +118,7 @@ export const getBiositeAnalytics = async (userId: string, timeRange: 'last7' | '
 };
 
 export const adminLinkMethods = {
-    updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<any> => {
+    updateAdminLink: async (adminId: string, linkData: AdminLinkData): Promise<unknown> => {
         try {
             const payload = {
                 linkId: linkData.linkId,
@@ -113,7 +132,7 @@ export const adminLinkMethods = {
 
             console.log('Sending payload:', payload);
 
-            const response = await api.patch(
+            const response = await api.patch<unknown>(
                 `/biosites/admin/update-link/${adminId}`,
                 payload
             );

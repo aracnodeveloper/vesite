@@ -27,6 +27,9 @@ import AdminPanel from "./pages/SuperAdmin.tsx";
 import NewBiositePage from "./context/NewBiositePage/NewBiositePage.tsx";
 import GalleryPage from "./components/layers/MySite/Text_blocks/GalleryPage.tsx"; // ← NUEVA LÍNEA
 import BlackCardLanding from "./pages/BlackCardLanding.tsx";
+import HistoriesListPage from "./components/layers/MySite/Histories/HistoriesListPage.tsx";
+import HistoryEditorPage from "./components/layers/MySite/Histories/HistoryEditorPage.tsx";
+import HistoryPreviewPage from "./components/layers/MySite/Histories/HistoryPreviewPage.tsx";
 
 // Componente wrapper para rutas privadas con Layout
 const PrivateLayout = () => (
@@ -76,6 +79,10 @@ const App = () => {
                                 <Route path="post" element={<PostPage />} />
                                 <Route path="app" element={<AppPage />} />
                                 <Route path="gallery" element={<GalleryPage />} /> {/* ← NUEVA LÍNEA */}
+                                <Route path="histories" element={<HistoriesListPage />} />
+                                <Route path="histories/new" element={<HistoryEditorPage />} />
+                                <Route path="histories/:historyId/edit" element={<HistoryEditorPage />} />
+                                <Route path="histories/:historyId" element={<HistoryPreviewPage />} />
                                 <Route path="droplet" element={<Styles />} />
                                 <Route path="styles" element={<Styles />} />
                                 <Route path="analytics" element={<Analytics />} />
