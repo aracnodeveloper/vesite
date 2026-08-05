@@ -1,11 +1,11 @@
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export default function BackButton({ text }: { text: string }) {
+export default function BackButton({ text, to }: { text: string; to?: string }) {
   const navigate = useNavigate();
 
   const handleBackClick = () => {
-    navigate("../");
+    navigate(to ?? "../");
   };
 
   return (

@@ -9,14 +9,16 @@ import {
 import analyticsEventManager from "../service/AnalyticsEventManager";
 import jsPDF from "jspdf";
 import NewBiositePage from "../context/NewBiositePage/NewBiositePage.tsx";
-import {usePreview} from "../context/PreviewContext.tsx";
-import type {AnalyticsData} from "../interfaces/Analytics.ts"
+import { usePreview } from "../context/PreviewContext.tsx";
+import type { AnalyticsData } from "../interfaces/Analytics.ts"
+import { useHistory } from "../hooks/useHistory.ts";
+
 
 type TimeRange = "last7" | "last30" | "lastYear";
 
 const AnalyticsContent = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
-      null
+    null
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,15 @@ const AnalyticsContent = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("last7");
   const { biosite } = usePreview();
+
+  // Extraemos las funciones y datos de nuestro nuevo hook
+  const { historyItems, fetchHistoryByBiosite, loading: historyLoading } = useHistory();
+  // Usamos useEffect para que, apenas tengamos el biosite.id, vaya a buscar su historial
+  useEffect(() => {
+    if (biosite?.id) {
+      fetchHistoryByBiosite(biosite.id);
+    }
+  }, [biosite?.id, fetchHistoryByBiosite]);
 
   const analyticsContext = useOptionalAnalytics();
 
@@ -54,8 +65,8 @@ const AnalyticsContent = () => {
 
   const generatePDFBlob = useCallback(async (): Promise<Blob> => {
     const timeRangeLabel =
-        timeRangeOptions.find((option) => option.value === timeRange)?.label ||
-        "Período seleccionado";
+      timeRangeOptions.find((option) => option.value === timeRange)?.label ||
+      "Período seleccionado";
 
     const doc = new jsPDF();
 
@@ -117,9 +128,9 @@ const AnalyticsContent = () => {
     doc.text("TOTAL CLICKS", 25 + spacing, yPosition + 22);
 
     const ctr =
-        analyticsData!.views > 0
-            ? Math.round((analyticsData!.clicks / analyticsData!.views) * 100)
-            : 0;
+      analyticsData!.views > 0
+        ? Math.round((analyticsData!.clicks / analyticsData!.views) * 100)
+        : 0;
     doc.setFillColor(...lightGrayColor);
     doc.rect(20 + spacing * 2, yPosition, metricBoxWidth, metricBoxHeight, "F");
     doc.setTextColor(...darkColor);
@@ -133,9 +144,9 @@ const AnalyticsContent = () => {
     doc.setFontSize(16);
     doc.setTextColor(...darkColor);
     doc.text(
-        `Actividad por ${timeRange === "lastYear" ? "Mes" : "Día"}`,
-        20,
-        yPosition
+      `Actividad por ${timeRange === "lastYear" ? "Mes" : "Día"}`,
+      20,
+      yPosition
     );
 
     yPosition += 15;
@@ -181,8 +192,8 @@ const AnalyticsContent = () => {
     }
 
     if (
-        analyticsData!.dailyActivity.length > 10 ||
-        analyticsData!.clickDetails.length > 0
+      analyticsData!.dailyActivity.length > 10 ||
+      analyticsData!.clickDetails.length > 0
     ) {
       doc.addPage();
       yPosition = 20;
@@ -211,9 +222,9 @@ const AnalyticsContent = () => {
 
           doc.setTextColor(...darkColor);
           const linkText =
-              click.label.length > 30
-                  ? click.label.substring(0, 27) + "..."
-                  : click.label;
+            click.label.length > 30
+              ? click.label.substring(0, 27) + "..."
+              : click.label;
           doc.text(linkText, 22, yPosition + 6);
           doc.text(click.count.toString(), 142, yPosition + 6);
 
@@ -233,9 +244,9 @@ const AnalyticsContent = () => {
       doc.setFontSize(8);
       doc.setTextColor(...grayColor);
       doc.text(
-          "Este reporte fue generado automáticamente por Biosite Analytics",
-          20,
-          285
+        "Este reporte fue generado automáticamente por Biosite Analytics",
+        20,
+        285
       );
       doc.text(`Página ${i} de ${totalPages}`, 170, 285);
     }
@@ -248,26 +259,23 @@ const AnalyticsContent = () => {
     if (!analyticsData) return;
 
     const timeRangeLabel =
-        timeRangeOptions.find((option) => option.value === timeRange)?.label ||
-        "Período seleccionado";
+      timeRangeOptions.find((option) => option.value === timeRange)?.label ||
+      "Período seleccionado";
 
     try {
-      const summaryText = `📊 Mis estadísticas (${timeRangeLabel}):\n👁 ${
-          analyticsData.views
-      } vistas\n👆 ${analyticsData.clicks} clics\n📈 ${
-          analyticsData.views > 0
-              ? Math.round((analyticsData.clicks / analyticsData.views) * 100)
-              : 0
-      }% CTR`;
+      const summaryText = `📊 Mis estadísticas (${timeRangeLabel}):\n👁 ${analyticsData.views
+        } vistas\n👆 ${analyticsData.clicks} clics\n📈 ${analyticsData.views > 0
+          ? Math.round((analyticsData.clicks / analyticsData.views) * 100)
+          : 0
+        }% CTR`;
 
       if (navigator.share && navigator.canShare) {
         try {
           const pdfBlob = await generatePDFBlob();
           const filename = `biosite-metricas-${timeRangeLabel
-              .toLowerCase()
-              .replace(/\s+/g, "-")}-${
-              new Date().toISOString().split("T")[0]
-          }.pdf`;
+            .toLowerCase()
+            .replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]
+            }.pdf`;
 
           const file = new File([pdfBlob], filename, {
             type: "application/pdf",
@@ -285,8 +293,8 @@ const AnalyticsContent = () => {
           }
         } catch (shareError) {
           console.log(
-              "No se pudo compartir el archivo, intentando con texto solamente:",
-              shareError
+            "No se pudo compartir el archivo, intentando con texto solamente:",
+            shareError
           );
         }
 
@@ -306,13 +314,13 @@ const AnalyticsContent = () => {
       }
 
       await navigator.clipboard.writeText(
-          `${summaryText}\n\n📄 Reporte completo disponible\n\n${window.location.href}`
+        `${summaryText}\n\n📄 Reporte completo disponible\n\n${window.location.href}`
       );
 
       const pdfBlob = await generatePDFBlob();
       const filename = `biosite-metricas-${timeRangeLabel
-          .toLowerCase()
-          .replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.pdf`;
+        .toLowerCase()
+        .replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.pdf`;
 
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
@@ -374,13 +382,13 @@ const AnalyticsContent = () => {
 
     try {
       const timeRangeLabel =
-          timeRangeOptions.find((option) => option.value === timeRange)?.label ||
-          "Período seleccionado";
+        timeRangeOptions.find((option) => option.value === timeRange)?.label ||
+        "Período seleccionado";
 
       const pdfBlob = await generatePDFBlob();
       const filename = `biosite-metricas-${timeRangeLabel
-          .toLowerCase()
-          .replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.pdf`;
+        .toLowerCase()
+        .replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.pdf`;
 
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
@@ -445,17 +453,17 @@ const AnalyticsContent = () => {
 
   useEffect(() => {
     const unsubscribeVisit = analyticsEventManager.onVisitTracked(
-        (biositeId) => {
-          console.log("📊 Visit tracked for biosite:", biositeId);
-          triggerRefresh();
-        }
+      (biositeId) => {
+        console.log("📊 Visit tracked for biosite:", biositeId);
+        triggerRefresh();
+      }
     );
 
     const unsubscribeClick = analyticsEventManager.onLinkClickTracked(
-        (linkId) => {
-          console.log("🔗 Link click tracked for link:", linkId);
-          triggerRefresh();
-        }
+      (linkId) => {
+        console.log("🔗 Link click tracked for link:", linkId);
+        triggerRefresh();
+      }
     );
 
     return () => {
@@ -527,8 +535,8 @@ const AnalyticsContent = () => {
       console.log("📈 Analytics API result:", analyticsResult);
 
       if (
-          typeof analyticsResult === "string" &&
-          analyticsResult.includes("<!doctype html>")
+        typeof analyticsResult === "string" &&
+        analyticsResult.includes("<!doctype html>")
       ) {
         console.warn("⚠️ API returned HTML instead of JSON");
         setAnalyticsData({
@@ -551,20 +559,20 @@ const AnalyticsContent = () => {
           biositeId: analyticsResult.biositeId || biositeId,
           biositeSlug: analyticsResult.biositeSlug || 'user-biosite',
           dailyActivity:
-              analyticsResult.dailyActivity &&
+            analyticsResult.dailyActivity &&
               analyticsResult.dailyActivity.length > 0
-                  ? analyticsResult.dailyActivity.map((day: any) => ({
-                    ...day,
-                    linkClicks: day.linkClicks || []
-                  }))
-                  : [
-                    {
-                      day: new Date().toISOString().split("T")[0],
-                      views: analyticsResult.views || 0,
-                      clicks: analyticsResult.clicks || 0,
-                      linkClicks: []
-                    },
-                  ],
+              ? analyticsResult.dailyActivity.map((day: any) => ({
+                ...day,
+                linkClicks: day.linkClicks || []
+              }))
+              : [
+                {
+                  day: new Date().toISOString().split("T")[0],
+                  views: analyticsResult.views || 0,
+                  clicks: analyticsResult.clicks || 0,
+                  linkClicks: []
+                },
+              ],
           clickDetails: (analyticsResult.clickDetails || []).map((detail: any) => ({
             ...detail,
             isActive: detail.isActive !== false
@@ -614,721 +622,851 @@ const AnalyticsContent = () => {
   const totalViews = analyticsData?.views || 0;
   const totalClicks = analyticsData?.clicks || 0;
   const ctr = totalViews > 0 ? Math.round((totalClicks / totalViews) * 100) : 0;
+  const totalHistoryViews = historyItems.reduce(
+    (total, item) => total + (item.visuals ?? 0),
+    0,
+  );
 
   if (loading) {
     return (
-        <div className="text-white p-6">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mr-3"></div>
-            <span>Loading analytics...</span>
-          </div>
+      <div className="text-white p-6">
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mr-3"></div>
+          <span>Loading analytics...</span>
         </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-        <div className="text-white p-6">
-          <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
-            <h3 className="text-red-400 font-semibold mb-2">
-              Error Loading Analytics
-            </h3>
-            <p className="text-red-300 mb-4">{error}</p>
+      <div className="text-white p-6">
+        <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
+          <h3 className="text-red-400 font-semibold mb-2">
+            Error Loading Analytics
+          </h3>
+          <p className="text-red-300 mb-4">{error}</p>
 
-            <button
-                onClick={handleManualRefresh}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors"
-            >
-              Retry
-            </button>
+          <button
+            onClick={handleManualRefresh}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors"
+          >
+            Retry
+          </button>
 
-            {analyticsContext && (
-                <div className="mt-4 text-sm border-t border-red-500 pt-4">
-                  <p className="text-gray-400">Debug Info:</p>
-                  <p className="text-gray-300">
-                    BiositeId: {biositeId || "Not set"}
-                  </p>
-                  <p className="text-gray-300">Time Range: {timeRange}</p>
-                  <p className="text-gray-300">
-                    Has tracked visit:{" "}
-                    {analyticsContext.hasTrackedVisit ? "Yes" : "No"}
-                  </p>
-                  <p className="text-gray-300">Refresh trigger: {refreshTrigger}</p>
-                  <p className="text-gray-300">
-                    Last refresh: {lastRefresh.toLocaleTimeString()}
-                  </p>
-                  <button
-                      onClick={() => {
-                        analyticsContext.resetTracking();
-                        handleManualRefresh();
-                      }}
-                      className="mt-2 px-3 py-1 bg-yellow-600 rounded text-white text-xs"
-                  >
-                    Reset & Refresh
-                  </button>
-                </div>
-            )}
-          </div>
+          {analyticsContext && (
+            <div className="mt-4 text-sm border-t border-red-500 pt-4">
+              <p className="text-gray-400">Debug Info:</p>
+              <p className="text-gray-300">
+                BiositeId: {biositeId || "Not set"}
+              </p>
+              <p className="text-gray-300">Time Range: {timeRange}</p>
+              <p className="text-gray-300">
+                Has tracked visit:{" "}
+                {analyticsContext.hasTrackedVisit ? "Yes" : "No"}
+              </p>
+              <p className="text-gray-300">Refresh trigger: {refreshTrigger}</p>
+              <p className="text-gray-300">
+                Last refresh: {lastRefresh.toLocaleTimeString()}
+              </p>
+              <button
+                onClick={() => {
+                  analyticsContext.resetTracking();
+                  handleManualRefresh();
+                }}
+                className="mt-2 px-3 py-1 bg-yellow-600 rounded text-white text-xs"
+              >
+                Reset & Refresh
+              </button>
+            </div>
+          )}
         </div>
+      </div>
     );
   }
 
   if (!analyticsData) {
     return (
-        <div className="text-white p-6">
-          <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
-            <h3 className="text-yellow-400 font-semibold mb-2">
-              No Analytics Data
-            </h3>
-            <p className="text-yellow-300 mb-4">Unable to load analytics data.</p>
+      <div className="text-white p-6">
+        <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
+          <h3 className="text-yellow-400 font-semibold mb-2">
+            No Analytics Data
+          </h3>
+          <p className="text-yellow-300 mb-4">Unable to load analytics data.</p>
 
-            <button
-                onClick={handleManualRefresh}
-                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-white text-sm transition-colors"
-            >
-              Refresh Data
-            </button>
+          <button
+            onClick={handleManualRefresh}
+            className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded text-white text-sm transition-colors"
+          >
+            Refresh Data
+          </button>
 
-            {analyticsContext && (
-                <div className="mt-4 text-sm border-t border-yellow-500 pt-4">
-                  <p className="text-gray-400">Debug Info:</p>
-                  <p className="text-gray-300">
-                    BiositeId: {biositeId || "Not set"}
-                  </p>
-                  <p className="text-gray-300">Time Range: {timeRange}</p>
-                  <p className="text-gray-300">
-                    Has tracked visit:{" "}
-                    {analyticsContext.hasTrackedVisit ? "Yes" : "No"}
-                  </p>
-                  <p className="text-gray-300">Refresh trigger: {refreshTrigger}</p>
-                  <p className="text-gray-300">
-                    Last refresh: {lastRefresh.toLocaleTimeString()}
-                  </p>
-                </div>
-            )}
-          </div>
+          {analyticsContext && (
+            <div className="mt-4 text-sm border-t border-yellow-500 pt-4">
+              <p className="text-gray-400">Debug Info:</p>
+              <p className="text-gray-300">
+                BiositeId: {biositeId || "Not set"}
+              </p>
+              <p className="text-gray-300">Time Range: {timeRange}</p>
+              <p className="text-gray-300">
+                Has tracked visit:{" "}
+                {analyticsContext.hasTrackedVisit ? "Yes" : "No"}
+              </p>
+              <p className="text-gray-300">Refresh trigger: {refreshTrigger}</p>
+              <p className="text-gray-300">
+                Last refresh: {lastRefresh.toLocaleTimeString()}
+              </p>
+            </div>
+          )}
         </div>
+      </div>
     );
   }
 
   return (
-      <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-medium font-bold text-gray-800 mb-5 uppercase tracking-wide text-start sr-only sm:not-sr-only">
-                Estadísticas
-              </h1>
+    <div className="h-full text-white px-4 py-2 lg:px-6 lg:py-16">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-medium font-bold text-gray-800 mb-5 uppercase tracking-wide text-start sr-only sm:not-sr-only">
+              Estadísticas
+            </h1>
 
-              <select
-                  value={timeRange}
-                  onChange={(e) =>
-                      handleTimeRangeChange(e.target.value as TimeRange)
-                  }
-                  className="px-3 py-2 bg-white border border-gray-600 rounded text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-[#98C022] transition-colors"
-              >
-                {timeRangeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                  onClick={handleShare}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors flex items-center cursor-pointer"
-                  title="Compartir métricas"
-              >
-                <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                  <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-                  />
-                </svg>
-                Compartir
-              </button>
-
-              <button
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloading}
-                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Descargar reporte PDF"
-              >
-                {isDownloading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                    <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                      <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                )}
-                {isDownloading ? "Generando..." : "PDF"}
-              </button>
-
-              <button
-                  onClick={handleManualRefresh}
-                  className="px-3 py-1 bg-[#98C022] hover:bg-[#86A81E] rounded text-white text-sm transition-colors flex items-center cursor-pointer"
-                  disabled={loading}
-                  title="Actualizar datos"
-              >
-                {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                    <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                      <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      />
-                    </svg>
-                )}
-                Actualizar
-              </button>
-            </div>
+            <select
+              value={timeRange}
+              onChange={(e) =>
+                handleTimeRangeChange(e.target.value as TimeRange)
+              }
+              className="px-3 py-2 bg-white border border-gray-600 rounded text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-[#98C022] transition-colors"
+            >
+              {timeRangeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* VISTA MÓVIL */}
-          <div className="lg:hidden">
-            <div className="space-y-6">
-              {/* Card de Actividad Total para móvil */}
-              <div className="bg-white rounded-2xl p-6">
-                <h2 className="text-lg font-medium text-black mb-4">
-                  Actividad Total
-                </h2>
-                <div className="bg-white p-4 rounded-lg">
-                  <div className="flex justify-around items-center text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-black">
-                        {totalViews}
-                      </p>
-                      <p className="text-xs text-gray-500">Vistas</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-black">
-                        {totalClicks}
-                      </p>
-                      <p className="text-xs text-gray-500">Clicks</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-black">{ctr}%</p>
-                      <p className="text-xs text-gray-500">CTR</p>
-                    </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleShare}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition-colors flex items-center cursor-pointer"
+              title="Compartir métricas"
+            >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                />
+              </svg>
+              Compartir
+            </button>
+
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition-colors flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Descargar reporte PDF"
+            >
+              {isDownloading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              )}
+              {isDownloading ? "Generando..." : "PDF"}
+            </button>
+
+            <button
+              onClick={handleManualRefresh}
+              className="px-3 py-1 bg-[#98C022] hover:bg-[#86A81E] rounded text-white text-sm transition-colors flex items-center cursor-pointer"
+              disabled={loading}
+              title="Actualizar datos"
+            >
+              {loading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              )}
+              Actualizar
+            </button>
+          </div>
+        </div>
+
+        {/* VISTA MÓVIL */}
+        <div className="lg:hidden">
+          <div className="space-y-6">
+            {/* Card de Actividad Total para móvil */}
+            <div className="bg-white rounded-2xl p-6">
+              <h2 className="text-lg font-medium text-black mb-4">
+                Actividad Total
+              </h2>
+              <div className="bg-white p-4 rounded-lg">
+                <div className="flex justify-around items-center text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-black">
+                      {totalViews}
+                    </p>
+                    <p className="text-xs text-gray-500">Vistas</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-black">
+                      {totalClicks}
+                    </p>
+                    <p className="text-xs text-gray-500">Clicks</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-black">{ctr}%</p>
+                    <p className="text-xs text-gray-500">CTR</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-black">{totalHistoryViews}</p>
+                    <p className="text-xs text-gray-500">Historias</p>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Card de actividad diaria para móvil */}
-              <div className="bg-white rounded-2xl p-6">
-                <h2 className="text-lg font-medium text-black mb-4">
-                  Actividad {timeRange === "lastYear" ? "Mensual" : "Diaria"}
-                </h2>
-                <div className="space-y-3">
-                  {analyticsData.dailyActivity.map((activity, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
+            {/* Card de actividad diaria para móvil */}
+            <div className="bg-white rounded-2xl p-6">
+              <h2 className="text-lg font-medium text-black mb-4">
+                Actividad {timeRange === "lastYear" ? "Mensual" : "Diaria"}
+              </h2>
+              <div className="space-y-3">
+                {analyticsData.dailyActivity.map((activity, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-black font-medium">
                         {activity.day}
                       </span>
-                          <div className="flex gap-4 text-sm">
+                      <div className="flex gap-4 text-sm">
                         <span className="text-gray-600">
                           👁️ {activity.views}
                         </span>
-                            <span className="text-gray-600">
+                        <span className="text-gray-600">
                           👆 {activity.clicks}
                         </span>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
 
-                        {/* Mostrar clicks por link si existen */}
-                        {activity.linkClicks && activity.linkClicks.length > 0 && (
-                            <div className="mt-2 pt-2 border-t border-gray-200">
-                              <p className="text-xs text-gray-500 mb-1">Clicks por enlace:</p>
-                              <div className="space-y-1">
-                                {activity.linkClicks.slice(0, 3).map((linkClick, idx) => (
-                                    <div key={idx} className="flex justify-between text-xs">
+                    {/* Mostrar clicks por link si existen */}
+                    {activity.linkClicks && activity.linkClicks.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-1">Clicks por enlace:</p>
+                        <div className="space-y-1">
+                          {activity.linkClicks.slice(0, 3).map((linkClick, idx) => (
+                            <div key={idx} className="flex justify-between text-xs">
                               <span className="text-gray-600 truncate mr-2">
                                 {linkClick.label}
                               </span>
-                                      <span className="text-gray-800 font-medium">
+                              <span className="text-gray-800 font-medium">
                                 {linkClick.count}
                               </span>
-                                    </div>
-                                ))}
-                                {activity.linkClicks.length > 3 && (
-                                    <p className="text-xs text-gray-400 italic">
-                                      +{activity.linkClicks.length - 3} más...
-                                    </p>
-                                )}
-                              </div>
                             </div>
-                        )}
-                      </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Card de Clics por enlace para móvil */}
-              <div className="bg-white rounded-3xl p-10">
-                <h2 className="text-lg font-medium text-black mb-4">
-                  Clicks por Link
-                </h2>
-                {analyticsData.clickDetails &&
-                analyticsData.clickDetails.length > 0 ? (
-                    <div className="space-y-4">
-                      {/* Social Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'social').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Redes Sociales</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'social')
-                                    .map((click, index) => (
-                                        <tr key={`social-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* Regular Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'regular').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Enlaces Regulares</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'regular')
-                                    .map((click, index) => (
-                                        <tr key={`regular-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* App Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'app').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Apps</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'app')
-                                    .map((click, index) => (
-                                        <tr key={`app-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* WhatsApp Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'whatsapp').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">WhatsApp</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'whatsapp')
-                                    .map((click, index) => (
-                                        <tr key={`whatsapp-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* Social Post Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'social_post').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Publicaciones</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'social_post')
-                                    .map((click, index) => (
-                                        <tr key={`post-${index}`} className="border-b border-gray-400 last:border-b-0" >
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* Other Links (no link_type or empty) */}
-                      {analyticsData.clickDetails.filter(c => !c.link_type || c.link_type === '').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Otros Enlaces</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => !c.link_type || c.link_type === '')
-                                    .map((click, index) => (
-                                        <tr key={`other-${index}`} className="border-b border-gray-400 last:border-b-0" >
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-                    </div>
-                ) : (
-                    <div className="bg-black/50 p-6 rounded-lg text-center">
-                      <p className="text-gray-400">No click data available yet.</p>
-                    </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* VISTA DESKTOP */}
-          <div className="hidden lg:block">
-            <div className="relative flex items-center justify-center mb-16">
-              <div
-                  className="absolute transform rounded-full flex flex-col items-center justify-center"
-                  style={{ height: "700px", width: "700px" }}
-              >
-                <svg
-                    width="900"
-                    height="900"
-                    viewBox="0 0 900 900"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g filter="url(#filter0_d_2019_354)">
-                    <circle cx="429" cy="425" r="416" fill="white" />
-                  </g>
-                  <defs>
-                    <filter
-                        id="filter0_d_2019_354"
-                        x="0"
-                        y="0"
-                        width="900"
-                        height="900"
-                        filterUnits="userSpaceOnUse"
-                        colorInterpolationFilters="sRGB"
-                    >
-                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                      <feColorMatrix
-                          in="SourceAlpha"
-                          type="matrix"
-                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                          result="hardAlpha"
-                      />
-                      <feMorphology
-                          radius="3"
-                          operator="dilate"
-                          in="SourceAlpha"
-                          result="effect1_dropShadow_2019_354"
-                      />
-                      <feOffset dy="4" />
-                      <feGaussianBlur stdDeviation="5" />
-                      <feComposite in2="hardAlpha" operator="out" />
-                      <feColorMatrix
-                          type="matrix"
-                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"
-                      />
-                      <feBlend
-                          mode="normal"
-                          in2="BackgroundImageFix"
-                          result="effect1_dropShadow_2019_354"
-                      />
-                      <feBlend
-                          mode="normal"
-                          in="SourceGraphic"
-                          in2="effect1_dropShadow_2019_354"
-                          result="shape"
-                      />
-                    </filter>
-                  </defs>
-                </svg>
-              </div>
-
-              <div className="absolute left-24 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
-                <div className="text-xs text-black mb-1">VISTAS</div>
-                <div className="text-4xl font-bold text-black">{totalViews}</div>
-              </div>
-
-              <div className="z-10 overflow-y-hidden w-[370px] h-[700px] ">
-                <PhonePreview>
-                  <NewBiositePage slug={biosite.slug} />
-                </PhonePreview>
-              </div>
-
-              <div className="absolute right-30 top-52 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
-                <div className="text-xs text-black mb-1">CLICKS</div>
-                <div className="text-2xl font-bold text-black">{totalClicks}</div>
-              </div>
-
-              <div className="absolute right-40 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
-                <div className="text-xs text-black mb-1">CTR</div>
-                <div className="text-2xl font-bold text-black">{ctr}%</div>
-              </div>
-              <div className="absolute left-60 top-22 w-13 h-13 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
-
-              <div className="absolute left-58 bottom-38 w-10 h-10 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
-            </div>
-
-            <div className="flex  gap-5">
-              <div className="bg-white rounded-3xl p-10">
-                <h2 className="text-xl text-gray-600 font-semibold mb-6">
-                  Actividad {timeRange === "lastYear" ? "Mensual" : "Diaria"}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-col-2 xl:grid-cols-3 gap-6">
-                  {analyticsData.dailyActivity.map((activity, index) => (
-                      <div
-                          key={index}
-                          className="p-6 rounded-xl border border-gray-200 bg-[#E8FAD5]"
-                      >
-                        <p className="text-sm text-gray-600 mb-2 font-medium">
-                          {timeRange === "lastYear" ? "Mes" : "Día"}: {activity.day}
-                        </p>
-                        <div className="flex justify-between items-center gap-5 mb-3">
-                          <div>
-                            <p className="text-lg font-semibold text-gray-600">
-                              {activity.views}
+                          ))}
+                          {activity.linkClicks.length > 3 && (
+                            <p className="text-xs text-gray-400 italic">
+                              +{activity.linkClicks.length - 3} más...
                             </p>
-                            <p className="text-xs text-gray-500">Vistas</p>
-                          </div>
-                          <div>
-                            <p className="text-lg font-semibold text-gray-600">
-                              {activity.clicks}
-                            </p>
-                            <p className="text-xs text-gray-500">Clicks</p>
-                          </div>
+                          )}
                         </div>
-
-                        {/* Mostrar clicks por link si existen */}
-                        {activity.linkClicks && activity.linkClicks.length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-gray-300">
-                              <p className="text-xs text-gray-500 mb-2 font-medium">
-                                Enlaces más clickeados:
-                              </p>
-                              <div className="space-y-1">
-                                {activity.linkClicks.slice(0, 3).map((linkClick, idx) => (
-                                    <div key={idx} className="flex justify-between text-xs items-center">
-                                        <span className="flex flex-col text-gray-600 font-semibold truncate mr-2">
-                                          {linkClick.label}
-                                          <a className='font-light'>
-                                          {linkClick.url.slice(0, 30)}
-                                          </a>
-                                        </span>
-                                        <span className="text-gray-800 font-semibold">
-                                          {linkClick.count}
-                                        </span>
-                                    </div>
-                                    ))}
-                                    {activity.linkClicks.length > 3 && (
-                                        <p className="text-xs text-gray-500 italic mt-1">
-                                          +{activity.linkClicks.length - 3} enlaces más
-                                        </p>
-                                    )}
-                              </div>
-                            </div>
-                        )}
                       </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-10">
-                <h2 className="text-lg font-medium text-black mb-4">
-                  Clicks por Link
-                </h2>
-                {analyticsData.clickDetails &&
-                analyticsData.clickDetails.length > 0 ? (
-                    <div className="space-y-4">
-                      {/* Social Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'social').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Redes Sociales</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'social')
-                                    .map((click, index) => (
-                                        <tr key={`social-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* Regular Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'regular').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Enlaces Regulares</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'regular')
-                                    .map((click, index) => (
-                                        <tr key={`regular-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* App Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'app').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Apps</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'app')
-                                    .map((click, index) => (
-                                        <tr key={`app-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label} </td>
-
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* WhatsApp Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'whatsapp').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">WhatsApp</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'whatsapp')
-                                    .map((click, index) => (
-                                        <tr key={`whatsapp-${index}`} className="border-b border-gray-400 last:border-b-0">
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* Social Post Links */}
-                      {analyticsData.clickDetails.filter(c => c.link_type === 'social_post').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Publicaciones</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => c.link_type === 'social_post')
-                                    .map((click, index) => (
-                                        <tr key={`post-${index}`} className="border-b border-gray-400 last:border-b-0" >
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-
-                      {/* Other Links (no link_type or empty) */}
-                      {analyticsData.clickDetails.filter(c => !c.link_type || c.link_type === '').length > 0 && (
-                          <div className='border-b-2 border-gray-800 '>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Otros Enlaces</h3>
-                            <div className="bg-white rounded-lg overflow-hidden">
-                              <table className="w-full text-left">
-                                <tbody>
-                                {analyticsData.clickDetails
-                                    .filter(c => !c.link_type || c.link_type === '')
-                                    .map((click, index) => (
-                                        <tr key={`other-${index}`} className="border-b border-gray-400 last:border-b-0" >
-                                          <td className="px-4 py-3 text-black text-sm">{click.label}</td>
-                                          <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                      )}
-                    </div>
-                ) : (
-                    <div className="bg-black/50 p-6 rounded-lg text-center">
-                      <p className="text-gray-400">No click data available yet.</p>
-                    </div>
-                )}
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Card de Clics por enlace para móvil */}
+            <div className="bg-white rounded-3xl p-10">
+              <h2 className="text-lg font-medium text-black mb-4">
+                Clicks por Link
+              </h2>
+              {analyticsData.clickDetails &&
+                analyticsData.clickDetails.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Social Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'social').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Redes Sociales</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'social')
+                              .map((click, index) => (
+                                <tr key={`social-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Regular Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'regular').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Enlaces Regulares</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'regular')
+                              .map((click, index) => (
+                                <tr key={`regular-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* App Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'app').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Apps</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'app')
+                              .map((click, index) => (
+                                <tr key={`app-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* WhatsApp Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'whatsapp').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">WhatsApp</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'whatsapp')
+                              .map((click, index) => (
+                                <tr key={`whatsapp-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Post Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'social_post').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Publicaciones</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'social_post')
+                              .map((click, index) => (
+                                <tr key={`post-${index}`} className="border-b border-gray-400 last:border-b-0" >
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other Links (no link_type or empty) */}
+                  {analyticsData.clickDetails.filter(c => !c.link_type || c.link_type === '').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Otros Enlaces</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => !c.link_type || c.link_type === '')
+                              .map((click, index) => (
+                                <tr key={`other-${index}`} className="border-b border-gray-400 last:border-b-0" >
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-black/50 p-6 rounded-lg text-center">
+                  <p className="text-gray-400">No click data available yet.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Card de Historial para móvil */}
+            <div className="bg-white rounded-2xl p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-black">
+                  Mis Historias (24h)
+                </h2>
+                <button 
+                  onClick={() => alert("Próximamente: Formulario para subir historia")}
+                  className="bg-[#E8FAD5] text-black text-sm font-medium px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-[#d4f5b5] transition-colors"
+                >
+                  <span className="text-lg leading-none">+</span> Subir
+                </button>
+              </div>
+              {historyLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
+                </div>
+              ) : historyItems && historyItems.length > 0 ? (
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
+                  {historyItems.map((item, index) => (
+                    <div key={item.id || index} className="bg-gray-50 p-4 rounded-lg flex justify-between items-center">
+                      <div className="flex flex-col">
+                        <span className="text-black font-medium text-sm">
+                          {new Date(item.createdAt).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
+                        </span>
+                        {item.image && (
+                           <span className="text-xs text-blue-500 truncate max-w-[120px] mt-1">
+                              📸 Con imagen
+                           </span>
+                        )}
+                      </div>
+                      <div className="flex gap-3 text-sm">
+                        <span className="text-gray-600 font-semibold">
+                          👁️ {item.visuals || 0}
+                        </span>
+                        <span className="text-gray-600 font-semibold">
+                          👆 {item.interactions || 0}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gray-50 p-6 rounded-lg text-center">
+                  <p className="text-gray-500 text-sm">No hay historial reciente disponible.</p>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
-        <div className="h-10"></div>
+
+        {/* VISTA DESKTOP */}
+        <div className="hidden lg:block">
+          <div className="relative flex items-center justify-center mb-16">
+            <div
+              className="absolute transform rounded-full flex flex-col items-center justify-center"
+              style={{ height: "700px", width: "700px" }}
+            >
+              <svg
+                width="900"
+                height="900"
+                viewBox="0 0 900 900"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g filter="url(#filter0_d_2019_354)">
+                  <circle cx="429" cy="425" r="416" fill="white" />
+                </g>
+                <defs>
+                  <filter
+                    id="filter0_d_2019_354"
+                    x="0"
+                    y="0"
+                    width="900"
+                    height="900"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feColorMatrix
+                      in="SourceAlpha"
+                      type="matrix"
+                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                      result="hardAlpha"
+                    />
+                    <feMorphology
+                      radius="3"
+                      operator="dilate"
+                      in="SourceAlpha"
+                      result="effect1_dropShadow_2019_354"
+                    />
+                    <feOffset dy="4" />
+                    <feGaussianBlur stdDeviation="5" />
+                    <feComposite in2="hardAlpha" operator="out" />
+                    <feColorMatrix
+                      type="matrix"
+                      values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.03 0"
+                    />
+                    <feBlend
+                      mode="normal"
+                      in2="BackgroundImageFix"
+                      result="effect1_dropShadow_2019_354"
+                    />
+                    <feBlend
+                      mode="normal"
+                      in="SourceGraphic"
+                      in2="effect1_dropShadow_2019_354"
+                      result="shape"
+                    />
+                  </filter>
+                </defs>
+              </svg>
+            </div>
+
+            <div className="absolute left-24 top-1/3 transform -translate-y-1/2 w-44 h-44 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+              <div className="text-xs text-black mb-1">VISTAS</div>
+              <div className="text-4xl font-bold text-black">{totalViews}</div>
+            </div>
+
+            <div className="z-10 overflow-y-hidden w-[370px] h-[700px] ">
+              <PhonePreview>
+                <NewBiositePage slug={biosite.slug} />
+              </PhonePreview>
+            </div>
+
+            <div className="absolute right-30 top-52 w-38 h-38 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+              <div className="text-xs text-black mb-1">CLICKS</div>
+              <div className="text-2xl font-bold text-black">{totalClicks}</div>
+            </div>
+
+            <div className="absolute right-40 bottom-40 w-32 h-32 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center">
+              <div className="text-xs text-black mb-1">CTR</div>
+              <div className="text-2xl font-bold text-black">{ctr}%</div>
+            </div>
+            <div className="absolute left-60 top-22 w-13 h-13 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
+
+            <div className="absolute left-58 bottom-38 w-10 h-10 bg-[#E8FAD5] border border-gray-400 rounded-full flex flex-col items-center justify-center"></div>
+          </div>
+
+          <div className="flex  gap-5">
+            <div className="bg-white rounded-3xl p-10">
+              <h2 className="text-xl text-gray-600 font-semibold mb-6">
+                Actividad {timeRange === "lastYear" ? "Mensual" : "Diaria"}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-col-2 xl:grid-cols-3 gap-6">
+                {analyticsData.dailyActivity.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="p-6 rounded-xl border border-gray-200 bg-[#E8FAD5]"
+                  >
+                    <p className="text-sm text-gray-600 mb-2 font-medium">
+                      {timeRange === "lastYear" ? "Mes" : "Día"}: {activity.day}
+                    </p>
+                    <div className="flex justify-between items-center gap-5 mb-3">
+                      <div>
+                        <p className="text-lg font-semibold text-gray-600">
+                          {activity.views}
+                        </p>
+                        <p className="text-xs text-gray-500">Vistas</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-gray-600">
+                          {activity.clicks}
+                        </p>
+                        <p className="text-xs text-gray-500">Clicks</p>
+                      </div>
+                    </div>
+
+                    {/* Mostrar clicks por link si existen */}
+                    {activity.linkClicks && activity.linkClicks.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-300">
+                        <p className="text-xs text-gray-500 mb-2 font-medium">
+                          Enlaces más clickeados:
+                        </p>
+                        <div className="space-y-1">
+                          {activity.linkClicks.slice(0, 3).map((linkClick, idx) => (
+                            <div key={idx} className="flex justify-between text-xs items-center">
+                              <span className="flex flex-col text-gray-600 font-semibold truncate mr-2">
+                                {linkClick.label}
+                                <a className='font-light'>
+                                  {linkClick.url.slice(0, 30)}
+                                </a>
+                              </span>
+                              <span className="text-gray-800 font-semibold">
+                                {linkClick.count}
+                              </span>
+                            </div>
+                          ))}
+                          {activity.linkClicks.length > 3 && (
+                            <p className="text-xs text-gray-500 italic mt-1">
+                              +{activity.linkClicks.length - 3} enlaces más
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-10">
+              <h2 className="text-lg font-medium text-black mb-4">
+                Clicks por Link
+              </h2>
+              {analyticsData.clickDetails &&
+                analyticsData.clickDetails.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Social Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'social').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Redes Sociales</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'social')
+                              .map((click, index) => (
+                                <tr key={`social-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Regular Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'regular').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Enlaces Regulares</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'regular')
+                              .map((click, index) => (
+                                <tr key={`regular-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* App Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'app').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Apps</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'app')
+                              .map((click, index) => (
+                                <tr key={`app-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label} </td>
+
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* WhatsApp Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'whatsapp').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">WhatsApp</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'whatsapp')
+                              .map((click, index) => (
+                                <tr key={`whatsapp-${index}`} className="border-b border-gray-400 last:border-b-0">
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Post Links */}
+                  {analyticsData.clickDetails.filter(c => c.link_type === 'social_post').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Publicaciones</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => c.link_type === 'social_post')
+                              .map((click, index) => (
+                                <tr key={`post-${index}`} className="border-b border-gray-400 last:border-b-0" >
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other Links (no link_type or empty) */}
+                  {analyticsData.clickDetails.filter(c => !c.link_type || c.link_type === '').length > 0 && (
+                    <div className='border-b-2 border-gray-800 '>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2 px-2">Otros Enlaces</h3>
+                      <div className="bg-white rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                          <tbody>
+                            {analyticsData.clickDetails
+                              .filter(c => !c.link_type || c.link_type === '')
+                              .map((click, index) => (
+                                <tr key={`other-${index}`} className="border-b border-gray-400 last:border-b-0" >
+                                  <td className="px-4 py-3 text-black text-sm">{click.label}</td>
+                                  <td className="px-4 py-3 text-black font-semibold text-right">{click.count}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-black/50 p-6 rounded-lg text-center">
+                  <p className="text-gray-400">No click data available yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Card de Historial para desktop */}
+          <div className="bg-white rounded-3xl p-10 w-full mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl text-gray-600 font-semibold">
+                Mis Historias Activas (Últimas 24h)
+              </h2>
+              <button 
+                onClick={() => alert("Próximamente: Formulario para subir historia")}
+                className="bg-[#E8FAD5] text-black font-medium px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-[#d4f5b5] transition-colors border border-gray-200"
+              >
+                <span className="text-xl leading-none">+</span> Subir nueva historia
+              </button>
+            </div>
+            {historyLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+              </div>
+            ) : historyItems && historyItems.length > 0 ? (
+              <div className="bg-[#E8FAD5] rounded-xl border border-gray-200 overflow-hidden">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-100/50 border-b border-gray-300">
+                    <tr>
+                      <th className="px-6 py-4 text-sm font-semibold text-gray-700">Fecha de subida</th>
+                      <th className="px-6 py-4 text-sm font-semibold text-gray-700">Vistas</th>
+                      <th className="px-6 py-4 text-sm font-semibold text-gray-700">Interacciones</th>
+                      <th className="px-6 py-4 text-sm font-semibold text-gray-700">Contenido</th>
+                      <th className="px-6 py-4 text-sm font-semibold text-gray-700">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200/50">
+                    {historyItems.map((item, index) => (
+                      <tr key={item.id || index} className="hover:bg-white/40 transition-colors">
+                        <td className="px-6 py-4 text-sm text-gray-700 font-medium">
+                          {new Date(item.createdAt).toLocaleString('es-ES', { 
+                            year: 'numeric', month: 'long', day: 'numeric', 
+                            hour: '2-digit', minute: '2-digit' 
+                          })}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700 font-semibold">
+                          👁️ {item.visuals || 0}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700 font-semibold">
+                          👆 {item.interactions || 0}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {item.image ? (
+                            <span className="inline-flex items-center gap-1 text-blue-600">
+                              📸 Con imagen
+                            </span>
+                          ) : '-'}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-right">
+                          <button 
+                            className="text-red-500 hover:text-red-700 font-medium text-xs px-2 py-1"
+                            onClick={() => alert("Próximamente: Eliminar historia")}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 p-8 rounded-xl text-center">
+                <p className="text-gray-500 font-medium">No tienes historias activas.</p>
+                <p className="text-gray-400 text-sm mt-1">Sube una historia para conectarte con tu audiencia.</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+      <div className="h-10"></div>
+    </div>
   );
 };
 
@@ -1346,9 +1484,9 @@ const Analytics = () => {
 
   if (biositeId) {
     return (
-        <AnalyticsWrapper biositeId={biositeId} isPublicView={false}>
-          <AnalyticsContent />
-        </AnalyticsWrapper>
+      <AnalyticsWrapper biositeId={biositeId} isPublicView={false}>
+        <AnalyticsContent />
+      </AnalyticsWrapper>
     );
   }
 

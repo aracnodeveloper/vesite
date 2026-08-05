@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import apiService from '../service/apiService';
 import {
     sectionsApi,
     getSectionsByBiositeApi,
     reorderSectionsApi
 } from '../constants/EndpointsRoutes';
-import type { CreateSectionData, ReorderSectionData, Section } from '../interfaces/sections.ts'
+import type { CreateSectionData, Section } from '../interfaces/sections.ts'
 
 export const useSections = () => {
     const [sections, setSections] = useState<Section[]>([]);
@@ -169,6 +169,12 @@ export const useSections = () => {
                     titulo: 'Gallery',
                     icon: 'gallery',
                     descripcion: 'Galleria de imagenes',
+                },
+                {
+                    biositeId,
+                    titulo: 'Historias',
+                    icon: 'histories',
+                    descripcion: 'Historias temporales del perfil',
                 }
             ];
 
@@ -179,6 +185,9 @@ export const useSections = () => {
 
             // Solo buscar secciones que faltan (NO verificar orderIndex)
             const sectionsToCreate: CreateSectionData[] = [];
+            let nextOrderIndex = existingSections.length > 0
+                ? Math.max(...existingSections.map(s => s.orderIndex)) + 1
+                : 0;
 
             for (const requiredSection of requiredSections) {
                 const existingSection = existingSectionsMap.get(requiredSection.titulo);
@@ -186,14 +195,11 @@ export const useSections = () => {
                 if (!existingSection) {
                     // La sección no existe, necesita ser creada
                     // Para nuevas secciones, usar el siguiente orderIndex disponible
-                    const maxOrderIndex = existingSections.length > 0
-                        ? Math.max(...existingSections.map(s => s.orderIndex))
-                        : -1;
-
                     sectionsToCreate.push({
                         ...requiredSection,
-                        orderIndex: maxOrderIndex + 1
+                        orderIndex: nextOrderIndex
                     });
+                    nextOrderIndex += 1;
                     console.log(`Sección faltante detectada: ${requiredSection.titulo}`);
                 }
                 // NO hacer nada si la sección existe, mantener su orderIndex actual
@@ -260,7 +266,7 @@ export const useSections = () => {
 
             const requiredSectionTitles = [
                 'Profile', 'Social', 'Links', 'Contactame', 'Link de mi App',
-                'VCard', 'Video', 'Music / Podcast', 'Social Post'
+                'VCard', 'Video', 'Music / Podcast', 'Social Post', 'Gallery', 'Historias'
             ];
 
             const existingTitles = existingSections.map(s => s.titulo);
@@ -361,13 +367,20 @@ export const useSections = () => {
                 descripcion: 'Instagram posts',
                 orderIndex: 8,
             },
-            {
-                biositeId,
-                titulo: 'Gallery',
-                icon: 'gallery',
-                descripcion: 'galeria de imagenes',
-                orderIndex: 9,
-            }
+                {
+                    biositeId,
+                    titulo: 'Gallery',
+                    icon: 'gallery',
+                    descripcion: 'galeria de imagenes',
+                    orderIndex: 9,
+                },
+                {
+                    biositeId,
+                    titulo: 'Historias',
+                    icon: 'histories',
+                    descripcion: 'Historias temporales del perfil',
+                    orderIndex: 10,
+                }
         ];
 
         try {
@@ -386,16 +399,6 @@ export const useSections = () => {
         } catch (err) {
             console.error('Error creating default sections:', err);
             throw err;
-        }
-    };
-
-    const checkExistingSections = async (biositeId: string): Promise<boolean> => {
-        try {
-            const existingSections = await getSectionsByBiosite(biositeId);
-            return existingSections.length > 0;
-        } catch (err) {
-            console.error('Error checking existing sections:', err);
-            return false;
         }
     };
 

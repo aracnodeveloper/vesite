@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GripVertical, Edit3 } from "lucide-react";
+import { CirclePlay, GripVertical, Edit3 } from "lucide-react";
 import { usePreview } from "../../context/PreviewContext.tsx";
 import { useSectionsContext } from "../../context/SectionsContext.tsx";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -308,6 +308,10 @@ const SectionsWithDrawerInteraction: React.FC<
         ),
         bgColor: "pink-600",
       },
+      Historias: {
+        icon: <CirclePlay size={17} className="text-white" />,
+        bgColor: "#F2647C",
+      },
       Video: {
         icon: (
           <svg
@@ -472,6 +476,7 @@ const SectionsWithDrawerInteraction: React.FC<
                                   .replace("contactame", "whatsapp")
                                   .replace("socialpost", "post")
                                   .replace("music/podcast", "music")
+                                  .replace("historias", "histories")
                               )
                             }
                             className={`

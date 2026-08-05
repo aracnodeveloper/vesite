@@ -146,7 +146,8 @@ export const AvatarSection = ({
     biosite,
     themeConfig,
     defaultAvatar,
-    handleImageClick
+    handleImageClick,
+    historyIndicator
 }: any) => {
     const defaultAvatars = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23e5e7eb'/%3E%3Cpath d='M48 20c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14zM24 72c0-13 11-20 24-20s24 7 24 20v4H24v-4z' fill='%239ca3af'/%3E%3C/svg%3E";
 
@@ -156,7 +157,7 @@ export const AvatarSection = ({
             className={`flex justify-center  ${biosite.avatarImage === null ? 'hidden' : ''} ${isExposedRoute ? '-mt-14' : '-mt-14'} relative z-10 mb-4 ${!isExposedRoute ? '' : 'cursor-pointer'}`}
             onClick={handleImageClick}>
             {validAvatarImage ? (
-                <div className="relative">
+                <div className="relative inline-block">
                     {imageLoadStates.avatar === 'loading' && (
                         <div
                             className={`absolute inset-0 flex items-center justify-center rounded-full border-3 border-white ${isExposedRoute ? 'w-16 h-16' : 'w-16 h-16'}`}
@@ -176,6 +177,7 @@ export const AvatarSection = ({
                             display: imageLoadStates.avatar === 'error' ? 'none' : 'block'
                         }}
                     />
+                    {historyIndicator}
                     {imageLoadStates.avatar === 'error' && (
                         <img
                             src={defaultAvatar}
@@ -185,11 +187,14 @@ export const AvatarSection = ({
                     )}
                 </div>
             ) : (
-                <img
-                    src={defaultAvatar}
-                    alt="Avatar placeholder"
-                    className="w-20 h-20 rounded-full border-3 border-white object-cover shadow-lg mt-5"
-                />
+                <div className="relative inline-block mt-5">
+                    <img
+                        src={defaultAvatar}
+                        alt="Avatar placeholder"
+                        className="w-20 h-20 rounded-full border-3 border-white object-cover shadow-lg"
+                    />
+                    {historyIndicator}
+                </div>
             )}
 
         </div>

@@ -223,6 +223,9 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 case 'Gallery':
                     shouldShow = true;
                     break;
+                case 'Historias':
+                    shouldShow = true;
+                    break;
                 default:
                     shouldShow = false;
                     break;

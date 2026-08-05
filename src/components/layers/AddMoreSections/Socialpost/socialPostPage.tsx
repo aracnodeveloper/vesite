@@ -1,5 +1,5 @@
 import { Instagram } from "lucide-react";
-import SVG from "../../../../../public/post.svg"
+const SVG = "/post.svg";
 import { useState, useEffect } from "react";
 import { usePreview } from "../../../../context/PreviewContext.tsx";
 import BackButton from "../../../shared/BackButton.tsx";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2, Upload, Copy, Check, User } from "lucide-react";
 import { Upload as AntdUpload, message } from "antd";
 import { uploadImage } from "../../../layers/MySite/Profile/lib/uploadImage";
-import imgP6 from "../../../../../public/img/fondo.svg";
+const imgP6 = "/img/fondo.svg";
 
 interface CreateBiositeData {
     title: string;

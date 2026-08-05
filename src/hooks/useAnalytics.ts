@@ -22,16 +22,6 @@ export const useAnalytics = ({
         }
     }, [debug]);
 
-
-
-    // Trackear visita automáticamente cuando se monta el componente en vista pública
-    useEffect(() => {
-        if (isPublicView && biositeId && !hasTrackedVisit.current) {
-            log('Auto-tracking visit on mount', { biositeId, isPublicView });
-            trackVisit();
-        }
-    }, [biositeId, isPublicView]);
-
     const trackVisit = useCallback(async () => {
         if (!biositeId || hasTrackedVisit.current) {
             log('Skipping visit tracking', {
@@ -58,6 +48,14 @@ export const useAnalytics = ({
             log('Failed to track visit', { error, biositeId });
         }
     }, [biositeId, log]);
+
+    // Trackear visita automáticamente cuando se monta el componente en vista pública
+    useEffect(() => {
+        if (isPublicView && biositeId && !hasTrackedVisit.current) {
+            log('Auto-tracking visit on mount', { biositeId, isPublicView });
+            trackVisit();
+        }
+    }, [biositeId, isPublicView, trackVisit, log]);
 
     const trackLinkClick = useCallback(async (linkId: string) => {
         if (!linkId) {

@@ -15,6 +15,7 @@ import { useSectionsContext } from "../../../context/SectionsContext.tsx";
 import { GripVertical, Menu, X, Check } from "lucide-react";
 import Loading from "../../shared/Loading.tsx";
 import Text_blocks from "./Text_blocks/text_block.tsx";
+import Histories from "./Histories/Histories";
 
 const MySite = () => {
   const {
@@ -114,6 +115,8 @@ const MySite = () => {
         return <Videos key="video" />;
       case "Gallery":
         return <Text_blocks key="gallery" />;
+      case "Historias":
+        return <Histories key="histories" />;
       default:
         return null;
     }
@@ -180,8 +183,8 @@ const MySite = () => {
                   <button
                     onClick={toggleReorderMode}
                     className={`p-2 rounded-lg transition-colors ${isReorderMode
-                        ? "bg-teal-600 text-white"
-                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                      ? "bg-teal-600 text-white"
+                      : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                       }`}
                     title={isReorderMode ? "Finalizar reordenamiento" : "Reordenar secciones"}
                   >

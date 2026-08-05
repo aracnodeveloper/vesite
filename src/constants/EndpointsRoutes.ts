@@ -3,7 +3,7 @@ export const loginApi: string = "/auth/login-flexible"
 export const registerStudentApi: string = "/auth/register"
 
 //Themes.ts-Templates
-export const themesApi ="/themes"
+export const themesApi = "/themes"
 
 // Plantillas - Nuevos endpoints
 export const plantillasApi = "/plantillas";
@@ -15,6 +15,8 @@ export const getBiositeAdminApi = "/biosites/admin";
 export const getBiositeApi = "/biosites/user";
 export const getBiositesApi = "/biosites"
 export const getALLBiositesApi = "/biosites?page=10&size=10"
+
+
 
 //Links
 export const LinksApi = "/links"
@@ -62,3 +64,11 @@ export const googleWalletApi = "/passes/google";       // GET /:memberId
 export const appleWalletApi = "/passes/apple";         // GET /:memberId.pkpass
 export const contactVcardApi = "/contacts";            // GET /:memberId.vcf
 export const memberByUserApi = "/members/user";        // GET /:userId
+
+
+// HISTORIAL
+export const historyApi = "/history";
+export const getHistoryByBiositeApi = "/history/biosite";
+
+// HIGHLIGHTS
+export const highlightsApi = "/highlights";
