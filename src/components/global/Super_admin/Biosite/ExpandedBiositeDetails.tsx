@@ -120,16 +120,28 @@ export default function ExpandedBiositeDetails({
       const newSlug = editableBiosite.slug?.trim()
           ? normalizeSlug(editableBiosite.slug)
           : null;
+      const newTitle = editableBiosite.title?.trim()
+          ? editableBiosite.title.trim()
+          : null;
 
-      // El slug se guarda primero: si ya está en uso, no se aplica ningún
-      // otro cambio y el administrador puede corregirlo antes de reintentar.
+      const biositeChanges: { title?: string | null; slug?: string | null } = {};
+      if (newTitle !== (biosite.title ?? null)) {
+        biositeChanges.title = newTitle;
+      }
       if (newSlug !== (biosite.slug ?? null)) {
-        await apiService.update<{ slug: string | null }>(
+        biositeChanges.slug = newSlug;
+      }
+
+      // Los datos del veSite se guardan primero: si el slug ya está en uso, no
+      // se aplica ningún otro cambio y el administrador puede corregirlo antes
+      // de reintentar.
+      if (Object.keys(biositeChanges).length > 0) {
+        await apiService.update<typeof biositeChanges>(
             updateBiositeApi,
             biosite.id,
-            { slug: newSlug }
+            biositeChanges
         );
-        setEditableBiosite((prev) => ({ ...prev, slug: newSlug }));
+        setEditableBiosite((prev) => ({ ...prev, ...biositeChanges }));
       }
 
       const updateUserData: UpdateUserDto = {
@@ -211,7 +223,7 @@ export default function ExpandedBiositeDetails({
             {/* Información del Usuario */}
             <div>
               <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">
-                Información del Usuario {biosite.title}
+                Información del Usuario {editableBiosite.title}
                 {error && (
                     <span className="ml-2 text-xs sm:text-sm text-red-600 font-normal">
                   (Error al cargar datos)
@@ -247,6 +259,13 @@ export default function ExpandedBiositeDetails({
                       <Input
                           name="owner.phone"
                           value={editableBiosite.owner?.phone ?? ""}
+                          onChange={handleChange}
+                      />
+                    </FomrField>
+                    <FomrField title={"Título del veSite"}>
+                      <Input
+                          name="title"
+                          value={editableBiosite.title ?? ""}
                           onChange={handleChange}
                       />
                     </FomrField>
