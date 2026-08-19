@@ -15,6 +15,19 @@ import {
 import EditableLink from "./EditableLink";
 import EditableVCardSection from "./EditableVCardSection";
 import type { UpdateBusinessCardDto } from "../../../../types/V-Card";
+import apiService from "../../../../service/apiService";
+import { updateBiositeApi } from "../../../../constants/EndpointsRoutes";
+
+// El slug forma parte de la URL pública del veSite, por lo que se normaliza
+// a minúsculas, sin espacios ni caracteres especiales.
+const normalizeSlug = (value: string) =>
+    value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-/, "");
 
 export default function ExpandedBiositeDetails({
                                                  biosite,
@@ -72,6 +85,14 @@ export default function ExpandedBiositeDetails({
     setUpdate_profile(true);
   };
 
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditableBiosite((prev) => ({
+      ...prev,
+      slug: normalizeSlug(e.target.value),
+    }));
+    setUpdate_profile(true);
+  };
+
   const handleImageChange = (fieldName: string) => (file: File | null) => {
     if (fieldName == "avatarImage") {
       setAvatarFile(file);
@@ -93,7 +114,24 @@ export default function ExpandedBiositeDetails({
     e.preventDefault();
     setIsLoading(true);
 
+    setFormError("");
+
     try {
+      const newSlug = editableBiosite.slug?.trim()
+          ? normalizeSlug(editableBiosite.slug)
+          : null;
+
+      // El slug se guarda primero: si ya está en uso, no se aplica ningún
+      // otro cambio y el administrador puede corregirlo antes de reintentar.
+      if (newSlug !== (biosite.slug ?? null)) {
+        await apiService.update<{ slug: string | null }>(
+            updateBiositeApi,
+            biosite.id,
+            { slug: newSlug }
+        );
+        setEditableBiosite((prev) => ({ ...prev, slug: newSlug }));
+      }
+
       const updateUserData: UpdateUserDto = {
         name: editableBiosite.owner?.name,
         email: editableBiosite.owner?.email,
@@ -118,7 +156,10 @@ export default function ExpandedBiositeDetails({
       }
     } catch (error) {
       let errorMessage = "Error desconocido";
-      if (error instanceof Error) {
+      const apiMessage = (error as any)?.response?.data?.message;
+      if (apiMessage) {
+        errorMessage = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === "string") {
         errorMessage = error;
@@ -208,6 +249,18 @@ export default function ExpandedBiositeDetails({
                           value={editableBiosite.owner?.phone ?? ""}
                           onChange={handleChange}
                       />
+                    </FomrField>
+                    <FomrField title={"Slug del veSite"}>
+                      <Input
+                          name="slug"
+                          value={editableBiosite.slug ?? ""}
+                          onChange={handleSlugChange}
+                      />
+                      <p className="mt-1 text-xs text-gray-500 break-all">
+                        {editableBiosite.slug
+                            ? `URL: /${editableBiosite.slug}`
+                            : "Sin slug. Solo minúsculas, números y guiones."}
+                      </p>
                     </FomrField>
                     <div>
                       <p className="text-xs sm:text-sm text-gray-600 uppercase tracking-wide">
