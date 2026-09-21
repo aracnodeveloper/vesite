@@ -461,7 +461,7 @@ const ProfilePage = () => {
             </div>
 
             {/* URL Input */}
-            <div className={isAdmin ? "mb-6" : "hidden"}>
+            <div className={isAdmin ? "mb-6" : "mb-6"}>
               <label className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start block">
                 SITIO
               </label>
@@ -548,8 +548,8 @@ const ProfilePage = () => {
                 type="default"
                 htmlType="submit"
                 className={`w-full border-none rounded-lg py-2 h-auto ${!loading && !slugValidating
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-400 text-gray-600 cursor-not-allowed"
                   }`}
                 loading={loading || slugValidating}
                 disabled={!biosite.id || loading || slugValidating}
