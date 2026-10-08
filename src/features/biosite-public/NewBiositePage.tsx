@@ -1,7 +1,8 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import type { Section } from "../sections/types/sections";
 import { sectionService } from "../sections/services/sectionService";
 import { biositeService } from "../biosite/services/biositeService";
+import { getErrorMessage } from "../../core/api/errors";
 import { useNavigate, useParams } from "react-router-dom";
 import type {
   BiositeFull,
@@ -24,7 +25,16 @@ import VCardModal from "./VCardModal";
 import type { VCardData } from "../vcard/types/V-Card";
 import { useTextBlocks } from "../text-blocks/hooks/useTextBlocks.ts";
 
-export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
+interface NewBiositePageProps {
+  slug?: string;
+  /**
+   * Al cambiar, vuelve a cargar los datos sin mostrar el spinner. Lo usa el
+   * preview del editor para reflejar cada cambio guardado.
+   */
+  refreshKey?: number;
+}
+
+export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBiositePageProps) {
   const { slug: paramSlug } = useParams<{ slug: string }>();
   const slug = propSlug || paramSlug;
   const { user } = useUser();
@@ -128,7 +138,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
 
       // Ejecutar actualización
-      const updatedBiosite = await biositeService.update(childBiosite.id, updateData);
+      const updatedBiosite = await biositeService.update(childBiosite.id, updateData, { notify: false });
 
       console.log("Sincronización completada exitosamente");
 
@@ -143,19 +153,20 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
     }
   };
 
+  const sectionsLoadedRef = useRef(false);
+
   useEffect(() => {
     const fetchSections = async () => {
+      const isFirstLoad = !sectionsLoadedRef.current;
       try {
-        setLoading(true);
+        if (isFirstLoad) setLoading(true);
         if (biosite?.id) {
           const fetchedSections = await sectionService.getByBiosite(biosite.id);
 
           // Guardar secciones para acceder al orderIndex de Gallery
           setFetchedSections(fetchedSections);
 
-          let links: Map<Section_type, BiositeLink[]>;
-
-          links = createOrderedSectionsRecord(
+          const links = createOrderedSectionsRecord(
             biosite.links,
             fetchedSections,
             propSlug != null,
@@ -163,77 +174,99 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
           );
 
           setLinks(links);
+          sectionsLoadedRef.current = true;
         }
-      } catch (erro: any) {
-        setError("Error al cargar secciones");
+      } catch {
+        // En una recarga silenciosa se conserva lo que ya se mostraba
+        if (isFirstLoad) setError("Error al cargar secciones");
       } finally {
-        setLoading(false);
+        if (isFirstLoad) setLoading(false);
       }
     };
 
     if (biosite?.id) {
       fetchSections();
     }
-  }, [biosite?.id, propSlug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [biosite, propSlug]);
 
   // Cargar textBlocks (imágenes de galería) cuando se carga el biosite
   useEffect(() => {
     if (biosite?.id) {
       getBlocksByBiosite(biosite.id);
     }
-  }, [biosite?.id, getBlocksByBiosite]);
+  }, [biosite?.id, refreshKey, getBlocksByBiosite]);
 
-  useEffect(() => {
-    const fetchBiositeBySlug = async () => {
+  // Solo se aplica la respuesta de la petición más reciente
+  const latestRequestRef = useRef(0);
+
+  const loadBiosite = async (silent: boolean) => {
+    const requestId = ++latestRequestRef.current;
+    const isLatest = () => requestId === latestRequestRef.current;
+
+    if (!silent) {
       setLoading(true);
       setError("");
+    }
 
-      if (!slug) {
-        throw new Error("No se proporcionó un slug válido");
+    if (!slug) {
+      throw new Error("No se proporcionó un slug válido");
+    }
+
+    try {
+      const initialBiosite = await biositeService.getBySlug(slug);
+
+      if (!initialBiosite) {
+        throw new Error("Biosite no encontrado");
       }
 
-      try {
-        const initialBiosite = await biositeService.getBySlug(slug);
+      const shouldIncludeParent = initialBiosite.owner?.parentId != null;
 
-        if (!initialBiosite) {
-          throw new Error("Biosite no encontrado");
-        }
+      if (shouldIncludeParent) {
+        const response = await biositeService.getBySlugWithParent(slug);
+        if (!isLatest()) return;
 
-        const shouldIncludeParent = initialBiosite.owner?.parentId != null;
+        if (Array.isArray(response) && response.length > 0) {
+          const childBiosite = response[0];
+          const parentBiosite = response.length > 1 ? response[1] : null;
 
-        if (shouldIncludeParent) {
-          const response = await biositeService.getBySlugWithParent(slug);
+          setBiosite(childBiosite);
+          setParentBiosite(parentBiosite);
 
-          if (Array.isArray(response) && response.length > 0) {
-            const childBiosite = response[0];
-            const parentBiosite = response.length > 1 ? response[1] : null;
-
-            setBiosite(childBiosite);
-            setParentBiosite(parentBiosite);
-
-            if (parentBiosite) {
-              await syncChildWithParent(childBiosite, parentBiosite);
-            }
-          } else {
-            setBiosite(initialBiosite);
+          if (parentBiosite) {
+            await syncChildWithParent(childBiosite, parentBiosite);
           }
         } else {
           setBiosite(initialBiosite);
-          setParentBiosite(null);
         }
-      } catch (error: any) {
-        const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          "Error al cargar el biosite";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
+      } else {
+        if (!isLatest()) return;
+        setBiosite(initialBiosite);
+        setParentBiosite(null);
       }
-    };
+    } catch (error) {
+      if (silent) {
+        // Si falla una recarga silenciosa se sigue mostrando la versión anterior
+        console.error("Error al recargar el biosite:", error);
+        return;
+      }
+      setError(getErrorMessage(error, "Error al cargar el biosite"));
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
 
-    fetchBiositeBySlug();
+  useEffect(() => {
+    loadBiosite(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
+
+  useEffect(() => {
+    if (refreshKey > 0) {
+      loadBiosite(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
 
   useEffect(() => {
     if (biosite && parentBiosite && !syncInProgress) {

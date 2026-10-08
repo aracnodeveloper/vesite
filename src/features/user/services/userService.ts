@@ -1,5 +1,6 @@
 import apiService from "../../../core/api/apiService";
 import { usersApi } from "../../../core/api/endpoints";
+import { withBiositeChange } from "../../../core/events/biositeEvents";
 import type { ChildUser, UpdateUserDto, User } from "../types/User";
 
 const userCache = new Map<string, User>();
@@ -15,7 +16,8 @@ export const userService = {
     },
 
     update: async (userId: string, data: UpdateUserDto): Promise<User> => {
-        const user = (await apiService.update<UpdateUserDto>(usersApi, userId, data)) as User;
+        // El nombre y la descripción del usuario se muestran en su biosite
+        const user = (await withBiositeChange(apiService.update<UpdateUserDto>(usersApi, userId, data))) as User;
         userCache.set(userId, user);
         return user;
     },

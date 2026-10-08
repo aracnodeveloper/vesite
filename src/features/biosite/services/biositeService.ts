@@ -8,6 +8,7 @@ import {
     registerApi,
 } from "../../../core/api/endpoints";
 import type { PaginatedResponse, PaginationParams } from "../../../core/api/types";
+import { notifyBiositeChanged } from "../../../core/events/biositeEvents";
 import type { CreatedUser } from "../../user/types/User";
 import type { BiositeFull, BiositeUpdateDto } from "../types/Biosite";
 
@@ -84,8 +85,17 @@ export const biositeService = {
     getBySlugWithParent: (slug: string) =>
         apiService.getAll<BiositeFull[]>(`${biositeBySlugApi}/${slug}?include_parent=true`),
 
-    update: async (biositeId: string, data: BiositePatch): Promise<BiositeFull | null> => {
+    /**
+     * `notify: false` evita avisar al preview; lo usa la propia vista pública al
+     * sincronizar un hijo con su padre (si avisara, se recargaría en bucle).
+     */
+    update: async (
+        biositeId: string,
+        data: BiositePatch,
+        { notify = true }: { notify?: boolean } = {}
+    ): Promise<BiositeFull | null> => {
         const result = await apiService.update<BiositePatch>(biositesApi, biositeId, data);
+        if (notify) notifyBiositeChanged();
         if (result == null) return null;
         const updated = Array.isArray(result) ? result[0] : result;
         return (updated ?? null) as BiositeFull | null;

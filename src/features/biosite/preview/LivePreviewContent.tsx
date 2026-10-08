@@ -30,7 +30,8 @@ import {
   isInstagramUrl,
 } from "../../../shared/utils/biositeUtils.ts";
 
-const LivePreviewContent = () => {
+/** Preview del editor para biosites sin slug; `refreshKey` recarga la galería. */
+const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
   const navigate = useNavigate();
   const maxReloadAttempts = 2;
   const storageKey = "biositeReloadAttempts";
@@ -85,7 +86,7 @@ const LivePreviewContent = () => {
     if (biositeId) {
       getBlocksByBiosite(biositeId);
     }
-  }, [biositeId, getBlocksByBiosite]);
+  }, [biositeId, refreshKey, getBlocksByBiosite]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

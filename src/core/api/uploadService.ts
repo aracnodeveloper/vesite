@@ -7,6 +7,7 @@ import {
     uploadImageApi,
 } from "./endpoints";
 import { getErrorMessage } from "./errors";
+import { withBiositeChange } from "../events/biositeEvents";
 
 interface UploadResponse {
     success: boolean;
@@ -68,21 +69,23 @@ export const uploadService = {
 
     uploadBiositeAvatar: (file: File, biositeId: string) => {
         requireId(biositeId, "ID de biosite no válido");
-        return postImage(`${uploadBiositeAvatarApi}/${biositeId}`, file, "Error al subir el avatar");
+        return withBiositeChange(postImage(`${uploadBiositeAvatarApi}/${biositeId}`, file, "Error al subir el avatar"));
     },
 
     uploadBiositeBackground: (file: File, biositeId: string) => {
         requireId(biositeId, "ID de biosite no válido");
-        return postImage(`${uploadBiositeBackgroundApi}/${biositeId}`, file, "Error al subir la imagen de fondo");
+        return withBiositeChange(
+            postImage(`${uploadBiositeBackgroundApi}/${biositeId}`, file, "Error al subir la imagen de fondo")
+        );
     },
 
     uploadLinkImage: (file: File, linkId: string) => {
         requireId(linkId, "ID de enlace no válido");
-        return postImage(`${linkImageApi}/${linkId}`, file, "Error al subir la imagen del enlace");
+        return withBiositeChange(postImage(`${linkImageApi}/${linkId}`, file, "Error al subir la imagen del enlace"));
     },
 
     uploadBlockImage: (file: File | Blob, blockId: string) => {
         requireId(blockId, "ID de bloque no válido");
-        return postImage(`${blockImageApi}/${blockId}`, file, "Error al subir imagen");
+        return withBiositeChange(postImage(`${blockImageApi}/${blockId}`, file, "Error al subir imagen"));
     },
 };
