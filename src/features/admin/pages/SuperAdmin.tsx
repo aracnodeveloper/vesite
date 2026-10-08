@@ -1,590 +1,53 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useFetchBiosite } from "../../biosite/hooks/useFetchBiosite";
-import type { BiositeListParams } from "../../biosite/services/biositeService";
-import { usePagination } from "../hooks/usePagination";
-import SearchAndFilters from "../components/SearchAndFilters";
-import type { FilterState } from "../components/SearchAndFilters";
-import { Users, Globe, RefreshCw, LinkIcon, Eye, Users2 } from "lucide-react";
+import React, { useCallback } from "react";
+import { Eye } from "lucide-react";
 import Cookie from "js-cookie";
-import type { BusinessCard } from "../../vcard/types/V-Card.ts";
-import { businessCardService } from "../../vcard/services/VCardService.ts";
-import { getBiositeAnalytics } from "../../analytics/services/analyticsService";
-import { linkService } from "../../links/services/linkService";
+import SearchAndFilters from "../components/SearchAndFilters";
 import { BiositesTable } from "../components/BiositesTable.tsx";
 import { AdminChildBiositesTable } from "../components/AdminChildBiositesTable.tsx";
-import type {
-  BiositeFull,
-  LinkData,
-  TimeRange,
-  AnalyticsData,
-} from "../types/AdminData.ts";
-import type { UpdateBusinessCardDto } from "../../vcard/types/V-Card";
-
-type ViewMode = "all" | "children";
+import AdminHeader from "../components/AdminHeader";
+import AdminStats from "../components/AdminStats";
+import { useAdminPermissions } from "../hooks/useAdminPermissions";
+import { useAdminBiositeList } from "../hooks/useAdminBiositeList";
+import { useBiositeDetails } from "../hooks/useBiositeDetails";
+import { categorizeLinks, formatDate, parseVCardData } from "../utils/adminUtils";
+import type { BiositeFull } from "../types/AdminData.ts";
 
 const AdminPanel: React.FC = () => {
   const role = Cookie.get("roleName");
   const userId = Cookie.get("userId");
 
-  const [viewMode, setViewMode] = useState<ViewMode>("all");
+  const permissions = useAdminPermissions(role, userId);
+  const details = useBiositeDetails();
+  const { fetchBiositeAnalytics, fetchBiositeLinks } = details;
 
-  const permissions = useMemo(() => {
-    const isSpecialUser = userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5";
-    const isSuperAdmin = role === "SUPER_ADMIN";
-    const isAdmin = role === "ADMIN";
-
-    return {
-      hasFullAccess: isSpecialUser || isSuperAdmin,
-      hasChildBiositeAccess: isAdmin || isSpecialUser || isSuperAdmin,
-      isAdmin,
-      isSuperAdmin,
-      isSpecialUser,
-      canToggleView: isSuperAdmin || isSpecialUser,
-    };
-  }, [role, userId]);
-
-  const { fetchAllBiosites, fetchChildBiosites } = useFetchBiosite();
-
-  const [businessCards, setBusinessCards] = useState<{
-    [key: string]: BusinessCard;
-  }>({});
-  const [loadingCards, setLoadingCards] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-
-  const [biositeLinks, setBiositeLinks] = useState<{
-    [key: string]: LinkData[];
-  }>({});
-  const [loadingBiositeLinks, setLoadingBiositeLinks] = useState<{
-    [key: string]: boolean;
-  }>({});
-
-  const [analyticsData, setAnalyticsData] = useState<{
-    [key: string]: AnalyticsData;
-  }>({});
-  const [loadingAnalytics, setLoadingAnalytics] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const [analyticsTimeRange, setAnalyticsTimeRange] =
-    useState<TimeRange>("last7");
-  const [showAnalytics, setShowAnalytics] = useState<{
-    [key: string]: boolean;
-  }>({});
-
-  const [error, setError] = useState<string | null>(null);
-  const [expandedBiosite, setExpandedBiosite] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
-
-  const [currentFilters, setCurrentFilters] = useState<FilterState>({
-    search: "",
-    status: "all",
-    hasSlug: "all",
-    slugSearch: "",
-    dateRange: "all",
-    sortBy: "createdAt",
-    sortOrder: "desc",
-  });
-  const [filteredData, setFilteredData] = useState<BiositeFull[]>([]);
-  const [BioData, setBioData] = useState<BiositeFull[]>([]);
-
-  const allBiositesPagination = usePagination<BiositeFull>({
-    initialPage: 1,
-    initialSize: 10,
-  });
-
-  const childBiositesPagination = usePagination<BiositeFull>({
-    initialPage: 1,
-    initialSize: 10,
-  });
-
-  const getCurrentPagination = useCallback(() => {
-    if (permissions.hasFullAccess && viewMode === "all") {
-      return allBiositesPagination;
-    } else if (permissions.hasChildBiositeAccess) {
-      return childBiositesPagination;
-    }
-    return allBiositesPagination;
-  }, [
-    permissions.hasFullAccess,
-    permissions.hasChildBiositeAccess,
-    viewMode,
-    allBiositesPagination,
-    childBiositesPagination,
-  ]);
-
-  const handleViewModeChange = useCallback(
-    (newViewMode: ViewMode) => {
-      if (!permissions.canToggleView) return;
-
-      setViewMode(newViewMode);
-      setCurrentFilters({
-        search: "",
-        status: "all",
-        hasSlug: "all",
-        slugSearch: "",
-        dateRange: "all",
-        sortBy: "createdAt",
-        sortOrder: "desc",
-      });
-      setFilteredData([]);
-      setInitialized(false);
-    },
-    [permissions.canToggleView]
-  );
-
-  const shouldShowAllBiosites = useMemo(() => {
-    return permissions.hasFullAccess && viewMode === "all";
-  }, [permissions.hasFullAccess, viewMode]);
-
-  const applyFilters = useCallback(
-      async (
-          currentPage: number,
-          size: number,
-          filters: FilterState
-      ): Promise<BiositeFull[]> => {
-        try {
-          const params: BiositeListParams = {
-            page: currentPage,
-            size: size,
-          };
-
-          // Búsqueda general
-          if (filters.search?.trim()) {
-            params.search = filters.search.trim();
-          }
-
-          // Ordenamiento
-          if (filters.sortBy) {
-            params.sortBy = filters.sortBy;
-          }
-          if (filters.sortOrder) {
-            params.sortOrder = filters.sortOrder;
-          }
-
-          // Estado
-          if (filters.status !== "all") {
-            params.status = filters.status;
-          }
-
-          // Fecha
-          if (filters.dateRange !== "all") {
-            params.dateRange = filters.dateRange;
-          }
-
-          // LÓGICA DE SLUG CON PRIORIDAD
-          if (filters.slugSearch?.trim()) {
-            // Prioridad 1: Búsqueda específica de slug
-            params.slugSearch = filters.slugSearch.trim();
-          } else if (filters.hasSlug !== "all") {
-            // Prioridad 2: Filtro de estado del slug
-            params.hasSlug = filters.hasSlug;
-          }
-
-          console.log('Parámetros antes de enviar:', params);
-
-          const response = await fetchAllBiosites(params);
-
-          return Array.isArray(response) ? response : response?.data || [];
-        } catch (error) {
-          console.error('Error en applyFilters:', error);
-          return [];
+  // Los biosites hijos se muestran con sus métricas y links ya cargados
+  const preloadChildDetails = useCallback(
+    (biosites: BiositeFull[]) => {
+      for (const biosite of biosites) {
+        if (biosite.id && biosite.ownerId) {
+          fetchBiositeAnalytics(biosite.id, biosite.ownerId);
         }
-      },
-      [fetchAllBiosites]
-  );
-
-  const handleSearch = useCallback(
-    async (filters: FilterState) => {
-      setCurrentFilters(filters);
-      const currentPagination = getCurrentPagination();
-
-      if (currentPagination.data.length > 0) {
-        const filtered = await applyFilters(
-          currentPagination.currentPage,
-          currentPagination.pageSize,
-          filters
-        );
-        setFilteredData(filtered);
-      }
-
-      currentPagination.setPage(1);
-    },
-    [getCurrentPagination, applyFilters]
-  );
-
-  const handleResetFilters = useCallback(() => {
-    const defaultFilters: FilterState = {
-      search: "",
-      status: "all",
-      hasSlug: "all",
-      slugSearch: "",
-      dateRange: "all",
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    };
-    setCurrentFilters(defaultFilters);
-    const currentPagination = getCurrentPagination();
-    setFilteredData(currentPagination.data);
-    currentPagination.setPage(1);
-  }, [getCurrentPagination]);
-
-  const fetchBiositeLinks = useCallback(
-    async (biositeId: string) => {
-      if (biositeLinks[biositeId] || loadingBiositeLinks[biositeId]) return;
-
-      setLoadingBiositeLinks((prev) => ({ ...prev, [biositeId]: true }));
-      try {
-        const links: LinkData[] = await linkService.getByBiosite(biositeId);
-        setBiositeLinks((prev) => ({ ...prev, [biositeId]: links }));
-      } catch (error) {
-        console.error(`Error fetching links for biosite ${biositeId}:`, error);
-        setBiositeLinks((prev) => ({ ...prev, [biositeId]: [] }));
-      } finally {
-        setLoadingBiositeLinks((prev) => ({ ...prev, [biositeId]: false }));
-      }
-    },
-    [biositeLinks, loadingBiositeLinks]
-  );
-
-  const fetchBiositeAnalytics = useCallback(
-    async (biositeId: string, ownerId: string) => {
-      if (analyticsData[biositeId] || loadingAnalytics[biositeId]) return;
-
-      setLoadingAnalytics((prev) => ({ ...prev, [biositeId]: true }));
-
-      try {
-        const processedData = await getBiositeAnalytics(ownerId, analyticsTimeRange, biositeId);
-        setAnalyticsData((prev) => ({ ...prev, [biositeId]: processedData }));
-      } catch (error) {
-        console.error(
-          `Error fetching analytics for biosite ${biositeId}:`,
-          error
-        );
-        setAnalyticsData((prev) => ({
-          ...prev,
-          [biositeId]: {
-            views: 0,
-            clicks: 0,
-            dailyActivity: [],
-            clickDetails: [],
-          },
-        }));
-      } finally {
-        setLoadingAnalytics((prev) => ({ ...prev, [biositeId]: false }));
-      }
-    },
-    [analyticsData, loadingAnalytics, analyticsTimeRange]
-  );
-
-  const toggleAnalytics = useCallback(
-    (biositeId: string, ownerId: string) => {
-      const isCurrentlyShowing = showAnalytics[biositeId];
-      setShowAnalytics((prev) => ({
-        ...prev,
-        [biositeId]: !isCurrentlyShowing,
-      }));
-
-      if (!isCurrentlyShowing && !analyticsData[biositeId]) {
-        fetchBiositeAnalytics(biositeId, ownerId);
-      }
-    },
-    [showAnalytics, analyticsData, fetchBiositeAnalytics]
-  );
-
-  const categorizeLinks = useCallback((links: LinkData[]) => {
-    const categories = {
-      total: links?.length || 0,
-      social: 0,
-      regular: 0,
-      whatsApp: 0,
-      apps: 0,
-      embed: 0,
-    };
-
-    if (!links || links.length === 0) {
-      return categories;
-    }
-
-    const socialPlatforms = [
-      "instagram",
-      "tiktok",
-      "twitter",
-      "x",
-      "youtube",
-      "facebook",
-      "twitch",
-      "linkedin",
-      "snapchat",
-      "threads",
-      "gmail",
-      "pinterest",
-      "spotify",
-      "discord",
-      "tumblr",
-      "telegram",
-      "amazon",
-      "onlyfans",
-    ];
-    const appStores = [
-      "appstore",
-      "googleplay",
-      "apps.apple.com",
-      "play.google.com",
-    ];
-    const embedKeywords = [
-      "music",
-      "video",
-      "embed",
-      "player",
-      "post",
-      "publicacion",
-    ];
-
-    links.forEach((link) => {
-      const labelLower = link.label?.toLowerCase() || "";
-      const urlLower = link.url?.toLowerCase() || "";
-      const iconLower = link.icon?.toLowerCase() || "";
-
-      if (urlLower.includes("api.whatsapp.com") || iconLower === "whatsapp") {
-        categories.whatsApp++;
-      } else if (
-        appStores.some(
-          (store) => labelLower.includes(store) || urlLower.includes(store)
-        )
-      ) {
-        categories.apps++;
-      } else if (
-        embedKeywords.some(
-          (keyword) =>
-            labelLower.includes(keyword) || urlLower.includes(keyword)
-        )
-      ) {
-        categories.embed++;
-      } else if (
-        socialPlatforms.some(
-          (platform) =>
-            labelLower.includes(platform) ||
-            urlLower.includes(platform) ||
-            iconLower.includes(platform)
-        )
-      ) {
-        categories.social++;
-      } else {
-        categories.regular++;
-      }
-    });
-
-    return categories;
-  }, []);
-
-  const loadData = useCallback(async () => {
-    if (!permissions.hasChildBiositeAccess || !userId) return;
-
-    try {
-      const currentPagination = getCurrentPagination();
-      currentPagination.setLoading(true);
-      currentPagination.setError(null);
-
-      let responseData: BiositeFull[] = [];
-      let responseBioData: BiositeFull[] = [];
-
-      if (shouldShowAllBiosites) {
-        const params = currentPagination.getPaginationParams();
-        const response = await fetchAllBiosites(params);
-        currentPagination.setPaginatedData(response);
-        responseData = Array.isArray(response)
-          ? response
-          : response?.data || [];
-      } else {
-        const childBiosites = await fetchChildBiosites(userId);
-        responseBioData = childBiosites;
-        setBioData(responseBioData);
-
-        // Cargar analytics y links para cada biosite hijo
-        for (const biosite of responseBioData) {
-          // Cargar analytics automáticamente
-          if (biosite.id && biosite.ownerId) {
-            fetchBiositeAnalytics(biosite.id, biosite.ownerId);
-          }
-          // Cargar links automáticamente
-          if (biosite.id) {
-            fetchBiositeLinks(biosite.id);
-          }
+        if (biosite.id) {
+          fetchBiositeLinks(biosite.id);
         }
-
-        const startIndex =
-          (currentPagination.currentPage - 1) * currentPagination.pageSize;
-        const endIndex = startIndex + currentPagination.pageSize;
-      }
-
-      if (responseData.length > 0) {
-        const filtered = await applyFilters(
-          currentPagination.currentPage,
-          currentPagination.pageSize,
-          currentFilters
-        );
-        setFilteredData(filtered);
-      }
-    } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error al cargar biosites";
-      getCurrentPagination().setError(errorMessage);
-      setError(errorMessage);
-    } finally {
-      getCurrentPagination().setLoading(false);
-    }
-  }, [
-    permissions.hasChildBiositeAccess,
-    shouldShowAllBiosites,
-    userId,
-    fetchAllBiosites,
-    fetchChildBiosites,
-    getCurrentPagination,
-    applyFilters,
-    currentFilters,
-    fetchBiositeAnalytics,
-    fetchBiositeLinks,
-  ]);
-
-  const handleRefreshData = useCallback(async () => {
-    await loadData();
-  }, [loadData]);
-
-  useEffect(() => {
-    const initializeData = async () => {
-      if (!permissions.hasChildBiositeAccess || !userId || initialized) return;
-
-      try {
-        setInitialized(true);
-        await loadData();
-      } catch (error) {
-        console.error("Error initializing data:", error);
-        setError("Error al inicializar datos");
-      }
-    };
-
-    initializeData();
-  }, [permissions.hasChildBiositeAccess, userId, viewMode]);
-
-  useEffect(() => {
-    const applyFiltersAsync = async () => {
-      const currentPagination = getCurrentPagination();
-      if (currentPagination.data.length > 0) {
-        const filtered = await applyFilters(
-          currentPagination.currentPage,
-          currentPagination.pageSize,
-          currentFilters
-        );
-        setFilteredData(filtered);
-      }
-    };
-
-    applyFiltersAsync();
-  }, [
-    currentFilters,
-    getCurrentPagination().currentPage,
-    getCurrentPagination().pageSize,
-  ]);
-
-  const toggleBiositeExpansion = useCallback(
-    (biositeId: string) => {
-      const wasExpanded = expandedBiosite === biositeId;
-      setExpandedBiosite(wasExpanded ? null : biositeId);
-
-      if (!wasExpanded) {
-        const currentPagination = getCurrentPagination();
-        const biosite = currentPagination.data.find((b) => b.id === biositeId);
-        if (biosite?.ownerId) {
-          fetchBusinessCard(biosite.ownerId);
-        }
-        fetchBiositeLinks(biositeId);
       }
     },
-    [expandedBiosite, getCurrentPagination, fetchBiositeLinks]
+    [fetchBiositeAnalytics, fetchBiositeLinks]
   );
 
-  const formatDate = useCallback((dateString?: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }, []);
+  const list = useAdminBiositeList({ permissions, userId, onChildBiositesLoaded: preloadChildDetails });
+  const { currentPagination, viewMode, error, initialized, shouldShowAllBiosites } = list;
 
-  const fetchBusinessCard = useCallback(
-    async (ownerId: string) => {
-      if (businessCards[ownerId] || loadingCards[ownerId]) return;
-
-      setLoadingCards((prev) => ({ ...prev, [ownerId]: true }));
-      try {
-        const card = await businessCardService.regenerateQRCode(ownerId);
-        setBusinessCards((prev) => ({ ...prev, [ownerId]: card }));
-      } catch (error) {
-        console.error(
-          `Error fetching business card for user ${ownerId}:`,
-          error
-        );
-        setBusinessCards((prev) => ({ ...prev, [ownerId]: null }));
-      } finally {
-        setLoadingCards((prev) => ({ ...prev, [ownerId]: false }));
-      }
-    },
-    [businessCards, loadingCards]
-  );
-
-  const handleUpdateVCard = useCallback(
-    async (id: string, data: UpdateBusinessCardDto) => {
-      try {
-        const updatedCard = await businessCardService.updateBusinessCard(id, data);
-
-        // Actualizar el estado local con la nueva información
-        setBusinessCards((prev) => ({
-          ...prev,
-          [data.ownerId]: updatedCard,
-        }));
-
-        console.log("VCard actualizada exitosamente");
-      } catch (error) {
-        console.error("Error updating VCard:", error);
-        throw error;
-      }
-    },
-    []
-  );
-
-  const parseVCardData = useCallback((businessCard: BusinessCard | null) => {
-    if (!businessCard?.data) return null;
-
-    try {
-      return typeof businessCard.data === "string"
-        ? JSON.parse(businessCard.data)
-        : businessCard.data;
-    } catch (error) {
-      console.error("Error parsing VCard data:", error);
-      return null;
-    }
-  }, []);
-
-  // Verificar permisos de acceso
   if (!permissions.hasChildBiositeAccess) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-600">
-            Acceso Denegado
-          </h2>
-          <p className="text-gray-500">
-            Solo los usuarios ADMIN y SUPER_ADMIN pueden acceder a este panel.
-          </p>
+          <h2 className="text-xl font-semibold text-gray-600">Acceso Denegado</h2>
+          <p className="text-gray-500">Solo los usuarios ADMIN y SUPER_ADMIN pueden acceder a este panel.</p>
         </div>
       </div>
     );
   }
-
-  const currentPagination = getCurrentPagination();
 
   if (currentPagination.loading && !initialized) {
     return (
@@ -592,8 +55,7 @@ const AdminPanel: React.FC = () => {
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
           <p className="text-gray-600">
-            Cargando{" "}
-            {shouldShowAllBiosites ? "todos los veSites" : "veSites hijos"}...
+            Cargando {shouldShowAllBiosites ? "todos los veSites" : "veSites hijos"}...
           </p>
         </div>
       </div>
@@ -611,7 +73,7 @@ const AdminPanel: React.FC = () => {
             </div>
             <div className="mt-3">
               <button
-                onClick={handleRefreshData}
+                onClick={list.refresh}
                 className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
               >
                 Reintentar
@@ -623,175 +85,74 @@ const AdminPanel: React.FC = () => {
     );
   }
 
-  const totalLinks = Object.values(biositeLinks).reduce(
-    (sum, links) => sum + (links?.length || 0),
-    0
-  );
-  
-  // Determinar qué datos usar según el modo de vista
-  const currentData = useMemo(() => {
-    if (viewMode === "children") {
-      return BioData;
-    }
-    return filteredData.length > 0 ? filteredData : currentPagination.data;
-  }, [viewMode, BioData, filteredData, currentPagination.data]);
+  const totalLinks = Object.values(details.biositeLinks).reduce((sum, links) => sum + (links?.length || 0), 0);
+  // Un ADMIN (sin acceso total) solo ve a sus hijos
+  const biositeCount =
+    viewMode === "children" || (role === "ADMIN" && !permissions.isSpecialUser)
+      ? list.childBiosites.length
+      : currentPagination.totalItems || 0;
 
-  const getViewTitle = () => {
-    if (!permissions.canToggleView) {
-      return permissions.hasFullAccess
-        ? "Super Administración"
-        : "Administración";
-    }
+  const toggleBiositeExpansion = (biositeId: string) =>
+    details.toggleExpansion(biositeId, currentPagination.data.find((b) => b.id === biositeId)?.ownerId);
 
-    return viewMode === "all"
-      ? "Super Administración - Vista Completa"
-      : "Super Administración - Vista Hijos";
-  };
-
-  const getViewDescription = () => {
-    if (!permissions.canToggleView) {
-      return permissions.hasFullAccess
-        ? "Gestión completa de veSites, usuarios y analytics"
-        : "Gestión de veSites hijos y analytics";
-    }
-
-    return viewMode === "all"
-      ? "Vista completa de todos los biosites del sistema"
-      : "Vista limitada a veSites bajo tu administración";
+  const tableProps = {
+    biositeLinks: details.biositeLinks,
+    loadingBiositeLinks: details.loadingBiositeLinks,
+    analyticsData: details.analyticsData,
+    loadingAnalytics: details.loadingAnalytics,
+    showAnalytics: details.showAnalytics,
+    analyticsTimeRange: details.analyticsTimeRange,
+    expandedBiosite: details.expandedBiosite,
+    businessCards: details.businessCards,
+    loadingCards: details.loadingCards,
+    categorizeLinks,
+    toggleBiositeExpansion,
+    toggleAnalytics: details.toggleAnalytics,
+    fetchBiositeAnalytics: details.fetchBiositeAnalytics,
+    setAnalyticsTimeRange: details.setAnalyticsTimeRange,
+    setShowAnalytics: details.setShowAnalytics,
+    setAnalyticsData: details.setAnalyticsData,
+    formatDate,
+    parseVCardData,
+    fetchBusinessCard: details.fetchBusinessCard,
+    onUpdateVCard: details.handleUpdateVCard,
   };
 
   return (
     <div className="h-full lg:w-[1450px]  text-white px-4 py-2 lg:px-6 lg:py-16  transform scale-[0.9]">
-      {/* Header */}
-      <div className="shadow rounded-lg p-6 mb-6">
-        <div className="flex flex-wrap items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Panel de {getViewTitle()}
-            </h1>
-            <p className="text-gray-600">{getViewDescription()}</p>
-            {permissions.isAdmin && !permissions.canToggleView && (
-              <p className="text-sm text-yellow-600 mt-1">
-                Vista limitada: Solo veSites bajo tu administración
-              </p>
-            )}
-          </div>
-          <div className="flex space-x-2">
-            {/* Toggle de vista para SUPER_ADMIN */}
-            {permissions.canToggleView && (
-              <div className="flex bg-gray-100 rounded-lg p-1 mr-2">
-                <button
-                  onClick={() => handleViewModeChange("all")}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                    viewMode === "all"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Todos</span>
-                </button>
-                <button
-                  onClick={() => handleViewModeChange("children")}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                    viewMode === "children"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <Users2 className="w-4 h-4" />
-                  <span>Hijos</span>
-                </button>
-              </div>
-            )}
-            <button
-              onClick={handleRefreshData}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2 cursor-pointer"
-              disabled={currentPagination.loading}
-            >
-              <RefreshCw
-                className={`w-4 h-4 ${
-                  currentPagination.loading ? "animate-spin" : ""
-                }`}
-              />
-              <span>Actualizar</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <AdminHeader
+        permissions={permissions}
+        viewMode={viewMode}
+        onViewModeChange={list.changeViewMode}
+        onRefresh={list.refresh}
+        loading={currentPagination.loading}
+      />
 
-      {/* Enhanced Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <div className="flex items-center">
-            <Globe className="w-8 h-8 text-green-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">
-                {shouldShowAllBiosites ? "Total veSites" : "veSites Hijos"}
-              </p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {viewMode === "children" || role === "ADMIN" && !permissions.isSpecialUser
-                  ? BioData.length 
-                  : currentPagination.totalItems || 0}
-              </p>
-              <p className="text-xs text-gray-400">
-                {viewMode === "children" || role === "ADMIN" && !permissions.isSpecialUser ? BioData.length : currentPagination.totalItems || 0}
-                 activos
-              </p>
-            </div>
-          </div>
-        </div>
+      <AdminStats
+        showAllBiosites={shouldShowAllBiosites}
+        biositeCount={biositeCount}
+        totalLinks={totalLinks}
+        hideLinks={role === "SUPER_ADMIN"}
+      />
 
-        <div className={`bg-white p-6 rounded-lg shadow border ${role === 'SUPER_ADMIN' ? 'hidden' : '' }`}>
-          <div className="flex items-center">
-            <LinkIcon className="w-8 h-8 text-purple-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total Enlaces</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {totalLinks}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <div className="flex items-center">
-            <Users className="w-8 h-8 text-blue-500" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">
-                {shouldShowAllBiosites ? "Usuarios Únicos" : "Usuarios Hijos"}
-              </p>
-              <p className="text-2xl font-semibold text-gray-900">
-              {viewMode === "children" || role === "ADMIN" && !permissions.isSpecialUser
-                  ? BioData.length 
-                  : currentPagination.totalItems || 0}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {(viewMode === 'children' || viewMode === 'all') && currentData.length > 0 && (
+      {list.currentData.length > 0 && (
         <div className="mb-6">
           <SearchAndFilters
-            onSearch={handleSearch}
-            onReset={handleResetFilters}
+            onSearch={list.handleSearch}
+            onReset={list.handleResetFilters}
             loading={currentPagination.loading}
-            totalResults={viewMode === "children" ? BioData.length : filteredData.length}
+            totalResults={viewMode === "children" ? list.childBiosites.length : list.filteredData.length}
           />
         </div>
       )}
 
-      {/* Main Content */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-900">
               {shouldShowAllBiosites
-                ? `veSites (${filteredData.length} de ${
-                    currentPagination.totalItems || 0
-                  })`
-                : `veSites Hijos ${BioData.length}`}
+                ? `veSites (${list.filteredData.length} de ${currentPagination.totalItems || 0})`
+                : `veSites Hijos ${list.childBiosites.length}`}
             </h2>
             {permissions.canToggleView && (
               <div className="flex items-center text-sm text-gray-500">
@@ -818,57 +179,19 @@ const AdminPanel: React.FC = () => {
           {shouldShowAllBiosites ? (
             <BiositesTable
               pagination={{
-                ...allBiositesPagination,
-                data: filteredData,
-                totalItems: filteredData.length,
-                totalUnfilteredItems: allBiositesPagination.totalItems || 0,
+                ...list.allBiositesPagination,
+                data: list.filteredData,
+                totalItems: list.filteredData.length,
+                totalUnfilteredItems: list.allBiositesPagination.totalItems || 0,
               }}
-              biositeLinks={biositeLinks}
-              loadingBiositeLinks={loadingBiositeLinks}
-              analyticsData={analyticsData}
-              loadingAnalytics={loadingAnalytics}
-              showAnalytics={showAnalytics}
-              analyticsTimeRange={analyticsTimeRange}
-              expandedBiosite={expandedBiosite}
-              businessCards={businessCards}
-              loadingCards={loadingCards}
-              categorizeLinks={categorizeLinks}
-              toggleBiositeExpansion={toggleBiositeExpansion}
-              toggleAnalytics={toggleAnalytics}
-              fetchBiositeAnalytics={fetchBiositeAnalytics}
-              setAnalyticsTimeRange={setAnalyticsTimeRange}
-              setShowAnalytics={setShowAnalytics}
-              setAnalyticsData={setAnalyticsData}
-              formatDate={formatDate}
-              parseVCardData={parseVCardData}
-              fetchBusinessCard={fetchBusinessCard}
-              onUpdateVCard={handleUpdateVCard}
+              {...tableProps}
             />
           ) : (
             <AdminChildBiositesTable
-              biosites={BioData}
-              totalBiosites={BioData.length}
-              loading={childBiositesPagination.loading}
-              biositeLinks={biositeLinks}
-              loadingBiositeLinks={loadingBiositeLinks}
-              analyticsData={analyticsData}
-              loadingAnalytics={loadingAnalytics}
-              showAnalytics={showAnalytics}
-              analyticsTimeRange={analyticsTimeRange}
-              expandedBiosite={expandedBiosite}
-              businessCards={businessCards}
-              loadingCards={loadingCards}
-              categorizeLinks={categorizeLinks}
-              toggleBiositeExpansion={toggleBiositeExpansion}
-              toggleAnalytics={toggleAnalytics}
-              fetchBiositeAnalytics={fetchBiositeAnalytics}
-              setAnalyticsTimeRange={setAnalyticsTimeRange}
-              setShowAnalytics={setShowAnalytics}
-              setAnalyticsData={setAnalyticsData}
-              formatDate={formatDate}
-              parseVCardData={parseVCardData}
-              fetchBusinessCard={fetchBusinessCard}
-              onUpdateVCard={handleUpdateVCard}
+              biosites={list.childBiosites}
+              totalBiosites={list.childBiosites.length}
+              loading={list.childBiositesPagination.loading}
+              {...tableProps}
             />
           )}
         </div>

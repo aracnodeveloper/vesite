@@ -27,11 +27,11 @@ export interface FilterState {
   sortOrder: "asc" | "desc";
 }
 
-const defaultFilters: FilterState = {
+export const defaultFilters: FilterState = {
   search: "",
   status: "all",
   hasSlug: "all",
-  slugSearch: "", // NUEVO
+  slugSearch: "",
   dateRange: "all",
   sortBy: "createdAt",
   sortOrder: "desc",
