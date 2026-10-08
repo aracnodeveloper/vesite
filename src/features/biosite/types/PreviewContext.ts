@@ -33,16 +33,15 @@ export interface AppLink {
     isSelected?: boolean;
 }
 
-{/**/}
-    export interface WhatsAppLink {
-        id: string;
-        phone: string;
-        description?: string;
-        message: string;
-        isActive: boolean;
-        link_type?: string;
-        isSelected?: boolean;
-    }
+export interface WhatsAppLink {
+    id: string;
+    phone: string;
+    description?: string;
+    message: string;
+    isActive: boolean;
+    link_type?: string;
+    isSelected?: boolean;
+}
 
 
 export interface PreviewContextType {
