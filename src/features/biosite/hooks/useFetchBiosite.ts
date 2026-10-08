@@ -60,6 +60,25 @@ export const useFetchBiosite = (userId?: string) => {
     [run]
   );
 
+  /** Biosites de cada usuario hijo de `parentId`; los que fallan se omiten. */
+  const loadChildUsersBiosites = useCallback(async (parentId: string): Promise<BiositeFull[]> => {
+    let childUsers: ChildUser[] = [];
+    try {
+      childUsers = await userService.getChildren(parentId);
+    } catch (err) {
+      setError(getErrorMessage(err, "Error al cargar usuarios hijos"));
+    }
+
+    const results = await Promise.allSettled(
+      childUsers.map((childUser) => biositeService.getByUser(childUser.id))
+    );
+    return results.flatMap((result, index) => {
+      if (result.status === "fulfilled") return result.value;
+      console.warn(`Error fetching biosites for user ${childUsers[index].id}:`, result.reason);
+      return [];
+    });
+  }, []);
+
   /**
    * Biosites que gestiona un admin. Si el backend no los devuelve directamente,
    * se reconstruyen a partir de los biosites de cada usuario hijo.
@@ -74,31 +93,13 @@ export const useFetchBiosite = (userId?: string) => {
       return run(
         async () => {
           const adminBiosites = await fetchAdminBiosites(parentId);
-          if (adminBiosites.length > 0) {
-            return adminBiosites;
-          }
-
-          let childUsers: ChildUser[] = [];
-          try {
-            childUsers = await userService.getChildren(parentId);
-          } catch (err) {
-            setError(getErrorMessage(err, "Error al cargar usuarios hijos"));
-          }
-
-          const results = await Promise.allSettled(
-            childUsers.map((childUser) => biositeService.getByUser(childUser.id))
-          );
-          return results.flatMap((result, index) => {
-            if (result.status === "fulfilled") return result.value;
-            console.warn(`Error fetching biosites for user ${childUsers[index].id}:`, result.reason);
-            return [];
-          });
+          return adminBiosites.length > 0 ? adminBiosites : loadChildUsersBiosites(parentId);
         },
         [],
         "Error al cargar biosites hijos"
       );
     },
-    [fetchAdminBiosites, run]
+    [fetchAdminBiosites, loadChildUsersBiosites, run]
   );
 
   const fetchCompleteBiositeStructure = useCallback(
@@ -117,19 +118,20 @@ export const useFetchBiosite = (userId?: string) => {
 
       return run(
         async () => {
+          // Una sola petición a /biosites/admin: sirve para "own" y, si trae datos, también para los hijos
           const ownBiosites = await biositeService.getByAdmin(parentId);
-          const childBiosites = await fetchChildBiosites(parentId);
-          return {
-            ownBiosites,
-            childBiosites,
-            allBiosites: [...ownBiosites, ...childBiosites],
-          };
+          const childBiosites =
+            ownBiosites.length > 0 ? ownBiosites : await loadChildUsersBiosites(parentId);
+          const allBiosites = [...ownBiosites, ...childBiosites].filter(
+            (biosite, index, list) => list.findIndex((b) => b.id === biosite.id) === index
+          );
+          return { ownBiosites, childBiosites, allBiosites };
         },
         empty,
         "Error al cargar estructura completa de biosites"
       );
     },
-    [fetchChildBiosites, run]
+    [loadChildUsersBiosites, run]
   );
 
   const fetchBiosite = useCallback(async (): Promise<BiositeFull | null> => {

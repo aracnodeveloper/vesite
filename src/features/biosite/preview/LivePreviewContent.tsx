@@ -335,7 +335,7 @@ const LivePreviewContent = () => {
       if (blocksWithImages.length > 0) {
         sections.push({
           type: "gallery",
-          orderIndex: getSectionOrderIndex("Galeria"),
+          orderIndex: getSectionOrderIndex("Gallery"),
           component: (
             <ImageGallerySection
               key="gallery-section"

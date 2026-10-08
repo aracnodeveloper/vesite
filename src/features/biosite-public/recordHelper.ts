@@ -9,7 +9,7 @@ const LINK_TYPES = {
   WHATSAPP: "whatsapp",
   MUSIC: "music",
   VIDEO: "video",
-  SOCIAL_POST: "social-post",
+  SOCIAL_POST: "social_post", // el valor que se guarda en link_type
 } as const;
 
 /**
@@ -123,13 +123,13 @@ const detectLinkType = (link: BiositeLink): string => {
       // Instagram posts and reels
       (urlLower.includes("instagram.com") &&
           (urlLower.includes("/p/") || urlLower.includes("/reel/"))) ||
-      // TikTok videos - ADDED
+      // TikTok videos (un perfil /@usuario no es un post: va a Social, como en el editor)
       urlLower.includes("vm.tiktok.com") ||
       urlLower.includes("tiktok.com/t/") ||
       (urlLower.includes("tiktok.com") && urlLower.includes("/video/")) ||
-      urlLower.includes("tiktok.com/@") ||
-      // General TikTok video patterns
-      (urlLower.includes("tiktok.com") && !urlLower.match(/tiktok\.com\/?$/))
+      (urlLower.includes("tiktok.com") &&
+          !urlLower.match(/tiktok\.com\/?$/) &&
+          !urlLower.includes("/@"))
   ) {
     return LINK_TYPES.SOCIAL_POST;
   }
