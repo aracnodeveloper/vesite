@@ -71,7 +71,8 @@ export interface AnalyticsData {
         count: number;
     }>;
 }
-export type TimeRange = 'last7' | 'last30' | 'lastYear';
+import type { TimeRange } from "../../analytics/types/Analytics";
+export type { TimeRange };
 
 
 export interface BiositesTableProps {

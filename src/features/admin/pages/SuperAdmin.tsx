@@ -253,57 +253,7 @@ const AdminPanel: React.FC = () => {
       setLoadingAnalytics((prev) => ({ ...prev, [biositeId]: true }));
 
       try {
-        const response = await getBiositeAnalytics(ownerId, analyticsTimeRange);
-
-        let processedData: AnalyticsData;
-
-        if (
-          typeof response === "string" &&
-          response.includes("<!doctype html>")
-        ) {
-          processedData = {
-            views: 0,
-            clicks: 0,
-            dailyActivity: [
-              {
-                day: new Date().toISOString().split("T")[0],
-                views: 0,
-                clicks: 0,
-              },
-            ],
-            clickDetails: [],
-          };
-        } else if (response && typeof response === "object") {
-          processedData = {
-            views: response.views || 0,
-            clicks: response.clicks || 0,
-            dailyActivity:
-              response.dailyActivity && response.dailyActivity.length > 0
-                ? response.dailyActivity
-                : [
-                    {
-                      day: new Date().toISOString().split("T")[0],
-                      views: response.views || 0,
-                      clicks: response.clicks || 0,
-                    },
-                  ],
-            clickDetails: response.clickDetails || [],
-          };
-        } else {
-          processedData = {
-            views: 0,
-            clicks: 0,
-            dailyActivity: [
-              {
-                day: new Date().toISOString().split("T")[0],
-                views: 0,
-                clicks: 0,
-              },
-            ],
-            clickDetails: [],
-          };
-        }
-
+        const processedData = await getBiositeAnalytics(ownerId, analyticsTimeRange, biositeId);
         setAnalyticsData((prev) => ({ ...prev, [biositeId]: processedData }));
       } catch (error) {
         console.error(

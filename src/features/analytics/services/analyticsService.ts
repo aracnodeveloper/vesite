@@ -1,6 +1,6 @@
 import apiService from '../../../core/api/apiService';
 import {biositeAnalyticsApi, registerLinkClickApi, registerVisitApi} from "../../../core/api/endpoints.ts";
-import type { AnalyticsData } from "../types/Analytics.ts";
+import type { AnalyticsData, TimeRange } from "../types/Analytics.ts";
 
 interface VisitStatData {
     biositeId: string;
@@ -99,14 +99,58 @@ class AnalyticsService {
     }
 }
 
+const today = () => new Date().toISOString().split("T")[0];
+
+const emptyAnalytics = (biositeId = ""): AnalyticsData => ({
+    biositeId,
+    biositeSlug: 'user-biosite',
+    dailyActivity: [{ day: today(), views: 0, clicks: 0, linkClicks: [] }],
+    clickDetails: [],
+    views: 0,
+    clicks: 0,
+});
+
+/**
+ * Normaliza la respuesta del backend. Si devuelve HTML (p. ej. un error del
+ * proxy) o algo inválido, se usan métricas vacías.
+ */
+const normalizeAnalytics = (raw: unknown, biositeId = ""): AnalyticsData => {
+    if (!raw || typeof raw !== "object") {
+        if (typeof raw === "string" && raw.includes("<!doctype html>")) {
+            console.warn("⚠️ API returned HTML instead of JSON");
+        } else {
+            console.warn("⚠️ Invalid analytics result:", raw);
+        }
+        return emptyAnalytics(biositeId);
+    }
+
+    const result = raw as Partial<AnalyticsData>;
+    return {
+        biositeId: result.biositeId || biositeId,
+        biositeSlug: result.biositeSlug || 'user-biosite',
+        dailyActivity: result.dailyActivity && result.dailyActivity.length > 0
+            ? result.dailyActivity.map((day) => ({ ...day, linkClicks: day.linkClicks || [] }))
+            : [{ day: today(), views: result.views || 0, clicks: result.clicks || 0, linkClicks: [] }],
+        clickDetails: (result.clickDetails || []).map((detail) => ({
+            ...detail,
+            isActive: detail.isActive !== false,
+        })),
+        views: result.views || 0,
+        clicks: result.clicks || 0,
+    };
+};
+
+/** Métricas del biosite de un usuario para el rango indicado, ya normalizadas. */
 export const getBiositeAnalytics = async (
     userId: string,
-    timeRange: 'last7' | 'last30' | 'lastYear' = 'last7'
-): Promise<AnalyticsData | string> => {
+    timeRange: TimeRange = 'last7',
+    biositeId?: string
+): Promise<AnalyticsData> => {
     try {
-        return await apiService.getAll<AnalyticsData | string>(`${biositeAnalyticsApi}/${userId}`, {
+        const raw = await apiService.getAll<unknown>(`${biositeAnalyticsApi}/${userId}`, {
             params: { timeRange },
         });
+        return normalizeAnalytics(raw, biositeId);
     } catch (error) {
         console.error('Error fetching biosite analytics:', error);
         throw error;
