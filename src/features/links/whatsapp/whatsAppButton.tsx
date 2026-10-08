@@ -1,11 +1,9 @@
 import { usePreview } from "../../biosite/context/PreviewContext";
-import { useLocation } from "react-router-dom";
 import { WhatsAppOutlined } from "@ant-design/icons";
 import React from "react";
 
 interface WhatsAppButtonProps {
     onWhatsAppClick?: (e: React.MouseEvent) => void;
-    handleWhatsAppLinkClick?: (id: string, url: string) => void;
     themeConfig: {
         colors: {
             primary: string;
@@ -22,12 +20,8 @@ interface WhatsAppButtonProps {
     };
 }
 
-const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig }: WhatsAppButtonProps) => {
+const WhatsAppButton = ({ onWhatsAppClick, themeConfig }: WhatsAppButtonProps) => {
     const { whatsAppLinks } = usePreview();
-    const location = useLocation();
-
-    const isExposedRoute = location.pathname === '/expoced';
-
     // Obtener enlaces de WhatsApp activos
     const activeWhatsAppLinks = whatsAppLinks.filter(link => link.isActive);
 
@@ -36,27 +30,10 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
         return null;
     }
 
-    const generateWhatsAppUrl = (phone: string, message: string): string => {
-        const cleanPhone = phone.replace(/[^\d+]/g, '');
-        const encodedMessage = encodeURIComponent(message.trim());
-        return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
-    };
-
-    const handleClick = (link: any) => (e: React.MouseEvent) => {
+    // En el preview del editor el botón lleva a la pantalla de WhatsApp
+    const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
-
-        if (isExposedRoute && handleWhatsAppLinkClick) {
-
-            const url = generateWhatsAppUrl(link.phone, link.message);
-            handleWhatsAppLinkClick(link.id, url);
-        } else if (isExposedRoute) {
-
-            const url = generateWhatsAppUrl(link.phone, link.message);
-            window.open(url, '_blank');
-        } else {
-
-            onWhatsAppClick && onWhatsAppClick(e);
-        }
+        onWhatsAppClick?.(e);
     };
 
     return (
@@ -64,7 +41,7 @@ const WhatsAppButton = ({ onWhatsAppClick, handleWhatsAppLinkClick, themeConfig 
             {activeWhatsAppLinks.map((link) => (
                 <button
                     key={link.id}
-                    onClick={handleClick(link)}
+                    onClick={handleClick}
                     className="w-full p-2 items-center rounded-lg bg-white text-center shadow-lg transition-all flex duration-200 hover:shadow-md cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: themeConfig.colors.accent,

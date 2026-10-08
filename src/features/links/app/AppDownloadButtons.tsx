@@ -1,19 +1,15 @@
 import { usePreview } from "../../biosite/context/PreviewContext";
-import { useLocation } from "react-router-dom";
-import { useLivePreviewLogic } from "../../biosite/hooks/useLivePreviewLogic.ts";
+import type { PreviewThemeConfig } from "../../biosite/hooks/useLivePreviewLogic.ts";
 import imgPng from '../../../assets/img/img_12.png'
 import { APPBYD, APPGBYD, DEFAULT_APP_STORE_URL, DEFAULT_GOOGLE_PLAY_URL } from "../../../shared/utils/biositeUtils.ts";
 
 interface AppDownloadButtonsProps {
     onAppClick?: (e: React.MouseEvent) => void;
+    themeConfig: PreviewThemeConfig;
 }
 
-const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
+const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps) => {
     const { appLinks } = usePreview();
-    const { themeConfig } = useLivePreviewLogic();
-    const location = useLocation();
-
-    const isExposedRoute = location.pathname === '/exposed';
 
     const appStoreLink = appLinks.find(link => link.store === 'appstore' && link.isActive);
     const googlePlayLink = appLinks.find(link => link.store === 'googleplay' && link.isActive);
@@ -28,10 +24,7 @@ const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
             {/* App Store Button */}
             {appStoreLink && (
                 <a
-                    href={isExposedRoute ? appStoreLink.url : undefined}
-                    target={isExposedRoute ? "_blank" : undefined}
-                    rel={isExposedRoute ? "noopener noreferrer" : undefined}
-                    onClick={!isExposedRoute ? onAppClick : undefined}
+                    onClick={onAppClick}
                     style={{
                         transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                         backgroundColor: themeConfig.colors.accent,
@@ -140,10 +133,7 @@ const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
             {/* Google Play Button */}
             {googlePlayLink && (
                 <a
-                    href={isExposedRoute ? googlePlayLink.url : undefined}
-                    target={isExposedRoute ? "_blank" : undefined}
-                    rel={isExposedRoute ? "noopener noreferrer" : undefined}
-                    onClick={!isExposedRoute ? onAppClick : undefined}
+                    onClick={onAppClick}
                     style={{
                         transform: themeConfig.isAnimated ? 'scale(1)' : 'none',
                         backgroundColor: themeConfig.colors.accent,

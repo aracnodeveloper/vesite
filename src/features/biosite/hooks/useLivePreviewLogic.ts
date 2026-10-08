@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useLivePreview } from "./useLivePreview.ts";
 import { usePreview } from "../context/PreviewContext.tsx";
@@ -25,10 +25,7 @@ export const useLivePreviewLogic = () => {
 
     const { getMusicEmbed, getSocialPost, getVideoEmbed, themeColor, fontFamily } = usePreview();
     const { user, fetchUser, loading: userLoading, error: userError } = useUser();
-    const location = useLocation();
     const navigate = useNavigate();
-
-    const isExposedRoute = location.pathname === '/expoced';
 
     useEffect(() => {
         const userId = Cookies.get('userId');
@@ -133,122 +130,10 @@ export const useLivePreviewLogic = () => {
         });
     };
 
-    const getSpotifyEmbedUrl = (url: string) => {
-        const trackMatch = url.match(/track\/([a-zA-Z0-9]+)/);
-        if (trackMatch) {
-            return `https://open.spotify.com/embed/track/${trackMatch[1]}?utm_source=generator&theme=0`;
-        }
-        return null;
-    };
-
-    const getYouTubeEmbedUrl = (url: string) => {
-        const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-        if (videoIdMatch) {
-            return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
-        }
-        return null;
-    };
-
-    const getInstagramEmbedUrl = (url: string) => {
-        const postMatch = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
-        if (postMatch) {
-            return `https://www.instagram.com/p/${postMatch[1]}/embed/`;
-        }
-        return null;
-    };
-
-    const isInstagramUrl = (url: string) => {
-        return url.includes('instagram.com') && (url.includes('/p/') || url.includes('/reel/'));
-    };
-
-    // Click handlers
-    const handleMusicClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/music');
-        }
-    };
-
-    const handleVideoClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/videos');
-        }
-    };
-
-    const handleSocialPostClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/post');
-        }
-    };
-
-    const handleLinksClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/links');
-        }
-    };
-
-    const handleSocialClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/social');
-        }
-    };
-
-    const handleImageClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/profile');
-        }
-    };
-
-    const handleAppClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/app');
-        }
-    };
-
-    const handleUserInfoClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/profile');
-        }
-    };
-
-    const handleVCardClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/VCard');
-        }
-    };
-
-    const handleWhatsAppClick = (e: React.MouseEvent) => {
-        if (!isExposedRoute) {
-            e.preventDefault();
-            navigate('/whatsApp');
-        }
-    };
-
-    // Add analytics handlers for exposed route
-    const handleLinkClick = (linkId: string, url: string) => {
-        if (isExposedRoute) {
-            // Track link click analytics here
-            console.log('Link clicked:', linkId, url);
-            // You can add analytics tracking here
-            window.open(url, '_blank');
-        }
-    };
-
-    const handleSocialLinkClick = (linkId: string, url: string) => {
-        if (isExposedRoute) {
-            // Track social link click analytics here
-            console.log('Social link clicked:', linkId, url);
-            // You can add analytics tracking here
-            window.open(url, '_blank');
-        }
+    // En el preview del editor, cada bloque lleva a la pantalla donde se edita
+    const navigateOnClick = (path: string) => (e: React.MouseEvent) => {
+        e.preventDefault();
+        navigate(path);
     };
 
     const themeConfig = getThemeConfig();
@@ -277,28 +162,23 @@ export const useLivePreviewLogic = () => {
         validAvatarImage,
         findPlatformForLink,
         filterRealSocialLinks,
-        getSpotifyEmbedUrl,
-        isExposedRoute,
         themeConfig,
         musicEmbed,
         socialPost,
         videoEmbed,
         description,
         defaultAvatar,
-        isInstagramUrl,
-        getYouTubeEmbedUrl,
-        getInstagramEmbedUrl,
-        handleMusicClick,
-        handleVideoClick,
-        handleSocialPostClick,
-        handleLinksClick,
-        handleSocialClick,
-        handleImageClick,
-        handleUserInfoClick,
-        handleAppClick,
-        handleVCardClick,
-        handleWhatsAppClick,
-        handleLinkClick,
-        handleSocialLinkClick,
+        handleMusicClick: navigateOnClick('/music'),
+        handleVideoClick: navigateOnClick('/videos'),
+        handleSocialPostClick: navigateOnClick('/post'),
+        handleLinksClick: navigateOnClick('/links'),
+        handleSocialClick: navigateOnClick('/social'),
+        handleImageClick: navigateOnClick('/profile'),
+        handleUserInfoClick: navigateOnClick('/profile'),
+        handleAppClick: navigateOnClick('/app'),
+        handleVCardClick: navigateOnClick('/VCard'),
+        handleWhatsAppClick: navigateOnClick('/whatsApp'),
     };
 };
+
+export type PreviewThemeConfig = ReturnType<typeof useLivePreviewLogic>["themeConfig"];
