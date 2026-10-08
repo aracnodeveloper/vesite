@@ -39,19 +39,3 @@ export interface UpdateHistoryDto {
     expiresAt?: string;
 }
 
-export interface HighlightItem {
-    id: string;
-    biositeId: string;
-    title: string;
-    coverImage?: string;
-    createdAt: string;
-    updatedAt: string;
-    histories: HistoryItem[];
-}
-
-export interface CreateHighlightDto {
-    biositeId: string;
-    title: string;
-    coverImage?: string;
-    historyIds: string[];
-}

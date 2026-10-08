@@ -2,6 +2,7 @@ import { usePreview } from "../../biosite/context/PreviewContext";
 import { useLocation } from "react-router-dom";
 import { useLivePreviewLogic } from "../../biosite/hooks/useLivePreviewLogic.ts";
 import imgPng from '../../../assets/img/img_12.png'
+import { APPBYD, APPGBYD, DEFAULT_APP_STORE_URL, DEFAULT_GOOGLE_PLAY_URL } from "../../../shared/utils/biositeUtils.ts";
 
 interface AppDownloadButtonsProps {
     onAppClick?: (e: React.MouseEvent) => void;
@@ -13,10 +14,6 @@ const AppDownloadButtons = ({ onAppClick }: AppDownloadButtonsProps) => {
     const location = useLocation();
 
     const isExposedRoute = location.pathname === '/exposed';
-    const DEFAULT_APP_STORE_URL = "https://apps.apple.com/ec/app/visitaecuador-com/id1385161516";
-    const DEFAULT_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.visitaEcuador&hl=es";
-    const APPBYD = "https://apps.apple.com/mx/app/byd-auto/id1492400299"
-    const APPGBYD ="https://play.google.com/store/search?q=BYD&c=apps&hl=es"
 
     const appStoreLink = appLinks.find(link => link.store === 'appstore' && link.isActive);
     const googlePlayLink = appLinks.find(link => link.store === 'googleplay' && link.isActive);

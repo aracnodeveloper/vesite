@@ -30,6 +30,7 @@ import Cookie from "js-cookie";
 import NewBiositePage from "../../features/biosite-public/NewBiositePage.tsx";
 import LivePreviewContent from "../../features/biosite/preview/LivePreviewContent.tsx";
 import { blackCardService } from "../../features/blackcard/services/blackCardService.ts";
+import { canAccessAdmin } from "../../core/auth/session";
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -37,10 +38,7 @@ const Layout: React.FC = () => {
   const { logout } = useAuthContext();
   const role = Cookie.get("roleName");
   const userId = Cookie.get("userId");
-  const hasAdminAccess =
-    role === "SUPER_ADMIN" ||
-    userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5" ||
-    role === "ADMIN";
+  const hasAdminAccess = canAccessAdmin(role, userId);
 
   const hasUltraAccess = userId === "b54a0f07-be56-48b4-8592-8d92dad6e7f2";
   const { biosite } = usePreview();

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import apiService from "../../../core/api/apiService";
-import { LinksApi} from "../../../core/api/endpoints.ts";
+import { getErrorMessage } from "../../../core/api/errors.ts";
+import { linkService } from "../services/linkService.ts";
 import type {Link, CreateLinkDto, UpdateLinkDto} from "../types/Links.ts";
 
 const LINK_TYPES = {
@@ -34,14 +34,12 @@ export const useFetchLinks = (biositeId?: string) => {
             setLoading(true);
             setError(null);
 
-            const res = await apiService.getAll<Link[]>(`/links/biosite/${biositeId}`);
-
-            const linksArray = Array.isArray(res) ? res : [];
+            const linksArray = await linkService.getByBiosite(biositeId);
             setLinks(linksArray);
             return linksArray;
-        } catch (error: any) {
+        } catch (error) {
             console.error("fetchLinks error:", error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al cargar los enlaces";
+            const errorMessage = getErrorMessage(error, "Error al cargar los enlaces");
             setError(errorMessage);
             setLinks([]);
             return [];
@@ -56,14 +54,14 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
             console.log("Creating link with data:", linkData);
 
-            const newLink = await apiService.create<CreateLinkDto, Link>(LinksApi, linkData);
+            const newLink = await linkService.create(linkData);
             console.log("Link created:", newLink);
 
             setLinks(prev => [...prev, newLink]);
             return newLink;
-        } catch (error: any) {
+        } catch (error) {
             console.error("createLink error:", error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al crear el enlace";
+            const errorMessage = getErrorMessage(error, "Error al crear el enlace");
             setError(errorMessage);
             return null;
         } finally {
@@ -77,7 +75,7 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
             console.log("Updating link:", linkId, updateData);
 
-            const updatedLink = await apiService.update<UpdateLinkDto>(LinksApi, linkId, updateData);
+            const updatedLink = await linkService.update(linkId, updateData);
             console.log("Link updated:", updatedLink);
 
             setLinks(prev =>
@@ -88,10 +86,10 @@ export const useFetchLinks = (biositeId?: string) => {
                 )
             );
 
-            return updatedLink as Link;
-        } catch (error: any) {
+            return updatedLink;
+        } catch (error) {
             console.error("updateLink error:", error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al actualizar el enlace";
+            const errorMessage = getErrorMessage(error, "Error al actualizar el enlace");
             setError(errorMessage);
             return null;
         } finally {
@@ -110,10 +108,10 @@ export const useFetchLinks = (biositeId?: string) => {
                 console.warn("Link not found in local state:", linkId);
             }
 
-            const response = await apiService.delete(LinksApi, linkId);
+            await linkService.remove(linkId);
             return true;
 
-        } catch (error: any) {
+        } catch {
             return false;
         } finally {
             setLoading(false);
@@ -126,7 +124,7 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
             console.log("Reordering links:", reorderedLinks);
 
-            await apiService.patch(`/links/reorder/${biositeId}`, { links: reorderedLinks });
+            await linkService.reorder(biositeId, reorderedLinks);
             console.log("Links reordered successfully");
 
             setLinks(prev => {
@@ -141,9 +139,9 @@ export const useFetchLinks = (biositeId?: string) => {
             });
 
             return true;
-        } catch (error: any) {
+        } catch (error) {
             console.error("reorderLinks error:", error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al reordenar los enlaces";
+            const errorMessage = getErrorMessage(error, "Error al reordenar los enlaces");
             setError(errorMessage);
             return false;
         } finally {
@@ -157,7 +155,7 @@ export const useFetchLinks = (biositeId?: string) => {
             setError(null);
             console.log("Toggling link status:", linkId, isActive);
 
-            const updatedLink = await apiService.update<UpdateLinkDto>("/links", linkId, { isActive });
+            const updatedLink = await linkService.update(linkId, { isActive });
             console.log("Link status updated:", updatedLink);
 
             setLinks(prev =>
@@ -169,9 +167,9 @@ export const useFetchLinks = (biositeId?: string) => {
             );
 
             return true;
-        } catch (error: any) {
+        } catch (error) {
             console.error("toggleLinkStatus error:", error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Error al cambiar el estado del enlace";
+            const errorMessage = getErrorMessage(error, "Error al cambiar el estado del enlace");
             setError(errorMessage);
             return false;
         } finally {

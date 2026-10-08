@@ -5,7 +5,7 @@ import { useBusinessCard } from "../hooks/useVCard";
 import imgP from "../../../assets/img/img.png";
 import { usePreview } from "../../biosite/context/PreviewContext.tsx";
 import { useParams } from "react-router-dom";
-import { useUser } from "../../admin/hooks/useUser.ts";
+import { useUser } from "../../user/hooks/useUser.ts";
 import { QRCodeSVG } from "qrcode.react";
 
 interface VCardData {

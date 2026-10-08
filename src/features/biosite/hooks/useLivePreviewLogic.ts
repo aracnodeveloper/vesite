@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useLivePreview } from "./useLivePreview.ts";
 import { usePreview } from "../context/PreviewContext.tsx";
-import { useUser } from "../../admin/hooks/useUser.ts";
+import { useUser } from "../../user/hooks/useUser.ts";
 import type { SocialLink } from "../types/PreviewContext.ts";
 
 export const useLivePreviewLogic = () => {

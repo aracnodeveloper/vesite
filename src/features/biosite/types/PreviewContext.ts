@@ -1,5 +1,5 @@
-import type {BiositeFull, BiositeUpdateDto} from "./Biosite.ts";
-import type {UUID} from "../../auth/types/authTypes.ts";
+import type { UserRole } from "../../../core/auth/session.ts";
+import type {BiositeFull, BiositeUpdateDto, CreateBiositeDto} from "./Biosite.ts";
 
 export interface SocialLink {
     id: string;
@@ -44,25 +44,6 @@ export interface AppLink {
         isSelected?: boolean;
     }
 
-
-export interface CreateBiositeDto {
-    ownerId: UUID;
-    title: string;
-    slug: string;
-    password?: string;
-}
-
-export interface AdminLinkCreationData {
-    biositeId: string;
-    icon: string;
-    url: string;
-    label: string;
-    link_type: string;
-    image?: string;
-    orderIndex: number;
-    isActive: boolean;
-    isSelected: boolean;
-}
 
 export interface PreviewContextType {
     biosite: BiositeFull | null;
@@ -121,7 +102,7 @@ export interface PreviewContextType {
     clearError: () => void;
 
     // Admin methods - Add these new methods
-    getUserRole: () => 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+    getUserRole: () => UserRole;
     isAdmin: () => boolean;
     toggleAdminLink: (linkId: string, isSelected: boolean) => Promise<void>;
     updateAdminLink: (linkId: string, linkData: any) => Promise<void>;

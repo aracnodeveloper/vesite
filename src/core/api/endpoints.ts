@@ -1,42 +1,43 @@
-//AUTH
-export const loginApi: string = "/auth/login-flexible"
-export const registerStudentApi: string = "/auth/register"
+// AUTH
+export const loginApi = "/auth/login-flexible";
+export const registerApi = "/auth/register";
 
-//Themes.ts-Templates
-export const themesApi = "/themes"
+// USERS
+export const usersApi = "/users";
 
-// Plantillas - Nuevos endpoints
+// BIOSITES
+export const biositesApi = "/biosites";
+export const allBiositesApi = "/biosites?page=10&size=10";
+export const biositesByUserApi = "/biosites/user";   // GET /:userId
+export const biositesByAdminApi = "/biosites/admin"; // GET /:adminId · PATCH /update-*/:adminId
+export const biositeBySlugApi = "/biosites/slug";    // GET /:slug
+export const biositeAnalyticsApi = "/biosites/analytics"; // GET /:userId
+
+// PLANTILLAS
 export const plantillasApi = "/plantillas";
 
-//Profile
-export const updateBiositeApi = "/biosites";
-export const getBiositeAdminApi = "/biosites/admin";
-export const getBiositeApi = "/biosites/user";
-export const getBiositesApi = "/biosites"
-export const getALLBiositesApi = "/biosites?page=10&size=10"
+// LINKS
+export const linksApi = "/links";
+export const linksByBiositeApi = "/links/biosite"; // GET /:biositeId
+export const reorderLinksApi = "/links/reorder";   // PATCH /:biositeId
 
-
-
-//Links
-export const LinksApi = "/links"
-export const LinksImageApi = "/upload/image-link";
-
-//Sections
+// SECTIONS
 export const sectionsApi = "/section";
-export const getSectionsByBiositeApi = "/section/biosite"; // GET /:biositeId
-export const reorderSectionsApi = "/section/reorder"; // PATCH /:biositeId
+export const sectionsByBiositeApi = "/section/biosite"; // GET /:biositeId
+export const reorderSectionsApi = "/section/reorder";   // PATCH /:biositeId
 
-//Text Blocks (for Carousel)
-export const BlockImageApi = "/upload/image-block";
+// TEXT BLOCKS (galería)
+export const textBlocksApi = "/texts-blocks";
+export const textBlocksByBiositeApi = "/texts-blocks/biosite"; // GET /:biositeId
 
-//upload
-export const uploadBiositeAvatarApi: string = "/upload/biosite-avatar"; // POST /{biositeId}
-export const uploadBiositeBackgroundApi: string = "/upload/biosite-background";
+// UPLOADS
+export const uploadImageApi = "/upload/image";
+export const uploadBiositeAvatarApi = "/upload/biosite-avatar";         // POST /:biositeId
+export const uploadBiositeBackgroundApi = "/upload/biosite-background"; // POST /:biositeId
+export const linkImageApi = "/upload/image-link";                       // POST /:linkId
+export const blockImageApi = "/upload/image-block";                     // POST /:blockId
 
-//User
-export const getALLUsersApi = "/users?page=10&size=10"
-
-// BUSINESS CARDS (V-Card.ts)
+// BUSINESS CARDS (V-Card)
 export const businessCardsApi = "/business-cards";
 export const createBusinessCardApi = "/business-cards"; // POST /:userId
 export const getBusinessCardApi = "/business-cards"; // GET /:id
@@ -44,15 +45,9 @@ export const getBusinessCardByUserApi = "/business-cards/user"; // GET /user/:us
 export const getBusinessCardBySlugApi = "/business-cards/by-slug"; // GET /by-slug/:slug
 export const regenerateQRCodeApi = "/business-cards/regenerate-qr"; // POST /regenerate-qr/:userId
 
-// ANALYTICS - VISITS STATS
+// ANALYTICS
 export const registerVisitApi = "/visits-stats/register-parser"; // POST
-export const getVisitsByBiositeApi = "/visits-stats/biosite"; // GET /:biositeId
-
-// ANALYTICS - LINKS CLICKS
 export const registerLinkClickApi = "/links-clicks/register-parser"; // POST
-
-// ANALYTICS - BIOSITE ANALYTICS
-export const biositeAnalyticsApi = "/biosites/analytics"; // GET /:userId
 
 // BLACK CARD - MEMBERS
 export const membersApi = "/members";
@@ -62,9 +57,6 @@ export const appleWalletApi = "/passes/apple";         // GET /:memberId.pkpass
 export const contactVcardApi = "/contacts";            // GET /:memberId.vcf
 export const memberByUserApi = "/members/user";        // GET /:userId
 
-
 // HISTORIAL
 export const historyApi = "/history";
 export const getHistoryByBiositeApi = "/history/biosite";
-
-// HIGHLIGHTS

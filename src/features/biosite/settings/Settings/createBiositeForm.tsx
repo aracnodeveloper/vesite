@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2, Upload, Copy, Check, User } from "lucide-react";
 import { Upload as AntdUpload, message } from "antd";
-import { uploadImage } from "../../profile/lib/uploadImage";
+import { uploadService } from "../../../../core/api/uploadService";
 const imgP6 = "/img/fondo.svg";
 
 interface CreateBiositeData {
@@ -94,7 +94,7 @@ const CreateBiositeWizard: React.FC<CreateBiositeWizardProps> = ({
             const loadingMessage = message.loading('Subiendo imagen de perfil...', 0);
 
             // Usar la función de upload genérica
-            const imageUrl = await uploadImage(fileToUpload);
+            const imageUrl = await uploadService.uploadImage(fileToUpload);
 
             console.log("Profile image upload successful. URL:", imageUrl);
             loadingMessage();

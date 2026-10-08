@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePreview } from '../context/PreviewContext.tsx';
 import { useSectionsContext } from '../../sections/context/SectionsContext.tsx';
-import { useUser } from "../../admin/hooks/useUser.ts";
+import { useUser } from "../../user/hooks/useUser.ts";
 
 export const useChangeDetection = () => {
     const { biosite, socialLinks, regularLinks, appLinks } = usePreview();

@@ -11,14 +11,15 @@ import {
     Shield
 } from "lucide-react";
 import { usePreview } from "../context/PreviewContext.tsx";
-import { useUser } from "../../admin/hooks/useUser.ts";
-import { useFetchBiosite } from "../../admin/hooks/useFetchBiosite.ts";
+import { useUser } from "../../user/hooks/useUser.ts";
+import { useFetchBiosite } from "../hooks/useFetchBiosite.ts";
 import type { BiositeFull } from "../types/Biosite";
 import type { UUID } from "../../auth/types/authTypes.ts";
 import Cookies from "js-cookie";
 import CreateBiositeWizard from "./Settings/createBiositeForm.tsx";
 import BiositesList from "./Settings/biositeList.tsx";
 import SettingsFooter from "./Settings/settingsFooter";
+import { canAccessAdmin } from "../../../core/auth/session";
 
 interface Profile {
     id: string;
@@ -77,10 +78,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const userId = Cookies.get("userId");
 
     // Check admin access (same logic as Layout)
-    const hasAdminAccess =
-        role === "SUPER_ADMIN" ||
-        userId === "92784deb-3a8e-42a0-91ee-cd64fb3726f5" ||
-        role === "ADMIN";
+    const hasAdminAccess = canAccessAdmin(role, userId);
 
     const {
         fetchCompleteBiositeStructure,

@@ -2,6 +2,7 @@ import { Edit2, X, Shield } from "lucide-react";
 import { useState } from "react";
 import Cookie from "js-cookie";
 import AdminLinkToggle from "./AdminLinkToggle";
+import { isAdminRole, type UserRole } from "../../../core/auth/session";
 
 interface AdminLinkCardProps {
     id: string;
@@ -14,7 +15,7 @@ interface AdminLinkCardProps {
     getSafeImageUrl: (imageUrl: string) => string;
     isSelected?: boolean;
     showAdminControls: boolean;
-    userRole?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+    userRole?: UserRole;
     onAdminToggle?: (linkId: string, isSelected: boolean) => Promise<void>;
     onAdminUpdate?: (linkId: string, linkData: any) => Promise<void>;
     biositeId?: string;
@@ -41,14 +42,14 @@ const AdminLinkCard = ({
     const [isToggling, setIsToggling] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const getCurrentRole = (): 'USER' | 'ADMIN' | 'SUPER_ADMIN' => {
+    const getCurrentRole = (): UserRole => {
         if (userRole) return userRole;
         const role = Cookie.get('roleName');
-        return role as 'USER' | 'ADMIN' | 'SUPER_ADMIN' || 'USER';
+        return role as UserRole || 'USER';
     };
 
     const currentRole = getCurrentRole();
-    const isAdmin = currentRole === 'ADMIN' || currentRole === 'SUPER_ADMIN';
+    const isAdmin = isAdminRole(currentRole);
 
     const handleAdminToggle = async (value: boolean) => {
         if (!onAdminToggle || !isAdmin) return;

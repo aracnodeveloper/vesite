@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, X, ImagePlus } from "lucide-react";
 import { message } from "antd";
-import { uploadLinkImage } from "../../../biosite/profile/lib/uploadImage.ts";
+import { uploadService } from "../../../../core/api/uploadService.ts";
 import LinkImage from "./LinkImage";
 import type { RegularLink } from "../../../biosite/types/PreviewContext.ts";
 import type { LinkData } from "../../../admin/types/AdminData.ts";
-import FomrField from "../../../../shared/ui/FormField.tsx";
+import FormField from "../../../../shared/ui/FormField.tsx";
 import Input from "../../../../shared/ui/Input.tsx";
 import ImageInput from "../../../../shared/ui/ImageInput.tsx";
 import Button from "../../../../shared/ui/Button.tsx";
@@ -88,7 +88,7 @@ const LinkEditForm = ({
         setUploadingImage(true);
         console.log("Uploading image for link ID:", link.id);
 
-        const imageUrl = await uploadLinkImage(file, link.id);
+        const imageUrl = await uploadService.uploadLinkImage(file, link.id);
         console.log("Image uploaded successfully:", imageUrl);
 
         onImageChange(imageUrl);
@@ -138,32 +138,32 @@ const LinkEditForm = ({
       {/* Form Content */}
       <div className="p-4">
         <div className="space-y-4">
-          <FomrField title={"NOMBRE"}>
+          <FormField title={"NOMBRE"}>
             <Input
               value={editTitle}
               placeholder="Nombre del enlace"
               disabled={isSubmitting}
               onChange={(e) => onTitleChange(e.target.value)}
             />
-          </FomrField>
-          <FomrField title={"URL"}>
+          </FormField>
+          <FormField title={"URL"}>
             <Input
               value={editUrl}
               placeholder="https://ejemplo.com"
               disabled={isSubmitting}
               onChange={(e) => onUrlChange(e.target.value)}
             />
-          </FomrField>
+          </FormField>
 
           <div className="flex items-center space-x-2">
-            <FomrField title={"IMAGEN (opcional)"}>
+            <FormField title={"IMAGEN (opcional)"}>
               <ImageInput
                 maxHeight={170}
                 square
                 initialSrc={editImage}
                 onChange={handleImageUpload}
               />
-            </FomrField>
+            </FormField>
             {uploadingImage && (
               <p className="text-sm text-blue-600 mt-1">Subiendo imagen...</p>
             )}

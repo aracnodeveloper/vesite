@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useBusinessCard } from "../hooks/useVCard.ts";
-import { useUser } from "../../admin/hooks/useUser.ts";
+import { useUser } from "../../user/hooks/useUser.ts";
 import { Edit, Save, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 import Cookies from "js-cookie";

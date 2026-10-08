@@ -1,19 +1,18 @@
 import { Button, Form, Input, message } from "antd";
 import { usePreview } from "../context/PreviewContext";
-import { useFetchBiosite } from "../../admin/hooks/useFetchBiosite";
-import { useUser } from "../../admin/hooks/useUser";
+import { useFetchBiosite } from "../hooks/useFetchBiosite";
+import { useUser } from "../../user/hooks/useUser";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-//import { ChevronLeft } from "lucide-react";
-//import { useNavigate } from "react-router-dom";
 import type {
   BiositeColors,
   BiositeUpdateDto,
 } from "../types/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
-import apiService from "../../../core/api/apiService";
+import { biositeService } from "../services/biositeService";
 import BackButton from "../../../shared/ui/BackButton";
 import Loading from "../../../shared/ui/Loading.tsx";
+import { isAdminRole } from "../../../core/auth/session";
 
 const { TextArea } = Input;
 
@@ -36,7 +35,7 @@ const ProfilePage = () => {
     number | null
   >(null);
 
-  const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+  const isAdmin = isAdminRole(role);
   const DEFAULT_BACKGROUND =
     "https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg";
   const loading = previewLoading || updateLoading || userLoading;
@@ -74,27 +73,7 @@ const ProfilePage = () => {
     try {
       setSlugValidating(true);
 
-      const response = await apiService.getAll<any>(
-        `/biosites?page=1&size=10&search=${encodeURIComponent(slug)}`
-      );
-
-      let biosites: any[] = [];
-
-      if (Array.isArray(response)) {
-        biosites = response;
-      } else if (
-        response &&
-        typeof response === "object" &&
-        "data" in response
-      ) {
-        biosites = (response as any).data || [];
-      } else {
-        biosites = [];
-      }
-
-      const exactMatch = biosites.find((b: any) => b.slug === slug);
-
-      return !exactMatch;
+      return await biositeService.isSlugAvailable(slug);
     } catch (error) {
       console.error("Error validating slug:", error);
       return true;
@@ -124,13 +103,7 @@ const ProfilePage = () => {
     }
 
     try {
-      await apiService.patch(
-        `/biosites/admin/update-background/${userId}?background=${encodeURIComponent(
-          backgroundImage
-        )}`,
-        {}
-      );
-      console.log("Background updated for admin and children successfully");
+      await biositeService.updateChildrenBackground(userId, backgroundImage);
     } catch (error) {
       console.error("Error updating background for admin and children:", error);
       throw error;

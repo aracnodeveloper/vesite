@@ -1,7 +1,7 @@
 import {createContext, useContext, useEffect, useState, useCallback} from "react";
 import type { BiositeFull } from "../types/Biosite";
 import type {PreviewContextType, SocialLink, RegularLink, AppLink, WhatsAppLink} from "../types/PreviewContext";
-import { useFetchBiosite } from "../../admin/hooks/useFetchBiosite";
+import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useFetchLinks } from "../../links/hooks/useFetchLinks";
 import { useBiositeOperations } from "../hooks/useBiositeManagement";
 import { useLinkOperations } from "../../links/hooks/useLinksManagement";

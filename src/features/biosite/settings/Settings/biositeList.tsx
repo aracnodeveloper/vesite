@@ -10,11 +10,10 @@ import {
     Loader2,
     Crown
 } from "lucide-react";
-//import imgP from "../../../../../public/img/img.png";
 import type { BiositeFull } from "../../types/Biosite";
 import type { UUID } from "../../../auth/types/authTypes.ts";
-import apiService from "../../../../core/api/apiService.ts";
-import { updateBiositeApi } from "../../../../core/api/endpoints.ts";
+import { biositeService } from "../../services/biositeService.ts";
+import { userService } from "../../../user/services/userService.ts";
 
 interface BiositeStructure {
     ownBiosites: BiositeFull[];
@@ -104,11 +103,11 @@ const BiositesList: React.FC<BiositeListProps> = ({
             onError('');
             clearError();
 
-            await apiService.delete(updateBiositeApi, biositeData.id);
+            await biositeService.remove(biositeData.id);
 
             if (isChildBiosite(biositeData)) {
                 try {
-                    await apiService.delete('/users', biositeData.ownerId);
+                    await userService.remove(biositeData.ownerId);
                 } catch (userError) {
                     console.warn('Error deleting associated user:', userError);
                 }

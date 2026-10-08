@@ -3,7 +3,7 @@ import { Database, Save, X, Edit } from "lucide-react";
 import type { BusinessCard, UpdateBusinessCardDto, VCardData } from "../../../vcard/types/V-Card";
 import Loading from "../../../../shared/ui/Loading";
 import Button from "../../../../shared/ui/Button";
-import FomrField from "../../../../shared/ui/FormField";
+import FormField from "../../../../shared/ui/FormField";
 import Input from "../../../../shared/ui/Input";
 
 interface EditableVCardSectionProps {
@@ -159,56 +159,56 @@ export default function EditableVCardSection({
                     // Modo de edición
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <FomrField title="Nombre">
+                            <FormField title="Nombre">
                                 <Input
                                     value={editableVCardData.name}
                                     onChange={(e) => handleVCardChange("name", e.target.value)}
                                     placeholder="Nombre completo"
                                 />
-                            </FomrField>
+                            </FormField>
 
-                            <FomrField title="Título/Posición">
+                            <FormField title="Título/Posición">
                                 <Input
                                     value={editableVCardData.title}
                                     onChange={(e) => handleVCardChange("title", e.target.value)}
                                     placeholder="Ej: CEO, Desarrollador"
                                 />
-                            </FomrField>
+                            </FormField>
 
-                            <FomrField title="Empresa">
+                            <FormField title="Empresa">
                                 <Input
                                     value={editableVCardData.company}
                                     onChange={(e) => handleVCardChange("company", e.target.value)}
                                     placeholder="Nombre de la empresa"
                                 />
-                            </FomrField>
+                            </FormField>
 
-                            <FomrField title="Email">
+                            <FormField title="Email">
                                 <Input
                                     type="email"
                                     value={editableVCardData.email}
                                     onChange={(e) => handleVCardChange("email", e.target.value)}
                                     placeholder="correo@ejemplo.com"
                                 />
-                            </FomrField>
+                            </FormField>
 
-                            <FomrField title="Teléfono">
+                            <FormField title="Teléfono">
                                 <Input
                                     type="tel"
                                     value={editableVCardData.phone}
                                     onChange={(e) => handleVCardChange("phone", e.target.value)}
                                     placeholder="+593 99 999 9999"
                                 />
-                            </FomrField>
+                            </FormField>
 
-                            <FomrField title="Sitio Web">
+                            <FormField title="Sitio Web">
                                 <Input
                                     type="url"
                                     value={editableVCardData.website}
                                     onChange={(e) => handleVCardChange("website", e.target.value)}
                                     placeholder="https://ejemplo.com"
                                 />
-                            </FomrField>
+                            </FormField>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-gray-200">

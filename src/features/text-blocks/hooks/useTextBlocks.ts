@@ -1,14 +1,8 @@
 // hooks/useTextBlocks.ts
 
 import { useState, useCallback } from 'react';
-import apiService from '../../../core/api/apiService';
-import api from '../../../core/api/client';
-import { BlockImageApi } from '../../../core/api/endpoints';
 import type { TextBlock, CreateTextBlockDto, UpdateTextBlockDto } from '../types/textBlocks';
-
-const TEXT_BLOCKS_ENDPOINT = '/texts-blocks';
-const TEXT_BLOCKS_ENDPOINTGet = '/texts-blocks/biosite';
-
+import { textBlockService } from '../services/textBlockService';
 
 export const useTextBlocks = () => {
     const [blocks, setBlocks] = useState<TextBlock[]>([]);
@@ -21,8 +15,7 @@ export const useTextBlocks = () => {
             setLoading(true);
             setError(null);
 
-            // Primero intentar obtener todos los bloques
-            const allBlocks = await apiService.getById<TextBlock[]>(TEXT_BLOCKS_ENDPOINTGet,biositeId);
+            const allBlocks = await textBlockService.getByBiosite(biositeId);
 
             setBlocks(allBlocks);
             return allBlocks;
@@ -42,10 +35,7 @@ export const useTextBlocks = () => {
             setLoading(true);
             setError(null);
 
-            const newBlock = await apiService.create<CreateTextBlockDto, TextBlock>(
-                TEXT_BLOCKS_ENDPOINT,
-                blockData
-            );
+            const newBlock = await textBlockService.create(blockData);
 
             setBlocks(prev => [...prev, newBlock].sort((a, b) =>
                 (a.orderIndex || 0) - (b.orderIndex || 0)
@@ -71,17 +61,13 @@ export const useTextBlocks = () => {
             setLoading(true);
             setError(null);
 
-            const updatedBlock = await apiService.update<UpdateTextBlockDto>(
-                TEXT_BLOCKS_ENDPOINT,
-                blockId,
-                updateData
-            );
+            const updatedBlock = await textBlockService.update(blockId, updateData);
 
             setBlocks(prev => prev.map(block =>
-                block.id === blockId ? updatedBlock as TextBlock : block
+                block.id === blockId ? updatedBlock : block
             ));
 
-            return updatedBlock as TextBlock;
+            return updatedBlock;
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Error al actualizar bloque';
             setError(errorMsg);
@@ -98,7 +84,7 @@ export const useTextBlocks = () => {
             setLoading(true);
             setError(null);
 
-            await apiService.delete(TEXT_BLOCKS_ENDPOINT, blockId);
+            await textBlockService.remove(blockId);
 
             setBlocks(prev => prev.filter(block => block.id !== blockId));
         } catch (err) {
@@ -120,30 +106,7 @@ export const useTextBlocks = () => {
             setLoading(true);
             setError(null);
 
-            const formData = new FormData();
-
-            // Convertir Blob a File si es necesario
-            if (imageFile instanceof Blob && !(imageFile instanceof File)) {
-                const file = new File([imageFile], 'image.jpg', { type: 'image/jpeg' });
-                formData.append('image', file);
-            } else {
-                formData.append('image', imageFile);
-            }
-
-            console.log('Uploading image to:', `${BlockImageApi}/${blockId}`);
-            console.log('FormData:', formData);
-
-            const response = await api.post(
-                `${BlockImageApi}/${blockId}`,
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
-
-            const imageUrl = response.data.data.url;
+            const imageUrl = await textBlockService.uploadImage(blockId, imageFile);
 
             // Actualizar el bloque local con la nueva URL
             setBlocks(prev => prev.map(block =>
@@ -151,11 +114,10 @@ export const useTextBlocks = () => {
             ));
 
             return imageUrl;
-        } catch (err: any) {
-            const errorMsg = err?.response?.data?.message || err instanceof Error ? err.message : 'Error al subir imagen';
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : 'Error al subir imagen';
             setError(errorMsg);
             console.error('Error uploading block image:', err);
-            console.error('Error response:', err?.response?.data);
             throw err;
         } finally {
             setLoading(false);

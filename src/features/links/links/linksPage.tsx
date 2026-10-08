@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Plus, X, Check } from "lucide-react";
 import { usePreview } from "../../biosite/context/PreviewContext.tsx";
-import { uploadLinkImage } from "../../biosite/profile/lib/uploadImage.ts";
+import { uploadService } from "../../../core/api/uploadService.ts";
 import { message } from "antd";
 import LinkEditForm from "./Components/LinksEditForm.tsx";
 import BackButton from "../../../shared/ui/BackButton.tsx";
@@ -205,7 +205,7 @@ const LinksPage = () => {
               0
           );
 
-          const imageUrl = await uploadLinkImage(file, linkToUpdate.id);
+          const imageUrl = await uploadService.uploadLinkImage(file, linkToUpdate.id);
 
           loadingMessage();
 

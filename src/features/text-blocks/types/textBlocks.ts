@@ -31,9 +31,3 @@ export interface UpdateTextBlockDto {
     isActive?: boolean;
     image?: string;
 }
-
-export interface TextBlocksState {
-    blocks: TextBlock[];
-    loading: boolean;
-    error: string | null;
-}

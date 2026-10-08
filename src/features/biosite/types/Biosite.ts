@@ -99,3 +99,10 @@ export interface BiositeUpdateDto {
   backgroundImage: string;
   isActive: boolean;
 }
+
+export interface CreateBiositeDto {
+  ownerId: UUID;
+  title: string;
+  slug: string;
+  password?: string;
+}

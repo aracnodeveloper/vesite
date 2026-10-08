@@ -19,15 +19,6 @@ export const LINK_TYPES = {
 } as const;
 
 /**
- * Link category constants for backward compatibility
- */
-export const LINK_CATEGORIES = {
-  MUSIC: "MUSIC",
-  VIDEO: "VIDEO",
-  SOCIAL_POST: "SOCIAL_POST",
-} as const;
-
-/**
  * Gets the order index for a section by its title
  */
 export const getSectionOrderIndex = (

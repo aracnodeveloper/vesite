@@ -1,12 +1,10 @@
 import type {FC, ReactNode} from 'react';
 import {useState}from 'react'
 import Cookie from 'js-cookie';
-import type {LoginParams} from "../types/authTypes.ts";
-import type {AuthResponse} from "../types/Auth.ts";
 import {AuthContext} from '../hooks/useAuthContext.ts'
-import apiService from "../../../core/api/apiService.ts";
-import {loginApi} from "../../../core/api/endpoints.ts";
+import {authService} from "../services/authService.ts";
 import notificationService from "../../../core/notificationService.ts";
+import { isAdminRole } from "../../../core/auth/session";
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,8 +17,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     const login = async (email: string, password: string) => {
         try {
             setLoading(true);
-            const data = {usuario: email, password: password}
-            const responseData = await apiService.createReqRes<LoginParams, AuthResponse>(loginApi, data)
+            const responseData = await authService.login(email, password)
 
             const {accessToken, refreshToken, userId, roleName, biositeId} = responseData;
 
@@ -45,7 +42,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
             setRoleName(userRole);
 
 
-            if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
+            if (isAdminRole(userRole)) {
                 notificationService.warning('Sudo mode', 'You are logged in as sudo, please be careful');
             }
 

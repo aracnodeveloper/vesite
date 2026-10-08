@@ -1,5 +1,6 @@
 import apiService from '../../../core/api/apiService';
-import {getVisitsByBiositeApi, registerLinkClickApi, registerVisitApi} from "../../../core/api/endpoints.ts";
+import {biositeAnalyticsApi, registerLinkClickApi, registerVisitApi} from "../../../core/api/endpoints.ts";
+import type { AnalyticsData } from "../types/Analytics.ts";
 
 interface VisitStatData {
     biositeId: string;
@@ -97,6 +98,20 @@ class AnalyticsService {
         this.trackedLinks.clear();
     }
 }
+
+export const getBiositeAnalytics = async (
+    userId: string,
+    timeRange: 'last7' | 'last30' | 'lastYear' = 'last7'
+): Promise<AnalyticsData | string> => {
+    try {
+        return await apiService.getAll<AnalyticsData | string>(`${biositeAnalyticsApi}/${userId}`, {
+            params: { timeRange },
+        });
+    } catch (error) {
+        console.error('Error fetching biosite analytics:', error);
+        throw error;
+    }
+};
 
 export const analyticsService = new AnalyticsService();
 export default analyticsService;

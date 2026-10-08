@@ -1,7 +1,7 @@
 import { useEffect, useState, type JSX } from "react";
-import apiService from "../../core/api/apiService";
 import type { Section } from "../sections/types/sections";
-import { getSectionsByBiositeApi } from "../../core/api/endpoints";
+import { sectionService } from "../sections/services/sectionService";
+import { biositeService } from "../biosite/services/biositeService";
 import { useNavigate, useParams } from "react-router-dom";
 import type {
   BiositeFull,
@@ -15,14 +15,14 @@ import {
   BackgroundSection,
   UserInfoSection,
 } from "../biosite/preview/LivePreviewComponents";
-import { useUser } from "../admin/hooks/useUser";
+import { useUser } from "../user/hooks/useUser";
 import { createOrderedSectionsRecord } from "./recordHelper";
 import BiositeSection, { Section_type } from "./BiositeSection";
 import ConditionalNavButton from "../../shared/ui/ConditionalNavButton";
 import HistoriesPreview from "../biosite/preview/HistoriesPreview";
 import VCardModal from "./VCardModal";
 import type { VCardData } from "../vcard/types/V-Card";
-import { useTextBlocks } from "../text-blocks/hooks/useTextBlocks.ts"; // Hook para obtener imágenes de galería
+import { useTextBlocks } from "../text-blocks/hooks/useTextBlocks.ts";
 
 export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
   const { slug: paramSlug } = useParams<{ slug: string }>();
@@ -128,21 +128,13 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
 
       // Ejecutar actualización
-      const updatedBiosite = await apiService.update<BiositeUpdateDto>(
-        "/biosites",
-        childBiosite.id,
-        updateData,
-      );
+      const updatedBiosite = await biositeService.update(childBiosite.id, updateData);
 
       console.log("Sincronización completada exitosamente");
 
       // Actualizar el estado local con el biosite sincronizado
       if (updatedBiosite) {
-        const biositeResult = Array.isArray(updatedBiosite)
-          ? updatedBiosite[0]
-          : updatedBiosite;
-
-        setBiosite(biositeResult as BiositeFull);
+        setBiosite(updatedBiosite);
       }
     } catch (error) {
       console.error("Error al sincronizar biosite hijo con padre:", error);
@@ -156,9 +148,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       try {
         setLoading(true);
         if (biosite?.id) {
-          const fetchedSections = await apiService.getAll<Section[]>(
-            `${getSectionsByBiositeApi}/${biosite.id}`,
-          );
+          const fetchedSections = await sectionService.getByBiosite(biosite.id);
 
           // Guardar secciones para acceder al orderIndex de Gallery
           setFetchedSections(fetchedSections);
@@ -203,10 +193,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
       }
 
       try {
-        const initialBiosite = await apiService.getById<BiositeFull>(
-          "/biosites/slug",
-          slug,
-        );
+        const initialBiosite = await biositeService.getBySlug(slug);
 
         if (!initialBiosite) {
           throw new Error("Biosite no encontrado");
@@ -215,9 +202,7 @@ export default function NewBiositePage({ slug: propSlug }: { slug?: string }) {
         const shouldIncludeParent = initialBiosite.owner?.parentId != null;
 
         if (shouldIncludeParent) {
-          const response = await apiService.getAll<BiositeFull[]>(
-            `/biosites/slug/${slug}?include_parent=true`,
-          );
+          const response = await biositeService.getBySlugWithParent(slug);
 
           if (Array.isArray(response) && response.length > 0) {
             const childBiosite = response[0];

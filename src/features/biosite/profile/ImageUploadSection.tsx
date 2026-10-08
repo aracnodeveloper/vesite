@@ -1,8 +1,9 @@
 import { Upload, Image, message } from "antd";
-import { uploadBiositeAvatar, uploadBiositeBackground } from "./lib/uploadImage.ts";
+import { uploadService } from "../../../core/api/uploadService.ts";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../types/Biosite";
 import { useState, useEffect, useRef } from "react";
 import ImageEditorModal from "../../../shared/ui/modals/ImageEditorModal.tsx";
+import { isAdminRole } from "../../../core/auth/session";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -145,9 +146,9 @@ const ImageUploadSection = ({
             let imageUrl: string;
 
             if (editingType === 'avatarImage') {
-                imageUrl = await uploadBiositeAvatar(croppedFile, biosite.id);
+                imageUrl = await uploadService.uploadBiositeAvatar(croppedFile, biosite.id);
             } else {
-                imageUrl = await uploadBiositeBackground(croppedFile, biosite.id);
+                imageUrl = await uploadService.uploadBiositeBackground(croppedFile, biosite.id);
             }
 
             loadingMessage();
@@ -262,7 +263,7 @@ const ImageUploadSection = ({
         onSuccess({}, file);
     };
 
-    const canEditCover = role === "SUPER_ADMIN" || role === "ADMIN";
+    const canEditCover = isAdminRole(role);
 
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;

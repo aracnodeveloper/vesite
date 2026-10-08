@@ -2,8 +2,9 @@ import { useCallback } from "react";
 import type { BiositeFull } from "../../biosite/types/Biosite";
 import type { SocialLink, RegularLink } from "../../biosite/types/PreviewContext.ts";
 import type { Link } from "../types/Links.ts";
-import { adminLinkMethods } from "../../../core/api/apiService";
+import { linkService } from "../services/linkService";
 import Cookie from "js-cookie";
+import { isAdminRole, type UserRole } from "../../../core/auth/session";
 
 // Link type constants
 const LINK_TYPES = {
@@ -45,9 +46,9 @@ export const useLinkOperations = ({
                                   }: UseLinkOperationsProps) => {
 
     // Get user role from cookies or context
-    const getUserRole = useCallback((): 'USER' | 'ADMIN' | 'SUPER_ADMIN' => {
+    const getUserRole = useCallback((): UserRole => {
         const role = Cookie.get('roleName');
-        return role as 'USER' | 'ADMIN' | 'SUPER_ADMIN' || 'USER';
+        return role as UserRole || 'USER';
     }, []);
 
     const getUserId = useCallback((): string | null => {
@@ -56,7 +57,7 @@ export const useLinkOperations = ({
 
     const isAdmin = useCallback(() => {
         const role = getUserRole();
-        return role === 'ADMIN' || role === 'SUPER_ADMIN';
+        return isAdminRole(role);
     }, [getUserRole]);
 
     // Admin-specific methods
@@ -101,7 +102,7 @@ export const useLinkOperations = ({
                 console.log('Sending admin link data:', linkData);
 
                 // Call the backend endpoint to update all child biosites
-                await adminLinkMethods.updateAdminLink(userId, linkData);
+                await linkService.updateAdminLink(userId, linkData);
             }
 
             // ALWAYS update the local link's isSelected status
@@ -148,7 +149,7 @@ export const useLinkOperations = ({
             console.log('Updating admin link with data:', updateData);
 
             // Update the link for all child biosites
-            await adminLinkMethods.updateAdminLink(userId, updateData);
+            await linkService.updateAdminLink(userId, updateData);
 
             // Update local link with the same data
             await updateLink(linkId, {

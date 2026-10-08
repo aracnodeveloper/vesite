@@ -37,3 +37,14 @@ export interface UpdateLinkDto {
     link_type?: string;
     isSelected?: boolean;
 }
+
+/** Link que el admin propaga a los biosites de sus usuarios hijos. */
+export interface AdminLinkData {
+    linkId: string;
+    icon: string;
+    url: string;
+    image?: string;
+    label: string;
+    link_type: string;
+    orderIndex?: number;
+}

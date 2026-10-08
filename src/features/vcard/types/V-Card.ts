@@ -17,13 +17,6 @@ export interface BusinessCard {
     isActive?: boolean;
 }
 
-export interface CreateBusinessCardDto {
-    ownerId: string;
-    qrCodeUrl?: string;
-    data?: any;
-    isActive?: boolean;
-}
-
 export interface UpdateBusinessCardDto {
     id?: string;
     ownerId: string;

@@ -1,22 +1,19 @@
 import { Database, Edit, LinkIcon } from "lucide-react";
 import Input from "../../../../shared/ui/Input";
 import { getLinkType } from "../SharedLinksComponents";
-import FomrField from "../../../../shared/ui/FormField";
+import FormField from "../../../../shared/ui/FormField";
 import ImageInput from "../../../../shared/ui/ImageInput";
 import { useState } from "react";
 import Button from "../../../../shared/ui/Button";
 import type { BiositeFull, LinkData } from "../../types/AdminData";
 import Loading from "../../../../shared/ui/Loading";
-import { useUser, type UpdateUserDto } from "../../hooks/useUser";
-import {
-  uploadBiositeAvatar,
-  uploadBiositeBackground,
-} from "../../../biosite/profile/lib/uploadImage";
+import { useUser } from "../../../user/hooks/useUser";
+import type { UpdateUserDto } from "../../../user/types/User";
+import { uploadService } from "../../../../core/api/uploadService";
 import EditableLink from "./EditableLink";
 import EditableVCardSection from "./EditableVCardSection";
 import type { UpdateBusinessCardDto } from "../../../vcard/types/V-Card";
-import apiService from "../../../../core/api/apiService";
-import { updateBiositeApi } from "../../../../core/api/endpoints";
+import { biositeService } from "../../../biosite/services/biositeService";
 
 // El slug forma parte de la URL pública del veSite, por lo que se normaliza
 // a minúsculas, sin espacios ni caracteres especiales.
@@ -136,11 +133,7 @@ export default function ExpandedBiositeDetails({
       // se aplica ningún otro cambio y el administrador puede corregirlo antes
       // de reintentar.
       if (Object.keys(biositeChanges).length > 0) {
-        await apiService.update<typeof biositeChanges>(
-            updateBiositeApi,
-            biosite.id,
-            biositeChanges
-        );
+        await biositeService.update(biosite.id, biositeChanges);
         setEditableBiosite((prev) => ({ ...prev, ...biositeChanges }));
       }
 
@@ -157,10 +150,10 @@ export default function ExpandedBiositeDetails({
 
       const result = await updateUser(biosite.ownerId, updateUserData);
       if (update_background) {
-        await uploadBiositeBackground(backgroundFile, biosite.id);
+        await uploadService.uploadBiositeBackground(backgroundFile, biosite.id);
       }
       if (update_avatar) {
-        await uploadBiositeAvatar(avatarFile, biosite.id);
+        await uploadService.uploadBiositeAvatar(avatarFile, biosite.id);
       }
 
       if (result) {
@@ -234,42 +227,42 @@ export default function ExpandedBiositeDetails({
                 <span className="flex items-center text-black font-bold mb-3 gap-2">     <Edit  className="w-4 h-4" /> EDITOR</span>
                 <form onSubmit={onSave} className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                    <FomrField title={"Nombre"}>
+                    <FormField title={"Nombre"}>
                       <Input
                           name="owner.name"
                           value={editableBiosite.owner?.name ?? ""}
                           onChange={handleChange}
                       />
-                    </FomrField>
-                    <FomrField title={"Email"}>
+                    </FormField>
+                    <FormField title={"Email"}>
                       <Input
                           name="owner.email"
                           value={editableBiosite.owner?.email ?? ""}
                           onChange={handleChange}
                       />
-                    </FomrField>
-                    <FomrField title={"Cédula"}>
+                    </FormField>
+                    <FormField title={"Cédula"}>
                       <Input
                           name="owner.cedula"
                           value={editableBiosite.owner?.cedula ?? ""}
                           onChange={handleChange}
                       />
-                    </FomrField>
-                    <FomrField title={"Telefono"}>
+                    </FormField>
+                    <FormField title={"Telefono"}>
                       <Input
                           name="owner.phone"
                           value={editableBiosite.owner?.phone ?? ""}
                           onChange={handleChange}
                       />
-                    </FomrField>
-                    <FomrField title={"Título del veSite"}>
+                    </FormField>
+                    <FormField title={"Título del veSite"}>
                       <Input
                           name="title"
                           value={editableBiosite.title ?? ""}
                           onChange={handleChange}
                       />
-                    </FomrField>
-                    <FomrField title={"Slug del veSite"}>
+                    </FormField>
+                    <FormField title={"Slug del veSite"}>
                       <Input
                           name="slug"
                           value={editableBiosite.slug ?? ""}
@@ -280,7 +273,7 @@ export default function ExpandedBiositeDetails({
                             ? `URL: /${editableBiosite.slug}`
                             : "Sin slug. Solo minúsculas, números y guiones."}
                       </p>
-                    </FomrField>
+                    </FormField>
                     <div>
                       <p className="text-xs sm:text-sm text-gray-600 uppercase tracking-wide">
                         Rol
@@ -300,7 +293,7 @@ export default function ExpandedBiositeDetails({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                    <FomrField title={"Avatar"}>
+                    <FormField title={"Avatar"}>
                       <ImageInput
                           maxHeight={200}
                           square
@@ -308,15 +301,15 @@ export default function ExpandedBiositeDetails({
                           initialSrc={biosite.avatarImage}
                           onChange={handleImageChange("avatarImage")}
                       />
-                    </FomrField>
-                    <FomrField title={"Background"}>
+                    </FormField>
+                    <FormField title={"Background"}>
                       <ImageInput
                           maxHeight={200}
                           value={backgroundFile}
                           initialSrc={biosite.backgroundImage}
                           onChange={handleImageChange("backgroundImage")}
                       />
-                    </FomrField>
+                    </FormField>
                   </div>
 
                   {update_profile && (

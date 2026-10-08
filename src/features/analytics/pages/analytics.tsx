@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getBiositeAnalytics } from "../../../core/api/apiService";
+import { getBiositeAnalytics } from "../services/analyticsService";
 import Cookies from "js-cookie";
 import PhonePreview from "../../biosite/preview/phonePreview.tsx";
 import {

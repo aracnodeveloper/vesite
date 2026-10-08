@@ -11,8 +11,8 @@ import BackButton from "../../../shared/ui/BackButton";
 import SVGAPPLE from '../../../assets/icons/AppleStore.svg'
 import SVGGOO from '../../../assets/icons/GooglePLay.svg'
 import ElementCard from "../components/ElementCard";
-import Cookie from "js-cookie";
-import apiService from "../../../core/api/apiService";
+import { getSessionAdminId } from "../../../core/auth/session";
+import { biositeService } from "../../biosite/services/biositeService";
 
 const AppPage = () => {
 
@@ -34,24 +34,13 @@ const AppPage = () => {
     setGooglePlayUrl(googlePlay?.url || "");
   }, [appLinks]);
 
-  // 🔥 FUNCIÓN: Actualizar app en biosites hijos
+  // Si el usuario es admin, propaga el enlace de la app a sus biosites hijos
   const updateAdminAndChildrenApp = async (type: "appstore" | "googleplay", appUrl: string) => {
-    const role = Cookie.get("roleName");
-    const userId = Cookie.get("userId");
-    const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
-
-    if (!isAdmin || !userId) {
-      console.log("Not admin or no userId, skipping children update");
-      return;
-    }
+    const adminId = getSessionAdminId();
+    if (!adminId) return;
 
     try {
-      console.log(`Updating ${type} for admin and children with URL:`, appUrl);
-      await apiService.patch(
-          `/biosites/admin/update-app/${userId}?type=${type}&appUrl=${encodeURIComponent(appUrl)}`,
-          {}
-      );
-      console.log(`${type} updated for admin and children successfully`);
+      await biositeService.updateChildrenApp(adminId, type, appUrl);
     } catch (error) {
       console.error(`Error updating ${type} for admin and children:`, error);
       throw error;
@@ -91,12 +80,8 @@ const AppPage = () => {
         setGooglePlayUrl(editUrl);
       }
 
-      // 🔥 IMPORTANTE: Actualizar app en biosites hijos DESPUÉS de actualizar localmente
-      const role = Cookie.get("roleName");
-      const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
-
-      if (isAdmin && editUrl) {
-        console.log(`Admin detected, updating ${editingStore} for children`);
+      // Propagar a los biosites hijos después de actualizar localmente
+      if (editUrl) {
         await updateAdminAndChildrenApp(editingStore, editUrl);
       }
 
@@ -153,14 +138,8 @@ const AppPage = () => {
           setGooglePlayUrl("");
         }
 
-        // 🔥 NUEVO: Si es admin, también eliminar de los hijos
-        const role = Cookie.get("roleName");
-        const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
-
-        if (isAdmin) {
-          console.log(`Admin detected, removing ${store} from children`);
-          await updateAdminAndChildrenApp(store, "");
-        }
+        // Si es admin, también eliminar de los hijos
+        await updateAdminAndChildrenApp(store, "");
 
         setTimeout(() => {
           setSaveStatus("idle");

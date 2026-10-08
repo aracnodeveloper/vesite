@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {type PaginationParams, useFetchBiosite} from "../hooks/useFetchBiosite";
+import { useFetchBiosite } from "../../biosite/hooks/useFetchBiosite";
+import type { BiositeListParams } from "../../biosite/services/biositeService";
 import { usePagination } from "../hooks/usePagination";
 import SearchAndFilters from "../components/SearchAndFilters";
 import type { FilterState } from "../components/SearchAndFilters";
@@ -7,8 +8,8 @@ import { Users, Globe, RefreshCw, LinkIcon, Eye, Users2 } from "lucide-react";
 import Cookie from "js-cookie";
 import type { BusinessCard } from "../../vcard/types/V-Card.ts";
 import { businessCardService } from "../../vcard/services/VCardService.ts";
-import { getBiositeAnalytics } from "../../../core/api/apiService";
-import apiService from "../../../core/api/apiService";
+import { getBiositeAnalytics } from "../../analytics/services/analyticsService";
+import { linkService } from "../../links/services/linkService";
 import { BiositesTable } from "../components/BiositesTable.tsx";
 import { AdminChildBiositesTable } from "../components/AdminChildBiositesTable.tsx";
 import type {
@@ -18,7 +19,6 @@ import type {
   AnalyticsData,
 } from "../types/AdminData.ts";
 import type { UpdateBusinessCardDto } from "../../vcard/types/V-Card";
-import { buildBiositeQueryParams, cleanParams } from '../utils/filterUtils.ts';
 
 type ViewMode = "all" | "children";
 
@@ -143,8 +143,7 @@ const AdminPanel: React.FC = () => {
           filters: FilterState
       ): Promise<BiositeFull[]> => {
         try {
-          // Construir parámetros usando la interfaz PaginationParams
-          const params: PaginationParams = {
+          const params: BiositeListParams = {
             page: currentPage,
             size: size,
           };
@@ -235,10 +234,8 @@ const AdminPanel: React.FC = () => {
 
       setLoadingBiositeLinks((prev) => ({ ...prev, [biositeId]: true }));
       try {
-        const links = await apiService.getAll<LinkData[]>(
-          `/links/biosite/${biositeId}`
-        );
-        setBiositeLinks((prev) => ({ ...prev, [biositeId]: links || [] }));
+        const links: LinkData[] = await linkService.getByBiosite(biositeId);
+        setBiositeLinks((prev) => ({ ...prev, [biositeId]: links }));
       } catch (error) {
         console.error(`Error fetching links for biosite ${biositeId}:`, error);
         setBiositeLinks((prev) => ({ ...prev, [biositeId]: [] }));

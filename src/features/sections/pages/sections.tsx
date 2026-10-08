@@ -1,98 +1,34 @@
 import Add from "../components/addMore";
 import MySite from "../../biosite/components/Mysite";
-import Cookie from "js-cookie";
-import apiService from "../../../core/api/apiService.ts";
 import { useEffect } from "react";
 import { usePreview } from "../../biosite/context/PreviewContext.tsx";
+import { getSessionAdminId } from "../../../core/auth/session";
+import { biositeService } from "../../biosite/services/biositeService";
 
 const Sections = () => {
   const { biosite, getVideoEmbed } = usePreview();
 
-  const updateAdminAndChildrenBackground = async (backgroundImage: string) => {
-    const role = Cookie.get("roleName");
-    const userId = Cookie.get("userId");
-    const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
-
-    if (!isAdmin || !userId) {
-      return;
-    }
-
-    try {
-      await apiService.patch(
-        `/biosites/admin/update-background/${userId}?background=${encodeURIComponent(
-          backgroundImage
-        )}`,
-        {}
-      );
-      console.log("Background updated for admin and children successfully");
-    } catch (error) {
-      console.error("Error updating background for admin and children:", error);
-      throw error;
-    }
-  };
-
-  const updateAdminAndChildrenVideoEffect = async (videoUrl: string) => {
-    const role = Cookie.get("roleName");
-    const userId = Cookie.get("userId");
-    const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
-
-    if (!isAdmin || !userId) {
-      return;
-    }
-
-    try {
-      await apiService.patch(
-        `/biosites/admin/update-video/${userId}?video=${encodeURIComponent(
-          videoUrl
-        )}`,
-        {}
-      );
-      console.log("Video updated for admin and children successfully");
-    } catch (error) {
-      console.error("Error updating video for admin and children:", error);
-      throw error;
-    }
-  };
-
+  // Al entrar, un admin propaga su fondo a los biosites de sus usuarios hijos
   useEffect(() => {
-    const executeAdminBackgroundUpdate = async () => {
-      const role = Cookie.get("roleName");
-      const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+    const adminId = getSessionAdminId();
+    if (!adminId || !biosite?.backgroundImage) return;
 
-      if (isAdmin && biosite?.backgroundImage) {
-        try {
-          await updateAdminAndChildrenBackground(biosite.backgroundImage);
-        } catch (error) {
-          console.error("Error updating admin background after login:", error);
-        }
-      }
-    };
-
-    if (biosite) {
-      executeAdminBackgroundUpdate();
-    }
+    biositeService
+      .updateChildrenBackground(adminId, biosite.backgroundImage)
+      .catch((error) => console.error("Error updating admin background after login:", error));
   }, [biosite]);
 
+  // ...y también el video de fondo, si tiene uno
   useEffect(() => {
-    const executeAdminVideoUpdate = async () => {
-      const role = Cookie.get("roleName");
-      const isAdmin = role === "SUPER_ADMIN" || role === "ADMIN";
+    const adminId = getSessionAdminId();
+    if (!adminId || !biosite) return;
 
-      if (isAdmin) {
-        const videoEmbed = getVideoEmbed();
-        if (videoEmbed && videoEmbed.url) {
-          try {
-            await updateAdminAndChildrenVideoEffect(videoEmbed.url);
-          } catch (error) {
-            console.error("Error updating admin video after login:", error);
-          }
-        }
-      }
-    };
+    const videoUrl = getVideoEmbed()?.url;
+    if (!videoUrl) return;
 
-    if (biosite) {
-      executeAdminVideoUpdate();
-    }
+    biositeService
+      .updateChildrenVideo(adminId, videoUrl)
+      .catch((error) => console.error("Error updating admin video after login:", error));
   }, [biosite, getVideoEmbed]);
 
   return (

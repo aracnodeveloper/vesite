@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../types/Biosite";
-import type { CreateBiositeDto } from "../../admin/types/User.ts";
+import type { BiositeFull, BiositeUpdateDto, BiositeColors, CreateBiositeDto } from "../types/Biosite";
 import Cookies from "js-cookie";
 
 interface UseBiositeOperationsProps {

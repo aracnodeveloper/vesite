@@ -5,7 +5,6 @@ import LinkEditForm from "../../../links/links/Components/LinksEditForm";
 import type { LinkData } from "../../types/AdminData";
 import { useFetchLinks } from "../../../links/hooks/useFetchLinks";
 import type { UpdateLinkDto } from "../../../links/types/Links";
-//import { uploadBiositeAvatar } from "../../../biosite/profile/lib/uploadImage";
 ///home/adrian/Repos/vesite/src/interfaces/Links.ts
 
 export default function EditableLink({

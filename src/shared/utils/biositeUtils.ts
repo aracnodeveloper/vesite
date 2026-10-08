@@ -103,33 +103,3 @@ export const DEFAULT_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/detai
 export const APPBYD = "https://apps.apple.com/mx/app/byd-auto/id1492400299";
 export const APPGBYD ="https://play.google.com/store/search?q=BYD&c=apps&hl=es";
 
-export const isDefaultUrl = (url: string, store: 'appstore' | 'googleplay'): boolean => {
-    if (store === 'appstore') {
-        return url === DEFAULT_APP_STORE_URL;
-    } else {
-        return url === DEFAULT_GOOGLE_PLAY_URL;
-    }
-};
-
-export const isBYDUrls = (url: string, store: 'appstore' | 'googleplay'): boolean => {
-    if (store === 'appstore') {
-        return url === APPBYD;
-    } else {
-        return url === APPGBYD;
-    }
-};
-
-export const hasCustombydUrls = (appLinks: any[]): boolean => {
-    const activeAppLinks = appLinks.filter(link => link.isActive);
-
-    return activeAppLinks.some(appLink => {
-        return !isBYDUrls(appLink.url, appLink.store);
-    });
-};
-export const hasCustomUrls = (appLinks: any[]): boolean => {
-    const activeAppLinks = appLinks.filter(link => link.isActive);
-
-    return activeAppLinks.some(appLink => {
-        return !isDefaultUrl(appLink.url, appLink.store);
-    });
-};
