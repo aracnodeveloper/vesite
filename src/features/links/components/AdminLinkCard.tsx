@@ -1,8 +1,8 @@
 import { Edit2, X, Shield } from "lucide-react";
 import { useState } from "react";
-import Cookie from "js-cookie";
 import AdminLinkToggle from "./AdminLinkToggle";
 import { isAdminRole, type UserRole } from "../../../core/auth/session";
+import { useAuthContext } from "../../auth/hooks/useAuthContext";
 
 interface AdminLinkCardProps {
     id: string;
@@ -42,13 +42,8 @@ const AdminLinkCard = ({
     const [isToggling, setIsToggling] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const getCurrentRole = (): UserRole => {
-        if (userRole) return userRole;
-        const role = Cookie.get('roleName');
-        return role as UserRole || 'USER';
-    };
-
-    const currentRole = getCurrentRole();
+    const { role } = useAuthContext();
+    const currentRole: UserRole = userRole || (role as UserRole) || 'USER';
     const isAdmin = isAdminRole(currentRole);
 
     const handleAdminToggle = async (value: boolean) => {

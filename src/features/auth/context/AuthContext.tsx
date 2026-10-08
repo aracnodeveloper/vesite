@@ -1,28 +1,64 @@
 import type {FC, ReactNode} from 'react';
-import {useState}from 'react'
+import {useEffect, useState} from 'react'
 import Cookie from 'js-cookie';
 import {AuthContext} from '../hooks/useAuthContext.ts'
 import {authService} from "../services/authService.ts";
+import type {SessionStatus, SessionUser} from "../types/Auth.ts";
 import notificationService from "../../../core/notificationService.ts";
 import { isAdminRole } from "../../../core/auth/session";
+import { decodeTokenPayload, getAccessToken, isTokenExpired } from "../../../core/auth/token";
+import { userService } from "../../user/services/userService";
+import { getErrorMessage } from "../../../core/api/errors";
 
+const SESSION_COOKIES = ['accessToken', 'refreshToken', 'userId', 'biositeId', 'mainUserId'];
+
+/**
+ * Sesión del usuario. El rol NO se guarda en cookies (se podía editar a mano):
+ * se pide al servidor con el token en cada carga de la app y vive en memoria.
+ */
 export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const [biositeId, setBiositeId] = useState<string | null>(null);
-    const [accessToken, setAccessToken] = useState<string | null>(null);
-    const [roleName, setRoleName] = useState<string | null>(null);
+    const [status, setStatus] = useState<SessionStatus>('loading');
+    const [user, setUser] = useState<SessionUser | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+
+    // Restaurar la sesión: identidad del token, rol confirmado por la API
+    useEffect(() => {
+        // Versiones anteriores guardaban el rol en una cookie; se descarta
+        Cookie.remove('roleName');
+
+        const token = getAccessToken();
+        const payload = token ? decodeTokenPayload(token) : null;
+        if (!payload || isTokenExpired(payload)) {
+            setStatus('anonymous');
+            return;
+        }
+
+        let cancelled = false;
+        userService.getById(payload.id)
+            .then((serverUser) => {
+                if (cancelled) return;
+                setUser({
+                    id: serverUser.id,
+                    role: serverUser.role ?? null,
+                    name: serverUser.name,
+                    email: serverUser.email,
+                });
+                setStatus('authenticated');
+            })
+            .catch((error) => {
+                console.error('No se pudo restaurar la sesión:', error);
+                if (!cancelled) setStatus('anonymous');
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const login = async (email: string, password: string) => {
         try {
             setLoading(true);
-            const responseData = await authService.login(email, password)
-
-            const {accessToken, refreshToken, userId, roleName, biositeId} = responseData;
-
-
-            const userRole = roleName as string;
+            const {accessToken, refreshToken, userId, roleName, biositeId} = await authService.login(email, password);
 
             const accessExpirationDate = new Date();
             const refreshExpirationDate = new Date();
@@ -31,33 +67,20 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
 
             Cookie.set('accessToken', accessToken, { expires: accessExpirationDate });
             Cookie.set('refreshToken', refreshToken, { expires: refreshExpirationDate });
+            // userId y biositeId indican qué biosite se está editando, no dan permisos
             Cookie.set('userId', userId, { expires: refreshExpirationDate});
-            Cookie.set('roleName', userRole, { expires: refreshExpirationDate });
             Cookie.set('biositeId', biositeId, { expires: refreshExpirationDate});
 
-            setIsAuthenticated(true);
-            setUserId(userId);
-            setBiositeId(biositeId);
-            setAccessToken(accessToken);
-            setRoleName(userRole);
+            setUser({ id: userId, role: roleName ?? null });
+            setStatus('authenticated');
 
-
-            if (isAdminRole(userRole)) {
+            if (isAdminRole(roleName)) {
                 notificationService.warning('Sudo mode', 'You are logged in as sudo, please be careful');
             }
 
             return {success: true};
-
-        } catch (error: any) {
-            console.error('Login error:', error);
-            if (error.response) {
-                console.error('Error in server response:', error.response.data);
-            } else if (error.request) {
-                console.error('No response from server:', error.request);
-            } else {
-                console.error('Error while setting up the request', error.message);
-            }
-
+        } catch (error) {
+            console.error('Login error:', getErrorMessage(error, 'Error al iniciar sesión'));
             return {success: false};
         } finally {
             setLoading(false);
@@ -65,32 +88,24 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({children}) => {
     };
 
     const logout = () => {
-        try {
-            setLoading(true);
-
-            Cookie.remove('accessToken');
-            Cookie.remove('refreshToken');
-            Cookie.remove('userId');
-            Cookie.remove('roleName');
-            Cookie.remove('biositeId');
-            Cookie.remove('mainUserId');
-
-            localStorage.removeItem('datos');
-
-            setIsAuthenticated(false);
-            setUserId(null);
-            setAccessToken(null);
-            setRoleName(null);
-            setBiositeId(null)
-        } catch (err) {
-            console.error('Logout error:', err);
-        } finally {
-            setLoading(false);
-        }
+        SESSION_COOKIES.forEach((name) => Cookie.remove(name));
+        localStorage.removeItem('datos');
+        setUser(null);
+        setStatus('anonymous');
     };
 
     return (
-        <AuthContext.Provider value={{isAuthenticated, userId,biositeId,accessToken, roleName, loading, login, logout}}>
+        <AuthContext.Provider
+            value={{
+                status,
+                isAuthenticated: status === 'authenticated',
+                user,
+                role: user?.role ?? null,
+                loading,
+                login,
+                logout,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

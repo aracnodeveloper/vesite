@@ -1,5 +1,7 @@
-import Cookie from "js-cookie";
-
+/**
+ * Reglas de rol para decidir qué se muestra en la interfaz. El rol sale de la
+ * sesión (AuthContext), confirmado por el servidor; nunca de una cookie.
+ */
 export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
 
 /** Usuarios con acceso de administración aunque su rol no sea admin. */
@@ -19,9 +21,3 @@ export const canUseBlackCard = (userId?: string | null): boolean =>
 
 export const canAccessAdmin = (role?: string | null, userId?: string | null): boolean =>
     isAdminRole(role) || isExtraAdminUser(userId);
-
-/** userId de la sesión si el usuario es admin; si no, null. */
-export const getSessionAdminId = (): string | null => {
-    const userId = Cookie.get("userId");
-    return isAdminRole(Cookie.get("roleName")) && userId ? userId : null;
-};

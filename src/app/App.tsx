@@ -11,6 +11,7 @@ import ProfilePage from "../features/biosite/profile/profilePage.tsx";
 import Analytics from "../features/analytics/pages/analytics.tsx";
 import Styles from "../features/biosite/pages/styles.tsx";
 import PrivateRoute from "../features/auth/pages/PrivateRoute.tsx";
+import { canAccessAdmin } from "../core/auth/session";
 import { PreviewProvider } from "../features/biosite/context/PreviewContext.tsx";
 import { SectionsProvider } from "../features/sections/context/SectionsContext.tsx";
 import SocialPage from "../features/links/social/socialPage.tsx";
@@ -86,7 +87,14 @@ const App = () => {
                                 <Route path="styles" element={<Styles />} />
                                 <Route path="analytics" element={<Analytics />} />
                                 <Route path="VCard" element={<VCardPage />} />
-                                <Route path="admin" element={<AdminPanel />} />
+                                <Route
+                                    path="admin"
+                                    element={
+                                        <PrivateRoute allow={canAccessAdmin}>
+                                            <AdminPanel />
+                                        </PrivateRoute>
+                                    }
+                                />
                             </Route>
 
                             {/* Catch-all: redirección a inicio */}

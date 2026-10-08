@@ -5,6 +5,7 @@ import type { Link } from "../types/Links.ts";
 import { linkService } from "../services/linkService";
 import Cookie from "js-cookie";
 import { isAdminRole, type UserRole } from "../../../core/auth/session";
+import { useAuthContext } from "../../auth/hooks/useAuthContext";
 
 // Link type constants
 const LINK_TYPES = {
@@ -45,11 +46,9 @@ export const useLinkOperations = ({
                                       getIconIdentifier
                                   }: UseLinkOperationsProps) => {
 
-    // Get user role from cookies or context
-    const getUserRole = useCallback((): UserRole => {
-        const role = Cookie.get('roleName');
-        return role as UserRole || 'USER';
-    }, []);
+    // Rol de la sesión (confirmado por el servidor)
+    const { role } = useAuthContext();
+    const getUserRole = useCallback((): UserRole => (role as UserRole) || 'USER', [role]);
 
     const getUserId = useCallback((): string | null => {
         return Cookie.get('userId') || null;

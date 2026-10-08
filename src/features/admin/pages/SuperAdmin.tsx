@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Eye } from "lucide-react";
 import Cookie from "js-cookie";
+import { useAuthContext } from "../../auth/hooks/useAuthContext";
 import SearchAndFilters from "../components/SearchAndFilters";
 import { BiositesTable } from "../components/BiositesTable.tsx";
 import { AdminChildBiositesTable } from "../components/AdminChildBiositesTable.tsx";
@@ -13,10 +14,11 @@ import { categorizeLinks, formatDate, parseVCardData } from "../utils/adminUtils
 import type { BiositeFull } from "../types/AdminData.ts";
 
 const AdminPanel: React.FC = () => {
-  const role = Cookie.get("roleName");
+  const { role, user } = useAuthContext();
+  // Usuario cuyo biosite se está editando (puede ser un hijo del admin)
   const userId = Cookie.get("userId");
 
-  const permissions = useAdminPermissions(role, userId);
+  const permissions = useAdminPermissions(role, user?.id);
   const details = useBiositeDetails();
   const { fetchBiositeAnalytics, fetchBiositeLinks } = details;
 

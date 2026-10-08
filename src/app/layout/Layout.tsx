@@ -20,7 +20,7 @@ const PUBLIC_SITE_URL = "https://visitaecuador.com/vesite";
 const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuthContext();
+  const { logout, role, user } = useAuthContext();
   const { biosite } = usePreview();
   const { hasChanges, markAsSaved, resetChangeDetection } = useChangeDetection();
   const { isUpdating, handleUpdate } = useUpdateShareActions();
@@ -28,7 +28,7 @@ const Layout: React.FC = () => {
 
   const userId = Cookie.get("userId");
   const navItems = getNavItems({
-    hasAdminAccess: canAccessAdmin(Cookie.get("roleName"), userId),
+    hasAdminAccess: canAccessAdmin(role, user?.id),
     hasBlackCard: canUseBlackCard(userId),
     userId,
   });

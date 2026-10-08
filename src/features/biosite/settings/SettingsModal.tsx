@@ -20,6 +20,7 @@ import CreateBiositeWizard from "./Settings/createBiositeForm.tsx";
 import BiositesList from "./Settings/biositeList.tsx";
 import SettingsFooter from "./Settings/settingsFooter";
 import { canAccessAdmin } from "../../../core/auth/session";
+import { useAuthContext } from "../../auth/hooks/useAuthContext";
 
 interface Profile {
     id: string;
@@ -74,11 +75,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     } = usePreview();
 
     const { user, fetchUser } = useUser();
-    const role = Cookies.get("roleName");
-    const userId = Cookies.get("userId");
+    const { role, user: sessionUser } = useAuthContext();
 
     // Check admin access (same logic as Layout)
-    const hasAdminAccess = canAccessAdmin(role, userId);
+    const hasAdminAccess = canAccessAdmin(role, sessionUser?.id);
 
     const {
         fetchCompleteBiositeStructure,

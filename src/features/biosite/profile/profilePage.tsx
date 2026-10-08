@@ -3,6 +3,7 @@ import { usePreview } from "../context/PreviewContext";
 import { useFetchBiosite } from "../hooks/useFetchBiosite";
 import { useUser } from "../../user/hooks/useUser";
 import Cookies from "js-cookie";
+import { useAuthContext } from "../../auth/hooks/useAuthContext";
 import { useEffect, useState } from "react";
 import type {
   BiositeColors,
@@ -17,7 +18,7 @@ import { isAdminRole } from "../../../core/auth/session";
 const { TextArea } = Input;
 
 const ProfilePage = () => {
-  const role = Cookies.get("roleName");
+  const { role } = useAuthContext();
   const { biosite, updatePreview, loading: previewLoading } = usePreview();
   const userId = Cookies.get("userId");
   const {

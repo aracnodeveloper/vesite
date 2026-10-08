@@ -11,12 +11,13 @@ import BackButton from "../../../shared/ui/BackButton";
 import SVGAPPLE from '../../../assets/icons/AppleStore.svg'
 import SVGGOO from '../../../assets/icons/GooglePLay.svg'
 import ElementCard from "../components/ElementCard";
-import { getSessionAdminId } from "../../../core/auth/session";
+import { useAdminTargetId } from "../../auth/hooks/useAdminTargetId";
 import { biositeService } from "../../biosite/services/biositeService";
 
 const AppPage = () => {
 
   const { appLinks, updateAppLink, addAppLink, removeAppLink, loading, error } = usePreview();
+  const adminId = useAdminTargetId();
 
   const [appStoreUrl, setAppStoreUrl] = useState("");
   const [googlePlayUrl, setGooglePlayUrl] = useState("");
@@ -36,7 +37,6 @@ const AppPage = () => {
 
   // Si el usuario es admin, propaga el enlace de la app a sus biosites hijos
   const updateAdminAndChildrenApp = async (type: "appstore" | "googleplay", appUrl: string) => {
-    const adminId = getSessionAdminId();
     if (!adminId) return;
 
     try {
