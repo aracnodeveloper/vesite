@@ -7,7 +7,6 @@ export const themesApi = "/themes"
 
 // Plantillas - Nuevos endpoints
 export const plantillasApi = "/plantillas";
-export const platillaByIdApi = "/plantillas"; // GET /{id}
 
 //Profile
 export const updateBiositeApi = "/biosites";
@@ -24,8 +23,6 @@ export const LinksImageApi = "/upload/image-link";
 
 //Sections
 export const sectionsApi = "/section";
-export const createSectionApi = "/section"; // POST
-export const getSectionsByUserApi = "/sections/user"; // GET /:userId
 export const getSectionsByBiositeApi = "/section/biosite"; // GET /:biositeId
 export const reorderSectionsApi = "/section/reorder"; // PATCH /:biositeId
 
@@ -71,4 +68,3 @@ export const historyApi = "/history";
 export const getHistoryByBiositeApi = "/history/biosite";
 
 // HIGHLIGHTS
-export const highlightsApi = "/highlights";

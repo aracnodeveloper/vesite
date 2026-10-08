@@ -19,13 +19,12 @@ import MusicPage from "./components/layers/AddMoreSections/Music-Posdcast/musicP
 import PostPage from "./components/layers/AddMoreSections/Socialpost/socialPostPage.tsx";
 import LinksPage from "./components/layers/AddMoreSections/Links/linksPage.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
-import LivePreviewContent from "./components/Preview/LivePreviewContent.tsx";
 import AppPage from "./components/layers/AddMoreSections/App/appPage.tsx";
 import VCardPage from "./components/layers/MySite/V-Card/V-CardPage.tsx";
 import WhatsAppPage from "./components/layers/AddMoreSections/WhattsApp/whatsAppPage.tsx";
 import AdminPanel from "./pages/SuperAdmin.tsx";
 import NewBiositePage from "./context/NewBiositePage/NewBiositePage.tsx";
-import GalleryPage from "./components/layers/MySite/Text_blocks/GalleryPage.tsx"; // ← NUEVA LÍNEA
+import GalleryPage from "./components/layers/MySite/Text_blocks/GalleryPage.tsx";
 import BlackCardLanding from "./pages/BlackCardLanding.tsx";
 import HistoriesListPage from "./components/layers/MySite/Histories/HistoriesListPage.tsx";
 import HistoryEditorPage from "./components/layers/MySite/Histories/HistoryEditorPage.tsx";
@@ -78,7 +77,7 @@ const App = () => {
                                 <Route path="music" element={<MusicPage />} />
                                 <Route path="post" element={<PostPage />} />
                                 <Route path="app" element={<AppPage />} />
-                                <Route path="gallery" element={<GalleryPage />} /> {/* ← NUEVA LÍNEA */}
+                                <Route path="gallery" element={<GalleryPage />} />
                                 <Route path="histories" element={<HistoriesListPage />} />
                                 <Route path="histories/new" element={<HistoryEditorPage />} />
                                 <Route path="histories/:historyId/edit" element={<HistoryEditorPage />} />
@@ -89,18 +88,6 @@ const App = () => {
                                 <Route path="VCard" element={<VCardPage />} />
                                 <Route path="admin" element={<AdminPanel />} />
                             </Route>
-
-                            {/* Ruta de preview sin Layout */}
-                            <Route
-                                path="vesite/expoced"
-                                element={
-                                    <PrivateRoute>
-                                        <div className="min-h-screen bg-gray-100">
-                                            <LivePreviewContent />
-                                        </div>
-                                    </PrivateRoute>
-                                }
-                            />
 
                             {/* Catch-all: redirección a inicio */}
                             <Route path="*" element={<Navigate to="/" replace />} />
