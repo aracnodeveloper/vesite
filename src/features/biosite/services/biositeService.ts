@@ -63,12 +63,14 @@ export const biositeService = {
             : apiService.getAll<BiositeListResponse>(allBiositesApi),
 
     /** true si ningún otro biosite usa exactamente ese slug. */
+    // Usa el endpoint público por slug (devuelve vacío si no existe): el
+    // listado /biosites es solo para administración.
     isSlugAvailable: async (slug: string): Promise<boolean> => {
-        const response = await apiService.getAll<BiositeListResponse>(
-            `${biositesApi}?page=1&size=10&search=${encodeURIComponent(slug)}`
+        const existing = await apiService.getById<BiositeFull | null>(
+            biositeBySlugApi,
+            encodeURIComponent(slug)
         );
-        const biosites = Array.isArray(response) ? response : response?.data ?? [];
-        return !biosites.some((biosite) => biosite.slug === slug);
+        return !existing;
     },
 
     getById: (biositeId: string) => apiService.getById<BiositeFull>(biositesApi, biositeId),
