@@ -16,6 +16,7 @@ import { GripVertical, Menu, X, Check } from "lucide-react";
 import Loading from "../../../shared/ui/Loading.tsx";
 import Text_blocks from "../../text-blocks/components/text_block.tsx";
 import Histories from "../../history/components/Histories";
+import DocumentsSection from "../../documents/components/DocumentsSection";
 
 const MySite = () => {
   const {
@@ -117,6 +118,8 @@ const MySite = () => {
         return <Text_blocks key="gallery" />;
       case "Historias":
         return <Histories key="histories" />;
+      case "Documentos":
+        return <DocumentsSection key="documents" />;
       default:
         return null;
     }

@@ -30,6 +30,7 @@ import BlackCardLanding from "../features/blackcard/pages/BlackCardLanding.tsx";
 import HistoriesListPage from "../features/history/components/HistoriesListPage.tsx";
 import HistoryEditorPage from "../features/history/components/HistoryEditorPage.tsx";
 import HistoryPreviewPage from "../features/history/components/HistoryPreviewPage.tsx";
+import DocumentsPage from "../features/documents/pages/DocumentsPage.tsx";
 
 // Componente wrapper para rutas privadas con Layout
 const PrivateLayout = () => (
@@ -79,6 +80,7 @@ const App = () => {
                                 <Route path="post" element={<PostPage />} />
                                 <Route path="app" element={<AppPage />} />
                                 <Route path="gallery" element={<GalleryPage />} />
+                                <Route path="documents" element={<DocumentsPage />} />
                                 <Route path="histories" element={<HistoriesListPage />} />
                                 <Route path="histories/new" element={<HistoryEditorPage />} />
                                 <Route path="histories/:historyId/edit" element={<HistoryEditorPage />} />

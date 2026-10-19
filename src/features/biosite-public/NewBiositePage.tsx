@@ -24,6 +24,9 @@ import HistoriesPreview from "../biosite/preview/HistoriesPreview";
 import VCardModal from "./VCardModal";
 import type { VCardData } from "../vcard/types/V-Card";
 import { useTextBlocks } from "../text-blocks/hooks/useTextBlocks.ts";
+import { useDocuments } from "../documents/hooks/useDocuments.ts";
+import DocumentsBlock from "../documents/components/DocumentsBlock.tsx";
+import { DOCUMENTS_SECTION_TITLE } from "../documents/utils/documentRules.ts";
 
 interface NewBiositePageProps {
   slug?: string;
@@ -54,6 +57,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
   // Estados para Gallery
   const [fetchedSections, setFetchedSections] = useState<Section[]>([]); // Guardar secciones para acceder al orderIndex
   const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks(); // Hook para obtener imágenes de galería
+  const { documents } = useDocuments(biosite?.id, refreshKey);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -522,6 +526,24 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
                       ),
                     });
                   }
+                }
+
+                // Documentos (PDF): comprimidos como links, el abierto embebido
+                if (documents.length > 0) {
+                  const documentsSection = fetchedSections.find(
+                    (s) => s.titulo === DOCUMENTS_SECTION_TITLE,
+                  );
+                  allSections.push({
+                    key: "documents",
+                    orderIndex: documentsSection?.orderIndex ?? 999,
+                    component: (
+                      <DocumentsBlock
+                        documents={documents}
+                        themeConfig={themeConfig}
+                        onEdit={isExposedRoute ? () => onNavigate("/documents") : undefined}
+                      />
+                    ),
+                  });
                 }
 
                 // Ordenar todas las secciones por orderIndex y renderizar

@@ -15,6 +15,7 @@ const REQUIRED_SECTIONS: Omit<CreateSectionData, 'biositeId' | 'orderIndex'>[] =
     { titulo: 'Social Post', icon: 'instagram', descripcion: 'Instagram posts' },
     { titulo: 'Gallery', icon: 'gallery', descripcion: 'Galleria de imagenes' },
     { titulo: 'Historias', icon: 'histories', descripcion: 'Historias temporales del perfil' },
+    { titulo: 'Documentos', icon: 'documents', descripcion: 'Menús, catálogos y otros PDF' },
 ];
 
 /** Elimina secciones repetidas por título y las ordena por orderIndex. */

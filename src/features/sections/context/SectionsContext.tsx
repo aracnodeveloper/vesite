@@ -172,6 +172,9 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 case 'Historias':
                     shouldShow = true;
                     break;
+                case 'Documentos':
+                    shouldShow = true;
+                    break;
                 default:
                     shouldShow = false;
                     break;

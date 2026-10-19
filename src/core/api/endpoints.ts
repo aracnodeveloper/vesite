@@ -30,6 +30,10 @@ export const reorderSectionsApi = "/section/reorder";   // PATCH /:biositeId
 export const textBlocksApi = "/texts-blocks";
 export const textBlocksByBiositeApi = "/texts-blocks/biosite"; // GET /:biositeId
 
+// DOCUMENTS (PDF de menús, catálogos...)
+export const documentsApi = "/documents";
+export const documentsByBiositeApi = "/documents/biosite"; // GET /:biositeId
+
 // UPLOADS
 export const uploadImageApi = "/upload/image";
 export const uploadBiositeAvatarApi = "/upload/biosite-avatar";         // POST /:biositeId

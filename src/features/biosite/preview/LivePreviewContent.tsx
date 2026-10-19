@@ -23,6 +23,9 @@ import { useNavigate } from "react-router-dom";
 import { useSectionsContext } from "../../sections/context/SectionsContext.tsx";
 import { useTextBlocks } from "../../text-blocks/hooks/useTextBlocks.ts";
 import PreviewEmbedCard from "./PreviewEmbedCard.tsx";
+import { useDocuments } from "../../documents/hooks/useDocuments.ts";
+import DocumentsBlock from "../../documents/components/DocumentsBlock.tsx";
+import { DOCUMENTS_SECTION_TITLE } from "../../documents/utils/documentRules.ts";
 import {
   getInstagramEmbedUrl,
   getSpotifyEmbedUrl,
@@ -30,7 +33,7 @@ import {
   isInstagramUrl,
 } from "../../../shared/utils/biositeUtils.ts";
 
-/** Preview del editor para biosites sin slug; `refreshKey` recarga la galería. */
+/** Preview del editor para biosites sin slug; `refreshKey` recarga galería y documentos. */
 const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
   const navigate = useNavigate();
   const maxReloadAttempts = 2;
@@ -43,6 +46,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
   // Get text blocks for gallery
   const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks();
   const biositeId = Cookie.get("biositeId");
+  const { documents } = useDocuments(biositeId, refreshKey);
 
   const {
     biosite,
@@ -349,6 +353,23 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
       }
     }
 
+    // Documents Section
+    if (documents.length > 0) {
+      sections.push({
+        type: "documents",
+        orderIndex: getSectionOrderIndex(DOCUMENTS_SECTION_TITLE),
+        component: (
+          <div key="documents-section" className="px-4 mb-4">
+            <DocumentsBlock
+              documents={documents}
+              themeConfig={themeConfig}
+              onEdit={() => navigate("/documents")}
+            />
+          </div>
+        ),
+      });
+    }
+
     // Sort sections by orderIndex
     return sections.sort((a, b) => a.orderIndex - b.orderIndex);
   }, [
@@ -358,6 +379,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     socialPost,
     videoEmbed,
     textBlocks,
+    documents,
     themeConfig,
     findPlatformForLink,
     handleSocialClick,
