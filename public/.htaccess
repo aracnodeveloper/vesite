@@ -1,3 +1,6 @@
+# El worker de pdf.js (visor de documentos) es un módulo .mjs: debe servirse como JavaScript
+AddType text/javascript .mjs
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /vesite/
