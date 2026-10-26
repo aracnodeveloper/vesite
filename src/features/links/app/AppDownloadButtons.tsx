@@ -53,7 +53,7 @@ const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps
                         <div className="flex flex-col items-start">
                             <div
                                 style={{
-                                    color: themeConfig.colors.text,
+                                    color: themeConfig.colors.accentText || themeConfig.colors.text,
                                     fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                 }}
                                 className="text-lg font-bold"
@@ -63,7 +63,7 @@ const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps
                             {!isAppStoreCustom && (
                                 <div
                                     style={{
-                                        color: themeConfig.colors.text,
+                                        color: themeConfig.colors.accentText || themeConfig.colors.text,
                                         fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                     }}
                                     className="text-sm opacity-80 -mt-1"
@@ -74,7 +74,7 @@ const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps
                             {!isAppStoreBYDCustom && (
                                 <div
                                     style={{
-                                        color: themeConfig.colors.text,
+                                        color: themeConfig.colors.accentText || themeConfig.colors.text,
                                         fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                     }}
                                     className="text-sm opacity-80 -mt-1"
@@ -158,7 +158,7 @@ const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps
                         <div className="flex flex-col items-start">
                             <div
                                 style={{
-                                    color: themeConfig.colors.text,
+                                    color: themeConfig.colors.accentText || themeConfig.colors.text,
                                     fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                 }}
                                 className="text-lg font-bold"
@@ -168,7 +168,7 @@ const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps
                             {!isGooglePlayCustom && (
                                 <div
                                     style={{
-                                        color: themeConfig.colors.text,
+                                        color: themeConfig.colors.accentText || themeConfig.colors.text,
                                         fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                     }}
                                     className="text-sm opacity-80 -mt-1"
@@ -179,7 +179,7 @@ const AppDownloadButtons = ({ onAppClick, themeConfig }: AppDownloadButtonsProps
                             {!isGooglePlayBYDCustom && (
                                 <div
                                     style={{
-                                        color: themeConfig.colors.text,
+                                        color: themeConfig.colors.accentText || themeConfig.colors.text,
                                         fontFamily: themeConfig.fonts.secondary || themeConfig.fonts.primary
                                     }}
                                     className="text-sm opacity-80 -mt-1"

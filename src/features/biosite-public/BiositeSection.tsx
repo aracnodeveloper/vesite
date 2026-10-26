@@ -128,6 +128,7 @@ export default function BiositeSection({
             id={link.id}
             themeConfig={themeConfig}
             title={link.label}
+            useAccentText
           />
         ));
       case Section_type.Music_Podcast:
@@ -151,6 +152,7 @@ export default function BiositeSection({
             onClick={link.onClick}
             url={link.url}
             title={link.label}
+            useAccentText
           />
         ));
       case Section_type.Social_Post:
