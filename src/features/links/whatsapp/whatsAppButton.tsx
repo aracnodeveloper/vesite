@@ -11,6 +11,7 @@ interface WhatsAppButtonProps {
             accent: string;
             background: string;
             text: string;
+            accentText?: string;
             profileBackground: string;
         };
         fonts: {
@@ -58,7 +59,7 @@ const WhatsAppButton = ({ onWhatsAppClick, themeConfig }: WhatsAppButtonProps) =
                         <span
                             className="font-medium text-sm truncate"
                             style={{
-                                color: themeConfig.colors.text,
+                                color: themeConfig.colors.accentText || themeConfig.colors.text,
                                 fontFamily: themeConfig.fonts.primary
                             }}
                         >
@@ -68,7 +69,7 @@ const WhatsAppButton = ({ onWhatsAppClick, themeConfig }: WhatsAppButtonProps) =
                             <span
                                 className="text-xs opacity-75 truncate mt-0.5"
                                 style={{
-                                    color: themeConfig.colors.text,
+                                    color: themeConfig.colors.accentText || themeConfig.colors.text,
                                     fontFamily: themeConfig.fonts.secondary
                                 }}
                             >
@@ -89,7 +90,7 @@ const WhatsAppButton = ({ onWhatsAppClick, themeConfig }: WhatsAppButtonProps) =
                         >
                             <path
                                 d="M6 12L10 8L6 4"
-                                stroke={themeConfig.colors.text || '#ffffff'}
+                                stroke={themeConfig.colors.accentText || themeConfig.colors.text || '#ffffff'}
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"

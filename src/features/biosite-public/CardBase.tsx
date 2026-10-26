@@ -39,7 +39,7 @@ export default function Cardbase({
   };
 
   const isDarkTheme = () => {
-    const backgroundColor = themeConfig.colors.background;
+    const backgroundColor = themeConfig.colors.accent;
 
     if (backgroundColor.includes('gradient')) {
 
