@@ -40,9 +40,13 @@ const HeaderSketch = ({ layout, avatar, background }: { layout: HeaderLayout; av
   switch (layout) {
     case "twin":
       return (
-        <div className="flex shrink-0 justify-center gap-[6%] pt-[18%]">
-          <Pic src={avatar} className="aspect-square w-[36%] rounded" />
-          <Pic src={background} className="aspect-square w-[36%] rounded" />
+        <div className="relative h-[36%] shrink-0">
+          <span className="absolute left-1/2 top-[22%] w-[38%] -translate-x-[85%] -rotate-[8deg] bg-white p-[2px] shadow ring-1 ring-black/10">
+            <Pic src={avatar} className="aspect-square w-full" />
+          </span>
+          <span className="absolute left-1/2 top-[30%] w-[38%] -translate-x-[12%] rotate-[14deg] bg-white p-[2px] shadow ring-1 ring-black/10">
+            <Pic src={background} className="aspect-square w-full" />
+          </span>
         </div>
       );
     case "portrait":

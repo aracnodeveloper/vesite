@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties, type MouseEvent, type ReactNod
 import type { BiositeFull, BiositeThemeConfig } from "../types/Biosite";
 import { DEFAULT_BACKGROUND } from "./LivePreviewComponents";
 
-/** Cabeceras de las plantillas Retrato, Polaroid y Ventanas. */
+/** Cabeceras de las plantillas Minimalista dos, Retrato, Polaroid y Ventanas. */
 export interface TemplateHeaderProps {
     biosite?: BiositeFull;
     themeConfig: BiositeThemeConfig;
@@ -40,6 +40,34 @@ const SafeImage = ({ src, fallback, alt, className, style }: {
 /** Color sólido para fundir la imagen con la página (un degradado no se puede anidar). */
 const fadeColor = (background?: string) =>
     !background || background.includes("gradient") ? "transparent" : background;
+
+/** Minimalista dos: foto de perfil e imagen de fondo como dos fotos impresas, giradas y solapadas. */
+export const TwinHeader = ({
+    validAvatarImage,
+    validBackgroundImage,
+    defaultAvatar,
+    handleImageClick,
+    isExposedRoute,
+    historyIndicator,
+}: TemplateHeaderProps) => (
+    <div
+        className={`relative mx-auto h-60 w-full max-w-sm ${isExposedRoute ? "cursor-pointer" : ""}`}
+        onClick={handleImageClick}
+    >
+        <div className="absolute left-1/2 top-10 w-36 -translate-x-[85%] -rotate-[8deg] bg-white p-1 shadow-xl ring-1 ring-black/10">
+            <SafeImage src={validAvatarImage} fallback={defaultAvatar} alt="Avatar" className="aspect-square w-full object-cover" />
+            {historyIndicator?.("frame")}
+        </div>
+        <div className="absolute left-1/2 top-14 w-36 -translate-x-[12%] rotate-[14deg] bg-white p-1 shadow-xl ring-1 ring-black/10">
+            <SafeImage
+                src={validBackgroundImage}
+                fallback={DEFAULT_BACKGROUND}
+                alt="Portada"
+                className="aspect-square w-full object-cover"
+            />
+        </div>
+    </div>
+);
 
 /** Retrato: la foto de perfil grande y circular; no usa la imagen de fondo. */
 export const PortraitHeader = ({
