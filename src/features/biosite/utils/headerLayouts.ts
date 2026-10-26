@@ -9,13 +9,20 @@ export const HEADER_CATEGORIES: { id: HeaderCategory; label: string }[] = [
     { id: "creative", label: "Creativo" },
 ];
 
-/** Pestaña de cada layout y qué imágenes muestra; el resto se ignora aunque esté subida. */
-export const HEADER_LAYOUTS: Record<HeaderLayout, { category: HeaderCategory; background: boolean; avatar: boolean }> = {
-    classic: { category: "minimal", background: true, avatar: true },
-    twin: { category: "minimal", background: true, avatar: true },
-    portrait: { category: "minimal", background: false, avatar: true },
-    polaroid: { category: "creative", background: true, avatar: false },
-    windows: { category: "creative", background: false, avatar: true },
+/**
+ * Pestaña de cada layout y qué imágenes muestra; el resto se ignora aunque esté
+ * subida. `backgroundAsAvatar`: sin foto de perfil, pone la imagen de fondo en
+ * su lugar (en vez de la silueta gris), porque la foto es el centro del diseño.
+ */
+export const HEADER_LAYOUTS: Record<
+    HeaderLayout,
+    { category: HeaderCategory; background: boolean; avatar: boolean; backgroundAsAvatar: boolean }
+> = {
+    classic: { category: "minimal", background: true, avatar: true, backgroundAsAvatar: false },
+    twin: { category: "minimal", background: true, avatar: true, backgroundAsAvatar: true },
+    portrait: { category: "minimal", background: false, avatar: true, backgroundAsAvatar: true },
+    polaroid: { category: "creative", background: true, avatar: false, backgroundAsAvatar: false },
+    windows: { category: "creative", background: false, avatar: true, backgroundAsAvatar: true },
 };
 
 const isHeaderLayout = (value: unknown): value is HeaderLayout =>

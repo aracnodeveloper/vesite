@@ -35,16 +35,30 @@ const WINDOW_POSITIONS = [
   "top-[18%] z-10 w-[48%] -translate-x-1/2",
 ];
 
-/** Cabecera de cada layout en pequeño; las medidas en % escalan con la tarjeta. */
+const PRINT_SKETCH = "absolute left-1/2 w-[38%] bg-white p-[2px] shadow ring-1 ring-black/10";
+
+/**
+ * Cabecera de cada layout en pequeño, igual que se verá: sin foto de perfil, la
+ * clásica la oculta y las demás usan la imagen de fondo. Las medidas en % escalan
+ * con la tarjeta.
+ */
 const HeaderSketch = ({ layout, avatar, background }: { layout: HeaderLayout; avatar?: string; background?: string }) => {
+  const profile = avatar ?? background;
+
   switch (layout) {
     case "twin":
       return (
         <div className="relative h-[36%] shrink-0">
-          <span className="absolute left-1/2 top-[22%] w-[38%] -translate-x-[85%] -rotate-[8deg] bg-white p-[2px] shadow ring-1 ring-black/10">
-            <Pic src={avatar} className="aspect-square w-full" />
-          </span>
-          <span className="absolute left-1/2 top-[30%] w-[38%] -translate-x-[12%] rotate-[14deg] bg-white p-[2px] shadow ring-1 ring-black/10">
+          {avatar && (
+            <span className={`${PRINT_SKETCH} top-[22%] -translate-x-[85%] -rotate-[8deg]`}>
+              <Pic src={avatar} className="aspect-square w-full" />
+            </span>
+          )}
+          <span
+            className={`${PRINT_SKETCH} ${
+              avatar ? "top-[30%] -translate-x-[12%] rotate-[14deg]" : "top-[22%] -translate-x-1/2 -rotate-[6deg]"
+            }`}
+          >
             <Pic src={background} className="aspect-square w-full" />
           </span>
         </div>
@@ -52,7 +66,7 @@ const HeaderSketch = ({ layout, avatar, background }: { layout: HeaderLayout; av
     case "portrait":
       return (
         <div className="flex shrink-0 justify-center pt-[14%]">
-          <Pic src={avatar} className="aspect-square w-[62%] rounded-full" />
+          <Pic src={profile} className="aspect-square w-[62%] rounded-full" />
         </div>
       );
     case "polaroid":
@@ -76,7 +90,7 @@ const HeaderSketch = ({ layout, avatar, background }: { layout: HeaderLayout; av
         <div className="relative h-[42%] shrink-0">
           {WINDOW_POSITIONS.map((position) => (
             <span key={position} className={`absolute left-1/2 rounded-sm bg-[#1f1f1f] pt-[4px] shadow ${position}`}>
-              <Pic src={avatar} className="aspect-[4/5] w-full rounded-b-sm" />
+              <Pic src={profile} className="aspect-[4/5] w-full rounded-b-sm" />
             </span>
           ))}
         </div>
@@ -89,10 +103,12 @@ const HeaderSketch = ({ layout, avatar, background }: { layout: HeaderLayout; av
             className="h-[30%] w-full shrink-0"
             style={{ clipPath: "polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%)" }}
           />
-          <Pic
-            src={avatar}
-            className="relative mx-auto -mt-[16%] aspect-square w-[32%] shrink-0 rounded-full border-2 border-white"
-          />
+          {avatar && (
+            <Pic
+              src={avatar}
+              className="relative mx-auto -mt-[16%] aspect-square w-[32%] shrink-0 rounded-full border-2 border-white"
+            />
+          )}
         </>
       );
   }
@@ -157,6 +173,7 @@ const TemplatePicker = ({ biosite, onSelect }: TemplatePickerProps) => {
   const activeTab = tab ?? (current ? HEADER_LAYOUTS[layoutOf(current)].category : categories[0]?.id);
   const visible = selectable.filter((template) => HEADER_LAYOUTS[layoutOf(template)].category === activeTab);
   const theme = getThemeConfig(biosite);
+  const hasAvatar = isValidImageUrl(biosite.avatarImage);
 
   const select = async (plantillaId: string) => {
     if (plantillaId === current?.id || savingId) return;
@@ -203,6 +220,7 @@ const TemplatePicker = ({ biosite, onSelect }: TemplatePickerProps) => {
           : visible.map((template) => {
               const layout = layoutOf(template);
               const isSelected = template.id === current?.id;
+              const usesBackgroundAsAvatar = !hasAvatar && HEADER_LAYOUTS[layout].backgroundAsAvatar;
 
               return (
                 <button
@@ -235,6 +253,11 @@ const TemplatePicker = ({ biosite, onSelect }: TemplatePickerProps) => {
                     {template.name}
                   </span>
                   <span className="-mt-1 text-[9px] leading-tight text-gray-400">{usesLabel(layout)}</span>
+                  {usesBackgroundAsAvatar && (
+                    <span className="text-[9px] leading-tight text-amber-600">
+                      Sin foto de perfil: usa la imagen de fondo
+                    </span>
+                  )}
                 </button>
               );
             })}

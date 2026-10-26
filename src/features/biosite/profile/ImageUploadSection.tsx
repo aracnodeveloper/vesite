@@ -268,9 +268,11 @@ const ImageUploadSection = ({
 
     const canEditCover = isAdminRole(role);
 
-    // Avisa si el diseño elegido no muestra alguna de las imágenes
+    // Avisa si el diseño elegido no muestra alguna de las imágenes, o si a falta
+    // de foto de perfil pone la de fondo en su lugar
     const shownImages = headerLayout ? HEADER_LAYOUTS[headerLayout] : null;
-    const hiddenImage = !shownImages
+    const usesBackgroundAsAvatar = !!shownImages?.backgroundAsAvatar && !isValidImageUrl(biosite.avatarImage);
+    const hiddenImage = !shownImages || usesBackgroundAsAvatar
         ? null
         : !shownImages.avatar
             ? "la foto de perfil"
@@ -420,6 +422,11 @@ const ImageUploadSection = ({
                 {hiddenImage && (
                     <p className="mt-2 text-xs text-gray-500">
                         El diseño elegido no muestra {hiddenImage}. Puedes cambiarlo en Diseño.
+                    </p>
+                )}
+                {usesBackgroundAsAvatar && (
+                    <p className="mt-2 text-xs text-gray-500">
+                        Sin foto de perfil, el diseño elegido muestra la imagen de fondo en su lugar.
                     </p>
                 )}
             </div>
