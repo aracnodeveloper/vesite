@@ -4,6 +4,7 @@ import { useCustomPalette } from "../hooks/useCustomPalette";
 import { COLOR_CATEGORIES, FONT_OPTIONS, PALETTE_ICON } from "../constants/styleOptions";
 import ColorGrid from "../components/styles/ColorGrid";
 import CustomPaletteEditor from "../components/styles/CustomPaletteEditor";
+import TemplatePicker from "../components/styles/TemplatePicker";
 
 type ThemeTab = "light" | "dark" | "custom";
 
@@ -11,7 +12,7 @@ const tabClass = (active: boolean, activeClass: string, extra: string) =>
   `${extra} ${active ? activeClass : "bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-50"}`;
 
 const StylesPage = () => {
-  const { biosite, themeColor, setThemeColor, fontFamily, setFontFamily, loading } = usePreview();
+  const { biosite, themeColor, setThemeColor, fontFamily, setFontFamily, setPlantilla, loading } = usePreview();
 
   const [activeTab, setActiveTab] = useState<ThemeTab>("light");
   const [showWarning, setShowWarning] = useState(true);
@@ -78,6 +79,8 @@ const StylesPage = () => {
           </p>
         </div>
       )}
+
+      {biosite && <TemplatePicker biosite={biosite} onSelect={setPlantilla} />}
 
       {/* Selector de fuente */}
       <div className="rounded-lg border border-gray-200 p-3 sm:p-4">

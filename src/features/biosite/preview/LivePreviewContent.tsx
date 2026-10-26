@@ -4,18 +4,16 @@ import {
   LoadingComponent,
   ErrorComponent,
   NoBiositeComponent,
-  BackgroundSection,
-  AvatarSection,
   UserInfoSection,
   SocialLinksSection,
   RegularLinksSection,
-  TwoSquareImagesSection,
 } from "./LivePreviewComponents";
+import BiositeHeader from "./BiositeHeader";
 import { ImageGallerySection } from "../../biosite-public/ImageGallerySection.tsx";
 import HistoriesPreview from "./HistoriesPreview";
 import VCardButton from "../../vcard/components/VCard.tsx";
 import ConditionalNavButton from "../../../shared/ui/ConditionalNavButton.tsx";
-import { useTemplates } from "../hooks/useTemplates.ts";
+import { useHeaderLayout } from "../hooks/useHeaderLayout.ts";
 import Cookie from "js-cookie";
 import AppDownloadButtons from "../../links/app/AppDownloadButtons.tsx";
 import WhatsAppButton from "../../links/whatsapp/whatsAppButton.tsx";
@@ -82,8 +80,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     handleWhatsAppClick,
   } = useLivePreviewLogic();
 
-  const { templates, getTemplateById, getDefaultTemplate, isTemplatesLoaded } =
-    useTemplates();
+  const headerLayout = useHeaderLayout(biosite?.plantillaId);
 
   // Load text blocks for gallery
   useEffect(() => {
@@ -129,35 +126,6 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
       localStorage.removeItem(storageKey);
     }
   }, [loading, userLoading, biosite, navigate, canStartChecking]);
-
-  const currentTemplate = useMemo(() => {
-    if (!isTemplatesLoaded || !templates.length) {
-      return undefined;
-    }
-
-    if (
-      biosite?.themeId &&
-      biosite.themeId !== "null" &&
-      biosite.themeId !== null &&
-      biosite.themeId !== undefined &&
-      biosite.themeId.trim() !== ""
-    ) {
-      const template = getTemplateById(biosite.themeId);
-
-      if (template) {
-        return template;
-      }
-    }
-
-    const defaultTemplate = getDefaultTemplate();
-    return defaultTemplate;
-  }, [
-    biosite?.themeId,
-    templates,
-    isTemplatesLoaded,
-    getTemplateById,
-    getDefaultTemplate,
-  ]);
 
   const getSectionOrderIndex = (sectionTitle: string): number => {
     const section = contextSections.find((s) => s.titulo === sectionTitle);
@@ -396,7 +364,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     navigate,
   ]);
 
-  if (loading || userLoading || !isTemplatesLoaded) {
+  if (loading || userLoading) {
     return <LoadingComponent themeConfig={themeConfig} />;
   }
 
@@ -410,16 +378,9 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     return <NoBiositeComponent themeConfig={themeConfig} />;
   }
 
-  if (!currentTemplate) {
-    console.log("No template available, showing loading...");
+  if (!headerLayout) {
     return <LoadingComponent themeConfig={themeConfig} />;
   }
-
-  const isSecondTemplate =
-    currentTemplate.id === "bc1452d1-a688-4567-a424-2a0f09103499" ||
-    currentTemplate.index === 1 ||
-    currentTemplate.name?.toLowerCase().includes("square") ||
-    currentTemplate.name?.toLowerCase().includes("dos");
 
   return (
     <div
@@ -436,60 +397,28 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
       }}
     >
       <div className="w-full max-w-sm min-h-screen mx-auto">
-        {isSecondTemplate ? (
-          <>
-            <div
-              className="w-full h-24"
-              style={{ backgroundColor: themeConfig.colors.background }}
-            ></div>
-
-            <TwoSquareImagesSection
-              validBackgroundImage={validBackgroundImage}
-              validAvatarImage={validAvatarImage}
-              imageLoadStates={imageLoadStates}
-              handleImageLoadStart={handleImageLoadStart}
-              handleImageLoad={handleImageLoad}
-              handleImageError={handleImageError}
-              biosite={biosite}
-              themeConfig={themeConfig}
-              defaultAvatar={defaultAvatar}
-              handleImageClick={handleImageClick}
+        <BiositeHeader
+          layout={headerLayout}
+          validBackgroundImage={validBackgroundImage}
+          validAvatarImage={validAvatarImage}
+          imageLoadStates={imageLoadStates}
+          handleImageLoadStart={handleImageLoadStart}
+          handleImageLoad={handleImageLoad}
+          handleImageError={handleImageError}
+          biosite={biosite}
+          themeConfig={themeConfig}
+          defaultAvatar={defaultAvatar}
+          handleImageClick={handleImageClick}
+          historyIndicator={(shape) => (
+            <HistoriesPreview
+              biositeId={biosite?.id}
+              accentColor={themeConfig.colors.accent}
+              textColor={themeConfig.colors.text}
+              display="avatar-trigger"
+              shape={shape}
             />
-          </>
-        ) : (
-          <>
-            <BackgroundSection
-              validBackgroundImage={validBackgroundImage}
-              imageLoadStates={imageLoadStates}
-              handleImageLoadStart={handleImageLoadStart}
-              handleImageLoad={handleImageLoad}
-              handleImageError={handleImageError}
-              biosite={biosite}
-              themeConfig={themeConfig}
-              handleImageClick={handleImageClick}
-            />
-
-            <AvatarSection
-              validAvatarImage={validAvatarImage}
-              imageLoadStates={imageLoadStates}
-              handleImageLoadStart={handleImageLoadStart}
-              handleImageLoad={handleImageLoad}
-              handleImageError={handleImageError}
-              biosite={biosite}
-              themeConfig={themeConfig}
-              defaultAvatar={defaultAvatar}
-              handleImageClick={handleImageClick}
-              historyIndicator={
-                <HistoriesPreview
-                  biositeId={biosite?.id}
-                  accentColor={themeConfig.colors.accent}
-                  textColor={themeConfig.colors.text}
-                  display="avatar-trigger"
-                />
-              }
-            />
-          </>
-        )}
+          )}
+        />
 
         {/* Main content */}
         <div className="w-full max-w-sm mx-auto">

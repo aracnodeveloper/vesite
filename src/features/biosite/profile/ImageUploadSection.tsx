@@ -4,6 +4,8 @@ import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../types/Bios
 import { useState, useEffect, useRef } from "react";
 import ImageEditorModal from "../../../shared/ui/modals/ImageEditorModal.tsx";
 import { isAdminRole } from "../../../core/auth/session";
+import { useHeaderLayout } from "../hooks/useHeaderLayout";
+import { HEADER_LAYOUT_IMAGES } from "../utils/headerLayouts";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -30,6 +32,7 @@ const ImageUploadSection = ({
     const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const headerLayout = useHeaderLayout(biosite.plantillaId);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -265,6 +268,16 @@ const ImageUploadSection = ({
 
     const canEditCover = isAdminRole(role);
 
+    // Avisa si la plantilla elegida no muestra alguna de las imágenes
+    const shownImages = headerLayout ? HEADER_LAYOUT_IMAGES[headerLayout] : null;
+    const hiddenImage = !shownImages
+        ? null
+        : !shownImages.avatar
+            ? "la foto de perfil"
+            : !shownImages.background && canEditCover
+                ? "la imagen de fondo"
+                : null;
+
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
@@ -404,6 +417,11 @@ const ImageUploadSection = ({
                         </div>
                     )}
                 </div>
+                {hiddenImage && (
+                    <p className="mt-2 text-xs text-gray-500">
+                        Tu plantilla no muestra {hiddenImage}. Puedes cambiarla en Estilos.
+                    </p>
+                )}
             </div>
 
             {/* Image Editor Modal */}

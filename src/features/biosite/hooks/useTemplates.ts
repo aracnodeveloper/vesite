@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { message } from 'antd';
 import type { Platilla } from '../types/Templates.ts';
 import { templateService } from '../services/templateService.ts';
@@ -17,11 +17,11 @@ const showTemplatesError = (errorMessage: string) => {
     }
 };
 
+/** Plantillas activas para el editor; avisa con un mensaje si no se pueden cargar. */
 export const useTemplates = () => {
-    const [templates, setTemplates] = useState<Platilla[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [templates, setTemplates] = useState<Platilla[]>(() => templateService.getCached() ?? []);
+    const [loading, setLoading] = useState(() => !templateService.getCached());
     const [error, setError] = useState<string | null>(null);
-    const [isTemplatesLoaded, setIsTemplatesLoaded] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -40,9 +40,7 @@ export const useTemplates = () => {
                 showTemplatesError(errorMessage);
             })
             .finally(() => {
-                if (!isMounted) return;
-                setIsTemplatesLoaded(true);
-                setLoading(false);
+                if (isMounted) setLoading(false);
             });
 
         return () => {
@@ -50,24 +48,5 @@ export const useTemplates = () => {
         };
     }, []);
 
-    const getTemplateById = useCallback((id: string | null | undefined): Platilla | undefined => {
-        if (!id || id === 'null' || !templates.length) {
-            return undefined;
-        }
-        return templates.find(template => template.id === id);
-    }, [templates]);
-
-    const getDefaultTemplate = useCallback((): Platilla | undefined => {
-        if (!templates.length) return undefined;
-        return templates.find(template => template.index === 0) ?? templates[0];
-    }, [templates]);
-
-    return {
-        templates,
-        loading,
-        error,
-        getTemplateById,
-        getDefaultTemplate,
-        isTemplatesLoaded,
-    };
+    return { templates, loading, error };
 };

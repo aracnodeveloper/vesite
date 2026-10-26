@@ -148,6 +148,28 @@ export const useBiositeOperations = ({
         }
     }, [biositeData, updateBiosite, setFontFamilyState, setBiosite]);
 
+    /** Cambia la plantilla de cabecera; null vuelve a la de por defecto. */
+    const setPlantilla = useCallback(async (plantillaId: string | null) => {
+        if (!biositeData?.id) {
+            throw new Error("No biosite available");
+        }
+
+        const updated = await updateBiosite({
+            ownerId: biositeData.ownerId,
+            title: biositeData.title,
+            slug: biositeData.slug,
+            themeId: biositeData.themeId,
+            plantillaId,
+            colors: typeof biositeData.colors === 'string' ? biositeData.colors : JSON.stringify(biositeData.colors),
+            fonts: biositeData.fonts || fontFamily,
+            backgroundImage: biositeData.backgroundImage || '',
+            isActive: biositeData.isActive
+        });
+        if (!updated) {
+            throw new Error("No se pudo guardar la plantilla");
+        }
+    }, [biositeData, fontFamily, updateBiosite]);
+
     const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
         try {
             const result = await createBiosite(data);
@@ -221,6 +243,7 @@ export const useBiositeOperations = ({
         refreshBiosite,
         setThemeColor,
         setFontFamily,
+        setPlantilla,
         createBiosite: createNewBiosite,
         getUserBiosites,
         switchToAnotherBiosite,

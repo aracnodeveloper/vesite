@@ -35,7 +35,7 @@ export const ErrorComponent = ({ error, themeConfig }: { error: string, themeCon
     </div>
 );
 
-const DEFAULT_BACKGROUND = "https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg";
+export const DEFAULT_BACKGROUND = "https://visitaecuador.com/bio-api/img/image-1753208386348-229952436.jpeg";
 
 export const NoBiositeComponent = ({ themeConfig }: { themeConfig: BiositeThemeConfig }) => (
     <div className="w-full h-full flex items-center justify-center"

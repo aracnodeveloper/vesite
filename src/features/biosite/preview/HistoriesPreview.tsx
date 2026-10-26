@@ -9,6 +9,8 @@ interface HistoriesPreviewProps {
   accentColor?: string;
   textColor?: string;
   display?: "featured" | "avatar-trigger";
+  /** Forma de la imagen que rodea el aro de "avatar-trigger". */
+  shape?: "circle" | "frame";
 }
 
 const isAvailable = (history: HistoryItem) => {
@@ -23,6 +25,7 @@ export default function HistoriesPreview({
   accentColor = "#84cc16",
   textColor = "#111827",
   display = "featured",
+  shape = "circle",
 }: HistoriesPreviewProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const [histories, setHistories] = useState<HistoryItem[]>([]);
@@ -77,25 +80,39 @@ export default function HistoriesPreview({
   if (histories.length === 0) return <div ref={anchorRef} />;
 
   if (display === "avatar-trigger") {
+    const isFrame = shape === "frame";
+    const radius = isFrame ? "rounded-[10px]" : "rounded-full";
+    // Un círculo se recorta con un degradado radial; un marco, restando el contenido
+    const ringMask = isFrame
+      ? {
+          padding: "5px",
+          WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+          WebkitMaskComposite: "xor",
+          mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+        }
+      : {
+          WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
+          mask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
+        };
+
     return (
       <>
-        <div ref={anchorRef} className="pointer-events-none absolute -inset-[7px] z-20 rounded-full">
+        <div ref={anchorRef} className={`pointer-events-none absolute -inset-[7px] z-20 ${radius}`}>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setActiveIndex(0); }}
-            className="pointer-events-auto absolute inset-0 rounded-full transition-transform hover:scale-[1.03] active:scale-95"
+            className={`pointer-events-auto absolute inset-0 ${radius} transition-transform hover:scale-[1.03] active:scale-95`}
             aria-label="Ver historias"
           >
             <span
-              className="absolute inset-0 rounded-full"
+              className={`absolute inset-0 ${radius}`}
               style={{
                 background: `conic-gradient(from 210deg, ${accentColor}, #f97316, #ec4899, ${accentColor})`,
-                WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
-                mask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))",
+                ...ringMask,
                 boxShadow: `0 0 0 2px rgba(255,255,255,0.95), 0 6px 16px ${accentColor}35`,
               }}
             />
-            <span className="absolute inset-[6px] rounded-full border-2 border-white/95" />
+            <span className={`absolute inset-[6px] border-2 border-white/95 ${isFrame ? "rounded-[5px]" : "rounded-full"}`} />
             <span className="absolute -right-1 bottom-1 flex h-6 w-6 items-center justify-center rounded-full border-[3px] border-white bg-gray-950 text-white shadow-lg">
               <CirclePlay size={12} fill="currentColor" />
             </span>
