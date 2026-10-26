@@ -1,19 +1,25 @@
-import type { HeaderLayout, Platilla } from "../types/Templates";
+import type { HeaderCategory, HeaderLayout, Platilla } from "../types/Templates";
 
 /** Layout de los biosites sin plantilla (o con una que este front no conoce). */
 export const DEFAULT_HEADER_LAYOUT: HeaderLayout = "classic";
 
-/** Qué imágenes muestra cada layout; el resto se ignora aunque esté subida. */
-export const HEADER_LAYOUT_IMAGES: Record<HeaderLayout, { background: boolean; avatar: boolean }> = {
-    classic: { background: true, avatar: true },
-    twin: { background: true, avatar: true },
-    portrait: { background: false, avatar: true },
-    polaroid: { background: true, avatar: false },
-    windows: { background: false, avatar: true },
+/** Pestañas del selector de diseño, en orden. */
+export const HEADER_CATEGORIES: { id: HeaderCategory; label: string }[] = [
+    { id: "minimal", label: "Minimalista" },
+    { id: "creative", label: "Creativo" },
+];
+
+/** Pestaña de cada layout y qué imágenes muestra; el resto se ignora aunque esté subida. */
+export const HEADER_LAYOUTS: Record<HeaderLayout, { category: HeaderCategory; background: boolean; avatar: boolean }> = {
+    classic: { category: "minimal", background: true, avatar: true },
+    twin: { category: "minimal", background: true, avatar: true },
+    portrait: { category: "minimal", background: false, avatar: true },
+    polaroid: { category: "creative", background: true, avatar: false },
+    windows: { category: "creative", background: false, avatar: true },
 };
 
 const isHeaderLayout = (value: unknown): value is HeaderLayout =>
-    typeof value === "string" && value in HEADER_LAYOUT_IMAGES;
+    typeof value === "string" && value in HEADER_LAYOUTS;
 
 export const getTemplateLayout = (template?: Platilla): HeaderLayout | undefined => {
     const layout = template?.config?.layout;

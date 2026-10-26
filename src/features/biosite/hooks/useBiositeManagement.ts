@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors, CreateBiositeDto } from "../types/Biosite";
 import Cookies from "js-cookie";
+import type { BiositePatch } from "../services/biositeService";
 
 interface UseBiositeOperationsProps {
     biositeData: BiositeFull | null;
@@ -9,6 +10,7 @@ interface UseBiositeOperationsProps {
     setThemeColorState: (color: string) => void;
     setFontFamilyState: (font: string) => void;
     updateBiositeHook: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
+    patchBiositeHook: (patch: BiositePatch) => Promise<BiositeFull | null>;
     setBiosite: (biosite: BiositeFull | null) => void;
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
     fetchUserBiosites: () => Promise<BiositeFull[]>;
@@ -24,6 +26,7 @@ export const useBiositeOperations = ({
                                          setThemeColorState,
                                          setFontFamilyState,
                                          updateBiositeHook,
+                                         patchBiositeHook,
                                          setBiosite,
                                          createBiosite,
                                          fetchUserBiosites,
@@ -148,27 +151,16 @@ export const useBiositeOperations = ({
         }
     }, [biositeData, updateBiosite, setFontFamilyState, setBiosite]);
 
-    /** Cambia la plantilla de cabecera; null vuelve a la de por defecto. */
+    /**
+     * Cambia la plantilla de cabecera (null vuelve a la de por defecto). Solo
+     * envía ese campo, así funciona aunque el perfil aún no tenga URL.
+     */
     const setPlantilla = useCallback(async (plantillaId: string | null) => {
-        if (!biositeData?.id) {
-            throw new Error("No biosite available");
-        }
-
-        const updated = await updateBiosite({
-            ownerId: biositeData.ownerId,
-            title: biositeData.title,
-            slug: biositeData.slug,
-            themeId: biositeData.themeId,
-            plantillaId,
-            colors: typeof biositeData.colors === 'string' ? biositeData.colors : JSON.stringify(biositeData.colors),
-            fonts: biositeData.fonts || fontFamily,
-            backgroundImage: biositeData.backgroundImage || '',
-            isActive: biositeData.isActive
-        });
+        const updated = await patchBiositeHook({ plantillaId });
         if (!updated) {
             throw new Error("No se pudo guardar la plantilla");
         }
-    }, [biositeData, fontFamily, updateBiosite]);
+    }, [patchBiositeHook]);
 
     const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
         try {

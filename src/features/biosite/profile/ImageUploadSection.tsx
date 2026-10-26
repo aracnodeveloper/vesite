@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import ImageEditorModal from "../../../shared/ui/modals/ImageEditorModal.tsx";
 import { isAdminRole } from "../../../core/auth/session";
 import { useHeaderLayout } from "../hooks/useHeaderLayout";
-import { HEADER_LAYOUT_IMAGES } from "../utils/headerLayouts";
+import { HEADER_LAYOUTS } from "../utils/headerLayouts";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -268,8 +268,8 @@ const ImageUploadSection = ({
 
     const canEditCover = isAdminRole(role);
 
-    // Avisa si la plantilla elegida no muestra alguna de las imágenes
-    const shownImages = headerLayout ? HEADER_LAYOUT_IMAGES[headerLayout] : null;
+    // Avisa si el diseño elegido no muestra alguna de las imágenes
+    const shownImages = headerLayout ? HEADER_LAYOUTS[headerLayout] : null;
     const hiddenImage = !shownImages
         ? null
         : !shownImages.avatar
@@ -419,7 +419,7 @@ const ImageUploadSection = ({
                 </div>
                 {hiddenImage && (
                     <p className="mt-2 text-xs text-gray-500">
-                        Tu plantilla no muestra {hiddenImage}. Puedes cambiarla en Estilos.
+                        El diseño elegido no muestra {hiddenImage}. Puedes cambiarlo en Diseño.
                     </p>
                 )}
             </div>
