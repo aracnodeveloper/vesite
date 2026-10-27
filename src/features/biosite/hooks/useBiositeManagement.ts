@@ -162,6 +162,14 @@ export const useBiositeOperations = ({
         }
     }, [patchBiositeHook]);
 
+    /** Cambia el diseño de los links (null vuelve al de por defecto); solo envía ese campo. */
+    const setLinksPlantilla = useCallback(async (linksPlantillaId: string | null) => {
+        const updated = await patchBiositeHook({ linksPlantillaId });
+        if (!updated) {
+            throw new Error("No se pudo guardar el diseño de los links");
+        }
+    }, [patchBiositeHook]);
+
     const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
         try {
             const result = await createBiosite(data);
@@ -236,6 +244,7 @@ export const useBiositeOperations = ({
         setThemeColor,
         setFontFamily,
         setPlantilla,
+        setLinksPlantilla,
         createBiosite: createNewBiosite,
         getUserBiosites,
         switchToAnotherBiosite,

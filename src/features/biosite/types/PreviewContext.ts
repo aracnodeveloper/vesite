@@ -61,6 +61,7 @@ export interface PreviewContextType {
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
     setPlantilla: (plantillaId: string | null) => Promise<void>;
+    setLinksPlantilla: (linksPlantillaId: string | null) => Promise<void>;
 
     // Biosite management methods
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;

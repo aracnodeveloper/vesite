@@ -1,9 +1,8 @@
-import { useState, type CSSProperties } from "react";
-import { message } from "antd";
-import { Check } from "lucide-react";
+import type { CSSProperties } from "react";
 import type { BiositeFull } from "../types/Biosite";
-import type { HeaderCategory, HeaderLayout, Platilla } from "../types/Templates";
+import type { HeaderLayout, Platilla } from "../types/Templates";
 import { useTemplates } from "../hooks/useTemplates";
+import DesignPicker from "../components/DesignPicker";
 import {
   DEFAULT_HEADER_LAYOUT,
   HEADER_CATEGORIES,
@@ -157,8 +156,6 @@ const layoutOf = (template: Platilla): HeaderLayout => getTemplateLayout(templat
  */
 const TemplatePicker = ({ biosite, onSelect }: TemplatePickerProps) => {
   const { templates, loading } = useTemplates();
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [tab, setTab] = useState<HeaderCategory | null>(null);
 
   const selectable = getSelectableTemplates(templates);
   if (!loading && selectable.length === 0) return null;
@@ -167,101 +164,33 @@ const TemplatePicker = ({ biosite, onSelect }: TemplatePickerProps) => {
   const current =
     selectable.find((template) => template.id === biosite.plantillaId) ??
     selectable.find((template) => layoutOf(template) === DEFAULT_HEADER_LAYOUT);
-  const categories = HEADER_CATEGORIES.filter((category) =>
-    selectable.some((template) => HEADER_LAYOUTS[layoutOf(template)].category === category.id)
-  );
-  const activeTab = tab ?? (current ? HEADER_LAYOUTS[layoutOf(current)].category : categories[0]?.id);
-  const visible = selectable.filter((template) => HEADER_LAYOUTS[layoutOf(template)].category === activeTab);
   const theme = getThemeConfig(biosite);
   const hasAvatar = isValidImageUrl(biosite.avatarImage);
-
-  const select = async (plantillaId: string) => {
-    if (plantillaId === current?.id || savingId) return;
-    setSavingId(plantillaId);
-    try {
-      await onSelect(plantillaId);
-    } catch (error) {
-      console.error("Error updating template:", error);
-      message.error("No se pudo cambiar el diseño. Inténtalo de nuevo.");
-    } finally {
-      setSavingId(null);
-    }
-  };
 
   return (
     <div className="mb-6">
       <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wide text-start">DISEÑO</h3>
-
-      {categories.length > 1 && (
-        <div className="mb-3 grid gap-2" style={{ gridTemplateColumns: `repeat(${categories.length}, minmax(0, 1fr))` }}>
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => setTab(category.id)}
-              aria-pressed={category.id === activeTab}
-              className={`h-10 rounded-lg border text-sm font-medium cursor-pointer transition-colors ${
-                category.id === activeTab
-                  ? "border-gray-900 bg-gray-900 text-white"
-                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-4 gap-2">
-        {loading
-          ? [0, 1, 2, 3].map((placeholder) => (
-              <div key={placeholder} className="aspect-[9/16] animate-pulse rounded-xl bg-gray-100" />
-            ))
-          : visible.map((template) => {
-              const layout = layoutOf(template);
-              const isSelected = template.id === current?.id;
-              const usesBackgroundAsAvatar = !hasAvatar && HEADER_LAYOUTS[layout].backgroundAsAvatar;
-
-              return (
-                <button
-                  key={template.id}
-                  type="button"
-                  title={template.description}
-                  onClick={() => select(template.id)}
-                  disabled={!!savingId}
-                  aria-pressed={isSelected}
-                  className="group flex min-w-0 flex-col gap-1 text-left cursor-pointer disabled:cursor-wait"
-                >
-                  <div
-                    className={`relative w-full overflow-hidden rounded-xl transition-all ${
-                      isSelected ? "ring-2 ring-blue-500 ring-offset-2" : "ring-1 ring-gray-200 group-hover:ring-gray-400"
-                    }`}
-                  >
-                    <LayoutThumbnail layout={layout} biosite={biosite} theme={theme} />
-                    {isSelected && (
-                      <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-white shadow">
-                        <Check size={10} strokeWidth={3} />
-                      </span>
-                    )}
-                    {savingId === template.id && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/60">
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-blue-500" />
-                      </div>
-                    )}
-                  </div>
-                  <span className={`truncate text-[10px] font-medium ${isSelected ? "text-blue-700" : "text-gray-700"}`}>
-                    {template.name}
-                  </span>
-                  <span className="-mt-1 text-[9px] leading-tight text-gray-400">{usesLabel(layout)}</span>
-                  {usesBackgroundAsAvatar && (
-                    <span className="text-[9px] leading-tight text-amber-600">
-                      Sin foto de perfil: usa la imagen de fondo
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-      </div>
+      <DesignPicker
+        templates={selectable}
+        loading={loading}
+        categories={HEADER_CATEGORIES}
+        categoryOf={(template) => HEADER_LAYOUTS[layoutOf(template)].category}
+        currentId={current?.id}
+        thumbnailAspect="aspect-[9/16]"
+        renderThumbnail={(template) => <LayoutThumbnail layout={layoutOf(template)} biosite={biosite} theme={theme} />}
+        renderCaption={(template) => {
+          const layout = layoutOf(template);
+          return (
+            <>
+              <span className="-mt-1 text-[9px] leading-tight text-gray-400">{usesLabel(layout)}</span>
+              {!hasAvatar && HEADER_LAYOUTS[layout].backgroundAsAvatar && (
+                <span className="text-[9px] leading-tight text-amber-600">Sin foto de perfil: usa la imagen de fondo</span>
+              )}
+            </>
+          );
+        }}
+        onSelect={onSelect}
+      />
     </div>
   );
 };

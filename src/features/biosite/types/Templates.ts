@@ -5,6 +5,8 @@ export type HeaderLayout = "classic" | "twin" | "portrait" | "polaroid" | "windo
 export type HeaderCategory = "minimal" | "creative";
 
 export interface PlantillaConfig {
+    /** "links" en las plantillas de links; sin tipo, son de cabecera. */
+    type?: string;
     layout?: string;
 }
 

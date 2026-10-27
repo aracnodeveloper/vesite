@@ -29,6 +29,7 @@ const isHeaderLayout = (value: unknown): value is HeaderLayout =>
     typeof value === "string" && value in HEADER_LAYOUTS;
 
 export const getTemplateLayout = (template?: Platilla): HeaderLayout | undefined => {
+    if (template?.config?.type === "links") return undefined;
     const layout = template?.config?.layout;
     return isHeaderLayout(layout) ? layout : undefined;
 };
