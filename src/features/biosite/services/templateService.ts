@@ -24,6 +24,9 @@ const normalizeTemplates = (data: unknown): Platilla[] => {
 };
 
 export const templateService = {
+    /** Las plantillas ya cargadas, para pintar sin esperar a la petición. */
+    getCached: (): Platilla[] | null => templatesCache,
+
     /** Plantillas activas ordenadas por índice; se cachean durante la sesión. */
     getActive: async (): Promise<Platilla[]> => {
         if (templatesCache) return templatesCache;

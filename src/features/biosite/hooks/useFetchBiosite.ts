@@ -3,7 +3,7 @@ import { getErrorMessage } from "../../../core/api/errors";
 import type { PaginatedResponse } from "../../../core/api/types";
 import { userService } from "../../user/services/userService";
 import type { ChildUser } from "../../user/types/User";
-import { biositeService, type BiositeListParams } from "../services/biositeService";
+import { biositeService, type BiositeListParams, type BiositePatch } from "../services/biositeService";
 import type { BiositeFull, BiositeUpdateDto, CreateBiositeDto } from "../types/Biosite";
 
 export const useFetchBiosite = (userId?: string) => {
@@ -251,6 +251,25 @@ export const useFetchBiosite = (userId?: string) => {
     return newBiositeData;
   };
 
+  /** Guarda solo los campos dados; no exige título ni slug porque no reenvía el resto. */
+  const patchBiosite = async (patch: BiositePatch): Promise<BiositeFull | null> => {
+    if (!biositeData?.id) {
+      setError("No biosite ID available for update");
+      return null;
+    }
+
+    const updated = await run(
+      () => biositeService.update(biositeData.id, patch),
+      null,
+      "Error al actualizar el biosite"
+    );
+    if (!updated) return null;
+
+    const newBiositeData: BiositeFull = { ...biositeData, ...updated, links: biositeData.links || [] };
+    setBiositeData(newBiositeData);
+    return newBiositeData;
+  };
+
   const switchBiosite = useCallback(
     async (biositeId: string): Promise<BiositeFull | null> => {
       const biosite = await run(
@@ -286,6 +305,7 @@ export const useFetchBiosite = (userId?: string) => {
     fetchBiosite,
     createBiosite,
     updateBiosite,
+    patchBiosite,
     switchBiosite,
 
     fetchUserBiosites,

@@ -74,6 +74,10 @@ export interface BiositeFull {
   title: string;
   slug: string;
   themeId: string;
+  /** Plantilla de cabecera; null = la de por defecto. */
+  plantillaId?: string | null;
+  /** Plantilla de los links; null = la de por defecto. */
+  linksPlantillaId?: string | null;
   theme?: BiositeTheme;
   colors: string | BiositeColors;
   fonts?: string;
@@ -93,6 +97,8 @@ export interface BiositeUpdateDto {
   title: string;
   slug: string;
   themeId: string;
+  plantillaId?: string | null;
+  linksPlantillaId?: string | null;
   colors: string | BiositeColors;
   fonts: string;
   avatarImage?: string;

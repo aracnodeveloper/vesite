@@ -1,3 +1,14 @@
+/** Cómo se dibujan la imagen de fondo y la de perfil en la cabecera del vesite. */
+export type HeaderLayout = "classic" | "twin" | "portrait" | "polaroid" | "windows";
+
+/** Pestaña del selector de diseño en la que aparece cada layout. */
+export type HeaderCategory = "minimal" | "creative";
+
+export interface PlantillaConfig {
+    /** "links" en las plantillas de links; sin tipo, son de cabecera. */
+    type?: string;
+    layout?: string;
+}
 
 export interface Platilla {
     id: string;
@@ -5,6 +16,6 @@ export interface Platilla {
     description?: string;
     previewUrl?: string;
     index?: number;
-    config: any; // JSON configuration
+    config: PlantillaConfig;
     isActive?: boolean;
 }

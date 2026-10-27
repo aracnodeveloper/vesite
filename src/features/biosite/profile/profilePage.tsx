@@ -10,6 +10,7 @@ import type {
   BiositeUpdateDto,
 } from "../types/Biosite";
 import ImageUploadSection from "./ImageUploadSection";
+import TemplatePicker from "./TemplatePicker";
 import { biositeService } from "../services/biositeService";
 import BackButton from "../../../shared/ui/BackButton";
 import Loading from "../../../shared/ui/Loading.tsx";
@@ -19,7 +20,7 @@ const { TextArea } = Input;
 
 const ProfilePage = () => {
   const { role } = useAuthContext();
-  const { biosite, updatePreview, loading: previewLoading } = usePreview();
+  const { biosite, updatePreview, setPlantilla, loading: previewLoading } = usePreview();
   const userId = Cookies.get("userId");
   const {
     updateBiosite,
@@ -370,6 +371,8 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
+
+        <TemplatePicker biosite={biosite} onSelect={setPlantilla} />
 
         {/* About Section */}
         <div className="mb-6">

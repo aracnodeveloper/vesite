@@ -39,7 +39,8 @@ export default function Cardbase({
   };
 
   const isDarkTheme = () => {
-    const backgroundColor = themeConfig.colors.accent;
+    // Hay biosites cuyos colores no traen accent: se juzga por el fondo de la página
+    const backgroundColor = themeConfig.colors.accent || themeConfig.colors.background || '#ffffff';
 
     if (backgroundColor.includes('gradient')) {
 

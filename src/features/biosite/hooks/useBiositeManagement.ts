@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors, CreateBiositeDto } from "../types/Biosite";
 import Cookies from "js-cookie";
+import type { BiositePatch } from "../services/biositeService";
 
 interface UseBiositeOperationsProps {
     biositeData: BiositeFull | null;
@@ -9,6 +10,7 @@ interface UseBiositeOperationsProps {
     setThemeColorState: (color: string) => void;
     setFontFamilyState: (font: string) => void;
     updateBiositeHook: (data: BiositeUpdateDto) => Promise<BiositeFull | null>;
+    patchBiositeHook: (patch: BiositePatch) => Promise<BiositeFull | null>;
     setBiosite: (biosite: BiositeFull | null) => void;
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;
     fetchUserBiosites: () => Promise<BiositeFull[]>;
@@ -24,6 +26,7 @@ export const useBiositeOperations = ({
                                          setThemeColorState,
                                          setFontFamilyState,
                                          updateBiositeHook,
+                                         patchBiositeHook,
                                          setBiosite,
                                          createBiosite,
                                          fetchUserBiosites,
@@ -148,6 +151,25 @@ export const useBiositeOperations = ({
         }
     }, [biositeData, updateBiosite, setFontFamilyState, setBiosite]);
 
+    /**
+     * Cambia la plantilla de cabecera (null vuelve a la de por defecto). Solo
+     * envía ese campo, así funciona aunque el perfil aún no tenga URL.
+     */
+    const setPlantilla = useCallback(async (plantillaId: string | null) => {
+        const updated = await patchBiositeHook({ plantillaId });
+        if (!updated) {
+            throw new Error("No se pudo guardar la plantilla");
+        }
+    }, [patchBiositeHook]);
+
+    /** Cambia el diseño de los links (null vuelve al de por defecto); solo envía ese campo. */
+    const setLinksPlantilla = useCallback(async (linksPlantillaId: string | null) => {
+        const updated = await patchBiositeHook({ linksPlantillaId });
+        if (!updated) {
+            throw new Error("No se pudo guardar el diseño de los links");
+        }
+    }, [patchBiositeHook]);
+
     const createNewBiosite = useCallback(async (data: CreateBiositeDto): Promise<BiositeFull | null> => {
         try {
             const result = await createBiosite(data);
@@ -221,6 +243,8 @@ export const useBiositeOperations = ({
         refreshBiosite,
         setThemeColor,
         setFontFamily,
+        setPlantilla,
+        setLinksPlantilla,
         createBiosite: createNewBiosite,
         getUserBiosites,
         switchToAnotherBiosite,

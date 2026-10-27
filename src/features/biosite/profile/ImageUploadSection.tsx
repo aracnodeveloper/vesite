@@ -4,6 +4,8 @@ import type { BiositeFull, BiositeUpdateDto, BiositeColors } from "../types/Bios
 import { useState, useEffect, useRef } from "react";
 import ImageEditorModal from "../../../shared/ui/modals/ImageEditorModal.tsx";
 import { isAdminRole } from "../../../core/auth/session";
+import { useHeaderLayout } from "../hooks/useHeaderLayout";
+import { HEADER_LAYOUTS } from "../utils/headerLayouts";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -30,6 +32,7 @@ const ImageUploadSection = ({
     const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const headerLayout = useHeaderLayout(biosite.plantillaId);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -265,6 +268,18 @@ const ImageUploadSection = ({
 
     const canEditCover = isAdminRole(role);
 
+    // Avisa si el diseño elegido no muestra alguna de las imágenes, o si a falta
+    // de foto de perfil pone la de fondo en su lugar
+    const shownImages = headerLayout ? HEADER_LAYOUTS[headerLayout] : null;
+    const usesBackgroundAsAvatar = !!shownImages?.backgroundAsAvatar && !isValidImageUrl(biosite.avatarImage);
+    const hiddenImage = !shownImages || usesBackgroundAsAvatar
+        ? null
+        : !shownImages.avatar
+            ? "la foto de perfil"
+            : !shownImages.background && canEditCover
+                ? "la imagen de fondo"
+                : null;
+
     const safeAvatarImage = isValidImageUrl(biosite.avatarImage) ? biosite.avatarImage : placeholderAvatar;
     const safeBackgroundImage = isValidImageUrl(biosite.backgroundImage) ? biosite.backgroundImage : placeholderBackground;
 
@@ -404,6 +419,16 @@ const ImageUploadSection = ({
                         </div>
                     )}
                 </div>
+                {hiddenImage && (
+                    <p className="mt-2 text-xs text-gray-500">
+                        El diseño elegido no muestra {hiddenImage}. Puedes cambiarlo en Diseño.
+                    </p>
+                )}
+                {usesBackgroundAsAvatar && (
+                    <p className="mt-2 text-xs text-gray-500">
+                        Sin foto de perfil, el diseño elegido muestra la imagen de fondo en su lugar.
+                    </p>
+                )}
             </div>
 
             {/* Image Editor Modal */}

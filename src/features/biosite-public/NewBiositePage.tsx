@@ -11,11 +11,10 @@ import type {
 } from "../biosite/types/Biosite";
 import Loading from "../../shared/ui/Loading";
 import { getThemeConfig, isValidImageUrl } from "../../shared/utils/biositeUtils";
-import {
-  AvatarSection,
-  BackgroundSection,
-  UserInfoSection,
-} from "../biosite/preview/LivePreviewComponents";
+import { UserInfoSection } from "../biosite/preview/LivePreviewComponents";
+import BiositeHeader from "../biosite/preview/BiositeHeader";
+import { useHeaderLayout } from "../biosite/hooks/useHeaderLayout";
+import { useLinksLayout } from "../links/hooks/useLinksLayout";
 import { useUser } from "../user/hooks/useUser";
 import { createOrderedSectionsRecord } from "./recordHelper";
 import BiositeSection, { Section_type } from "./BiositeSection";
@@ -58,6 +57,8 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
   const [fetchedSections, setFetchedSections] = useState<Section[]>([]); // Guardar secciones para acceder al orderIndex
   const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks(); // Hook para obtener imágenes de galería
   const { documents } = useDocuments(biosite?.id, refreshKey);
+  const headerLayout = useHeaderLayout(biosite?.plantillaId);
+  const linksLayout = useLinksLayout(biosite?.linksPlantillaId);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -369,7 +370,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
     }
   };
 
-  if (loading || syncInProgress) {
+  if (loading || syncInProgress || !headerLayout || !linksLayout) {
     return <Loading />;
   }
 
@@ -427,18 +428,10 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
         }}
       >
         <div className={`w-full max-w-full min-h-screen mx-auto`}>
-          <BackgroundSection
+          <BiositeHeader
+            layout={headerLayout}
             isExposedRoute={isExposedRoute}
             validBackgroundImage={validBackgroundImage}
-            imageLoadStates={imageLoadStates}
-            handleImageLoad={setImageLoadStates}
-            biosite={biosite}
-            themeConfig={themeConfig}
-            handleImageClick={handleUserInfoClick}
-          />
-
-          <AvatarSection
-            isExposedRoute={isExposedRoute}
             validAvatarImage={validAvatarImage}
             imageLoadStates={imageLoadStates}
             handleImageLoad={setImageLoadStates}
@@ -446,14 +439,15 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
             themeConfig={themeConfig}
             defaultAvatar={defaultAvatar}
             handleImageClick={handleUserInfoClick}
-            historyIndicator={
+            historyIndicator={(shape) => (
               <HistoriesPreview
                 biositeId={biosite?.id}
                 accentColor={themeConfig.colors.accent}
                 textColor={themeConfig.colors.text}
                 display="avatar-trigger"
+                shape={shape}
               />
-            }
+            )}
           />
 
           <div className={`w-full max-w-md mx-auto`}>
@@ -492,6 +486,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
                             themeConfig={themeConfig}
                             section={sectionId}
                             links={sectionLinks}
+                            linksLayout={linksLayout}
                             vcard={{
                               avatar: validAvatarImage,
                               background: validBackgroundImage,

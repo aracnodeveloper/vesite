@@ -60,6 +60,8 @@ export interface PreviewContextType {
     setThemeColor: (color: string, textColor: string, accentColor: string, border?: string, accentText?: string) => Promise<void>;
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
+    setPlantilla: (plantillaId: string | null) => Promise<void>;
+    setLinksPlantilla: (linksPlantillaId: string | null) => Promise<void>;
 
     // Biosite management methods
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;

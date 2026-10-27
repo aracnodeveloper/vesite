@@ -15,6 +15,8 @@ import { useAnalytics } from "../analytics/hooks/useAnalytics.ts";
 //import { useBusinessCard } from "../vcard/hooks/useVCard.ts";
 import { useNavigate } from "react-router-dom";
 import { ImageGallerySection } from "./ImageGallerySection.tsx";
+import LinksDesign from "../links/design/LinksDesign.tsx";
+import type { LinkLayout } from "../links/design/linkLayouts.ts";
 
 export enum Section_type {
   Profile = "Profile",
@@ -43,6 +45,7 @@ export default function BiositeSection({
   vcard,
   isPreview = false,
   isPublicView = false,
+  linksLayout = "button",
 }: {
   section: Section_type;
   links?: BiositeLink[]; // Opcional: usado por Social, Links, Music, etc.
@@ -51,6 +54,8 @@ export default function BiositeSection({
   vcard?: VCard;
   isPreview?: boolean;
   isPublicView?: boolean;
+  /** Diseño de la sección Links ("button" = el de siempre). */
+  linksLayout?: LinkLayout;
 }) {
   const navigate = useNavigate();
 
@@ -101,6 +106,18 @@ export default function BiositeSection({
           />
         );
       case Section_type.Links:
+        if (linksLayout !== "button" && links?.length) {
+          return (
+            <LinksDesign
+              layout={linksLayout}
+              links={[...links]
+                .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+                .map((link) => ({ id: link.id, label: link.label, url: link.url, image: link.image, onClick: link.onClick }))}
+              themeConfig={themeConfig}
+              onTrack={onTrack}
+            />
+          );
+        }
         return links
           ?.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
           .map((link) => (
