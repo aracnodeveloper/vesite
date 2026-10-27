@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import ImageEditorModal from "../../../shared/ui/modals/ImageEditorModal.tsx";
 import { isAdminRole } from "../../../core/auth/session";
 import { useHeaderLayout } from "../hooks/useHeaderLayout";
-import { HEADER_LAYOUT_IMAGES } from "../utils/headerLayouts";
+import { HEADER_LAYOUTS } from "../utils/headerLayouts";
 
 interface ImageUploadSectionProps {
     biosite: BiositeFull;
@@ -268,9 +268,11 @@ const ImageUploadSection = ({
 
     const canEditCover = isAdminRole(role);
 
-    // Avisa si la plantilla elegida no muestra alguna de las imágenes
-    const shownImages = headerLayout ? HEADER_LAYOUT_IMAGES[headerLayout] : null;
-    const hiddenImage = !shownImages
+    // Avisa si el diseño elegido no muestra alguna de las imágenes, o si a falta
+    // de foto de perfil pone la de fondo en su lugar
+    const shownImages = headerLayout ? HEADER_LAYOUTS[headerLayout] : null;
+    const usesBackgroundAsAvatar = !!shownImages?.backgroundAsAvatar && !isValidImageUrl(biosite.avatarImage);
+    const hiddenImage = !shownImages || usesBackgroundAsAvatar
         ? null
         : !shownImages.avatar
             ? "la foto de perfil"
@@ -419,7 +421,12 @@ const ImageUploadSection = ({
                 </div>
                 {hiddenImage && (
                     <p className="mt-2 text-xs text-gray-500">
-                        Tu plantilla no muestra {hiddenImage}. Puedes cambiarla en Estilos.
+                        El diseño elegido no muestra {hiddenImage}. Puedes cambiarlo en Diseño.
+                    </p>
+                )}
+                {usesBackgroundAsAvatar && (
+                    <p className="mt-2 text-xs text-gray-500">
+                        Sin foto de perfil, el diseño elegido muestra la imagen de fondo en su lugar.
                     </p>
                 )}
             </div>

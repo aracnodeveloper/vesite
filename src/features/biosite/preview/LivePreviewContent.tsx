@@ -14,6 +14,8 @@ import HistoriesPreview from "./HistoriesPreview";
 import VCardButton from "../../vcard/components/VCard.tsx";
 import ConditionalNavButton from "../../../shared/ui/ConditionalNavButton.tsx";
 import { useHeaderLayout } from "../hooks/useHeaderLayout.ts";
+import { useLinksLayout } from "../../links/hooks/useLinksLayout.ts";
+import LinksDesign from "../../links/design/LinksDesign.tsx";
 import Cookie from "js-cookie";
 import AppDownloadButtons from "../../links/app/AppDownloadButtons.tsx";
 import WhatsAppButton from "../../links/whatsapp/whatsAppButton.tsx";
@@ -81,6 +83,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
   } = useLivePreviewLogic();
 
   const headerLayout = useHeaderLayout(biosite?.plantillaId);
+  const linksLayout = useLinksLayout(biosite?.linksPlantillaId);
 
   // Load text blocks for gallery
   useEffect(() => {
@@ -157,14 +160,27 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
       sections.push({
         type: "regular",
         orderIndex: getSectionOrderIndex("Links"),
-        component: (
-          <RegularLinksSection
-            key="regular-section"
-            regularLinksData={regularLinksData}
-            handleLinksClick={handleLinksClick}
-            themeConfig={themeConfig}
-          />
-        ),
+        component:
+          linksLayout && linksLayout !== "button" ? (
+            <div key="regular-section" className="px-4 pb-4">
+              <LinksDesign
+                layout={linksLayout}
+                links={regularLinksData.map((link: { title: string; image?: string }) => ({
+                  label: link.title,
+                  image: link.image,
+                  onClick: handleLinksClick,
+                }))}
+                themeConfig={themeConfig}
+              />
+            </div>
+          ) : (
+            <RegularLinksSection
+              key="regular-section"
+              regularLinksData={regularLinksData}
+              handleLinksClick={handleLinksClick}
+              themeConfig={themeConfig}
+            />
+          ),
       });
     }
 
@@ -343,6 +359,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
   }, [
     realSocialLinks,
     regularLinksData,
+    linksLayout,
     musicEmbed,
     socialPost,
     videoEmbed,
@@ -378,7 +395,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     return <NoBiositeComponent themeConfig={themeConfig} />;
   }
 
-  if (!headerLayout) {
+  if (!headerLayout || !linksLayout) {
     return <LoadingComponent themeConfig={themeConfig} />;
   }
 

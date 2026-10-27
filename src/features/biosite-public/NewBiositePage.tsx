@@ -14,6 +14,7 @@ import { getThemeConfig, isValidImageUrl } from "../../shared/utils/biositeUtils
 import { UserInfoSection } from "../biosite/preview/LivePreviewComponents";
 import BiositeHeader from "../biosite/preview/BiositeHeader";
 import { useHeaderLayout } from "../biosite/hooks/useHeaderLayout";
+import { useLinksLayout } from "../links/hooks/useLinksLayout";
 import { useUser } from "../user/hooks/useUser";
 import { createOrderedSectionsRecord } from "./recordHelper";
 import BiositeSection, { Section_type } from "./BiositeSection";
@@ -57,6 +58,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
   const { blocks: textBlocks, getBlocksByBiosite } = useTextBlocks(); // Hook para obtener imágenes de galería
   const { documents } = useDocuments(biosite?.id, refreshKey);
   const headerLayout = useHeaderLayout(biosite?.plantillaId);
+  const linksLayout = useLinksLayout(biosite?.linksPlantillaId);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -368,7 +370,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
     }
   };
 
-  if (loading || syncInProgress || !headerLayout) {
+  if (loading || syncInProgress || !headerLayout || !linksLayout) {
     return <Loading />;
   }
 
@@ -484,6 +486,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
                             themeConfig={themeConfig}
                             section={sectionId}
                             links={sectionLinks}
+                            linksLayout={linksLayout}
                             vcard={{
                               avatar: validAvatarImage,
                               background: validBackgroundImage,

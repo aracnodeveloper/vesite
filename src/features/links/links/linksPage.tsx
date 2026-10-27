@@ -8,6 +8,7 @@ import BackButton from "../../../shared/ui/BackButton.tsx";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import AdminLinkCard from "../components/AdminLinkCard.tsx";
+import LinksTemplatePicker from "../design/LinksTemplatePicker.tsx";
 //import LinkCard from "../components/LinkCard.tsx";
 
 const LinksPage = () => {
@@ -25,6 +26,8 @@ const LinksPage = () => {
     isAdmin,
     toggleAdminLink,
     updateAdminLink,
+    biosite,
+    setLinksPlantilla,
   } = usePreview();
 
   const [adding, setAdding] = useState(false);
@@ -586,6 +589,14 @@ const LinksPage = () => {
                   </button>
               )}
             </div>
+
+            {biosite && (
+                <LinksTemplatePicker
+                    biosite={biosite}
+                    linkImages={activeLinks.map((link) => link.image)}
+                    onSelect={setLinksPlantilla}
+                />
+            )}
           </div>
         </div>
 
