@@ -78,6 +78,9 @@ export interface BiositeFull {
   plantillaId?: string | null;
   /** Plantilla de los links; null = la de por defecto. */
   linksPlantillaId?: string | null;
+  /** Plantillas de links de las secciones Contáctame y Link de mi App. */
+  contactPlantillaId?: string | null;
+  appPlantillaId?: string | null;
   theme?: BiositeTheme;
   colors: string | BiositeColors;
   fonts?: string;
@@ -99,6 +102,8 @@ export interface BiositeUpdateDto {
   themeId: string;
   plantillaId?: string | null;
   linksPlantillaId?: string | null;
+  contactPlantillaId?: string | null;
+  appPlantillaId?: string | null;
   colors: string | BiositeColors;
   fonts: string;
   avatarImage?: string;

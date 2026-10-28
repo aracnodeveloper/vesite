@@ -18,6 +18,16 @@ export type LinkLayout =
 
 export type LinkCategory = "buttons" | "cards" | "advanced";
 
+/** Secciones del vesite que eligen su propio diseño de links. */
+export type LinkSection = "links" | "contact" | "app";
+
+/** Campo del biosite donde se guarda el diseño de cada sección. */
+export const LINK_SECTION_FIELD = {
+    links: "linksPlantillaId",
+    contact: "contactPlantillaId",
+    app: "appPlantillaId",
+} as const satisfies Record<LinkSection, string>;
+
 /** El de siempre: botón rectangular con la imagen a la izquierda. */
 export const DEFAULT_LINK_LAYOUT: LinkLayout = "button";
 

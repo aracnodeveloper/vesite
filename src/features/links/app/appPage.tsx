@@ -11,12 +11,13 @@ import BackButton from "../../../shared/ui/BackButton";
 import SVGAPPLE from '../../../assets/icons/AppleStore.svg'
 import SVGGOO from '../../../assets/icons/GooglePLay.svg'
 import ElementCard from "../components/ElementCard";
+import LinksTemplatePicker from "../design/LinksTemplatePicker";
 import { useAdminTargetId } from "../../auth/hooks/useAdminTargetId";
 import { biositeService } from "../../biosite/services/biositeService";
 
 const AppPage = () => {
 
-  const { appLinks, updateAppLink, addAppLink, removeAppLink, loading, error } = usePreview();
+  const { appLinks, updateAppLink, addAppLink, removeAppLink, loading, error, biosite, setLinkDesign } = usePreview();
   const adminId = useAdminTargetId();
 
   const [appStoreUrl, setAppStoreUrl] = useState("");
@@ -351,6 +352,18 @@ const AppPage = () => {
                     )}
                   </div>
                 </div>
+            )}
+
+            {/* Diseño de los botones de descarga en el vesite */}
+            {biosite && (
+                <LinksTemplatePicker
+                    biosite={biosite}
+                    selectedId={biosite.appPlantillaId}
+                    description="Cambia cómo se ven tus botones de descarga en el vesite."
+                    linkImages={[SVGAPPLE, SVGGOO]}
+                    imageFit="contain"
+                    onSelect={(id) => setLinkDesign("app", id)}
+                />
             )}
           </div>
         </div>

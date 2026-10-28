@@ -12,6 +12,8 @@ import {
 import { usePreview } from "../../biosite/context/PreviewContext";
 import { WhatsAppOutlined } from "@ant-design/icons";
 import BackButton from "../../../shared/ui/BackButton";
+import LinksTemplatePicker from "../design/LinksTemplatePicker";
+import whatsAppIcon from "../../../assets/icons/WHATS.svg";
 
 const WhatsAppPage = () => {
   const {
@@ -22,6 +24,7 @@ const WhatsAppPage = () => {
     removeWhatsAppLink,
     loading,
     error,
+    setLinkDesign,
   } = usePreview();
 
   const getActiveApiWhatsAppLinks = () => {
@@ -482,6 +485,20 @@ const WhatsAppPage = () => {
                 Cancelar
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Diseño de los botones de contacto en el vesite */}
+        {!showForm && biosite && (
+          <div className="w-full max-w-md mb-6">
+            <LinksTemplatePicker
+              biosite={biosite}
+              selectedId={biosite.contactPlantillaId}
+              description="Cambia cómo se ven tus botones de contacto en el vesite."
+              linkImages={[whatsAppIcon]}
+              imageFit="contain"
+              onSelect={(id) => setLinkDesign("contact", id)}
+            />
           </div>
         )}
 

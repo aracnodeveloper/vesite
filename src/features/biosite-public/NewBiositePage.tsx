@@ -59,6 +59,8 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
   const { documents } = useDocuments(biosite?.id, refreshKey);
   const headerLayout = useHeaderLayout(biosite?.plantillaId);
   const linksLayout = useLinksLayout(biosite?.linksPlantillaId);
+  const contactLayout = useLinksLayout(biosite?.contactPlantillaId);
+  const appLayout = useLinksLayout(biosite?.appPlantillaId);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -370,7 +372,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
     }
   };
 
-  if (loading || syncInProgress || !headerLayout || !linksLayout) {
+  if (loading || syncInProgress || !headerLayout || !linksLayout || !contactLayout || !appLayout) {
     return <Loading />;
   }
 
@@ -487,6 +489,8 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
                             section={sectionId}
                             links={sectionLinks}
                             linksLayout={linksLayout}
+                            contactLayout={contactLayout}
+                            appLayout={appLayout}
                             vcard={{
                               avatar: validAvatarImage,
                               background: validBackgroundImage,
