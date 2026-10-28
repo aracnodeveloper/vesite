@@ -3,6 +3,8 @@ import type { LinkLayout } from "./linkLayouts";
 import { tint, type LinksTheme } from "./linksTheme";
 
 interface SketchColors {
+  /** Iconos en vez de fotos: se ven enteros sobre blanco. */
+  contain: boolean;
   card: string;
   cardBar: string;
   pageBar: string;
@@ -12,7 +14,11 @@ interface SketchColors {
 
 /** Imagen de un link de ejemplo, o un bloque suave si no hay. */
 const Img = ({ src, className, style, colors }: { src?: string; className: string; style?: CSSProperties; colors: SketchColors }) =>
-  src ? (
+  src && colors.contain ? (
+    <span className={`flex items-center justify-center bg-white ${className.replace(/\bblock\b/, "")}`} style={style}>
+      <img src={src} alt="" className="h-[70%] w-[70%] object-contain" />
+    </span>
+  ) : src ? (
     <img src={src} alt="" className={`object-cover ${className}`} style={style} />
   ) : (
     <span className={`block ${className}`} style={{ background: colors.empty, ...style }} />
@@ -188,10 +194,21 @@ const sketch = (layout: LinkLayout, image: (i: number) => string | undefined, c:
 };
 
 /** Miniatura cuadrada de un diseño de links con las imágenes y colores del usuario. */
-const LinkLayoutThumbnail = ({ layout, images, theme }: { layout: LinkLayout; images: string[]; theme: LinksTheme }) => {
+const LinkLayoutThumbnail = ({
+  layout,
+  images,
+  theme,
+  imageFit = "cover",
+}: {
+  layout: LinkLayout;
+  images: string[];
+  theme: LinksTheme;
+  imageFit?: "cover" | "contain";
+}) => {
   const { colors } = theme;
   const linkColor = colors.accentText || colors.text || "#000000";
   const sketchColors: SketchColors = {
+    contain: imageFit === "contain",
     // Sin color de acento las tarjetas son transparentes: en pequeño se marcan con un tono suave
     card: colors.accent || tint(colors.text || "#000000", 10)!,
     cardBar: tint(linkColor, 70)!,

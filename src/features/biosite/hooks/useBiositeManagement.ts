@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { BiositeFull, BiositeUpdateDto, BiositeColors, CreateBiositeDto } from "../types/Biosite";
 import Cookies from "js-cookie";
 import type { BiositePatch } from "../services/biositeService";
+import { LINK_SECTION_FIELD, type LinkSection } from "../../links/design/linkLayouts";
 
 interface UseBiositeOperationsProps {
     biositeData: BiositeFull | null;
@@ -162,11 +163,14 @@ export const useBiositeOperations = ({
         }
     }, [patchBiositeHook]);
 
-    /** Cambia el diseño de los links (null vuelve al de por defecto); solo envía ese campo. */
-    const setLinksPlantilla = useCallback(async (linksPlantillaId: string | null) => {
-        const updated = await patchBiositeHook({ linksPlantillaId });
+    /**
+     * Cambia el diseño de links de una sección (Links, Contáctame o App); null
+     * vuelve al de por defecto. Solo envía ese campo.
+     */
+    const setLinkDesign = useCallback(async (section: LinkSection, plantillaId: string | null) => {
+        const updated = await patchBiositeHook({ [LINK_SECTION_FIELD[section]]: plantillaId });
         if (!updated) {
-            throw new Error("No se pudo guardar el diseño de los links");
+            throw new Error("No se pudo guardar el diseño");
         }
     }, [patchBiositeHook]);
 
@@ -244,7 +248,7 @@ export const useBiositeOperations = ({
         setThemeColor,
         setFontFamily,
         setPlantilla,
-        setLinksPlantilla,
+        setLinkDesign,
         createBiosite: createNewBiosite,
         getUserBiosites,
         switchToAnotherBiosite,

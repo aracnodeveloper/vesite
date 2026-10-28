@@ -4,11 +4,7 @@ import { sectionService } from "../sections/services/sectionService";
 import { biositeService } from "../biosite/services/biositeService";
 import { getErrorMessage } from "../../core/api/errors";
 import { useNavigate, useParams } from "react-router-dom";
-import type {
-  BiositeFull,
-  BiositeLink,
-  BiositeUpdateDto,
-} from "../biosite/types/Biosite";
+import type { BiositeFull, BiositeLink } from "../biosite/types/Biosite";
 import Loading from "../../shared/ui/Loading";
 import { getThemeConfig, isValidImageUrl } from "../../shared/utils/biositeUtils";
 import { UserInfoSection } from "../biosite/preview/LivePreviewComponents";
@@ -26,6 +22,7 @@ import { useTextBlocks } from "../text-blocks/hooks/useTextBlocks.ts";
 import { useDocuments } from "../documents/hooks/useDocuments.ts";
 import DocumentsBlock from "../documents/components/DocumentsBlock.tsx";
 import { DOCUMENTS_SECTION_TITLE } from "../documents/utils/documentRules.ts";
+import { inheritFromParent } from "./parentInheritance";
 
 interface NewBiositePageProps {
   slug?: string;
@@ -41,12 +38,10 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
   const slug = propSlug || paramSlug;
   const { user } = useUser();
   const [biosite, setBiosite] = useState<BiositeFull>();
-  const [parentBiosite, setParentBiosite] = useState<BiositeFull | null>(null);
   const [links, setLinks] = useState<Map<Section_type, BiositeLink[]>>();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showVCard, setShowVCard] = useState(false);
-  const [syncInProgress, setSyncInProgress] = useState(false);
   const navigate = useNavigate();
   const maxReloadAttempts = 2;
   const storageKey = "biositeReloadAttempts";
@@ -59,6 +54,8 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
   const { documents } = useDocuments(biosite?.id, refreshKey);
   const headerLayout = useHeaderLayout(biosite?.plantillaId);
   const linksLayout = useLinksLayout(biosite?.linksPlantillaId);
+  const contactLayout = useLinksLayout(biosite?.contactPlantillaId);
+  const appLayout = useLinksLayout(biosite?.appPlantillaId);
 
   const [imageLoadStates, setImageLoadStates] = useState<{
     [key: string]: "loading" | "loaded" | "error";
@@ -94,68 +91,6 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
 
   const onNavigate = (route: string) => {
     navigate(route);
-  };
-
-  // Función para sincronizar el biosite hijo con el padre
-  const syncChildWithParent = async (
-    childBiosite: BiositeFull,
-    parentBiosite: BiositeFull,
-  ) => {
-    if (syncInProgress) return;
-
-    try {
-      setSyncInProgress(true);
-
-      // Verificar si necesita sincronización
-      const needsSync =
-        childBiosite.backgroundImage !== parentBiosite.backgroundImage ||
-        JSON.stringify(childBiosite.colors) !==
-          JSON.stringify(parentBiosite.colors);
-
-      if (!needsSync) {
-        console.log("Biosite hijo ya está sincronizado con el padre");
-        return;
-      }
-
-      console.log("Sincronizando biosite hijo con padre...");
-
-      // Preparar los colores del padre
-      const parentColors =
-        typeof parentBiosite.colors === "string"
-          ? parentBiosite.colors
-          : JSON.stringify(parentBiosite.colors);
-
-      // Crear el DTO de actualización
-      const updateData: BiositeUpdateDto = {
-        ownerId: childBiosite.ownerId,
-        title: childBiosite.title,
-        slug: childBiosite.slug,
-        themeId: childBiosite.themeId,
-        colors: parentColors,
-        fonts: childBiosite.fonts || "Inter",
-        backgroundImage: parentBiosite.backgroundImage || "",
-        isActive: childBiosite.isActive,
-      };
-
-      // Si el hijo tiene avatar, mantenerlo
-      if (childBiosite.avatarImage) {
-        updateData.avatarImage = childBiosite.avatarImage;
-      }
-
-      // Ejecutar actualización
-      const updatedBiosite = await biositeService.update(childBiosite.id, updateData, { notify: false });
-
-      console.log("Sincronización completada exitosamente");
-
-      // Actualizar el estado local con el biosite sincronizado
-      if (updatedBiosite) {
-        setBiosite(updatedBiosite);
-      }
-    } catch (error) {
-      console.error("Error al sincronizar biosite hijo con padre:", error);
-    } finally {
-      setSyncInProgress(false);
-    }
   };
 
   const sectionsLoadedRef = useRef(false);
@@ -235,19 +170,14 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
           const childBiosite = response[0];
           const parentBiosite = response.length > 1 ? response[1] : null;
 
-          setBiosite(childBiosite);
-          setParentBiosite(parentBiosite);
-
-          if (parentBiosite) {
-            await syncChildWithParent(childBiosite, parentBiosite);
-          }
+          // Fondo, colores y links compartidos se leen del admin, sin guardarlos
+          setBiosite(parentBiosite ? inheritFromParent(childBiosite, parentBiosite) : childBiosite);
         } else {
           setBiosite(initialBiosite);
         }
       } else {
         if (!isLatest()) return;
         setBiosite(initialBiosite);
-        setParentBiosite(null);
       }
     } catch (error) {
       if (silent) {
@@ -272,18 +202,6 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
-
-  useEffect(() => {
-    if (biosite && parentBiosite && !syncInProgress) {
-      const needsSync =
-        biosite.backgroundImage !== parentBiosite.backgroundImage ||
-        JSON.stringify(biosite.colors) !== JSON.stringify(parentBiosite.colors);
-
-      if (needsSync) {
-        syncChildWithParent(biosite, parentBiosite);
-      }
-    }
-  }, [biosite, parentBiosite]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -370,7 +288,7 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
     }
   };
 
-  if (loading || syncInProgress || !headerLayout || !linksLayout) {
+  if (loading || !headerLayout || !linksLayout || !contactLayout || !appLayout) {
     return <Loading />;
   }
 
@@ -487,6 +405,8 @@ export default function NewBiositePage({ slug: propSlug, refreshKey = 0 }: NewBi
                             section={sectionId}
                             links={sectionLinks}
                             linksLayout={linksLayout}
+                            contactLayout={contactLayout}
+                            appLayout={appLayout}
                             vcard={{
                               avatar: validAvatarImage,
                               background: validBackgroundImage,

@@ -27,7 +27,7 @@ const LinksPage = () => {
     toggleAdminLink,
     updateAdminLink,
     biosite,
-    setLinksPlantilla,
+    setLinkDesign,
   } = usePreview();
 
   const [adding, setAdding] = useState(false);
@@ -593,8 +593,10 @@ const LinksPage = () => {
             {biosite && (
                 <LinksTemplatePicker
                     biosite={biosite}
+                    selectedId={biosite.linksPlantillaId}
+                    description="Cambia cómo se ven tus enlaces en el vesite."
                     linkImages={activeLinks.map((link) => link.image)}
-                    onSelect={setLinksPlantilla}
+                    onSelect={(id) => setLinkDesign("links", id)}
                 />
             )}
           </div>

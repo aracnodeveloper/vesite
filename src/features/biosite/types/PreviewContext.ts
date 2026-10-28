@@ -1,5 +1,6 @@
 import type { UserRole } from "../../../core/auth/session.ts";
 import type {BiositeFull, BiositeUpdateDto, CreateBiositeDto} from "./Biosite.ts";
+import type { LinkSection } from "../../links/design/linkLayouts";
 
 export interface SocialLink {
     id: string;
@@ -61,7 +62,7 @@ export interface PreviewContextType {
     fontFamily: string;
     setFontFamily: (font: string) => Promise<void>;
     setPlantilla: (plantillaId: string | null) => Promise<void>;
-    setLinksPlantilla: (linksPlantillaId: string | null) => Promise<void>;
+    setLinkDesign: (section: LinkSection, plantillaId: string | null) => Promise<void>;
 
     // Biosite management methods
     createBiosite: (data: CreateBiositeDto) => Promise<BiositeFull | null>;

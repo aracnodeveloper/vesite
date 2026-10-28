@@ -16,6 +16,10 @@ import ConditionalNavButton from "../../../shared/ui/ConditionalNavButton.tsx";
 import { useHeaderLayout } from "../hooks/useHeaderLayout.ts";
 import { useLinksLayout } from "../../links/hooks/useLinksLayout.ts";
 import LinksDesign from "../../links/design/LinksDesign.tsx";
+import { usePreview } from "../context/PreviewContext.tsx";
+import whatsAppIcon from "../../../assets/icons/WHATS.svg";
+import appStoreIcon from "../../../assets/icons/AppleStore.svg";
+import googlePlayIcon from "../../../assets/icons/GooglePLay.svg";
 import Cookie from "js-cookie";
 import AppDownloadButtons from "../../links/app/AppDownloadButtons.tsx";
 import WhatsAppButton from "../../links/whatsapp/whatsAppButton.tsx";
@@ -84,6 +88,9 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
 
   const headerLayout = useHeaderLayout(biosite?.plantillaId);
   const linksLayout = useLinksLayout(biosite?.linksPlantillaId);
+  const contactLayout = useLinksLayout(biosite?.contactPlantillaId);
+  const appLayout = useLinksLayout(biosite?.appPlantillaId);
+  const { whatsAppLinks, appLinks } = usePreview();
 
   // Load text blocks for gallery
   useEffect(() => {
@@ -185,30 +192,60 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     }
 
     // WhatsApp Section
+    const activeWhatsAppLinks = whatsAppLinks.filter((link) => link.isActive);
     sections.push({
       type: "whatsapp",
       orderIndex: getSectionOrderIndex("Contactame"),
-      component: (
-        <WhatsAppButton
-          key="whatsapp-section"
-          onWhatsAppClick={handleWhatsAppClick}
-          themeConfig={themeConfig}
-        />
-      ),
+      component:
+        contactLayout && contactLayout !== "button" && activeWhatsAppLinks.length > 0 ? (
+          <div key="whatsapp-section" className="px-4 mb-2">
+            <LinksDesign
+              layout={contactLayout}
+              links={activeWhatsAppLinks.map((link) => ({
+                label: link.description || "WhatsApp",
+                image: whatsAppIcon,
+                imageFit: "contain" as const,
+                onClick: handleWhatsAppClick,
+              }))}
+              themeConfig={themeConfig}
+            />
+          </div>
+        ) : (
+          <WhatsAppButton
+            key="whatsapp-section"
+            onWhatsAppClick={handleWhatsAppClick}
+            themeConfig={themeConfig}
+          />
+        ),
     });
 
     // App Download Section
+    const activeAppLinks = appLinks.filter((link) => link.isActive);
     sections.push({
       type: "app",
       orderIndex: getSectionOrderIndex("Link de mi App"),
-      component: (
-        <div
-          key="app-section"
-          onClick={handleAppClick}
-        >
-          <AppDownloadButtons themeConfig={themeConfig} />
-        </div>
-      ),
+      component:
+        appLayout && appLayout !== "button" && activeAppLinks.length > 0 ? (
+          <div key="app-section" className="px-4 mb-2">
+            <LinksDesign
+              layout={appLayout}
+              links={activeAppLinks.map((link) => ({
+                label: link.store === "appstore" ? "App Store" : "Google Play",
+                image: link.store === "appstore" ? appStoreIcon : googlePlayIcon,
+                imageFit: "contain" as const,
+                onClick: handleAppClick,
+              }))}
+              themeConfig={themeConfig}
+            />
+          </div>
+        ) : (
+          <div
+            key="app-section"
+            onClick={handleAppClick}
+          >
+            <AppDownloadButtons themeConfig={themeConfig} />
+          </div>
+        ),
     });
 
     // VCard Section
@@ -360,6 +397,10 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     realSocialLinks,
     regularLinksData,
     linksLayout,
+    contactLayout,
+    appLayout,
+    whatsAppLinks,
+    appLinks,
     musicEmbed,
     socialPost,
     videoEmbed,
@@ -395,7 +436,7 @@ const LivePreviewContent = ({ refreshKey = 0 }: { refreshKey?: number }) => {
     return <NoBiositeComponent themeConfig={themeConfig} />;
   }
 
-  if (!headerLayout || !linksLayout) {
+  if (!headerLayout || !linksLayout || !contactLayout || !appLayout) {
     return <LoadingComponent themeConfig={themeConfig} />;
   }
 

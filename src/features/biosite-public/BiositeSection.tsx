@@ -46,6 +46,8 @@ export default function BiositeSection({
   isPreview = false,
   isPublicView = false,
   linksLayout = "button",
+  contactLayout = "button",
+  appLayout = "button",
 }: {
   section: Section_type;
   links?: BiositeLink[]; // Opcional: usado por Social, Links, Music, etc.
@@ -56,6 +58,9 @@ export default function BiositeSection({
   isPublicView?: boolean;
   /** Diseño de la sección Links ("button" = el de siempre). */
   linksLayout?: LinkLayout;
+  /** Diseños de las secciones Contáctame y Link de mi App. */
+  contactLayout?: LinkLayout;
+  appLayout?: LinkLayout;
 }) {
   const navigate = useNavigate();
 
@@ -135,6 +140,23 @@ export default function BiositeSection({
             />
           ));
       case Section_type.Contactame:
+        if (contactLayout !== "button" && links?.length) {
+          return (
+            <LinksDesign
+              layout={contactLayout}
+              links={links.map((link) => ({
+                id: link.id,
+                label: link.label,
+                url: link.url,
+                image: SVG,
+                imageFit: "contain" as const,
+                onClick: link.onClick,
+              }))}
+              themeConfig={themeConfig}
+              onTrack={onTrack}
+            />
+          );
+        }
         return links?.map((link) => (
           <Cardbase
             icon={undefined}
@@ -157,6 +179,23 @@ export default function BiositeSection({
           />
         ) : null;
       case Section_type.Link_de_mi_App:
+        if (appLayout !== "button" && links?.length) {
+          return (
+            <LinksDesign
+              layout={appLayout}
+              links={links.map((link) => ({
+                id: link.id,
+                label: link.label,
+                url: link.url,
+                image: link.tag?.includes("apps.apple.com") ? AppleStore : GooglePlay,
+                imageFit: "contain" as const,
+                onClick: link.onClick,
+              }))}
+              themeConfig={themeConfig}
+              onTrack={onTrack}
+            />
+          );
+        }
         return links?.map((link) => (
           <Cardbase
             icon={isVisitaEcuadorApp(link.url) ? visitaecuador_com : ""}

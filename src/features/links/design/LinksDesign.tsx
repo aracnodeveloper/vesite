@@ -9,6 +9,8 @@ export interface DesignLink {
   label: string;
   url?: string;
   image?: string;
+  /** "contain" para iconos (WhatsApp, tiendas de apps): se ven enteros sobre blanco. */
+  imageFit?: "cover" | "contain";
   onClick?: (e: MouseEvent) => void;
 }
 
@@ -78,6 +80,13 @@ const LinkImage = ({ link, theme, className }: { link: DesignLink; theme: LinksT
     return (
       <span className={`flex items-center justify-center ${className}`} style={{ background: tint(color, 12), color }}>
         <Link2 className="h-1/3 w-1/3 max-h-8 max-w-8 opacity-70" />
+      </span>
+    );
+  }
+  if (link.imageFit === "contain") {
+    return (
+      <span className={`flex items-center justify-center bg-white ${className.replace(/\bblock\b/, "")}`}>
+        <img src={link.image} alt="" className="h-[70%] w-[70%] object-contain" onError={() => setFailed(true)} />
       </span>
     );
   }
@@ -366,9 +375,8 @@ const SliderLinks = ({ links, theme, onTrack }: LayoutProps) => {
           key={keyOf(link, i)}
           link={link}
           onTrack={onTrack}
-          className={`relative block aspect-video shrink-0 snap-center overflow-hidden rounded-xl shadow-lg ${
-            links.length > 1 ? "w-[82%]" : "w-full"
-          }`}
+          className={`relative block aspect-video shrink-0 snap-center overflow-hidden rounded-xl shadow-lg ${links.length > 1 ? "w-[82%]" : "w-full"
+            }`}
           style={s.card}
         >
           <LinkImage link={link} theme={theme} className="absolute inset-0 h-full w-full" />
